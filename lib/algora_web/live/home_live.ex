@@ -17,7 +17,6 @@ defmodule AlgoraWeb.HomeLive do
   alias Algora.Repo
   alias AlgoraWeb.Components.Footer
   alias AlgoraWeb.Components.Header
-  alias AlgoraWeb.Components.Wordmarks
   alias AlgoraWeb.Data.PlatformStats
   alias AlgoraWeb.Forms.BountyForm
   alias AlgoraWeb.Forms.TipForm
@@ -27,10 +26,9 @@ defmodule AlgoraWeb.HomeLive do
 
   defp placeholder_text do
     """
-    - GitHub looks like a green carpet, red flag if wearing suit
-    - Great communication skills, can talk to customers
-    - Must be a shark, aggressive, has urgency and agency
+    - GitHub looks like a green carpet, red flag if wearing suit in pfp
     - Has contributions to open source inference engines (like vLLM)
+    - Posts regularly on X and LinkedIn
     """
   end
 
@@ -116,23 +114,25 @@ defmodule AlgoraWeb.HomeLive do
       <%= if @screenshot? do %>
         <div class="-mt-24" />
       <% else %>
-        <Header.header />
+        <Header.header class="container" />
       <% end %>
 
       <main class="bg-black relative overflow-hidden">
-        <section class="relative isolate min-h-[calc(100vh)]">
-          <div class="h-full mx-auto max-w-[88rem] px-6 lg:px-8 flex flex-col items-center justify-center pt-48 pb-12">
+        <section class="relative isolate xl:pb-16 2xl:pb-44">
+          <div class="h-full mx-auto container px-6 lg:px-8 flex flex-col items-center justify-center pt-28 2xl:pt-48 pb-12">
             <div class="h-full mx-auto lg:mx-0 flex lg:max-w-none items-center justify-center text-center w-full">
               <div class="w-full flex flex-col lg:flex-row lg:justify-center gap-6">
                 <div class="w-full flex flex-col items-center lg:items-start text-center lg:text-left">
-                  <h1 class="font-display text-3xl sm:text-lg md:text-5xl xl:text-[3.25rem] font-semibold tracking-tight text-foreground">
-                    Meet your new <span class="text-emerald-400">hire today</span>
+                  <h1 class="font-display text-4xl sm:text-5xl md:text-6xl font-semibold tracking-tight text-foreground">
+                    Meet your <br class="xl:hidden" />
+                    <span class="text-emerald-400">new hire today</span>
                   </h1>
-                  <p class="mt-4 text-lg leading-8 text-muted-foreground max-w-2xl">
-                    Access a network of top 1% engineers, pre-vetted through their OSS contributions.
+                  <p class="mt-2 2xl:mt-4 text-base xl:text-lg text-foreground max-w-2xl">
+                    Access a network of top 1% engineers,<br class="xl:hidden" />
+                    pre-vetted through OSS contributions. <br />
                     <span class="font-semibold">Only pay when you hire.</span>
                   </p>
-                  <ul class="mt-2 flex flex-col gap-2 text-sm">
+                  <ul class="mt-2 2xl:mt-6 flex flex-col gap-1 xl:gap-2 text-sm">
                     <li class="flex items-center text-left text-foreground/80">
                       <.icon
                         name="tabler-square-rounded-number-1"
@@ -164,78 +164,38 @@ defmodule AlgoraWeb.HomeLive do
                   <img
                     src="/images/screenshots/job-candidates.png"
                     alt="Job candidates"
-                    class="-ml-2 mt-4 rounded-xl object-cover max-w-[46rem]"
+                    class="-ml-2 mt-4 2xl:mt-10 rounded-xl object-cover w-full max-w-xl xl:max-w-[45rem]"
                     style="aspect-ratio: 1556/816;"
                   />
-                  <%!-- <div class="pt-4 sm:max-w-[40rem] grid w-full grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-y-4 gap-x-4 mx-auto items-center justify-center sm:ml-0">
-                    <.link class="relative flex items-center justify-center" href={~p"/cal"}>
-                      <Wordmarks.calcom class="w-[80%] col-auto" alt="Cal.com" />
-                    </.link>
-                    <.link class="relative flex items-center justify-center" href={~p"/qdrant"}>
-                      <Wordmarks.qdrant class="w-[80%] col-auto" alt="Qdrant" />
-                    </.link>
-                    <.link class="relative flex items-center justify-center" href={~p"/zio"}>
-                      <img
-                        loading="eager"
-                        src={~p"/images/wordmarks/zio.png"}
-                        alt="ZIO"
-                        class="mt-1 sm:mt-3 w-[70%] col-auto brightness-0 invert"
-                      />
-                    </.link>
-                    <.link
-                      class="relative flex items-center justify-center"
-                      navigate={~p"/activepieces"}
-                    >
-                      <img
-                        loading="eager"
-                        src={~p"/images/wordmarks/activepieces.svg"}
-                        alt="Activepieces"
-                        class="col-auto brightness-0 invert"
-                      />
-                    </.link>
-                    <.link class="relative flex items-center justify-center" href={~p"/golemcloud"}>
-                      <Wordmarks.golemcloud class="col-auto w-[80%]" alt="Golem Cloud" />
-                    </.link>
-                    <.link
-                      class="font-bold font-display text-sm sm:text-base whitespace-nowrap flex items-center justify-center"
-                      navigate={~p"/browser-use"}
-                    >
-                      <img
-                        loading="eager"
-                        src={~p"/images/wordmarks/browser-use.svg"}
-                        alt="Browser Use"
-                        class="saturate-0 w-4 sm:w-4 mr-1 sm:mr-1"
-                      /> Browser Use
-                    </.link>
-                  </div> --%>
                 </div>
-
-                <div class="w-full max-w-[34rem] text-left -mt-4">
-                  <div class="rounded-xl bg-card text-card-foreground shadow-2xl ring-1 ring-white/10">
-                    <div class="p-8">
-                      <h2 class="text-3xl font-semibold leading-7 text-white">
+                <div class="w-full max-w-xl mx-auto lg:max-w-lg 2xl:max-w-[34rem] text-left">
+                  <div class="rounded-xl bg-card text-card-foreground shadow-2xl ring-1 ring-white/15">
+                    <div class="p-6 2xl:p-10">
+                      <h2 class="text-2xl 2xl:text-3xl font-semibold leading-7 text-white">
                         View your candidates
                       </h2>
                       <p class="pt-2 text-sm text-muted-foreground">
-                        Share your JD to receive your candidates within hours.
+                        Share JD to receive matches within hours
                       </p>
 
-                      <form class="mt-6 flex flex-col gap-6">
+                      <form class="mt-4 2xl:mt-6 flex flex-col gap-4 2xl:gap-6">
                         <.input
                           type="textarea"
                           name="job_description"
                           value=""
                           label="Job description / careers URL"
-                          rows="4"
+                          rows="3"
                           placeholder="Tell us about the role and your requirements..."
+                          class="resize-none"
                         />
                         <.input
                           type="textarea"
                           name="job_description"
                           value=""
                           label="Describe your ideal candidate, heuristics, green/red flags etc."
-                          rows="4"
+                          rows="3"
                           placeholder={placeholder_text()}
+                          class="resize-none"
                         />
                         <.input
                           name="email"
@@ -258,7 +218,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="relative isolate py-16 sm:py-40">
+        <section class="relative isolate pb-16 sm:pb-40">
           <div class="mx-auto max-w-7xl px-6 lg:px-8 pt-24 xl:pt-0">
             <img
               src={~p"/images/logos/yc.svg"}
@@ -266,35 +226,37 @@ defmodule AlgoraWeb.HomeLive do
               alt="Y Combinator Logo"
               loading="lazy"
             />
-            <h2 class="mt-4 sm:mt-8 font-display text-xl sm:text-3xl xl:text-6xl font-semibold tracking-tight text-foreground text-center mb-4 !leading-[1.25]">
-              Trusted by open source YC founders
+            <h2 class="mt-4 sm:mt-8 font-display text-xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-semibold tracking-tight text-foreground text-center mb-4 !leading-[1.25]">
+              Trusted by <br class="md:hidden" /> open source YC founders
             </h2>
 
             <div class="pt-4 sm:pt-8 flex flex-col md:flex-row gap-8 px-4">
               <div class="flex-1 mx-auto max-w-xl flex flex-col justify-between border ring-1 ring-border transition-all bg-card group rounded-xl text-card-foreground shadow p-6">
                 <figure class="relative flex flex-col h-full">
-                  <blockquote class="text-lg font-medium text-foreground/90 flex-grow">
+                  <blockquote class="text-base xl:text-lg font-medium text-foreground/90 flex-grow">
                     <p>
                       "Algora helped us meet Nick, who after being contracted a few months, joined the Trigger founding team full-time.
                     </p>
-                    <p class="pt-4">
+                    <p class="pt-2 xl:pt-4">
                       It was the easiest hire and turned out to be very very good."
                     </p>
                   </blockquote>
-                  <figcaption class="mt-8 flex items-center gap-x-4">
+                  <figcaption class="mt-4 xl:mt-8 flex items-center gap-3 xl:gap-4">
                     <img
                       src="/images/people/eric-allam.jpg"
                       alt="Eric Allam"
-                      class="h-16 w-16 rounded-full object-cover bg-gray-800"
+                      class="size-12 xl:size-16 rounded-full object-cover bg-gray-800"
                       loading="lazy"
                     />
-                    <div class="text-sm">
-                      <div class="text-base font-semibold text-foreground">Eric Allam</div>
-                      <div class="text-foreground/90 font-medium">
-                        CTO, Trigger.dev <span class="text-orange-400">(YC W23)</span>
+                    <div>
+                      <div class="text-sm xl:text-base font-semibold text-foreground">
+                        Eric Allam
                       </div>
-                      <div class="text-muted-foreground font-medium flex items-center gap-1">
-                        <.icon name="tabler-map-pin" class="h-4 w-4" /> London
+                      <div class="text-xs xl:text-sm text-foreground/90 font-medium">
+                        Co-founder & CTO
+                      </div>
+                      <div class="text-xs xl:text-sm text-foreground/90 font-medium">
+                        Trigger.dev <span class="text-orange-400">(YC W23)</span>
                       </div>
                     </div>
                   </figcaption>
@@ -303,29 +265,31 @@ defmodule AlgoraWeb.HomeLive do
 
               <div class="flex-1 mx-auto max-w-xl flex flex-col justify-between border ring-1 ring-border transition-all bg-card group rounded-xl text-card-foreground shadow p-6">
                 <figure class="relative flex flex-col h-full">
-                  <blockquote class="text-lg font-medium text-foreground/90 flex-grow">
+                  <blockquote class="text-base xl:text-lg font-medium text-foreground/90 flex-grow">
                     <p>
                       "Algora helped us meet Gergő and I couldn't be happier with the results. He's been working full-time with us for over a year now and is a key contributor to our product.
                     </p>
 
-                    <p class="pt-4">
+                    <p class="pt-2 xl:pt-4">
                       I think you realized this by now, but you have such a powerful sourcing/hiring engine in your hands!"
                     </p>
                   </blockquote>
-                  <figcaption class="mt-8 flex items-center gap-x-4">
+                  <figcaption class="mt-4 xl:mt-8 flex items-center gap-3 xl:gap-4">
                     <img
                       src="/images/people/nicolas-camara.jpg"
                       alt="Nicolas Camara"
-                      class="h-16 w-16 rounded-full object-cover bg-gray-800"
+                      class="size-12 xl:size-16 rounded-full object-cover bg-gray-800"
                       loading="lazy"
                     />
-                    <div class="text-sm">
-                      <div class="text-base font-semibold text-foreground">Nicolas Camara</div>
-                      <div class="text-foreground/90 font-medium">
-                        CEO, Firecrawl <span class="text-orange-400">(YC S22)</span>
+                    <div>
+                      <div class="text-sm xl:text-base font-semibold text-foreground">
+                        Nicolas Camara
                       </div>
-                      <div class="text-muted-foreground font-medium flex items-center gap-1">
-                        <.icon name="tabler-map-pin" class="h-4 w-4" /> San Francisco
+                      <div class="text-xs xl:text-sm text-foreground/90 font-medium">
+                        Co-founder & CEO
+                      </div>
+                      <div class="text-xs xl:text-sm text-foreground/90 font-medium">
+                        Firecrawl <span class="text-orange-400">(YC S22)</span>
                       </div>
                     </div>
                   </figcaption>
@@ -340,7 +304,7 @@ defmodule AlgoraWeb.HomeLive do
 
         <section class="relative isolate pb-16 sm:pb-40">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
-            <h2 class="font-display text-xl sm:text-3xl xl:text-6xl font-semibold tracking-tight text-foreground text-center !leading-[1.25]">
+            <h2 class="font-display text-xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-semibold tracking-tight text-foreground text-center mb-4 !leading-[1.25]">
               Community highlights
             </h2>
             <p class="mt-2 text-lg text-muted-foreground text-center">
@@ -358,7 +322,7 @@ defmodule AlgoraWeb.HomeLive do
         <section class="relative isolate pb-16 sm:pb-40">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <h2 class="font-display text-xl sm:text-3xl xl:text-6xl font-semibold tracking-tight text-foreground text-center !leading-[1.25]">
-              Join the open source economy
+              Meet your new teammates today
             </h2>
             <div class="mt-6 sm:mt-10 flex gap-4 justify-center">
               <.button
@@ -555,13 +519,13 @@ defmodule AlgoraWeb.HomeLive do
   defp yc_logo_cloud(assigns) do
     ~H"""
     <div>
-      <div class="grid grid-cols-3 lg:grid-cols-3 items-center justify-center gap-x-5 gap-y-4 sm:gap-x-12 sm:gap-y-12">
+      <div class="grid grid-cols-3 lg:grid-cols-3 items-center justify-center gap-x-5 gap-y-4 sm:gap-x-8 sm:gap-y-6  lg:gap-x-12 lg:gap-y-12">
         <.link
-          class="font-bold font-display text-base sm:text-4xl whitespace-nowrap flex items-center justify-center"
+          class="font-bold font-display text-base sm:text-2xl lg:text-4xl whitespace-nowrap flex items-center justify-center"
           navigate={~p"/browser-use"}
         >
           <img
-            class="size-4 sm:size-10 mr-2 sm:mr-4"
+            class="size-4 sm:size-7 lg:size-10 mr-2 lg:mr-4"
             src={~p"/images/wordmarks/browser-use.svg"}
             loading="lazy"
           /> Browser Use
@@ -629,7 +593,7 @@ defmodule AlgoraWeb.HomeLive do
           <img
             src={~p"/images/wordmarks/triggerdotdev.png"}
             alt="Trigger.dev"
-            class="col-auto sm:w-[90%] saturate-0"
+            class="col-auto lg:w-[90%] saturate-0"
             loading="lazy"
           />
         </.link>
@@ -637,30 +601,30 @@ defmodule AlgoraWeb.HomeLive do
           <img
             src={~p"/images/wordmarks/traceloop.png"}
             alt="Traceloop"
-            class="sm:w-[90%] col-auto saturate-0"
+            class="lg:w-[90%] col-auto saturate-0"
             loading="lazy"
           />
         </.link>
         <.link
-          class="font-bold font-display text-base sm:text-5xl whitespace-nowrap flex items-center justify-center"
+          class="font-bold font-display text-base sm:text-3xl lg:text-5xl whitespace-nowrap flex items-center justify-center"
           navigate={~p"/trieve"}
         >
           <img
             src={~p"/images/wordmarks/trieve.png"}
             alt="Trieve logo"
-            class="size-8 sm:size-16 mr-2 brightness-0 invert"
+            class="size-8 sm:size-12 lg:size-16 mr-2 brightness-0 invert"
             loading="lazy"
           /> Trieve
         </.link>
         <.link
-          class="font-bold font-display text-base sm:text-5xl whitespace-nowrap flex items-center justify-center"
+          class="font-bold font-display text-base sm:text-3xl lg:text-5xl whitespace-nowrap flex items-center justify-center"
           navigate={~p"/twentyhq"}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             xmlns:xlink="http://www.w3.org/1999/xlink"
             viewBox="0 0 40 40"
-            class="shrink-0 size-4 sm:size-10 mr-2 sm:mr-4"
+            class="shrink-0 size-4 sm:size-8 lg:size-10 mr-2 lg:mr-4"
           >
             <path
               fill="currentColor"
@@ -702,7 +666,7 @@ defmodule AlgoraWeb.HomeLive do
         </.link>
 
         <.link
-          class="font-bold font-display text-base sm:text-4xl whitespace-nowrap flex items-center justify-center brightness-0 invert"
+          class="font-bold font-display text-base sm:text-3xl lg:text-4xl whitespace-nowrap flex items-center justify-center brightness-0 invert"
           aria-label="Logo"
           navigate={~p"/mendableai"}
         >
@@ -714,19 +678,19 @@ defmodule AlgoraWeb.HomeLive do
           <img
             src={~p"/images/wordmarks/keep.png"}
             alt="Keep"
-            class="col-auto w-[70%] sm:w-[50%]"
+            class="col-auto w-[70%] lg:w-[50%]"
             loading="lazy"
           />
         </.link>
 
         <.link
-          class="font-bold font-display text-base sm:text-5xl whitespace-nowrap flex items-center justify-center"
+          class="font-bold font-display text-base sm:text-3xl lg:text-5xl whitespace-nowrap flex items-center justify-center"
           navigate={~p"/windmill-labs"}
         >
           <img
             src={~p"/images/wordmarks/windmill.svg"}
             alt="Windmill"
-            class="size-4 sm:size-14 mr-2 saturate-0"
+            class="size-4 sm:size-10 lg:size-14 mr-2 saturate-0"
             loading="lazy"
           /> Windmill
         </.link>
@@ -735,7 +699,7 @@ defmodule AlgoraWeb.HomeLive do
           <img
             src={~p"/images/wordmarks/panora.png"}
             alt="Panora"
-            class="col-auto w-[60%] sm:w-[50%] saturate-0 brightness-0 invert"
+            class="col-auto w-[60%] lg:w-[50%] saturate-0 brightness-0 invert"
             loading="lazy"
           />
         </.link>
@@ -744,7 +708,7 @@ defmodule AlgoraWeb.HomeLive do
           <img
             src={~p"/images/wordmarks/highlight.png"}
             alt="Highlight"
-            class="col-auto sm:w-[90%] saturate-0"
+            class="col-auto lg:w-[90%] saturate-0"
             loading="lazy"
           />
         </.link>
@@ -757,25 +721,25 @@ defmodule AlgoraWeb.HomeLive do
     ~H"""
     <.link
       navigate={@event.link}
-      class="group relative flex items-center gap-4 bg-card p-6 rounded-xl border-l-8 transition-all mb-6 z-10 hover:scale-[1.03] border-[color:var(--event-theme-color)] shadow-[0px_0px_3px_var(--event-theme-color-10),_0px_0px_6px_var(--event-theme-color-15),_0px_0px_8px_var(--event-theme-color-20)]"
+      class="group relative flex items-center gap-4 bg-card p-4 md:p-6 rounded-xl border-l-8 transition-all mb-6 z-10 hover:scale-[1.03] border-[color:var(--event-theme-color)] shadow-[0px_0px_3px_var(--event-theme-color-10),_0px_0px_6px_var(--event-theme-color-15),_0px_0px_8px_var(--event-theme-color-20)]"
       style={"--event-theme-color: #{@event.theme_color}; --event-theme-color-05: #ffffff0D; --event-theme-color-08: #ffffff14; --event-theme-color-10: #ffffff1A; --event-theme-color-15: #ffffff26; --event-theme-color-20: #ffffff33;"}
     >
-      <div class="size-16 rounded-xl bg-background flex-shrink-0 overflow-hidden">
+      <div class="size-12 md:size-16 rounded-xl bg-background flex-shrink-0 overflow-hidden">
         <img src={@event.logo} alt={@event.alt} class="w-full h-full object-contain" />
       </div>
       <div class="flex-1">
         <div class="flex items-center gap-2">
-          <p class="text-lg font-semibold text-foreground">
+          <p class="text-sm md:text-lg font-semibold text-foreground">
             {@event.title}
           </p>
         </div>
-        <p class="text-sm text-muted-foreground flex items-center gap-2 mt-1">
+        <p class="text-xs md:text-sm text-muted-foreground flex items-center gap-2 mt-1">
           {@event.date}
         </p>
       </div>
       <.icon
         name="tabler-chevron-right"
-        class="size-6 text-muted-foreground group-hover:text-[color:var(--event-theme-color)] transition-colors"
+        class="size-4 md:size-6 text-muted-foreground group-hover:text-[color:var(--event-theme-color)] transition-colors"
       />
     </.link>
     """

@@ -340,7 +340,7 @@ defmodule AlgoraWeb.HomeLive do
 
         <section class="relative isolate pb-16 sm:pb-40">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
-            <h2 class="font-display text-xl sm:text-3xl xl:text-6xl font-semibold tracking-tight text-foreground text-center mb-4 !leading-[1.25]">
+            <h2 class="font-display text-xl sm:text-3xl xl:text-6xl font-semibold tracking-tight text-foreground text-center !leading-[1.25]">
               Community highlights
             </h2>
             <p class="mt-2 text-lg text-muted-foreground text-center">
@@ -757,8 +757,8 @@ defmodule AlgoraWeb.HomeLive do
     ~H"""
     <.link
       navigate={@event.link}
-      class="group relative flex items-center gap-4 bg-card p-6 rounded-xl shadow-lg border-l-8 transition-all mb-6 z-10 hover:scale-[1.03] hover:shadow-2xl border-[color:var(--event-theme-color)]"
-      style={"--event-theme-color: #{@event.theme_color}"}
+      class="group relative flex items-center gap-4 bg-card p-6 rounded-xl border-l-8 transition-all mb-6 z-10 hover:scale-[1.03] border-[color:var(--event-theme-color)] shadow-[0px_0px_6px_var(--event-theme-color-10),_0px_0px_12px_var(--event-theme-color-15),_0px_0px_16px_var(--event-theme-color-20)]"
+      style={"--event-theme-color: #{@event.theme_color}; --event-theme-color-05: #{@event.theme_color}0D; --event-theme-color-08: #{@event.theme_color}14; --event-theme-color-10: #{@event.theme_color}1A; --event-theme-color-15: #{@event.theme_color}26; --event-theme-color-20: #{@event.theme_color}33;"}
     >
       <div class="size-16 rounded-xl bg-background flex-shrink-0 overflow-hidden">
         <img src={@event.logo} alt={@event.alt} class="w-full h-full object-contain" />
@@ -770,7 +770,7 @@ defmodule AlgoraWeb.HomeLive do
           </p>
         </div>
         <p class="text-sm text-muted-foreground flex items-center gap-2 mt-1">
-          <.icon name="tabler-calendar" class="size-4" /> {@event.date}
+          {@event.date}
         </p>
       </div>
       <.icon
@@ -804,7 +804,7 @@ defmodule AlgoraWeb.HomeLive do
         date: "May 15, 2025",
         logo: "https://avatars.githubusercontent.com/u/142257755?s=200&v=4",
         alt: "DotTxt",
-        theme_color: "#fff",
+        theme_color: "#ffffff",
         link: "/highlights/dottxt"
       },
       %{
@@ -820,7 +820,7 @@ defmodule AlgoraWeb.HomeLive do
         date: "May 22, 2025",
         logo: "https://avatars.githubusercontent.com/u/129894407?v=4",
         alt: "Prequel",
-        theme_color: "#fff",
+        theme_color: "#ffffff",
         link: "/highlights/prequel"
       },
       %{
@@ -828,7 +828,7 @@ defmodule AlgoraWeb.HomeLive do
         date: "May 25, 2025",
         logo: "https://avatars.githubusercontent.com/u/194294730?s=200&v=4",
         alt: "Unsiloed",
-        theme_color: "#fff",
+        theme_color: "#ffffff",
         link: "/highlights/unsiloed"
       }
     ]

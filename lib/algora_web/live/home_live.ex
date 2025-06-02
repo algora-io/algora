@@ -121,7 +121,7 @@ defmodule AlgoraWeb.HomeLive do
 
       <main class="bg-black relative overflow-hidden">
         <section class="relative isolate min-h-[calc(100vh)]">
-          <div class="h-full mx-auto max-w-[88rem] px-6 lg:px-8 flex flex-col items-center justify-center pt-32 pb-12">
+          <div class="h-full mx-auto max-w-[88rem] px-6 lg:px-8 flex flex-col items-center justify-center pt-48 pb-12">
             <div class="h-full mx-auto lg:mx-0 flex lg:max-w-none items-center justify-center text-center w-full">
               <div class="w-full flex flex-col lg:flex-row lg:justify-center gap-6">
                 <div class="w-full flex flex-col items-center lg:items-start text-center lg:text-left">
@@ -357,7 +357,7 @@ defmodule AlgoraWeb.HomeLive do
 
         <section class="relative isolate pb-16 sm:pb-40">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
-            <h2 class="mb-8 text-3xl font-bold text-card-foreground text-center">
+            <h2 class="font-display text-xl sm:text-3xl xl:text-6xl font-semibold tracking-tight text-foreground text-center !leading-[1.25]">
               Join the open source economy
             </h2>
             <div class="mt-6 sm:mt-10 flex gap-4 justify-center">
@@ -365,14 +365,14 @@ defmodule AlgoraWeb.HomeLive do
                 navigate={~p"/onboarding/org"}
                 class="h-10 sm:h-14 rounded-md px-8 sm:px-12 text-sm sm:text-xl"
               >
-                Companies
+                Start hiring
               </.button>
               <.button
-                navigate={~p"/onboarding/dev"}
+                navigate={~p"/platform"}
                 variant="secondary"
                 class="h-10 sm:h-14 rounded-md px-8 sm:px-12 text-sm sm:text-xl"
               >
-                Developers
+                Explore platform
               </.button>
             </div>
             <%!-- <div class="flex justify-center gap-4">

@@ -129,50 +129,43 @@ defmodule AlgoraWeb.HomeLive do
                     Meet your new <span class="text-emerald-400">hire today</span>
                   </h1>
                   <p class="mt-4 text-lg leading-8 text-muted-foreground max-w-xl">
-                    Access a curated network of top 1% engineers, pre-vetted through their open source contributions.
+                    Access a network of top 1% engineers, pre-vetted through their OSS contributions.
                     <span class="font-semibold">Only pay when you hire.</span>
                   </p>
-                  <div class="pt-6 mr-auto max-w-xl flex flex-col justify-between">
+                  <img
+                    src="/images/screenshots/job-candidates.png"
+                    alt="Job candidates"
+                    class="mt-4 rounded-xl object-cover max-w-xl"
+                    style="aspect-ratio: 1556/816;"
+                  />
+                  <div class="pt-4 mr-auto max-w-xl flex flex-col justify-between">
                     <figure class="relative flex flex-col rounded-xl bg-card text-card-foreground shadow-2xl ring-1 ring-white/10 p-6">
-                      <blockquote class="text-base font-medium text-foreground/90 flex-grow">
-                        <p>
-                          "Algora helped us meet Nick, who after being contracted a few months, joined the Trigger founding team full-time.
-                        </p>
-                        <p class="pt-4">
-                          It was the easiest hire and turned out to be very very good."
-                        </p>
+                      <blockquote class="text-sm font-medium text-foreground/90 flex-grow">
+                        "Algora helped us meet Nick, who after being contracted a few months, joined the Trigger founding team full-time. It was the easiest hire and turned out to be very very good."
                       </blockquote>
                       <figcaption class="mt-4 flex items-center gap-x-2">
                         <img
                           src="/images/people/eric-allam.jpg"
                           alt="Eric Allam"
-                          class="h-12 w-12 rounded-full object-cover bg-gray-800"
+                          class="h-8 w-8 rounded-full object-cover bg-gray-800"
                           loading="lazy"
                         />
                         <div class="text-xs">
                           <div class="text-sm font-semibold text-foreground">Eric Allam</div>
-                          <div class="text-foreground/90 font-medium">Co-founder & CTO</div>
-                          <div class="text-muted-foreground font-medium">
-                            Trigger.dev <span class="text-orange-400">(YC W23)</span>
+                          <div class="text-foreground/90 font-medium">
+                            Co-founder & CTO, Trigger.dev
+                            <span class="text-orange-400">(YC W23)</span>
                           </div>
                         </div>
                       </figcaption>
                     </figure>
                   </div>
-                  <div class="pt-6 sm:max-w-[40rem] grid w-full grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-y-4 gap-x-4 mx-auto items-center justify-center sm:ml-0">
+                  <div class="pt-4 sm:max-w-[40rem] grid w-full grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-y-4 gap-x-4 mx-auto items-center justify-center sm:ml-0">
                     <.link class="relative flex items-center justify-center" href={~p"/cal"}>
                       <Wordmarks.calcom class="w-[80%] col-auto" alt="Cal.com" />
                     </.link>
                     <.link class="relative flex items-center justify-center" href={~p"/qdrant"}>
                       <Wordmarks.qdrant class="w-[80%] col-auto" alt="Qdrant" />
-                    </.link>
-                    <.link class="relative flex items-center justify-center" href={~p"/remotion"}>
-                      <img
-                        loading="eager"
-                        src={~p"/images/wordmarks/remotion.png"}
-                        alt="Remotion"
-                        class="col-auto w-full saturate-0"
-                      />
                     </.link>
                     <.link class="relative flex items-center justify-center" href={~p"/zio"}>
                       <img
@@ -193,122 +186,8 @@ defmodule AlgoraWeb.HomeLive do
                         class="col-auto brightness-0 invert"
                       />
                     </.link>
-                    <.link class="relative flex items-center justify-center" href={~p"/tembo"}>
-                      <img
-                        loading="eager"
-                        src={~p"/images/wordmarks/tembo.png"}
-                        alt="Tembo"
-                        class="col-auto saturate-0"
-                      />
-                    </.link>
-                    <.link class="relative flex items-center justify-center" href={~p"/maybe-finance"}>
-                      <img
-                        loading="eager"
-                        src={~p"/images/wordmarks/maybe.png"}
-                        alt="Maybe"
-                        class="col-auto w-full saturate-0"
-                      />
-                    </.link>
                     <.link class="relative flex items-center justify-center" href={~p"/golemcloud"}>
                       <Wordmarks.golemcloud class="col-auto w-[80%]" alt="Golem Cloud" />
-                    </.link>
-                    <.link class="relative flex items-center justify-center" href={~p"/deskflow"}>
-                      <img
-                        loading="eager"
-                        src={~p"/images/wordmarks/synergy.svg"}
-                        alt="Synergy"
-                        class="col-auto saturate-0 invert w-[80%]"
-                      />
-                    </.link>
-                    <.link class="relative flex items-center justify-center" href={~p"/Capgo"}>
-                      <img
-                        loading="eager"
-                        src={~p"/images/wordmarks/capgo.png"}
-                        alt="Capgo"
-                        class="col-auto w-[80%]"
-                      />
-                    </.link>
-                    <.link class="relative flex items-center justify-center" href={~p"/tracemachina"}>
-                      <img
-                        loading="eager"
-                        src={~p"/images/wordmarks/nativelink.png"}
-                        alt="Nativelink"
-                        class="col-auto saturate-0"
-                      />
-                    </.link>
-                    <.link class="relative flex items-center justify-center" href={~p"/softwaremill"}>
-                      <img
-                        loading="eager"
-                        src={~p"/images/wordmarks/softwaremill.png"}
-                        alt="Softwaremill"
-                        class="col-auto invert"
-                      />
-                    </.link>
-                    <.link class="relative flex items-center justify-center" href={~p"/CapSoftware"}>
-                      <Wordmarks.cap class="col-auto saturate-0 invert w-[80%]" alt="Cap" />
-                    </.link>
-                    <.link
-                      class="relative flex items-center justify-center"
-                      href={~p"/spaceandtimelabs"}
-                    >
-                      <img
-                        loading="eager"
-                        src={~p"/images/wordmarks/spaceandtimelabs.svg"}
-                        alt="Space and Time"
-                        class="col-auto saturate-0"
-                      />
-                    </.link>
-                    <.link
-                      class="font-bold font-display text-base sm:text-base whitespace-nowrap flex items-center justify-center"
-                      navigate={~p"/getkyo"}
-                    >
-                      <img
-                        loading="eager"
-                        src={~p"/images/logos/kyo.png"}
-                        alt="Kyo"
-                        class="size-6 sm:size-5 mr-1 sm:mr-1 saturate-0 invert"
-                      /> Kyo
-                    </.link>
-                    <.link class="relative flex items-center justify-center" href={~p"/permitio"}>
-                      <img
-                        loading="eager"
-                        src={~p"/images/wordmarks/permit.svg"}
-                        alt="Permit"
-                        class="col-auto saturate-0"
-                      />
-                    </.link>
-                    <.link
-                      class="font-bold font-display text-lg sm:text-lg whitespace-nowrap flex items-center justify-center"
-                      navigate={~p"/coollabsio"}
-                    >
-                      Coolify
-                    </.link>
-                    <.link class="relative flex items-center justify-center" href={~p"/encoredev"}>
-                      <img
-                        loading="eager"
-                        src={~p"/images/wordmarks/encore.svg"}
-                        alt="Encore"
-                        class="col-auto invert w-[70%]"
-                      />
-                    </.link>
-                    <.link class="relative flex items-center justify-center" href={~p"/tolgee"}>
-                      <img
-                        loading="eager"
-                        src={~p"/images/wordmarks/tolgee.png"}
-                        alt="Tolgee"
-                        class="col-auto w-[80%]"
-                      />
-                    </.link>
-                    <.link
-                      class="font-bold font-display text-base sm:text-base whitespace-nowrap flex items-center justify-center"
-                      navigate={~p"/keygen-sh"}
-                    >
-                      <img
-                        loading="eager"
-                        src={~p"/images/wordmarks/keygen.svg"}
-                        alt="Keygen"
-                        class="saturate-0 w-5 sm:w-4 mr-1 sm:mr-1"
-                      /> keygen
                     </.link>
                     <.link
                       class="font-bold font-display text-sm sm:text-base whitespace-nowrap flex items-center justify-center"
@@ -320,39 +199,6 @@ defmodule AlgoraWeb.HomeLive do
                         alt="Browser Use"
                         class="saturate-0 w-4 sm:w-4 mr-1 sm:mr-1"
                       /> Browser Use
-                    </.link>
-                    <.link
-                      class="font-bold font-display text-base sm:text-base whitespace-nowrap flex items-center justify-center"
-                      navigate={~p"/tscircuit"}
-                    >
-                      <img
-                        loading="eager"
-                        src={~p"/images/logos/tscircuit.svg"}
-                        alt="TSC"
-                        class="saturate-0 invert w-5 sm:w-5 mr-1 sm:mr-1"
-                      /> tscircuit
-                    </.link>
-                    <.link
-                      class="font-bold font-display text-sm sm:text-base whitespace-nowrap flex items-center justify-center"
-                      navigate={~p"/prefix-dev"}
-                    >
-                      <img
-                        loading="eager"
-                        src={~p"/images/logos/prefix.svg"}
-                        alt="TSC"
-                        class="saturate-0 w-6 sm:w-5 mr-1 sm:mr-1"
-                      /> Prefix.dev
-                    </.link>
-                    <.link
-                      class="font-extrabold font-mono text-base sm:text-base whitespace-nowrap flex items-center justify-center"
-                      navigate={~p"/mediar-ai"}
-                    >
-                      <img
-                        loading="eager"
-                        src={~p"/images/logos/screenpipe.webp"}
-                        alt="Screenpipe"
-                        class="shrink-0 saturate-0 w-5 sm:w-6 mr-1 sm:mr-1"
-                      /> screenpipe
                     </.link>
                   </div>
                 </div>

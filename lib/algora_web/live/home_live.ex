@@ -120,7 +120,7 @@ defmodule AlgoraWeb.HomeLive do
       <% end %>
 
       <main class="bg-black relative overflow-hidden">
-        <section class="relative isolate">
+        <section class="relative isolate min-h-[calc(100vh)]">
           <div class="h-full mx-auto max-w-[88rem] px-6 lg:px-8 flex flex-col items-center justify-center pt-32 pb-12">
             <div class="h-full mx-auto lg:mx-0 flex lg:max-w-none items-center justify-center text-center w-full">
               <div class="w-full flex flex-col lg:flex-row lg:justify-center gap-6">
@@ -128,39 +128,46 @@ defmodule AlgoraWeb.HomeLive do
                   <h1 class="font-display text-3xl sm:text-lg md:text-5xl xl:text-[3.25rem] font-semibold tracking-tight text-foreground">
                     Meet your new <span class="text-emerald-400">hire today</span>
                   </h1>
-                  <p class="mt-4 text-lg leading-8 text-muted-foreground max-w-xl">
+                  <p class="mt-4 text-lg leading-8 text-muted-foreground max-w-2xl">
                     Access a network of top 1% engineers, pre-vetted through their OSS contributions.
                     <span class="font-semibold">Only pay when you hire.</span>
                   </p>
+                  <ul class="mt-2 flex flex-col gap-2 text-sm">
+                    <li class="flex items-center text-left text-foreground/80">
+                      <.icon
+                        name="tabler-square-rounded-number-1"
+                        class="size-6 mr-2 shrink-0 text-foreground/80"
+                      />
+                      <span class="font-medium leading-7 whitespace-nowrap">
+                        Submit JD
+                      </span>
+                    </li>
+                    <li class="flex items-center text-left text-foreground/80">
+                      <.icon
+                        name="tabler-square-rounded-number-2"
+                        class="size-6 mr-2 shrink-0 text-foreground/80"
+                      />
+                      <span class="font-medium leading-7 whitespace-nowrap">
+                        Receive matches <span class="text-emerald-300">within hours</span>
+                      </span>
+                    </li>
+                    <li class="flex items-center text-left text-foreground/80">
+                      <.icon
+                        name="tabler-square-rounded-number-3"
+                        class="size-6 mr-2 shrink-0 text-foreground/80"
+                      />
+                      <span class="font-medium leading-7 whitespace-nowrap">
+                        Interview <span class="text-emerald-300">within days</span>
+                      </span>
+                    </li>
+                  </ul>
                   <img
                     src="/images/screenshots/job-candidates.png"
                     alt="Job candidates"
-                    class="mt-4 rounded-xl object-cover max-w-xl"
+                    class="-ml-2 mt-4 rounded-xl object-cover max-w-[48rem]"
                     style="aspect-ratio: 1556/816;"
                   />
-                  <div class="pt-4 mr-auto max-w-xl flex flex-col justify-between">
-                    <figure class="relative flex flex-col rounded-xl bg-card text-card-foreground shadow-2xl ring-1 ring-white/10 p-6">
-                      <blockquote class="text-sm font-medium text-foreground/90 flex-grow">
-                        "Algora helped us meet Nick, who after being contracted a few months, joined the Trigger founding team full-time. It was the easiest hire and turned out to be very very good."
-                      </blockquote>
-                      <figcaption class="mt-4 flex items-center gap-x-2">
-                        <img
-                          src="/images/people/eric-allam.jpg"
-                          alt="Eric Allam"
-                          class="h-8 w-8 rounded-full object-cover bg-gray-800"
-                          loading="lazy"
-                        />
-                        <div class="text-xs">
-                          <div class="text-sm font-semibold text-foreground">Eric Allam</div>
-                          <div class="text-foreground/90 font-medium">
-                            Co-founder & CTO, Trigger.dev
-                            <span class="text-orange-400">(YC W23)</span>
-                          </div>
-                        </div>
-                      </figcaption>
-                    </figure>
-                  </div>
-                  <div class="pt-4 sm:max-w-[40rem] grid w-full grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-y-4 gap-x-4 mx-auto items-center justify-center sm:ml-0">
+                  <%!-- <div class="pt-4 sm:max-w-[40rem] grid w-full grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-y-4 gap-x-4 mx-auto items-center justify-center sm:ml-0">
                     <.link class="relative flex items-center justify-center" href={~p"/cal"}>
                       <Wordmarks.calcom class="w-[80%] col-auto" alt="Cal.com" />
                     </.link>
@@ -200,44 +207,18 @@ defmodule AlgoraWeb.HomeLive do
                         class="saturate-0 w-4 sm:w-4 mr-1 sm:mr-1"
                       /> Browser Use
                     </.link>
-                  </div>
+                  </div> --%>
                 </div>
 
-                <div class="max-w-[38rem] text-left -mt-4">
+                <div class="w-full max-w-[34rem] text-left -mt-4">
                   <div class="rounded-xl bg-card text-card-foreground shadow-2xl ring-1 ring-white/10">
                     <div class="p-8">
-                      <h2 class="text-3xl text-center font-semibold leading-7 text-white">
-                        Get started in seconds
+                      <h2 class="text-3xl font-semibold leading-7 text-white">
+                        View your candidates
                       </h2>
-                      <ul class="mt-2 flex items-center justify-center gap-6 text-sm">
-                        <li class="flex items-center text-left text-foreground/80">
-                          <.icon
-                            name="tabler-square-rounded-number-1"
-                            class="size-6 mr-2 shrink-0 text-emerald-300"
-                          />
-                          <span class="font-medium leading-7 whitespace-nowrap">
-                            Submit JD
-                          </span>
-                        </li>
-                        <li class="flex items-center text-left text-foreground/80">
-                          <.icon
-                            name="tabler-square-rounded-number-2"
-                            class="size-6 mr-2 shrink-0 text-emerald-300"
-                          />
-                          <span class="font-medium leading-7 whitespace-nowrap">
-                            Receive matches <span class="text-emerald-300">within hours</span>
-                          </span>
-                        </li>
-                        <li class="flex items-center text-left text-foreground/80">
-                          <.icon
-                            name="tabler-square-rounded-number-3"
-                            class="size-6 mr-2 shrink-0 text-emerald-300"
-                          />
-                          <span class="font-medium leading-7 whitespace-nowrap">
-                            Interview <span class="text-emerald-300">within days</span>
-                          </span>
-                        </li>
-                      </ul>
+                      <p class="pt-2 text-sm text-muted-foreground">
+                        Share your JD to receive your candidates within hours.
+                      </p>
 
                       <form class="mt-6 flex flex-col gap-6">
                         <.input
@@ -245,7 +226,7 @@ defmodule AlgoraWeb.HomeLive do
                           name="job_description"
                           value=""
                           label="Job description / careers URL"
-                          rows="3"
+                          rows="4"
                           placeholder="Tell us about the role and your requirements..."
                         />
                         <.input

@@ -348,173 +348,9 @@ defmodule AlgoraWeb.HomeLive do
             </p>
 
             <div class="mt-8 grid gap-4 max-w-2xl mx-auto">
-              <div class="group hover:bg-card/60 transition-colors rounded-lg bg-card p-4">
-                <div class="flex items-center gap-4">
-                  <div class="size-12 rounded-lg bg-background p-2 ring-1 ring-white/10 group-hover:ring-cyan-500/50 transition-all">
-                    <img
-                      src="https://notes.fm/images/favicon.png"
-                      alt="Notes"
-                      class="w-full h-full object-contain"
-                    />
-                  </div>
-                  <div class="flex-1">
-                    <p class="text-foreground group-hover:text-cyan-400 transition-colors">
-                      Notes hired with Algora
-                    </p>
-                    <p class="text-sm text-muted-foreground flex items-center gap-2">
-                      <.icon name="tabler-calendar" class="size-4" /> May 5, 2025
-                    </p>
-                  </div>
-                  <.icon
-                    name="tabler-chevron-right"
-                    class="size-5 text-muted-foreground group-hover:text-cyan-400 transition-colors"
-                  />
-                </div>
-              </div>
-
-              <div class="group hover:bg-card/60 transition-colors rounded-lg bg-card p-4">
-                <div class="flex items-center gap-4">
-                  <div class="size-12 rounded-lg bg-background p-2 ring-1 ring-white/10 group-hover:ring-cyan-500/50 transition-all">
-                    <img
-                      src="https://notes.fm/images/favicon.png"
-                      alt="Notes"
-                      class="w-full h-full object-contain"
-                    />
-                  </div>
-                  <div class="flex-1">
-                    <p class="text-foreground group-hover:text-cyan-400 transition-colors">
-                      Notes hired with Algora
-                    </p>
-                    <p class="text-sm text-muted-foreground flex items-center gap-2">
-                      <.icon name="tabler-calendar" class="size-4" /> May 5, 2025
-                    </p>
-                  </div>
-                  <.icon
-                    name="tabler-chevron-right"
-                    class="size-5 text-muted-foreground group-hover:text-cyan-400 transition-colors"
-                  />
-                </div>
-              </div>
-
-              <div class="group hover:bg-card/60 transition-colors rounded-lg bg-card p-4">
-                <div class="flex items-center gap-4">
-                  <div class="size-12 rounded-lg bg-background p-2 ring-1 ring-white/10 group-hover:ring-cyan-500/50 transition-all">
-                    <img
-                      src="https://avatars.githubusercontent.com/u/181807673?s=200&v=4"
-                      alt="Outspeed"
-                      class="w-full h-full object-contain"
-                    />
-                  </div>
-                  <div class="flex-1">
-                    <p class="text-foreground group-hover:text-cyan-400 transition-colors">
-                      Outspeed is hiring with Algora
-                    </p>
-                    <p class="text-sm text-muted-foreground flex items-center gap-2">
-                      <.icon name="tabler-calendar" class="size-4" /> May 12, 2025
-                    </p>
-                  </div>
-                  <.icon
-                    name="tabler-chevron-right"
-                    class="size-5 text-muted-foreground group-hover:text-cyan-400 transition-colors"
-                  />
-                </div>
-              </div>
-
-              <div class="group hover:bg-card/60 transition-colors rounded-lg bg-card p-4">
-                <div class="flex items-center gap-4">
-                  <div class="size-12 rounded-lg bg-background p-2 ring-1 ring-white/10 group-hover:ring-cyan-500/50 transition-all">
-                    <img
-                      src="https://avatars.githubusercontent.com/u/142257755?s=200&v=4"
-                      alt="DotTxt"
-                      class="w-full h-full object-contain"
-                    />
-                  </div>
-                  <div class="flex-1">
-                    <p class="text-foreground group-hover:text-cyan-400 transition-colors">
-                      .txt is hiring with Algora
-                    </p>
-                    <p class="text-sm text-muted-foreground flex items-center gap-2">
-                      <.icon name="tabler-calendar" class="size-4" /> May 15, 2025
-                    </p>
-                  </div>
-                  <.icon
-                    name="tabler-chevron-right"
-                    class="size-5 text-muted-foreground group-hover:text-cyan-400 transition-colors"
-                  />
-                </div>
-              </div>
-
-              <div class="group hover:bg-card/60 transition-colors rounded-lg bg-card p-4">
-                <div class="flex items-center gap-4">
-                  <div class="size-12 rounded-lg bg-background p-2 ring-1 ring-white/10 group-hover:ring-cyan-500/50 transition-all">
-                    <img
-                      src="https://avatars.githubusercontent.com/u/139391156?s=200&v=4"
-                      alt="Turso"
-                      class="w-full h-full object-contain"
-                    />
-                  </div>
-                  <div class="flex-1">
-                    <p class="text-foreground group-hover:text-cyan-400 transition-colors">
-                      Turso launches open source challenge
-                    </p>
-                    <p class="text-sm text-muted-foreground flex items-center gap-2">
-                      <.icon name="tabler-calendar" class="size-4" /> May 18, 2025
-                    </p>
-                  </div>
-                  <.icon
-                    name="tabler-chevron-right"
-                    class="size-5 text-muted-foreground group-hover:text-cyan-400 transition-colors"
-                  />
-                </div>
-              </div>
-
-              <div class="group hover:bg-card/60 transition-colors rounded-lg bg-card p-4">
-                <div class="flex items-center gap-4">
-                  <div class="size-12 rounded-lg bg-background p-2 ring-1 ring-white/10 group-hover:ring-cyan-500/50 transition-all">
-                    <img
-                      src="https://avatars.githubusercontent.com/u/129894407?v=4"
-                      alt="Prequel"
-                      class="w-full h-full object-contain"
-                    />
-                  </div>
-                  <div class="flex-1">
-                    <p class="text-foreground group-hover:text-cyan-400 transition-colors">
-                      Prequel launches bounty program
-                    </p>
-                    <p class="text-sm text-muted-foreground flex items-center gap-2">
-                      <.icon name="tabler-calendar" class="size-4" /> May 22, 2025
-                    </p>
-                  </div>
-                  <.icon
-                    name="tabler-chevron-right"
-                    class="size-5 text-muted-foreground group-hover:text-cyan-400 transition-colors"
-                  />
-                </div>
-              </div>
-
-              <div class="group hover:bg-card/60 transition-colors rounded-lg bg-card p-4">
-                <div class="flex items-center gap-4">
-                  <div class="size-12 rounded-lg bg-background p-2 ring-1 ring-white/10 group-hover:ring-cyan-500/50 transition-all">
-                    <img
-                      src="https://avatars.githubusercontent.com/u/194294730?s=200&v=4"
-                      alt="Unsiloed"
-                      class="w-full h-full object-contain"
-                    />
-                  </div>
-                  <div class="flex-1">
-                    <p class="text-foreground group-hover:text-cyan-400 transition-colors">
-                      Unsiloed launches bounty program
-                    </p>
-                    <p class="text-sm text-muted-foreground flex items-center gap-2">
-                      <.icon name="tabler-calendar" class="size-4" /> May 25, 2025
-                    </p>
-                  </div>
-                  <.icon
-                    name="tabler-chevron-right"
-                    class="size-5 text-muted-foreground group-hover:text-cyan-400 transition-colors"
-                  />
-                </div>
-              </div>
+              <%= for event <- events() do %>
+                <.event_card event={event} />
+              <% end %>
             </div>
           </div>
         </section>
@@ -915,6 +751,87 @@ defmodule AlgoraWeb.HomeLive do
       </div>
     </div>
     """
+  end
+
+  def event_card(assigns) do
+    ~H"""
+    <.link
+      navigate={@event.link}
+      class="group relative flex items-center gap-4 bg-card p-6 rounded-xl shadow-lg border-l-8 transition-all mb-6 z-10 hover:scale-[1.03] hover:shadow-2xl border-[color:var(--event-theme-color)]"
+      style={"--event-theme-color: #{@event.theme_color}"}
+    >
+      <div class="size-16 rounded-xl bg-background flex-shrink-0 overflow-hidden">
+        <img src={@event.logo} alt={@event.alt} class="w-full h-full object-contain" />
+      </div>
+      <div class="flex-1">
+        <div class="flex items-center gap-2">
+          <p class="text-lg font-semibold text-foreground">
+            {@event.title}
+          </p>
+        </div>
+        <p class="text-sm text-muted-foreground flex items-center gap-2 mt-1">
+          <.icon name="tabler-calendar" class="size-4" /> {@event.date}
+        </p>
+      </div>
+      <.icon
+        name="tabler-chevron-right"
+        class="size-6 text-muted-foreground group-hover:text-[color:var(--event-theme-color)] transition-colors"
+      />
+    </.link>
+    """
+  end
+
+  defp events do
+    [
+      %{
+        title: "Notes hired with Algora",
+        date: "May 5, 2025",
+        logo: "https://notes.fm/images/favicon.png",
+        alt: "Notes",
+        theme_color: "#0029ff",
+        link: "/highlights/notes"
+      },
+      %{
+        title: "Outspeed is hiring with Algora",
+        date: "May 12, 2025",
+        logo: "https://avatars.githubusercontent.com/u/181807673?s=200&v=4",
+        alt: "Outspeed",
+        theme_color: "#00ffff",
+        link: "/highlights/outspeed"
+      },
+      %{
+        title: ".txt is hiring with Algora",
+        date: "May 15, 2025",
+        logo: "https://avatars.githubusercontent.com/u/142257755?s=200&v=4",
+        alt: "DotTxt",
+        theme_color: "#fff",
+        link: "/highlights/dottxt"
+      },
+      %{
+        title: "Turso launches open source challenge",
+        date: "May 18, 2025",
+        logo: "https://avatars.githubusercontent.com/u/139391156?s=200&v=4",
+        alt: "Turso",
+        theme_color: "#50f5d2",
+        link: "/highlights/turso"
+      },
+      %{
+        title: "Prequel launches bounty program",
+        date: "May 22, 2025",
+        logo: "https://avatars.githubusercontent.com/u/129894407?v=4",
+        alt: "Prequel",
+        theme_color: "#fff",
+        link: "/highlights/prequel"
+      },
+      %{
+        title: "Unsiloed launches bounty program",
+        date: "May 25, 2025",
+        logo: "https://avatars.githubusercontent.com/u/194294730?s=200&v=4",
+        alt: "Unsiloed",
+        theme_color: "#fff",
+        link: "/highlights/unsiloed"
+      }
+    ]
   end
 
   # defp user_features do

@@ -131,6 +131,16 @@ module.exports = {
         "accordion-up": "accordion-up 0.2s ease-out",
         rotate: "rotate 10s linear infinite",
       },
+      typography: {
+        DEFAULT: {
+          css: {
+            "code::before": false,
+            "code::after": false,
+            "blockquote p:first-of-type::before": false,
+            "blockquote p:last-of-type::after": false,
+          },
+        },
+      },
     },
   },
   plugins: [

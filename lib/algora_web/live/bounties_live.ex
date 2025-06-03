@@ -1072,10 +1072,10 @@ defmodule AlgoraWeb.BountiesLive do
     jobs_by_user = Enum.group_by(Jobs.list_jobs(), & &1.user)
 
     events =
-      (transactions || [])
+      transactions
       |> Enum.map(fn tx -> %{item: tx, type: :transaction, timestamp: tx.succeeded_at} end)
       |> Enum.concat(
-        (jobs_by_user || [])
+        jobs_by_user
         |> Enum.flat_map(fn {_user, jobs} -> jobs end)
         |> Enum.map(fn job -> %{item: job, type: :job, timestamp: job.inserted_at} end)
       )

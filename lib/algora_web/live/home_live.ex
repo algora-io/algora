@@ -348,7 +348,8 @@ defmodule AlgoraWeb.HomeLive do
             </h2>
             <div class="mt-6 sm:mt-10 flex gap-4 justify-center">
               <.button
-                navigate={~p"/onboarding/org"}
+                id="start-hiring-button"
+                phx-hook="ScrollToTop"
                 class="h-10 sm:h-14 rounded-md px-8 sm:px-12 text-sm sm:text-xl"
               >
                 Start hiring

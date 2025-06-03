@@ -616,6 +616,13 @@ const Hooks = {
       });
     },
   },
+  ScrollToTop: {
+    mounted() {
+      this.el.addEventListener("click", () => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+    },
+  },
 } satisfies Record<string, Partial<ViewHook> & Record<string, unknown>>;
 
 // Accessible focus handling

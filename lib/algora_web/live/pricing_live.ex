@@ -376,21 +376,26 @@ defmodule AlgoraWeb.PricingLive do
         </div>
       </section>
 
-      <section class="bg-background border-t py-16 sm:py-24">
+      <section class="relative isolate pb-16 sm:pb-40">
         <div class="mx-auto max-w-7xl px-6 lg:px-8">
           <h2 class="mb-8 text-3xl font-bold text-card-foreground text-center">
-            <span class="text-muted-foreground">The open source</span>
-            <span class="block sm:inline">Upwork alternative.</span>
+            Join the open source economy
           </h2>
-          <div class="flex justify-center gap-4">
-            <.button navigate="/onboarding/org">
-              Start your project
+          <div class="mt-6 sm:mt-10 flex gap-4 justify-center">
+            <.button
+              navigate={~p"/onboarding/org"}
+              class="h-10 sm:h-14 rounded-md px-8 sm:px-12 text-sm sm:text-xl"
+            >
+              Companies
             </.button>
-            <.button href={AlgoraWeb.Constants.get(:calendar_url)} variant="secondary">
-              Request a demo
+            <.button
+              navigate={~p"/onboarding/dev"}
+              variant="secondary"
+              class="h-10 sm:h-14 rounded-md px-8 sm:px-12 text-sm sm:text-xl"
+            >
+              Developers
             </.button>
           </div>
-          <.features_bento />
         </div>
       </section>
 

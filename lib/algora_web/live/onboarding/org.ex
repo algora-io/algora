@@ -5,12 +5,49 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
   require Logger
 
+  defmodule Form do
+    @moduledoc false
+    use Ecto.Schema
+
+    @primary_key false
+    @derive {Jason.Encoder, only: [:email, :job_description, :candidate_description]}
+    embedded_schema do
+      field :email, :string
+      field :job_description, :string
+      field :candidate_description, :string
+    end
+
+    def changeset(form, attrs \\ %{}) do
+      form
+      |> Ecto.Changeset.cast(attrs, [:email, :job_description, :candidate_description])
+      |> Ecto.Changeset.validate_required([:email, :job_description])
+      |> Ecto.Changeset.validate_format(:email, ~r/@/)
+    end
+  end
+
+  @impl true
+  def mount(_params, _session, socket) do
+    {:ok, assign(socket, :form, to_form(Form.changeset(%Form{}, %{})))}
+  end
+
   defp placeholder_text do
     """
     - GitHub looks like a green carpet, red flag if wearing suit in pfp
     - Has contributions to open source inference engines (like vLLM)
     - Posts regularly on X and LinkedIn
     """
+  end
+
+  @impl true
+  def handle_event("submit", %{"form" => params}, socket) do
+    case %Form{} |> Form.changeset(params) |> Ecto.Changeset.apply_action(:save) do
+      {:ok, data} ->
+        Algora.Activities.alert(Jason.encode!(data), :critical)
+        {:noreply, put_flash(socket, :info, "We'll send you matching candidates within the next few hours.")}
+
+      {:error, changeset} ->
+        {:noreply, assign(socket, form: to_form(changeset))}
+    end
   end
 
   @impl true
@@ -46,33 +83,36 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         </div>
       </header>
 
-      <div class="flex-1 py-4 flex items-center justify-center">
+      <div class="flex-1 py-4 flex items-center justify-center max-h-[calc(100vh-11rem)] overflow-y-auto scrollbar-thin">
         <div class="w-full max-w-[28rem] text-left">
-          <form class="flex flex-col gap-6">
-            <.input name="email" value="" label="Work email" placeholder="you@company.com" />
+          <.form for={@form} phx-submit="submit" class="flex flex-col gap-6">
             <.input
+              field={@form[:email]}
+              type="email"
+              label="Work email"
+              placeholder="you@company.com"
+            />
+            <.input
+              field={@form[:job_description]}
               type="textarea"
-              name="job_description"
-              value=""
               label="Job description / careers URL"
               rows="3"
               placeholder="Tell us about the role and your requirements..."
             />
             <.input
+              field={@form[:candidate_description]}
               type="textarea"
-              name="job_description"
-              value=""
               label="Describe your ideal candidate, heuristics, green/red flags etc."
               rows="3"
               placeholder={placeholder_text()}
             />
             <div class="flex flex-col gap-4">
-              <.button class="w-full">Receive your candidates</.button>
+              <.button class="w-full" type="submit">Receive your candidates</.button>
               <div class="text-xs text-muted-foreground text-center">
                 No credit card required - only pay when you hire
               </div>
             </div>
-          </form>
+          </.form>
         </div>
       </div>
 

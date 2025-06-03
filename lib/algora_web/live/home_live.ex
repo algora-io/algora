@@ -24,6 +24,26 @@ defmodule AlgoraWeb.HomeLive do
 
   require Logger
 
+  defmodule Form do
+    @moduledoc false
+    use Ecto.Schema
+
+    @primary_key false
+    @derive {Jason.Encoder, only: [:email, :job_description, :candidate_description]}
+    embedded_schema do
+      field :email, :string
+      field :job_description, :string
+      field :candidate_description, :string
+    end
+
+    def changeset(form, attrs \\ %{}) do
+      form
+      |> Ecto.Changeset.cast(attrs, [:email, :job_description, :candidate_description])
+      |> Ecto.Changeset.validate_required([:email, :job_description])
+      |> Ecto.Changeset.validate_format(:email, ~r/@/)
+    end
+  end
+
   defp placeholder_text do
     """
     - GitHub looks like a green carpet, red flag if wearing suit in pfp
@@ -78,7 +98,7 @@ defmodule AlgoraWeb.HomeLive do
          |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
          |> assign(:featured_devs, featured_devs)
          |> assign(:stats, stats)
-         |> assign(:form, to_form(JobPosting.changeset(%JobPosting{}, %{})))
+         |> assign(:form, to_form(Form.changeset(%Form{}, %{})))
          |> assign(:jobs_by_user, jobs_by_user)
          |> assign(:user_metadata, AsyncResult.loading())
          |> assign(:transactions, Payments.list_featured_transactions())
@@ -178,38 +198,40 @@ defmodule AlgoraWeb.HomeLive do
                         Share JD to receive matches within hours
                       </p>
 
-                      <form class="mt-4 2xl:mt-6 flex flex-col gap-4 2xl:gap-6">
+                      <.form
+                        for={@form}
+                        phx-submit="submit"
+                        class="mt-4 2xl:mt-6 flex flex-col gap-4 2xl:gap-6"
+                      >
                         <.input
+                          field={@form[:job_description]}
                           type="textarea"
-                          name="job_description"
-                          value=""
                           label="Job description / careers URL"
                           rows="3"
                           placeholder="Tell us about the role and your requirements..."
                           class="resize-none"
                         />
                         <.input
+                          field={@form[:candidate_description]}
                           type="textarea"
-                          name="job_description"
-                          value=""
                           label="Describe your ideal candidate, heuristics, green/red flags etc."
                           rows="3"
                           placeholder={placeholder_text()}
                           class="resize-none"
                         />
                         <.input
-                          name="email"
-                          value=""
+                          field={@form[:email]}
+                          type="email"
                           label="Work email"
                           placeholder="you@company.com"
                         />
                         <div class="flex flex-col gap-4">
-                          <.button class="w-full">Receive your candidates</.button>
+                          <.button class="w-full" type="submit">Receive your candidates</.button>
                           <div class="text-xs text-muted-foreground text-center">
                             No credit card required - only pay when you hire
                           </div>
                         </div>
-                      </form>
+                      </.form>
                     </div>
                   </div>
                 </div>
@@ -358,6 +380,18 @@ defmodule AlgoraWeb.HomeLive do
 
     <.modal_video_dialog />
     """
+  end
+
+  @impl true
+  def handle_event("submit", %{"form" => params}, socket) do
+    case %Form{} |> Form.changeset(params) |> Ecto.Changeset.apply_action(:save) do
+      {:ok, data} ->
+        Algora.Activities.alert(Jason.encode!(data), :critical)
+        {:noreply, put_flash(socket, :info, "We'll send you matching candidates within the next few hours.")}
+
+      {:error, changeset} ->
+        {:noreply, assign(socket, form: to_form(changeset))}
+    end
   end
 
   @impl true

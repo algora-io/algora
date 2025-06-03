@@ -472,8 +472,7 @@ defmodule AlgoraWeb.PlatformLive do
                   </div>
                   <div class="pt-8 flex flex-col items-center lg:mx-auto gap-3">
                     <.button
-                      href={AlgoraWeb.Constants.get(:calendar_url)}
-                      rel="noopener"
+                      navigate={~p"/onboarding/org"}
                       size="xl"
                       class="w-full text-lg drop-shadow-[0_1px_5px_#34d39980]"
                     >
@@ -835,8 +834,7 @@ defmodule AlgoraWeb.PlatformLive do
             </h2>
             <div class="mt-6 sm:mt-10 flex gap-4 justify-center">
               <.button
-                href={AlgoraWeb.Constants.get(:calendar_url)}
-                rel="noopener"
+                navigate={~p"/onboarding/org"}
                 class="h-10 sm:h-14 rounded-md px-8 sm:px-12 text-sm sm:text-xl"
               >
                 Companies

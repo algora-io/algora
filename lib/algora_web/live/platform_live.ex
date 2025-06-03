@@ -17,7 +17,6 @@ defmodule AlgoraWeb.PlatformLive do
   alias Algora.Repo
   alias AlgoraWeb.Components.Footer
   alias AlgoraWeb.Components.Header
-  alias AlgoraWeb.Components.Wordmarks
   alias AlgoraWeb.Data.PlatformStats
   alias AlgoraWeb.Forms.BountyForm
   alias AlgoraWeb.Forms.TipForm

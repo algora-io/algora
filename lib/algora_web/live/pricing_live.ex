@@ -50,7 +50,7 @@ defmodule AlgoraWeb.PricingLive do
             <div class="mx-auto max-w-7xl sm:text-center">
               <div class="mx-auto max-w-3xl space-y-2 lg:max-w-none">
                 <h1 class="text-2xl sm:text-4xl font-bold text-popover-foreground">
-                  Custom pricing for every team
+                  Pricing for every team
                 </h1>
                 <p class="text-sm sm:text-lg text-muted-foreground">
                   For individuals, OSS communities, and open/closed source companies

@@ -472,13 +472,13 @@ defmodule AlgoraWeb.PlatformLive do
                   </div>
                   <div class="pt-8 flex flex-col items-center lg:mx-auto gap-3">
                     <.button
-                      phx-click="create_bounty"
+                      href={AlgoraWeb.Constants.get(:calendar_url)}
+                      rel="noopener"
                       size="xl"
                       class="w-full text-lg drop-shadow-[0_1px_5px_#34d39980]"
                     >
                       Fund issues
                     </.button>
-                    <div class="text-base text-muted-foreground">No credit card required</div>
                   </div>
                 </div>
               </div>
@@ -835,7 +835,8 @@ defmodule AlgoraWeb.PlatformLive do
             </h2>
             <div class="mt-6 sm:mt-10 flex gap-4 justify-center">
               <.button
-                navigate={~p"/onboarding/org"}
+                href={AlgoraWeb.Constants.get(:calendar_url)}
+                rel="noopener"
                 class="h-10 sm:h-14 rounded-md px-8 sm:px-12 text-sm sm:text-xl"
               >
                 Companies
@@ -1255,31 +1256,6 @@ defmodule AlgoraWeb.PlatformLive do
     </div>
     """
   end
-
-  # defp user_features do
-  #   [
-  #     %{
-  #       title: "Bounties & contracts",
-  #       description: "Work on new projects and grow your career",
-  #       src: ~p"/images/screenshots/user-dashboard.png"
-  #     },
-  #     %{
-  #       title: "Your new resume",
-  #       description: "Showcase your open source contributions",
-  #       src: ~p"/images/screenshots/profile.png"
-  #     },
-  #     %{
-  #       title: "Embed on your site",
-  #       description: "Let anyone share a bounty/contract with you",
-  #       src: ~p"/images/screenshots/embed-profile.png"
-  #     },
-  #     %{
-  #       title: "Payment history",
-  #       description: "Monitor your earnings in real-time",
-  #       src: ~p"/images/screenshots/user-transactions.png"
-  #     }
-  #   ]
-  # end
 
   defp yc_logo_cloud(assigns) do
     ~H"""

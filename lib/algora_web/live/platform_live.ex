@@ -332,7 +332,7 @@ defmodule AlgoraWeb.PlatformLive do
                   </div>
                   <h4 class="font-semibold text-foreground mb-1">Save Time & Money</h4>
                   <p class="text-sm text-foreground-light">
-                    0% placement fees and efficient matching process
+                    Match with top developers efficiently
                   </p>
                 </div>
                 <div>

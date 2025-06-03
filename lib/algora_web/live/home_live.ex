@@ -748,52 +748,60 @@ defmodule AlgoraWeb.HomeLive do
   defp events do
     [
       %{
-        title: "Notes hired with Algora",
-        date: "May 5, 2025",
-        logo: "https://notes.fm/images/favicon.png",
-        alt: "Notes",
-        theme_color: "#0029ff",
-        link: "/highlights/notes"
-      },
-      %{
-        title: "Outspeed is hiring with Algora",
-        date: "May 12, 2025",
-        logo: "https://avatars.githubusercontent.com/u/181807673?s=200&v=4",
-        alt: "Outspeed",
-        theme_color: "#00ffff",
-        link: "/highlights/outspeed"
-      },
-      %{
-        title: ".txt is hiring with Algora",
-        date: "May 15, 2025",
-        logo: "https://avatars.githubusercontent.com/u/142257755?s=200&v=4",
-        alt: "DotTxt",
-        theme_color: "#ffffff",
-        link: "/highlights/dottxt"
-      },
-      %{
-        title: "Turso launches open source challenge",
-        date: "May 18, 2025",
+        title: "Turso launches open source challenge!",
+        date: "Jun 3, 2025",
         logo: "https://avatars.githubusercontent.com/u/139391156?s=200&v=4",
         alt: "Turso",
         theme_color: "#50f5d2",
-        link: "/highlights/turso"
+        link: "/challenges/turso"
       },
       %{
-        title: "Prequel launches bounty program",
-        date: "May 22, 2025",
+        title: ".txt is hiring with Algora!",
+        date: "Jun 2, 2025",
+        logo: "https://avatars.githubusercontent.com/u/142257755?s=200&v=4",
+        alt: "DotTxt",
+        theme_color: "#ffffff",
+        link: "/candidates/dottxt-ai"
+      },
+      %{
+        title: "Prequel launches bounty program!",
+        date: "May 31, 2025",
         logo: "https://avatars.githubusercontent.com/u/129894407?v=4",
         alt: "Prequel",
         theme_color: "#ffffff",
-        link: "/highlights/prequel"
+        link: "/prequel-dev/home"
       },
       %{
-        title: "Unsiloed launches bounty program",
-        date: "May 25, 2025",
+        title: "Notes hired with Algora!",
+        date: "May 28, 2025",
+        logo: "https://notes.fm/images/favicon.png",
+        alt: "Notes",
+        theme_color: "#0029ff",
+        link: "/notes/home"
+      },
+      %{
+        title: "Outspeed is hiring with Algora!",
+        date: "May 26, 2025",
+        logo: "https://avatars.githubusercontent.com/u/181807673?s=200&v=4",
+        alt: "Outspeed",
+        theme_color: "#00ffff",
+        link: "/candidates/outspeed"
+      },
+      %{
+        title: "Unsiloed launches bounty program!",
+        date: "May 11, 2025",
         logo: "https://avatars.githubusercontent.com/u/194294730?s=200&v=4",
         alt: "Unsiloed",
         theme_color: "#ffffff",
-        link: "/highlights/unsiloed"
+        link: "/unsiloed-ai/home"
+      },
+      %{
+        title: "Notes hired with Algora!",
+        date: "May 1, 2025",
+        logo: "https://notes.fm/images/favicon.png",
+        alt: "Notes",
+        theme_color: "#0029ff",
+        link: "/notes/home"
       }
     ]
   end

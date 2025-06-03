@@ -46,6 +46,7 @@ defmodule Algora.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:tidewave, "~> 0.1", only: :dev},
       {:phoenix, "~> 1.7.21"},
       {:phoenix_ecto, "~> 4.6"},
       {:phoenix_html, "~> 4.2.1"},

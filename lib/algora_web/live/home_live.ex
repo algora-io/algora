@@ -184,8 +184,8 @@ defmodule AlgoraWeb.HomeLive do
                   <img
                     src="/images/screenshots/job-candidates.png"
                     alt="Job candidates"
-                    class="-ml-2 mt-4 2xl:mt-10 rounded-xl object-cover w-full max-w-xl xl:max-w-[45rem]"
-                    style="aspect-ratio: 1556/816;"
+                    class="-ml-2 mt-4 2xl:mt-10 object-cover w-full max-w-xl xl:max-w-[45rem]"
+                    style="aspect-ratio: 1524/737;"
                   />
                 </div>
                 <div class="w-full max-w-xl mx-auto lg:max-w-lg 2xl:max-w-[34rem] text-left">

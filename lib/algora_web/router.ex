@@ -105,6 +105,7 @@ defmodule AlgoraWeb.Router do
       live "/onboarding/dev", Onboarding.DevLive
       live "/community", CommunityLive, :index
       live "/community/:tech", CommunityLive, :index
+      live "/platform", PlatformLive, :index
       live "/crowdfund", CrowdfundLive, :index
       live "/pricing", PricingLive
       live "/challenges", ChallengesLive

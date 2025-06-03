@@ -783,14 +783,6 @@ defmodule AlgoraWeb.HomeLive do
   defp events do
     [
       %{
-        title: "Turso launches open source challenge!",
-        date: "Jun 3, 2025",
-        logo: "https://avatars.githubusercontent.com/u/139391156?s=200&v=4",
-        alt: "Turso",
-        theme_color: "#50f5d2",
-        link: "/challenges/turso"
-      },
-      %{
         title: ".txt is hiring with Algora!",
         date: "Jun 2, 2025",
         logo: "https://avatars.githubusercontent.com/u/142257755?s=200&v=4",

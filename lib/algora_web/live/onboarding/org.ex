@@ -7,10 +7,9 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
   defp placeholder_text do
     """
-    - GitHub looks like a green carpet, red flag if wearing suit
-    - Great communication skills, can talk to customers
-    - Must be a shark, aggressive, has urgency and agency
+    - GitHub looks like a green carpet, red flag if wearing suit in pfp
     - Has contributions to open source inference engines (like vLLM)
+    - Posts regularly on X and LinkedIn
     """
   end
 
@@ -47,8 +46,8 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         </div>
       </header>
 
-      <div class="flex-1 flex items-center justify-center">
-        <div class="w-full max-w-[28rem] text-left -mt-4">
+      <div class="flex-1 py-4 flex items-center justify-center">
+        <div class="w-full max-w-[28rem] text-left">
           <form class="flex flex-col gap-6">
             <.input name="email" value="" label="Work email" placeholder="you@company.com" />
             <.input
@@ -56,7 +55,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
               name="job_description"
               value=""
               label="Job description / careers URL"
-              rows="4"
+              rows="3"
               placeholder="Tell us about the role and your requirements..."
             />
             <.input
@@ -64,7 +63,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
               name="job_description"
               value=""
               label="Describe your ideal candidate, heuristics, green/red flags etc."
-              rows="4"
+              rows="3"
               placeholder={placeholder_text()}
             />
             <div class="flex flex-col gap-4">
@@ -77,30 +76,33 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         </div>
       </div>
 
-      <footer class="w-full py-8 border-t border-white/20">
+      <footer class="w-full py-4 border-t border-white/20">
         <div class="container mx-auto px-4">
           <div class="flex flex-col md:flex-row items-center justify-between gap-6">
             <div class="text-sm text-muted-foreground">
               © 2025 Algora PBC. All rights reserved.
             </div>
-            <div class="flex items-center gap-4">
-              <.button variant="outline">Schedule a call</.button>
-              <div class="flex gap-2">
-                <.link
-                  class="flex w-max items-center gap-2 rounded-lg border border-gray-700 py-2 pl-2 pr-3.5 text-xs text-muted-foreground hover:text-foreground transition-colors hover:border-gray-600"
-                  href="tel:+16504202207"
-                >
-                  <.icon name="tabler-phone-filled" class="size-4" /> US
-                  <span>+1 (650) 420-2207</span>
-                </.link>
-                <.link
-                  class="flex w-max items-center gap-2 rounded-lg border border-gray-700 py-2 pl-2 pr-3.5 text-xs text-muted-foreground hover:text-foreground transition-colors hover:border-gray-600"
-                  href="tel:+306973184144"
-                >
-                  <.icon name="tabler-phone-filled" class="size-4" /> EU
-                  <span>+30 (697) 318-4144</span>
-                </.link>
-              </div>
+            <div class="flex items-center gap-2">
+              <.link
+                class="flex w-max items-center gap-2 rounded-lg border border-gray-700 py-2 pl-2 pr-3.5 text-xs text-muted-foreground hover:text-foreground transition-colors hover:border-gray-600"
+                href={AlgoraWeb.Constants.get(:calendar_url)}
+                rel="noopener"
+              >
+                <.icon name="tabler-calendar-clock" class="size-4" />
+                <span>Schedule a call</span>
+              </.link>
+              <.link
+                class="flex w-max items-center gap-2 rounded-lg border border-gray-700 py-2 pl-2 pr-3.5 text-xs text-muted-foreground hover:text-foreground transition-colors hover:border-gray-600"
+                href="tel:+16504202207"
+              >
+                <.icon name="tabler-phone" class="size-4" /> US <span>+1 (650) 420-2207</span>
+              </.link>
+              <.link
+                class="flex w-max items-center gap-2 rounded-lg border border-gray-700 py-2 pl-2 pr-3.5 text-xs text-muted-foreground hover:text-foreground transition-colors hover:border-gray-600"
+                href="tel:+306973184144"
+              >
+                <.icon name="tabler-phone" class="size-4" /> EU <span>+30 (697) 318-4144</span>
+              </.link>
             </div>
           </div>
         </div>

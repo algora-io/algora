@@ -50,7 +50,7 @@ defmodule AlgoraWeb.PricingLive do
             <div class="mx-auto max-w-7xl sm:text-center">
               <div class="mx-auto max-w-3xl space-y-2 lg:max-w-none">
                 <h1 class="text-2xl sm:text-4xl font-bold text-popover-foreground">
-                  Simple, transparent pricing
+                  Pricing for every team
                 </h1>
                 <p class="text-sm sm:text-lg text-muted-foreground">
                   For individuals, OSS communities, and open/closed source companies
@@ -214,7 +214,7 @@ defmodule AlgoraWeb.PricingLive do
                     </.button>
                   </div>
                   <p class="text-foreground-light text-sm sm:text-base 2xl:pr-4">
-                    End-to-end hiring with 0% placement fees
+                    End-to-end hiring
                   </p>
                 </div>
                 <div class="p-4 sm:pt-2 sm:px-6 group-hover:sm:-ml-[4px] transition-all">
@@ -295,16 +295,6 @@ defmodule AlgoraWeb.PricingLive do
                           <.icon name="tabler-check" class="size-5 text-purple-400" />
                         </div>
                         <span class="text-sm xl:text-base mb-0 text-foreground font-medium bg-purple-500/30 px-2 py-0.5 rounded-md -mt-1">
-                          0% placement fees
-                        </span>
-                      </div>
-                    </li>
-                    <li class="flex flex-col pt-1">
-                      <div class="flex items-start">
-                        <div class="flex w-7 shrink-0">
-                          <.icon name="tabler-check" class="size-5 text-purple-400" />
-                        </div>
-                        <span class="text-sm xl:text-base mb-0 text-foreground font-medium bg-purple-500/30 px-2 py-0.5 rounded-md -mt-1">
                           Recruiting partner option available
                         </span>
                       </div>
@@ -336,7 +326,7 @@ defmodule AlgoraWeb.PricingLive do
                   </div>
                   <h4 class="font-semibold text-foreground mb-1">Save Time & Money</h4>
                   <p class="text-sm text-foreground-light">
-                    0% placement fees and efficient matching process
+                    Match with top developers efficiently
                   </p>
                 </div>
                 <div>
@@ -386,21 +376,26 @@ defmodule AlgoraWeb.PricingLive do
         </div>
       </section>
 
-      <section class="bg-background border-t py-16 sm:py-24">
+      <section class="relative isolate pb-16 sm:pb-40">
         <div class="mx-auto max-w-7xl px-6 lg:px-8">
           <h2 class="mb-8 text-3xl font-bold text-card-foreground text-center">
-            <span class="text-muted-foreground">The open source</span>
-            <span class="block sm:inline">Upwork alternative.</span>
+            Join the open source economy
           </h2>
-          <div class="flex justify-center gap-4">
-            <.button navigate="/onboarding/org">
-              Start your project
+          <div class="mt-6 sm:mt-10 flex gap-4 justify-center">
+            <.button
+              navigate={~p"/onboarding/org"}
+              class="h-10 sm:h-14 rounded-md px-8 sm:px-12 text-sm sm:text-xl"
+            >
+              Companies
             </.button>
-            <.button href={AlgoraWeb.Constants.get(:calendar_url)} variant="secondary">
-              Request a demo
+            <.button
+              navigate={~p"/onboarding/dev"}
+              variant="secondary"
+              class="h-10 sm:h-14 rounded-md px-8 sm:px-12 text-sm sm:text-xl"
+            >
+              Developers
             </.button>
           </div>
-          <.features_bento />
         </div>
       </section>
 
@@ -470,12 +465,13 @@ defmodule AlgoraWeb.PricingLive do
                   <% "pay-developers" -> %>
                     <div class="flex justify-between">
                       <div class="flex items-end">
-                        <p class="font-display text-4xl text-emerald-400">
-                          9%
-                        </p>
-                        <p class="text-foreground-lighter text-sm mb-1.5 ml-2 leading-4">
-                          service fee
-                        </p>
+                        <.button
+                          variant="default"
+                          size="lg"
+                          class="font-display text-lg mr-auto sm:mr-0"
+                        >
+                          Contact us
+                        </.button>
                       </div>
                     </div>
                 <% end %>
@@ -529,7 +525,7 @@ defmodule AlgoraWeb.PricingLive do
         description: "Reward contributors with Algora",
         price: nil,
         cta_text: "Create bounties",
-        cta_url: "/onboarding/org",
+        cta_url: AlgoraWeb.Constants.get(:calendar_url),
         popular: false,
         features: [
           %Feature{name: "GitHub bounties and tips"},
@@ -543,12 +539,6 @@ defmodule AlgoraWeb.PricingLive do
   defp get_faq_items do
     [
       %FaqItem{
-        id: "platform-fee",
-        question: "How do the platform fees work?",
-        answer:
-          "For organizations, we charge a 9% fee on bounties when they are rewarded. For individual contributors, you receive 100% of the bounty amount with no fees deducted."
-      },
-      %FaqItem{
         id: "payment-methods",
         question: "What payment methods do you support?",
         answer:
@@ -558,7 +548,7 @@ defmodule AlgoraWeb.PricingLive do
         id: "payment-process",
         question: "How does the payment process work?",
         answer:
-          "There's no upfront payment required for bounties. Organizations can either pay manually after merging pull requests, or save their card with Stripe to enable auto-pay on merge. Manual payments are processed through a secure Stripe hosted checkout page."
+          "Organizations can either pay manually after merging pull requests, or save their card with Stripe to enable auto-pay on merge. Manual payments are processed through a secure Stripe hosted checkout page."
       },
       %FaqItem{
         id: "invoices-receipts",

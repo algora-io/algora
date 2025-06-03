@@ -14,12 +14,19 @@ defmodule AlgoraWeb.Components.Header do
     ]
   end
 
+  attr :class, :string, default: nil
+
   def header(assigns) do
     ~H"""
     <header class="absolute inset-x-0 top-0 z-50">
       <AlgoraWeb.Components.Banner.banner />
       <nav
-        class="-mt-3 mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8"
+        class={
+          classes([
+            "-mt-3 mx-auto container flex items-center justify-between p-6 lg:px-8",
+            @class
+          ])
+        }
         aria-label="Global"
       >
         <div class="flex lg:flex-1">

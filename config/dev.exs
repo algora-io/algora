@@ -103,7 +103,8 @@ config :algora, AlgoraWeb.Endpoint,
     ],
     notify: [
       live_view: [
-        ~r"lib/algora_web/live/.*(ex|heex)$"
+        ~r"lib/algora_web/live/.*(ex|heex)$",
+        ~r"lib/algora_cloud/live/.*(ex|heex)$"
       ]
     ]
   ]

@@ -18,14 +18,14 @@ defmodule AlgoraWeb.Challenges.LimboLive do
     ~H"""
     <div class="relative bg-background">
       <div class="absolute top-0 z-10 w-full">
-        <Header.header class="max-w-[100rem]" hide_banner />
+        <Header.header hide_banner />
       </div>
       <main class="relative z-0">
         <article>
           <div class="text-white">
             <div class="relative z-20">
               <section class="mb-24 md:mb-36 min-h-[calc(100svh-36px)] md:min-h-0">
-                <div class="relative z-20 mx-auto max-w-[100rem] px-6 lg:px-8">
+                <div class="relative z-20 mx-auto container px-6 lg:px-8">
                   <div class="max-w-5xl pt-28 md:pt-36 2xl:pt-72">
                     <a
                       rel="noopener"

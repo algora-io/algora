@@ -839,29 +839,4 @@ defmodule AlgoraWeb.HomeLive do
       }
     ]
   end
-
-  # defp user_features do
-  #   [
-  #     %{
-  #       title: "Bounties & contracts",
-  #       description: "Work on new projects and grow your career",
-  #       src: ~p"/images/screenshots/user-dashboard.png"
-  #     },
-  #     %{
-  #       title: "Your new resume",
-  #       description: "Showcase your open source contributions",
-  #       src: ~p"/images/screenshots/profile.png"
-  #     },
-  #     %{
-  #       title: "Embed on your site",
-  #       description: "Let anyone share a bounty/contract with you",
-  #       src: ~p"/images/screenshots/embed-profile.png"
-  #     },
-  #     %{
-  #       title: "Payment history",
-  #       description: "Monitor your earnings in real-time",
-  #       src: ~p"/images/screenshots/user-transactions.png"
-  #     }
-  #   ]
-  # end
 end

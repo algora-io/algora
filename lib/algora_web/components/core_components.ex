@@ -1288,12 +1288,21 @@ defmodule AlgoraWeb.CoreComponents do
   attr :navigate, :string, default: nil
   attr :patch, :string, default: nil
   attr :replace, :boolean, default: false
+  attr :target, :string, default: nil
+  attr :rel, :string, default: nil
   slot :inner_block
 
   def maybe_link(assigns) do
     ~H"""
     <%= if link?(assigns) do %>
-      <.link href={@href} navigate={@navigate} patch={@patch} replace={@replace}>
+      <.link
+        href={@href}
+        navigate={@navigate}
+        patch={@patch}
+        replace={@replace}
+        target={@target}
+        rel={@rel}
+      >
         {render_slot(@inner_block)}
       </.link>
     <% else %>

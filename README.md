@@ -48,7 +48,7 @@ OSS communities and closed source teams can **self-host** or join **[Algora.io](
 
 **[Algora.io](https://algora.io)** is a complete solution for sourcing, screening, interviewing & onboarding engineers to your team.
 
-| Hiring proces                | Benefit                                           |
+| Hiring process               | Benefit                                           |
 | ---------------------------- | ------------------------------------------------- |
 | **sourcing**                 | publish jobs to 50K+ developers, access matches   |
 | **screening**                | auto screen job applicants for OSS contributions  |
@@ -142,7 +142,13 @@ OSS communities and closed source teams can **self-host** or join **[Algora.io](
 
 The easiest way to get up and running is to [install](https://docs.docker.com/get-docker/) and use Docker for running Postgres.
 
-Make sure Docker, Elixir, Erlang and Node.js are all installed on your development machine. You can install Elixir and Erlang/OTP by running [`asdf install`](https://github.com/asdf-vm/asdf) from the project root.
+Make sure Docker, Elixir, Erlang and Node.js are all installed on your development machine. You can install Elixir and Erlang/OTP with [ASDF](https://asdf-vm.com/) from the project root as follows:
+1. [Install ASDF](https://asdf-vm.com/guide/getting-started.html)
+2. `asdf plugin add erlang`
+3. `asdf plugin add elixir`
+4. `asdf plugin add pnpm`
+5. `asdf plugin add nodejs`
+6. `asdf install`
 
 We also recommend using [direnv](https://github.com/direnv/direnv) to load environment variables and [entr](https://github.com/eradman/entr) to watch for file changes.
 

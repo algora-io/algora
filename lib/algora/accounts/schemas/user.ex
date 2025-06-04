@@ -78,6 +78,7 @@ defmodule Algora.Accounts.User do
     field :discord_url, :string
     field :slack_url, :string
     field :linkedin_url, :string
+    field :linkedin_meta, :map, default: %{}
 
     field :og_title, :string
     field :og_image_url, :string

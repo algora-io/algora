@@ -155,6 +155,8 @@ defmodule Algora.Accounts do
       name: u.name,
       provider_login: u.provider_login,
       provider_meta: u.provider_meta,
+      linkedin_url: u.linkedin_url,
+      linkedin_meta: u.linkedin_meta,
       avatar_url: u.avatar_url,
       bio: u.bio,
       system_bio: u.system_bio,

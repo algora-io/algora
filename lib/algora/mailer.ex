@@ -46,7 +46,7 @@ defmodule Algora.Mailer do
         <div style="background-color: #ffffff; box-sizing: border-box; display: block; padding: 0;">
           <table cellpadding="0" cellspacing="0" width="100%">
             <tr>
-              <td style="font-family:sans-serif; font-size: 16px;">
+              <td>
                 #{html_sections(template_params)}
               </td>
             </tr>

@@ -33,12 +33,15 @@ defmodule AlgoraWeb.Components.TechBadge do
   defp icon_url("ray"), do: "/images/logos/ray.png"
   defp icon_url("vllm"), do: "/images/logos/vllm.png"
   defp icon_url("huggingface"), do: "/images/logos/huggingface.png"
+  defp icon_url("youtube"), do: "/images/logos/youtube.png"
+  defp icon_url("tiktok"), do: "/images/logos/tiktok.png"
   defp icon_url(tech), do: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/#{icon_path(tech)}"
 
   defp icon_path("aws"), do: "amazonwebservices/amazonwebservices-plain-wordmark.svg"
   defp icon_path("gcp"), do: "googlecloud/googlecloud-original.svg"
   defp icon_path("objectivec"), do: "objectivec/objectivec-plain.svg"
   defp icon_path("rails"), do: "rails/rails-plain.svg"
+  defp icon_path("django"), do: "django/django-plain.svg"
   defp icon_path("html"), do: "html5/html5-original.svg"
   defp icon_path("css"), do: "css3/css3-original.svg"
   defp icon_path(tech), do: "#{tech}/#{tech}-original.svg"
@@ -48,11 +51,13 @@ defmodule AlgoraWeb.Components.TechBadge do
   defp icon_class("crystal"), do: "bg-white invert saturate-0"
   defp icon_class("groovy"), do: "bg-white invert saturate-0"
   defp icon_class("objectivec"), do: "bg-white invert saturate-0"
+  defp icon_class("django"), do: "bg-white invert saturate-0"
   defp icon_class("purescript"), do: "bg-white invert saturate-0"
   defp icon_class("astro"), do: "bg-white invert saturate-0"
   defp icon_class("apple"), do: "bg-white invert saturate-0"
   defp icon_class("github"), do: "bg-white invert saturate-0"
   defp icon_class("bash"), do: "bg-white invert saturate-0"
+  defp icon_class("twitter"), do: "bg-white invert saturate-0"
   defp icon_class(_tech), do: "bg-transparent"
 
   defp normalize(tech) do
@@ -128,18 +133,6 @@ defmodule AlgoraWeb.Components.TechBadge do
       "Swift",
       "Elixir",
       "Lua",
-      "Julia",
-      "Haskell",
-      "Clojure",
-      "Solidity",
-      "Objective-C",
-      "R",
-      "Erlang",
-      "Perl",
-      "Zig",
-      "Nim",
-      "Groovy",
-      "F#",
       "OCaml",
       "Crystal",
       "PureScript",
@@ -183,7 +176,12 @@ defmodule AlgoraWeb.Components.TechBadge do
       "Firecracker",
       "Ray",
       "vLLM",
-      "Huggingface"
+      "Huggingface",
+      "Twitter",
+      "YouTube",
+      "LinkedIn",
+      "TikTok",
+      "Django"
     ]
   end
 end

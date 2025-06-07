@@ -113,6 +113,7 @@ defmodule Algora.Accounts.User do
     has_many :activities, {"user_activities", Activity}, foreign_key: :assoc_id
 
     has_one :customer, Algora.Payments.Customer, foreign_key: :user_id
+    has_one :heatmap, Algora.Workspace.UserHeatmap, foreign_key: :user_id
 
     has_many :media, UserMedia
 

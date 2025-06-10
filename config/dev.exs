@@ -134,6 +134,12 @@ config :swoosh, :api_client, false
 # Path to install SaladUI components
 config :salad_ui, components_path: Path.join(File.cwd!(), "lib/algora_web/components/ui")
 
+config :hound,
+  browser: "chrome",
+  driver: "chrome_driver",
+  host: "localhost",
+  port: System.get_env("CHROMEDRIVER_PORT")
+
 config :algora,
   bucket_name: System.get_env("BUCKET_NAME"),
   cloudflare_tunnel: System.get_env("CLOUDFLARE_TUNNEL"),

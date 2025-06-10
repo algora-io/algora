@@ -59,6 +59,9 @@ defmodule Algora.Accounts.User do
     field :hourly_rate_min, Money
     field :hourly_rate_max, Money
     field :hours_per_week, :integer
+    field :min_compensation, Money
+    field :willing_to_relocate, :boolean, default: false
+    field :us_work_authorization, :boolean, default: false
 
     field :total_earned, Money, virtual: true
     field :transactions_count, :integer, virtual: true
@@ -386,6 +389,24 @@ defmodule Algora.Accounts.User do
 
   def is_admin_changeset(user, is_admin) do
     cast(user, %{is_admin: is_admin}, [:is_admin])
+  end
+
+  def job_preferences_changeset(%User{} = user, params) do
+    user
+    |> cast(params, [
+      :min_compensation,
+      :willing_to_relocate,
+      :us_work_authorization,
+      :linkedin_url,
+      :twitter_url,
+      :location
+    ])
+    |> validate_url(:linkedin_url)
+    |> validate_url(:twitter_url)
+  end
+
+  defp validate_url(changeset, field) do
+    validate_format(changeset, field, ~r/^https?:\/\/.*/, message: "must be a valid URL")
   end
 
   def validate_timezone(changeset) do

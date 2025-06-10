@@ -55,6 +55,18 @@ const Hooks = {
       posthog.identify(email, { email });
     },
   },
+  ScrollToEnd: {
+    mounted() {
+      requestAnimationFrame(() => {
+        this.el.scrollLeft = this.el.scrollWidth;
+      });
+    },
+    updated() {
+      requestAnimationFrame(() => {
+        this.el.scrollLeft = this.el.scrollWidth;
+      });
+    },
+  },
   Flash: {
     mounted() {
       let hide = () =>

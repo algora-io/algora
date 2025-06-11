@@ -598,12 +598,17 @@ defmodule AlgoraWeb.Org.JobLive do
 
   defp assign_applicants(socket) do
     all_applicants = Jobs.list_job_applications(socket.assigns.job)
-    matches = Settings.get_job_matches(socket.assigns.job)
+    
+    # Get total matches count first (efficient query)
+    total_matches_count = Settings.get_job_matches_count(socket.assigns.job)
+    
+    # Load only the matches we need to display (limit to 9)
+    limited_matches = Settings.get_job_matches(socket.assigns.job, limit: 9)
 
-    truncated_matches = Algora.Cloud.truncate_matches(socket.assigns.current_org, matches)
+    truncated_matches = AlgoraCloud.truncate_matches(socket.assigns.current_org, limited_matches)
 
     developers =
-      matches
+      limited_matches
       |> Enum.concat(all_applicants)
       |> Enum.map(& &1.user)
 
@@ -627,10 +632,13 @@ defmodule AlgoraWeb.Org.JobLive do
       end
     end
 
+    # Create a fake matches list with the right count for UI compatibility
+    fake_matches = List.duplicate(%{}, total_matches_count)
+
     socket
     |> assign(:developers, developers)
     |> assign(:applicants, sort_by_contributions(socket.assigns.job, all_applicants, contributions_map))
-    |> assign(:matches, matches)
+    |> assign(:matches, fake_matches)
     |> assign(:truncated_matches, truncated_matches)
     |> assign(:contributions_map, contributions_map)
     |> assign(:heatmaps_map, heatmaps_map)

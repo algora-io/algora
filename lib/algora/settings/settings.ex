@@ -102,16 +102,19 @@ defmodule Algora.Settings do
     set("org_matches:#{org_handle}", %{"matches" => matches})
   end
 
-  def get_job_matches(job) do
+  def get_job_matches(job, opts \\ []) do
+    limit = Keyword.get(opts, :limit, 1000)
+    
     case get("job_matches:#{job.id}") do
       %{"matches" => matches} when is_list(matches) ->
-        load_matches(matches)
+        matches
+        |> load_matches()
+        |> Enum.take(limit)
 
       _ ->
-        # Use a larger limit to get more accurate count (1000 instead of 50)
         [
           tech_stack: job.tech_stack,
-          limit: 1000,
+          limit: limit,
           email_required: true,
           sort_by:
             case get_job_criteria(job) do
@@ -119,8 +122,27 @@ defmodule Algora.Settings do
               _ -> [{"solver", true}]
             end
         ]
-        |> Algora.Cloud.list_top_matches()
+        |> AlgoraCloud.list_top_matches()
         |> load_matches_2()
+    end
+  end
+
+  def get_job_matches_count(job) do
+    case get("job_matches:#{job.id}") do
+      %{"matches" => matches} when is_list(matches) ->
+        length(matches)
+
+      _ ->
+        [
+          tech_stack: job.tech_stack,
+          email_required: true,
+          sort_by:
+            case get_job_criteria(job) do
+              criteria when map_size(criteria) > 0 -> criteria
+              _ -> [{"solver", true}]
+            end
+        ]
+        |> AlgoraCloud.count_top_matches()
     end
   end
 
@@ -131,7 +153,7 @@ defmodule Algora.Settings do
       limit: 50,
       sort_by: get_job_criteria(job)
     ]
-    |> Algora.Cloud.list_top_stargazers()
+    |> AlgoraCloud.list_top_stargazers()
     |> load_matches_2()
   end
 

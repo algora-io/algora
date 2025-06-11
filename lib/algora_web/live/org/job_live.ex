@@ -7,7 +7,6 @@ defmodule AlgoraWeb.Org.JobLive do
   alias Algora.Markdown
   alias Algora.Repo
   alias Algora.Settings
-  alias Algora.Workspace
   alias AlgoraWeb.Forms.BountyForm
   alias AlgoraWeb.Forms.ContractForm
   alias AlgoraWeb.Forms.TipForm
@@ -287,6 +286,7 @@ defmodule AlgoraWeb.Org.JobLive do
                         tech_stack={@job.tech_stack |> Enum.take(1)}
                         contributions={Map.get(@contributions_map, match.user.id, [])}
                         contract_type="bring_your_own"
+                        anonymized={@current_org.hiring_subscription != :active}
                       />
                     </div>
                   <% end %>
@@ -414,7 +414,6 @@ defmodule AlgoraWeb.Org.JobLive do
 
     {share_drawer(assigns)}
 
-
     {payment_drawer(assigns)}
     """
   end
@@ -423,7 +422,6 @@ defmodule AlgoraWeb.Org.JobLive do
   def handle_event("show_payment_drawer", _, socket) do
     {:noreply, push_patch(socket, to: ~p"/#{socket.assigns.job.user.handle}/jobs/#{socket.assigns.job.id}/activate")}
   end
-
 
   @impl true
   def handle_event("screen_applicants", _, socket) do
@@ -434,7 +432,6 @@ defmodule AlgoraWeb.Org.JobLive do
 
     {:noreply, socket}
   end
-
 
   @impl true
   def handle_event("change_tab", %{"tab" => tab}, socket) do
@@ -571,7 +568,6 @@ defmodule AlgoraWeb.Org.JobLive do
     {:noreply, socket}
   end
 
-
   @impl true
   def handle_info({:contributions_fetching, handle}, socket) do
     {:noreply, assign(socket, :loading_contribution_handle, handle)}
@@ -655,7 +651,6 @@ defmodule AlgoraWeb.Org.JobLive do
       put_flash(socket, :info, "All applicants have already been screened.")
     end
   end
-
 
   defp get_matching_tech(contribution, tech_stack) do
     tech_stack = Enum.map(tech_stack, &String.downcase/1)
@@ -829,31 +824,42 @@ defmodule AlgoraWeb.Org.JobLive do
       <div class="w-full truncate">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div class="flex items-center gap-4">
-            <.link navigate={User.url(@user)}>
-              <.avatar class="h-12 w-12 rounded-full">
-                <.avatar_image src={@user.avatar_url} alt={@user.name} />
-                <.avatar_fallback class="rounded-lg">
-                  {Algora.Util.initials(@user.name)}
-                </.avatar_fallback>
-              </.avatar>
-            </.link>
+            <%= if @anonymized do %>
+              <div class="h-12 w-12 rounded-full bg-muted"></div>
+            <% else %>
+              <.link navigate={User.url(@user)}>
+                <.avatar class="h-12 w-12 rounded-full">
+                  <.avatar_image src={@user.avatar_url} alt={@user.name} />
+                  <.avatar_fallback class="rounded-lg">
+                    {Algora.Util.initials(@user.name)}
+                  </.avatar_fallback>
+                </.avatar>
+              </.link>
+            <% end %>
 
             <div>
               <div class="flex items-center gap-1 text-base text-foreground">
-                <.link navigate={User.url(@user)} class="font-semibold hover:underline">
-                  {@user.name}
+                <%= if @anonymized do %>
+                  <span class="font-semibold blur-sm">Anonymous user</span>
                   <span :if={@user.country}>
                     {Algora.Misc.CountryEmojis.get(@user.country)}
                   </span>
-                  <%!-- <%= if @current_user && @current_user.is_admin && @user.provider_meta["hireable"] do %>
-                    <.badge variant="success">
-                      Hireable
-                    </.badge>
-                  <% end %> --%>
-                </.link>
+                <% else %>
+                  <.link navigate={User.url(@user)} class="font-semibold hover:underline">
+                    {@user.name}
+                    <span :if={@user.country}>
+                      {Algora.Misc.CountryEmojis.get(@user.country)}
+                    </span>
+                    <%!-- <%= if @current_user && @current_user.is_admin && @user.provider_meta["hireable"] do %>
+                      <.badge variant="success">
+                        Hireable
+                      </.badge>
+                    <% end %> --%>
+                  </.link>
+                <% end %>
               </div>
               <div
-                :if={@user.provider_meta}
+                :if={@user.provider_meta && not @anonymized}
                 class="pt-0.5 flex items-center gap-x-2 gap-y-1 text-xs text-muted-foreground max-w-[250px] 2xl:max-w-none truncate"
               >
                 <.link
@@ -1019,7 +1025,6 @@ defmodule AlgoraWeb.Org.JobLive do
     |> Enum.map(& &1.contribution_count)
     |> Enum.sum()
   end
-
 
   defp share_drawer_header(%{share_drawer_type: "contract"} = assigns) do
     ~H"""

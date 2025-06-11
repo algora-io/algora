@@ -56,6 +56,7 @@ config :algora, Oban,
     activity_mailer: 1,
     campaign_emails: 1,
     fetch_top_contributions: 1,
+    job_invitations: 1,
     # --- #
     github_og_image: 1,
     notify_transfer: 1,

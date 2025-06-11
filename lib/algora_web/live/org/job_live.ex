@@ -598,10 +598,10 @@ defmodule AlgoraWeb.Org.JobLive do
 
   defp assign_applicants(socket) do
     all_applicants = Jobs.list_job_applications(socket.assigns.job)
-    
+
     # Get total matches count first (efficient query)
     total_matches_count = Settings.get_job_matches_count(socket.assigns.job)
-    
+
     # Load only the matches we need to display (limit to 9)
     limited_matches = Settings.get_job_matches(socket.assigns.job, limit: 9)
 
@@ -623,10 +623,8 @@ defmodule AlgoraWeb.Org.JobLive do
 
     # Trigger async sync for missing heatmaps if connected
     if connected?(socket) do
-      missing_heatmap_users = 
-        developers
-        |> Enum.reject(&Map.has_key?(heatmaps_map, &1.id))
-      
+      missing_heatmap_users = Enum.reject(developers, &Map.has_key?(heatmaps_map, &1.id))
+
       if length(missing_heatmap_users) > 0 do
         enqueue_heatmap_sync(missing_heatmap_users)
       end
@@ -954,6 +952,8 @@ defmodule AlgoraWeb.Org.JobLive do
           </.button>
         </div>
 
+        <.heatmap_display :if={@heatmap_data} heatmap_data={@heatmap_data} />
+
         <div :if={@contributions != []} class="mt-4">
           <p class="text-xs text-muted-foreground uppercase font-semibold">
             Top contributions
@@ -1005,8 +1005,6 @@ defmodule AlgoraWeb.Org.JobLive do
             <% end %>
           </div>
         </div>
-
-        <.heatmap_display :if={@heatmap_data && not @anonymized} heatmap_data={@heatmap_data} />
       </div>
     </div>
     """

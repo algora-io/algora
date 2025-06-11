@@ -972,6 +972,52 @@ defmodule AlgoraWeb.Org.JobLive do
           </.button>
         </div>
 
+        <div class="mt-4 space-y-2 text-sm">
+          <%= if @heatmap_data do %>
+            <div class="flex items-center gap-2">
+              <.icon
+                name={
+                  if get_avg_daily_commits(@heatmap_data) >= 1, do: "tabler-check", else: "tabler-x"
+                }
+                class={
+                  if get_avg_daily_commits(@heatmap_data) >= 1,
+                    do: "text-success-400",
+                    else: "text-destructive"
+                }
+              />
+              <span>{get_avg_daily_commits(@heatmap_data)} commits per day</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <.icon
+                name={
+                  if get_weekend_commits(@heatmap_data) >= 1, do: "tabler-check", else: "tabler-x"
+                }
+                class={
+                  if get_weekend_commits(@heatmap_data) >= 1,
+                    do: "text-success-400",
+                    else: "text-destructive"
+                }
+              />
+              <span>Active on weekends</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <.icon
+                name={
+                  if has_matching_tech_stack?(@user.tech_stack, @tech_stack, @contributions),
+                    do: "tabler-check",
+                    else: "tabler-x"
+                }
+                class={
+                  if has_matching_tech_stack?(@user.tech_stack, @tech_stack, @contributions),
+                    do: "text-success-400",
+                    else: "text-destructive"
+                }
+              />
+              <span>Versed in {Enum.join(@tech_stack, ", ")}</span>
+            </div>
+          <% end %>
+        </div>
+
         <.heatmap_display :if={@heatmap_data} heatmap_data={@heatmap_data} />
 
         <div :if={@contributions != []} class="mt-4">
@@ -1685,4 +1731,51 @@ defmodule AlgoraWeb.Org.JobLive do
   end
 
   def price, do: Algora.Settings.get_subscription_price()
+
+  defp get_avg_daily_commits(heatmap_data) do
+    total_contributions = get_in(heatmap_data, ["totalContributions"]) || 0
+    days = length(get_in(heatmap_data, ["weeks"]) || []) * 7
+    days = if days > 0, do: days, else: 365
+    Float.round(total_contributions / days, 1)
+  end
+
+  defp get_weekend_commits(heatmap_data) do
+    weeks = get_in(heatmap_data, ["weeks"]) || []
+
+    weekend_days =
+      Enum.flat_map(weeks, fn week ->
+        days = week["contributionDays"] || []
+
+        Enum.filter(days, fn day ->
+          date = Date.from_iso8601!(String.replace(day["date"], "T00:00:00.000+00:00", ""))
+          # Saturday and Sunday
+          Date.day_of_week(date) in [6, 7]
+        end)
+      end)
+
+    total_weekend_contributions = Enum.sum(Enum.map(weekend_days, & &1["contributionCount"]))
+    total_weekends = length(weekend_days)
+    # ~52 weeks * 2 days
+    total_weekends = if total_weekends > 0, do: total_weekends, else: 104
+    Float.round(total_weekend_contributions / total_weekends, 1)
+  end
+
+  defp has_matching_tech_stack?(user_stack, job_stack, contributions) do
+    # Get tech stacks from top contributions
+    contribution_techs =
+      contributions
+      |> Enum.flat_map(fn contribution ->
+        contribution.repository.tech_stack || []
+      end)
+      |> Enum.uniq()
+
+    # Combine user's declared tech stack with contribution tech stacks
+    all_user_techs =
+      ((user_stack || []) ++ contribution_techs)
+      |> Enum.uniq()
+      |> MapSet.new(&String.downcase/1)
+
+    job_set = MapSet.new(Enum.map(job_stack || [], &String.downcase/1))
+    !MapSet.disjoint?(all_user_techs, job_set)
+  end
 end

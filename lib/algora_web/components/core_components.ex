@@ -1290,6 +1290,7 @@ defmodule AlgoraWeb.CoreComponents do
   attr :replace, :boolean, default: false
   attr :target, :string, default: nil
   attr :rel, :string, default: nil
+  attr :class, :string, default: nil
   slot :inner_block
 
   def maybe_link(assigns) do
@@ -1302,11 +1303,12 @@ defmodule AlgoraWeb.CoreComponents do
         replace={@replace}
         target={@target}
         rel={@rel}
+        class={@class}
       >
         {render_slot(@inner_block)}
       </.link>
     <% else %>
-      <span>{render_slot(@inner_block)}</span>
+      <span class={@class}>{render_slot(@inner_block)}</span>
     <% end %>
     """
   end

@@ -796,7 +796,7 @@ defmodule AlgoraWeb.Org.JobLive do
               <% end %>
             <% else %>
               <%= for {owner, contributions} <- aggregate_contributions(@contributions) |> Enum.take(3) do %>
-                <.link
+                <.maybe_link
                   href={"https://github.com/#{owner.provider_login}/#{List.first(contributions).repository.name}/pulls?q=author%3A#{@application.user.provider_login}+is%3Amerged+"}
                   target="_blank"
                   rel="noopener"
@@ -842,7 +842,7 @@ defmodule AlgoraWeb.Org.JobLive do
                       </span>
                     </div>
                   </div>
-                </.link>
+                </.maybe_link>
               <% end %>
             <% end %>
           </div>
@@ -960,8 +960,8 @@ defmodule AlgoraWeb.Org.JobLive do
           </p>
           <div class="flex flex-col gap-3 mt-2">
             <%= for {owner, contributions} <- aggregate_contributions(@contributions) |> Enum.take(3) do %>
-              <.link
-                href={"https://github.com/#{owner.provider_login}/#{List.first(contributions).repository.name}/pulls?q=author%3A#{@user.provider_login}+is%3Amerged+"}
+              <.maybe_link
+                href={if @anonymized, do: nil, else: "https://github.com/#{owner.provider_login}/#{List.first(contributions).repository.name}/pulls?q=author%3A#{@user.provider_login}+is%3Amerged+"}
                 target="_blank"
                 rel="noopener"
                 class="flex items-center gap-3 rounded-xl pr-2 bg-card/50 border border-border/50 hover:border-border transition-all"
@@ -1001,7 +1001,7 @@ defmodule AlgoraWeb.Org.JobLive do
                     </span>
                   </div>
                 </div>
-              </.link>
+              </.maybe_link>
             <% end %>
           </div>
         </div>

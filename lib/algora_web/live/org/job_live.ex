@@ -452,7 +452,7 @@ defmodule AlgoraWeb.Org.JobLive do
       :critical
     )
 
-    {:noreply, put_flash(socket, :info, "#{dev.provider_login} is invited to an interview")}
+    {:noreply, put_flash(socket, :info, "Invitation sent!")}
   end
 
   @impl true
@@ -461,42 +461,50 @@ defmodule AlgoraWeb.Org.JobLive do
         %{"user_id" => user_id, "type" => "contract", "contract_type" => contract_type},
         socket
       ) do
-    developer = Enum.find(socket.assigns.developers, &(&1.id == user_id))
-    match = Enum.find(socket.assigns.matches, &(&1.user.id == user_id))
-    hourly_rate = match[:hourly_rate]
+    if socket.assigns.current_org.hiring_subscription == :active do
+      developer = Enum.find(socket.assigns.developers, &(&1.id == user_id))
+      match = Enum.find(socket.assigns.matches, &(&1.user.id == user_id))
+      hourly_rate = match[:hourly_rate]
 
-    hours_per_week = developer.hours_per_week || 30
+      hours_per_week = developer.hours_per_week || 30
 
-    {:noreply,
-     socket
-     |> assign(:main_contract_form_open?, true)
-     |> assign(
-       :main_contract_form,
-       %ContractForm{
-         contract_type: String.to_existing_atom(contract_type),
-         contractor: match[:user] || developer
-       }
-       |> ContractForm.changeset(%{
-         amount: if(hourly_rate, do: Money.mult!(hourly_rate, hours_per_week)),
-         hourly_rate: hourly_rate,
-         contractor_handle: developer.provider_login,
-         hours_per_week: hours_per_week,
-         title: "#{socket.assigns.current_org.name} OSS Development",
-         description: "Open source contribution to #{socket.assigns.current_org.name} for a week"
-       })
-       |> to_form()
-     )}
+      {:noreply,
+       socket
+       |> assign(:main_contract_form_open?, true)
+       |> assign(
+         :main_contract_form,
+         %ContractForm{
+           contract_type: String.to_existing_atom(contract_type),
+           contractor: match[:user] || developer
+         }
+         |> ContractForm.changeset(%{
+           amount: if(hourly_rate, do: Money.mult!(hourly_rate, hours_per_week)),
+           hourly_rate: hourly_rate,
+           contractor_handle: developer.provider_login,
+           hours_per_week: hours_per_week,
+           title: "#{socket.assigns.current_org.name} OSS Development",
+           description: "Open source contribution to #{socket.assigns.current_org.name} for a week"
+         })
+         |> to_form()
+       )}
+    else
+      {:noreply, push_patch(socket, to: ~p"/#{socket.assigns.job.user.handle}/jobs/#{socket.assigns.job.id}/activate")}
+    end
   end
 
   @impl true
   def handle_event("share_opportunity", %{"user_id" => user_id, "type" => type}, socket) do
-    developer = Enum.find(socket.assigns.developers, &(&1.id == user_id))
+    if socket.assigns.current_org.hiring_subscription == :active do
+      developer = Enum.find(socket.assigns.developers, &(&1.id == user_id))
 
-    {:noreply,
-     socket
-     |> assign(:selected_developer, developer)
-     |> assign(:share_drawer_type, type)
-     |> assign(:show_share_drawer, true)}
+      {:noreply,
+       socket
+       |> assign(:selected_developer, developer)
+       |> assign(:share_drawer_type, type)
+       |> assign(:show_share_drawer, true)}
+    else
+      {:noreply, push_patch(socket, to: ~p"/#{socket.assigns.job.user.handle}/jobs/#{socket.assigns.job.id}/activate")}
+    end
   end
 
   @impl true
@@ -630,12 +638,13 @@ defmodule AlgoraWeb.Org.JobLive do
     end
 
     # Sort matches by total contributions (0 if no heatmap) and take top 6
-    sorted_matches = 
+    sorted_matches =
       all_matches
       |> Enum.sort_by(fn match ->
         heatmap_data = Map.get(heatmaps_map, match.user.id)
         total_contributions = if heatmap_data, do: get_in(heatmap_data, ["totalContributions"]) || 0, else: 0
-        -total_contributions  # negative for descending sort
+        # negative for descending sort
+        -total_contributions
       end)
       |> Enum.take(6)
 

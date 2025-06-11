@@ -108,9 +108,10 @@ defmodule Algora.Settings do
         load_matches(matches)
 
       _ ->
+        # Use a larger limit to get more accurate count (1000 instead of 50)
         [
           tech_stack: job.tech_stack,
-          limit: Algora.Cloud.count_matches(job),
+          limit: 1000,
           email_required: true,
           sort_by:
             case get_job_criteria(job) do

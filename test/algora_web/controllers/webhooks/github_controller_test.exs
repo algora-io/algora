@@ -191,6 +191,71 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
 
       assert Money.equal?(Repo.one(Bounty).amount, ~M[300]usd)
     end
+
+    test "editing GitHub comment with /bounty command preserves bounty visibility", ctx do
+      comment_id = :rand.uniform(1000)
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :repo_admin,
+          body: "/bounty $100",
+          params: %{"comment" => %{"id" => comment_id}}
+        }
+      ])
+
+      bounty = Repo.one(Bounty)
+      original_visibility = bounty.visibility
+      assert original_visibility != nil
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.edited",
+          user_type: :repo_admin,
+          body: "/bounty $200",
+          params: %{"comment" => %{"id" => comment_id}}
+        }
+      ])
+
+      updated_bounty = Repo.one(Bounty)
+      assert updated_bounty.visibility == original_visibility
+    end
+
+    test "visibility preserved when adding to existing bounty via new comment", ctx do
+      # Create initial bounty with exclusive visibility
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :repo_admin,
+          body: "/bounty $500",
+          params: %{"comment" => %{"id" => 1}}
+        }
+      ])
+
+      original_bounty = Repo.one(Bounty)
+      # Set to exclusive mode for this test
+      _updated_owner = ctx[:org] |> change(%{bounty_mode: :exclusive}) |> Repo.update!()
+      updated_bounty = original_bounty |> change(%{visibility: :exclusive}) |> Repo.update!()
+
+      original_visibility = updated_bounty.visibility
+      assert original_visibility == :exclusive
+
+      # Add to bounty with new comment (this increases the amount)
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :repo_admin,
+          body: "/bounty $100",
+          params: %{"comment" => %{"id" => 2}}
+        }
+      ])
+
+      final_bounty = Repo.one(Bounty)
+      assert final_bounty.amount.amount >= 600
+
+      # This test should now PASS with the fix - visibility is preserved
+      assert final_bounty.visibility == original_visibility
+    end
   end
 
   describe "create tips" do

@@ -221,6 +221,152 @@ defmodule Algora.BountiesTest do
       transfer = Repo.one(from t in Transaction, where: t.type == :transfer)
       assert is_nil(transfer)
     end
+
+    test "preserves visibility when editing bounty comment", %{owner: owner, creator: creator, ticket_ref: ticket_ref} do
+      # Create initial bounty with explicit visibility
+      {:ok, bounty} =
+        Bounties.create_bounty(%{
+          ticket_ref: ticket_ref,
+          owner: owner |> change(%{bounty_mode: :public}) |> Repo.update!(),
+          creator: creator,
+          amount: ~M[100]usd,
+          visibility: :public
+        })
+
+      assert bounty.visibility == :public
+
+      # Simulate editing the bounty comment (like GitHub webhook would do)
+      # This should preserve the existing visibility, not set it to nil
+      {:ok, updated_bounty} =
+        Bounties.create_bounty(
+          %{
+            ticket_ref: ticket_ref,
+            owner: owner,
+            creator: creator,
+            amount: ~M[200]usd
+          },
+          strategy: :set
+        )
+
+      assert updated_bounty.visibility == :public
+    end
+
+    test "preserves visibility when increasing bounty amount", %{owner: owner, creator: creator, ticket_ref: ticket_ref} do
+      # Create initial bounty with community visibility
+      {:ok, bounty} =
+        Bounties.create_bounty(%{
+          ticket_ref: ticket_ref,
+          owner: owner |> change(%{bounty_mode: :community}) |> Repo.update!(),
+          creator: creator,
+          amount: ~M[100]usd,
+          visibility: :community
+        })
+
+      assert bounty.visibility == :community
+
+      # Simulate adding to bounty amount (like GitHub webhook would do)
+      {:ok, updated_bounty} =
+        Bounties.create_bounty(
+          %{
+            ticket_ref: ticket_ref,
+            owner: owner,
+            creator: creator,
+            amount: ~M[50]usd
+          },
+          strategy: :increase
+        )
+
+      assert updated_bounty.visibility == :community
+    end
+
+    test "preserves exclusive visibility when updating bounty", %{owner: owner, creator: creator, ticket_ref: ticket_ref} do
+      # Create initial bounty with exclusive visibility
+      {:ok, bounty} =
+        Bounties.create_bounty(%{
+          ticket_ref: ticket_ref,
+          owner: owner |> change(%{bounty_mode: :exclusive}) |> Repo.update!(),
+          creator: creator,
+          amount: ~M[500]usd,
+          visibility: :exclusive
+        })
+
+      assert bounty.visibility == :exclusive
+
+      # Simulate webhook edit without visibility parameter
+      {:ok, updated_bounty} =
+        Bounties.create_bounty(
+          %{
+            ticket_ref: ticket_ref,
+            owner: owner,
+            creator: creator,
+            amount: ~M[750]usd
+          },
+          strategy: :set
+        )
+
+      assert updated_bounty.visibility == :exclusive
+    end
+
+    test "handles nil visibility options without overriding existing value", %{
+      owner: owner,
+      creator: creator,
+      ticket_ref: ticket_ref
+    } do
+      # Create initial bounty
+      {:ok, bounty} =
+        Bounties.create_bounty(%{
+          ticket_ref: ticket_ref,
+          owner: owner |> change(%{bounty_mode: :public}) |> Repo.update!(),
+          creator: creator,
+          amount: ~M[100]usd
+        })
+
+      original_visibility = bounty.visibility
+
+      # Simulate what happens when GitHub webhook doesn't pass visibility option
+      {:ok, updated_bounty} =
+        Bounties.create_bounty(
+          %{
+            ticket_ref: ticket_ref,
+            owner: owner,
+            creator: creator,
+            amount: ~M[200]usd
+          },
+          # Empty options - no visibility passed
+          []
+        )
+
+      assert updated_bounty.visibility == original_visibility
+    end
+
+    test "allows explicit visibility override when provided", %{owner: owner, creator: creator, ticket_ref: ticket_ref} do
+      # Create initial bounty with public visibility
+      {:ok, bounty} =
+        Bounties.create_bounty(%{
+          ticket_ref: ticket_ref,
+          owner: owner |> change(%{bounty_mode: :public}) |> Repo.update!(),
+          creator: creator,
+          amount: ~M[100]usd,
+          visibility: :public
+        })
+
+      assert bounty.visibility == :public
+
+      # Explicitly change visibility to community
+      {:ok, updated_bounty} =
+        Bounties.create_bounty(
+          %{
+            ticket_ref: ticket_ref,
+            owner: owner,
+            creator: creator,
+            amount: ~M[200]usd
+          },
+          strategy: :set,
+          visibility: :community
+        )
+
+      assert updated_bounty.visibility == :community
+    end
   end
 
   describe "tips" do

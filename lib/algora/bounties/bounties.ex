@@ -160,7 +160,7 @@ defmodule Algora.Bounties do
                   existing
                   |> Bounty.changeset(%{
                     amount: amount,
-                    visibility: opts[:visibility],
+                    visibility: opts[:visibility] || existing.visibility,
                     shared_with: shared_with
                   })
                   # |> Activity.put_activity(%Bounty{}, %{type: :bounty_updated, notify_users: []})
@@ -170,7 +170,7 @@ defmodule Algora.Bounties do
                   existing
                   |> Bounty.changeset(%{
                     amount: Money.add!(existing.amount, amount),
-                    visibility: opts[:visibility],
+                    visibility: opts[:visibility] || existing.visibility,
                     shared_with: shared_with
                   })
                   # |> Activity.put_activity(%Bounty{}, %{type: :bounty_updated, notify_users: []})

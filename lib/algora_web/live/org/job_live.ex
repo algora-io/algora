@@ -602,13 +602,11 @@ defmodule AlgoraWeb.Org.JobLive do
     # Get total matches count first (efficient query)
     total_matches_count = Settings.get_job_matches_count(socket.assigns.job)
 
-    # Load only the matches we need to display (limit to 9)
-    limited_matches = Settings.get_job_matches(socket.assigns.job, limit: 9)
-
-    truncated_matches = AlgoraCloud.truncate_matches(socket.assigns.current_org, limited_matches)
+    # Load 12 matches for sorting by contributions
+    all_matches = Settings.get_job_matches(socket.assigns.job, limit: 12)
 
     developers =
-      limited_matches
+      all_matches
       |> Enum.concat(all_applicants)
       |> Enum.map(& &1.user)
 
@@ -621,14 +619,27 @@ defmodule AlgoraWeb.Org.JobLive do
       |> AlgoraCloud.Profiles.list_heatmaps()
       |> Map.new(fn heatmap -> {heatmap.user_id, heatmap.data} end)
 
-    # Trigger async sync for missing heatmaps if connected
+    # Trigger async sync for missing heatmaps if connected (for all 12 matches)
     if connected?(socket) do
-      missing_heatmap_users = Enum.reject(developers, &Map.has_key?(heatmaps_map, &1.id))
+      all_match_users = Enum.map(all_matches, & &1.user)
+      missing_heatmap_users = Enum.reject(all_match_users, &Map.has_key?(heatmaps_map, &1.id))
 
       if length(missing_heatmap_users) > 0 do
         enqueue_heatmap_sync(missing_heatmap_users)
       end
     end
+
+    # Sort matches by total contributions (0 if no heatmap) and take top 6
+    sorted_matches = 
+      all_matches
+      |> Enum.sort_by(fn match ->
+        heatmap_data = Map.get(heatmaps_map, match.user.id)
+        total_contributions = if heatmap_data, do: get_in(heatmap_data, ["totalContributions"]) || 0, else: 0
+        -total_contributions  # negative for descending sort
+      end)
+      |> Enum.take(6)
+
+    truncated_matches = AlgoraCloud.truncate_matches(socket.assigns.current_org, sorted_matches)
 
     # Create a fake matches list with the right count for UI compatibility
     fake_matches = List.duplicate(%{}, total_matches_count)
@@ -859,7 +870,7 @@ defmodule AlgoraWeb.Org.JobLive do
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div class="flex items-center gap-4">
             <%= if @anonymized do %>
-              <div class="h-12 w-12 rounded-full bg-muted"></div>
+              <div class="h-12 w-12 rounded-full bg-muted blur-sm"></div>
             <% else %>
               <.link navigate={User.url(@user)}>
                 <.avatar class="h-12 w-12 rounded-full">
@@ -893,11 +904,11 @@ defmodule AlgoraWeb.Org.JobLive do
                 <% end %>
               </div>
               <div
-                :if={@user.provider_meta && not @anonymized}
+                :if={@user.provider_meta}
                 class="pt-0.5 flex items-center gap-x-2 gap-y-1 text-xs text-muted-foreground max-w-[250px] 2xl:max-w-none truncate"
               >
                 <.link
-                  :if={@user.provider_login}
+                  :if={@user.provider_login && not @anonymized}
                   href={"https://github.com/#{@user.provider_login}"}
                   target="_blank"
                   class="flex items-center gap-1 hover:underline"
@@ -961,7 +972,12 @@ defmodule AlgoraWeb.Org.JobLive do
           <div class="flex flex-col gap-3 mt-2">
             <%= for {owner, contributions} <- aggregate_contributions(@contributions) |> Enum.take(3) do %>
               <.maybe_link
-                href={if @anonymized, do: nil, else: "https://github.com/#{owner.provider_login}/#{List.first(contributions).repository.name}/pulls?q=author%3A#{@user.provider_login}+is%3Amerged+"}
+                href={
+                  if @anonymized,
+                    do: nil,
+                    else:
+                      "https://github.com/#{owner.provider_login}/#{List.first(contributions).repository.name}/pulls?q=author%3A#{@user.provider_login}+is%3Amerged+"
+                }
                 target="_blank"
                 rel="noopener"
                 class="flex items-center gap-3 rounded-xl pr-2 bg-card/50 border border-border/50 hover:border-border transition-all"

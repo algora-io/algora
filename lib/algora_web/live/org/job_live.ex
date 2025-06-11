@@ -287,6 +287,7 @@ defmodule AlgoraWeb.Org.JobLive do
                         contributions={Map.get(@contributions_map, match.user.id, [])}
                         contract_type="bring_your_own"
                         anonymized={@current_org.hiring_subscription != :active}
+                        heatmap_data={Map.get(@heatmaps_map, match.user.id)}
                       />
                     </div>
                   <% end %>
@@ -608,12 +609,39 @@ defmodule AlgoraWeb.Org.JobLive do
 
     contributions_map = fetch_applicants_contributions(developers, socket.assigns.job.tech_stack)
 
+    # Fetch heatmaps for all developers
+    heatmaps_map =
+      developers
+      |> Enum.map(& &1.id)
+      |> AlgoraCloud.Profiles.list_heatmaps()
+      |> Map.new(fn heatmap -> {heatmap.user_id, heatmap.data} end)
+
+    # Trigger async sync for missing heatmaps if connected
+    if connected?(socket) do
+      missing_heatmap_users = 
+        developers
+        |> Enum.reject(&Map.has_key?(heatmaps_map, &1.id))
+      
+      if length(missing_heatmap_users) > 0 do
+        enqueue_heatmap_sync(missing_heatmap_users)
+      end
+    end
+
     socket
     |> assign(:developers, developers)
     |> assign(:applicants, sort_by_contributions(socket.assigns.job, all_applicants, contributions_map))
     |> assign(:matches, matches)
     |> assign(:truncated_matches, truncated_matches)
     |> assign(:contributions_map, contributions_map)
+    |> assign(:heatmaps_map, heatmaps_map)
+  end
+
+  defp enqueue_heatmap_sync(users) do
+    Task.start(fn ->
+      for user <- users do
+        AlgoraCloud.Profiles.sync_heatmap_by(id: user.id)
+      end
+    end)
   end
 
   defp enqueue_screening(socket, users) do
@@ -969,9 +997,54 @@ defmodule AlgoraWeb.Org.JobLive do
             <% end %>
           </div>
         </div>
+
+        <.heatmap_display :if={@heatmap_data && not @anonymized} heatmap_data={@heatmap_data} />
       </div>
     </div>
     """
+  end
+
+  defp heatmap_display(assigns) do
+    ~H"""
+    <div class="mt-4">
+      <div class="flex items-center justify-between mb-2">
+        <div class="text-xs text-muted-foreground uppercase font-semibold">
+          {get_in(@heatmap_data, ["totalContributions"])} contributions in the last year
+        </div>
+      </div>
+      <div class="grid grid-cols-[repeat(17,1fr)] gap-1">
+        <%= for week <- get_in(@heatmap_data, ["weeks"]) |> Enum.take(-17) do %>
+          <div class="grid grid-rows-7 gap-1">
+            <%= for day <- week["contributionDays"] do %>
+              <div
+                class={"h-3 w-3 rounded-sm #{get_contribution_color(day["contributionCount"])}"}
+                title={"#{day["contributionCount"]} contributions on #{format_date(day["date"])}"}
+              >
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+    """
+  end
+
+  defp get_contribution_color(count) do
+    cond do
+      count == 0 -> "bg-muted/50"
+      count in 1..5 -> "bg-success-400/40"
+      count in 6..10 -> "bg-success-400/50"
+      count in 11..15 -> "bg-success-400/70"
+      count in 16..20 -> "bg-success-400/90"
+      true -> "bg-success-400"
+    end
+  end
+
+  defp format_date(date_string) do
+    date_string
+    |> String.replace("T00:00:00.000+00:00", "")
+    |> Date.from_iso8601!()
+    |> Calendar.strftime("%B %d, %Y")
   end
 
   defp social_links do

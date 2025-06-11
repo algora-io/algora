@@ -111,6 +111,7 @@ defmodule Algora.Settings do
         [
           tech_stack: job.tech_stack,
           limit: Algora.Cloud.count_matches(job),
+          email_required: true,
           sort_by:
             case get_job_criteria(job) do
               criteria when map_size(criteria) > 0 -> criteria

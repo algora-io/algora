@@ -311,7 +311,6 @@ defmodule Algora.PSP.ConnectCountries do
         "HR",
         "HU",
         "IE",
-        "IL",
         "IS",
         "IT",
         "JO",

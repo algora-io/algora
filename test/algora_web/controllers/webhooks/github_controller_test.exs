@@ -256,6 +256,53 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       # This test should now PASS with the fix - visibility is preserved
       assert final_bounty.visibility == original_visibility
     end
+
+    test "updates ticket title and description on issues.edited", ctx do
+      issue_number = :rand.uniform(1000)
+      updated_title = "Updated Issue Title"
+      updated_body = "Updated issue description"
+
+      # First create the issue (title will be set by GitHub mock to "title #{number}")
+      process_scenario!(ctx, [
+        %{
+          event_action: "issues.opened",
+          user_type: :repo_admin,
+          body: "/bounty $100",
+          params: %{
+            "issue" => %{
+              "number" => issue_number,
+              "state" => "open"
+            }
+          }
+        }
+      ])
+
+      ticket = Repo.get_by!(Ticket, number: issue_number)
+      # This comes from GitHub mock
+      assert ticket.title == "title #{issue_number}"
+      # This comes from GitHub mock
+      assert ticket.description == "body #{issue_number}"
+
+      # Now edit the issue title and description
+      process_scenario!(ctx, [
+        %{
+          event_action: "issues.edited",
+          user_type: :repo_admin,
+          params: %{
+            "issue" => %{
+              "number" => issue_number,
+              "state" => "open",
+              "title" => updated_title,
+              "body" => updated_body
+            }
+          }
+        }
+      ])
+
+      ticket = Repo.get_by!(Ticket, number: issue_number)
+      assert ticket.title == updated_title
+      assert ticket.description == updated_body
+    end
   end
 
   describe "create tips" do
@@ -1578,6 +1625,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
             "id" => 123,
             "number" => 123,
             "state" => "open",
+            "title" => "Default Issue Title",
             "body" => mock_body(ctx[:body]),
             "user" => mock_user(ctx[:author])
           }
@@ -1597,6 +1645,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
             "id" => 123,
             "number" => 123,
             "state" => "open",
+            "title" => "Default PR Title",
             "body" => mock_body(ctx[:body]),
             "user" => mock_user(ctx[:author]),
             "merged_at" => nil

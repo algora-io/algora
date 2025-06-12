@@ -274,6 +274,9 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     end
   end
 
+  defp process_event(%Webhook{event_action: "issues.edited"} = webhook, _commands),
+    do: handle_ticket_metadata_change(webhook)
+
   defp process_event(%Webhook{event_action: event_action, payload: payload}, commands)
        when event_action in ["pull_request.opened", "pull_request.reopened", "pull_request.edited"] do
     source =
@@ -285,7 +288,10 @@ defmodule AlgoraWeb.Webhooks.GithubController do
 
     if source do
       source
-      |> change(%{description: payload["pull_request"]["body"]})
+      |> change(%{
+        title: payload["pull_request"]["title"],
+        description: payload["pull_request"]["body"]
+      })
       |> Repo.update()
     end
 
@@ -692,6 +698,30 @@ defmodule AlgoraWeb.Webhooks.GithubController do
                closed_at: Util.to_date!(github_ticket["closed_at"]),
                merged_at: Util.to_date!(github_ticket["merged_at"])
              )
+             |> Repo.update() do
+          {:ok, _} -> :ok
+          {:error, reason} -> {:error, reason}
+        end
+    end
+  end
+
+  defp handle_ticket_metadata_change(%Webhook{payload: payload} = webhook) do
+    github_ticket = get_github_ticket(webhook)
+
+    case Workspace.get_ticket(
+           payload["repository"]["owner"]["login"],
+           payload["repository"]["name"],
+           github_ticket["number"]
+         ) do
+      nil ->
+        :ok
+
+      ticket ->
+        case ticket
+             |> change(%{
+               title: github_ticket["title"],
+               description: github_ticket["body"]
+             })
              |> Repo.update() do
           {:ok, _} -> :ok
           {:error, reason} -> {:error, reason}

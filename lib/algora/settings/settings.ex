@@ -104,7 +104,7 @@ defmodule Algora.Settings do
 
   def get_job_matches(job, opts \\ []) do
     limit = Keyword.get(opts, :limit, 1000)
-    
+
     case get("job_matches:#{job.id}") do
       %{"matches" => matches} when is_list(matches) ->
         matches
@@ -122,7 +122,7 @@ defmodule Algora.Settings do
               _ -> [{"solver", true}]
             end
         ]
-        |> AlgoraCloud.list_top_matches()
+        |> Algora.Cloud.list_top_matches()
         |> load_matches_2()
     end
   end
@@ -133,7 +133,7 @@ defmodule Algora.Settings do
         length(matches)
 
       _ ->
-        [
+        Algora.Cloud.count_top_matches(
           tech_stack: job.tech_stack,
           email_required: true,
           sort_by:
@@ -141,8 +141,7 @@ defmodule Algora.Settings do
               criteria when map_size(criteria) > 0 -> criteria
               _ -> [{"solver", true}]
             end
-        ]
-        |> AlgoraCloud.count_top_matches()
+        )
     end
   end
 
@@ -153,7 +152,7 @@ defmodule Algora.Settings do
       limit: 50,
       sort_by: get_job_criteria(job)
     ]
-    |> AlgoraCloud.list_top_stargazers()
+    |> Algora.Cloud.list_top_stargazers()
     |> load_matches_2()
   end
 

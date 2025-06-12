@@ -624,7 +624,7 @@ defmodule AlgoraWeb.Org.JobLive do
     heatmaps_map =
       developers
       |> Enum.map(& &1.id)
-      |> AlgoraCloud.Profiles.list_heatmaps()
+      |> Algora.Cloud.list_heatmaps()
       |> Map.new(fn heatmap -> {heatmap.user_id, heatmap.data} end)
 
     # Trigger async sync for missing heatmaps if connected (for all 12 matches)
@@ -648,7 +648,7 @@ defmodule AlgoraWeb.Org.JobLive do
       end)
       |> Enum.take(6)
 
-    truncated_matches = AlgoraCloud.truncate_matches(socket.assigns.current_org, sorted_matches)
+    truncated_matches = Algora.Cloud.truncate_matches(socket.assigns.current_org, sorted_matches)
 
     # Create a fake matches list with the right count for UI compatibility
     fake_matches = List.duplicate(%{}, total_matches_count)
@@ -665,7 +665,7 @@ defmodule AlgoraWeb.Org.JobLive do
   defp enqueue_heatmap_sync(users) do
     Task.start(fn ->
       for user <- users do
-        AlgoraCloud.Profiles.sync_heatmap_by(id: user.id)
+        Algora.Cloud.sync_heatmap_by(id: user.id)
       end
     end)
   end

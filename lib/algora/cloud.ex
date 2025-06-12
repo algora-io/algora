@@ -21,6 +21,18 @@ defmodule Algora.Cloud do
     call(AlgoraCloud, :count_matches, [job])
   end
 
+  def list_heatmaps(user_ids) do
+    call(AlgoraCloud.Profiles, :list_heatmaps, [user_ids])
+  end
+
+  def sync_heatmap_by(opts \\ []) do
+    call(AlgoraCloud.Profiles, :sync_heatmap_by, [opts])
+  end
+
+  def count_top_matches(opts \\ []) do
+    call(AlgoraCloud, :count_top_matches, [opts])
+  end
+
   def get_contribution_score(job, user, contributions_map) do
     call(AlgoraCloud, :get_contribution_score, [job, user, contributions_map])
   end

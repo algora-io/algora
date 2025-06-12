@@ -147,6 +147,7 @@ defmodule AlgoraWeb.Components.TechBadge do
       "Pulumi",
       "TensorFlow",
       "PyTorch",
+      "Ecto",
       "Azure",
       "AWS",
       "GCP",

@@ -284,6 +284,7 @@ defmodule AlgoraWeb.Org.JobLive do
                         current_user={@current_user}
                         user={match.user}
                         tech_stack={@job.tech_stack |> Enum.take(1)}
+                        job={@job}
                         contributions={Map.get(@contributions_map, match.user.id, [])}
                         contract_type="bring_your_own"
                         anonymized={@current_org.hiring_subscription != :active}
@@ -1003,17 +1004,17 @@ defmodule AlgoraWeb.Org.JobLive do
             <div class="flex items-center gap-2">
               <.icon
                 name={
-                  if has_matching_tech_stack?(@user.tech_stack, @tech_stack, @contributions),
+                  if has_matching_tech_stack?(@user.tech_stack, @job.tech_stack, @contributions),
                     do: "tabler-check",
                     else: "tabler-x"
                 }
                 class={
-                  if has_matching_tech_stack?(@user.tech_stack, @tech_stack, @contributions),
+                  if has_matching_tech_stack?(@user.tech_stack, @job.tech_stack, @contributions),
                     do: "text-success-400",
                     else: "text-destructive"
                 }
               />
-              <span>Versed in {Enum.join(@tech_stack, ", ")}</span>
+              <span>Versed in {get_matching_techs(@user.tech_stack, @job.tech_stack, @contributions) |> Enum.join(", ")}</span>
             </div>
           <% end %>
         </div>
@@ -1760,7 +1761,7 @@ defmodule AlgoraWeb.Org.JobLive do
     Float.round(total_weekend_contributions / total_weekends, 1)
   end
 
-  defp has_matching_tech_stack?(user_stack, job_stack, contributions) do
+  defp get_matching_techs(user_stack, job_stack, contributions) do
     # Get tech stacks from top contributions
     contribution_techs =
       contributions
@@ -1776,6 +1777,15 @@ defmodule AlgoraWeb.Org.JobLive do
       |> MapSet.new(&String.downcase/1)
 
     job_set = MapSet.new(Enum.map(job_stack || [], &String.downcase/1))
-    !MapSet.disjoint?(all_user_techs, job_set)
+    
+    # Return the intersection
+    MapSet.intersection(all_user_techs, job_set)
+    |> MapSet.to_list()
+    |> Enum.map(&String.capitalize/1)
+  end
+
+  defp has_matching_tech_stack?(user_stack, job_stack, contributions) do
+    matching_techs = get_matching_techs(user_stack, job_stack, contributions)
+    length(matching_techs) > 0
   end
 end

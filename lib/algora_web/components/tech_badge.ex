@@ -58,6 +58,7 @@ defmodule AlgoraWeb.Components.TechBadge do
   defp icon_class("github"), do: "bg-white invert saturate-0"
   defp icon_class("bash"), do: "bg-white invert saturate-0"
   defp icon_class("twitter"), do: "bg-white invert saturate-0"
+  defp icon_class("apachekafka"), do: "bg-white invert saturate-0"
   defp icon_class(_tech), do: "bg-transparent"
 
   defp normalize(tech) do
@@ -79,6 +80,12 @@ defmodule AlgoraWeb.Components.TechBadge do
 
       "react.js" ->
         "react"
+
+      "react native" ->
+        "react"
+
+      "nest.js" ->
+        "nestjs"
 
       "shell" ->
         "bash"
@@ -103,6 +110,9 @@ defmodule AlgoraWeb.Components.TechBadge do
 
       "transformers" ->
         "huggingface"
+
+      "kafka" ->
+        "apachekafka"
 
       t ->
         t
@@ -132,6 +142,7 @@ defmodule AlgoraWeb.Components.TechBadge do
       "Kotlin",
       "Swift",
       "Elixir",
+      "Haskell",
       "Lua",
       "OCaml",
       "Crystal",
@@ -157,9 +168,11 @@ defmodule AlgoraWeb.Components.TechBadge do
       "Astro",
       "Node.js",
       "Next.js",
+      "Nest.js",
       "HTML",
       "CSS",
       "PostgreSQL",
+      "Redis",
       "Figma",
       "Prometheus",
       "Grafana",
@@ -182,7 +195,12 @@ defmodule AlgoraWeb.Components.TechBadge do
       "YouTube",
       "LinkedIn",
       "TikTok",
-      "Django"
+      "Django",
+      "ApacheKafka",
+      "ObjectiveC",
+      "Envoy",
+      "RabbitMQ",
+      "Flutter"
     ]
   end
 end

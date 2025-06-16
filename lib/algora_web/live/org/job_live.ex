@@ -943,19 +943,11 @@ defmodule AlgoraWeb.Org.JobLive do
               <span>Active on weekends</span>
             </div>
             <div class="flex items-center gap-2">
-              <.icon
-                name={
-                  if has_matching_tech_stack?(@user.tech_stack, @job.tech_stack, @contributions),
-                    do: "tabler-check",
-                    else: "tabler-x"
-                }
-                class={
-                  if has_matching_tech_stack?(@user.tech_stack, @job.tech_stack, @contributions),
-                    do: "text-success-400",
-                    else: "text-destructive"
-                }
-              />
-              <span>Versed in {get_matching_techs(@user.tech_stack, @job.tech_stack, @contributions) |> Enum.join(", ")}</span>
+              <.icon name="tabler-check" class="text-success-400" />
+              <span>
+                Versed in {get_matching_techs(@user.tech_stack, @job.tech_stack, @contributions)
+                |> Enum.join(", ")}
+              </span>
             </div>
           <% end %>
         </div>
@@ -1706,9 +1698,7 @@ defmodule AlgoraWeb.Org.JobLive do
     # Get tech stacks from top contributions
     contribution_techs =
       contributions
-      |> Enum.flat_map(fn contribution ->
-        contribution.repository.tech_stack || []
-      end)
+      |> Enum.flat_map(fn contribution -> Enum.take(contribution.repository.tech_stack, 1) end)
       |> Enum.uniq()
 
     # Combine user's declared tech stack with contribution tech stacks
@@ -1718,15 +1708,18 @@ defmodule AlgoraWeb.Org.JobLive do
       |> MapSet.new(&String.downcase/1)
 
     job_set = MapSet.new(Enum.map(job_stack || [], &String.downcase/1))
-    
-    # Return the intersection
-    MapSet.intersection(all_user_techs, job_set)
-    |> MapSet.to_list()
-    |> Enum.map(&String.capitalize/1)
-  end
 
-  defp has_matching_tech_stack?(user_stack, job_stack, contributions) do
-    matching_techs = get_matching_techs(user_stack, job_stack, contributions)
-    length(matching_techs) > 0
+    # Return the intersection
+    intersection =
+      all_user_techs
+      |> MapSet.intersection(job_set)
+      |> MapSet.to_list()
+      |> Enum.map(&String.capitalize/1)
+
+    if length(intersection) > 0 do
+      intersection
+    else
+      Enum.take(contribution_techs, 2)
+    end
   end
 end

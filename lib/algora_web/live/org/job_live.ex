@@ -101,10 +101,12 @@ defmodule AlgoraWeb.Org.JobLive do
   def handle_params(%{"tab" => "activate"}, uri, socket) do
     Algora.Activities.alert("Activate clicked #{uri}", :warning)
 
-    socket =
-      if socket.assigns.current_org.subscription_price,
-        do: assign(socket, :show_payment_drawer, true),
-        else: redirect(socket, external: AlgoraWeb.Constants.get(:calendar_url))
+    socket = redirect(socket, external: AlgoraWeb.Constants.get(:calendar_url))
+
+    # socket =
+    #   if socket.assigns.current_org.subscription_price,
+    #     do: assign(socket, :show_payment_drawer, true),
+    #     else: redirect(socket, external: AlgoraWeb.Constants.get(:calendar_url))
 
     {:noreply, assign_new(socket, :current_tab, fn -> default_tab() end)}
   end
@@ -339,85 +341,24 @@ defmodule AlgoraWeb.Org.JobLive do
         <% end %>
       </div>
 
-      <.section :if={@current_org.hiring_subscription != :active}>
-        <div class="border ring-1 ring-transparent rounded-xl overflow-hidden">
-          <div class="bg-card/75 flex flex-col h-full p-4 rounded-xl border-t-4 sm:border-t-0 sm:border-l-4 border-emerald-400">
-            <div class="grid md:grid-cols-2 gap-8 p-4 sm:p-6">
-              <div>
-                <h3 class="text-3xl font-semibold text-foreground">
-                  <span class="text-success-300 drop-shadow-[0_1px_5px_#34d39980]">Activate</span>
-                  Annual Subscription
-                </h3>
-                <ul class="mt-4 text-base grid grid-cols-1 gap-3">
-                  <li class="flex items-center gap-4 md:gap-3">
-                    <div class="shrink-0 flex items-center justify-center rounded-full bg-success-300/10 size-12 md:size-10 border border-success-300/20">
-                      <.icon name="tabler-speakerphone" class="size-8 md:size-6 text-success-300" />
-                    </div>
-                    <span>
-                      <span class="font-semibold text-success-300">Reach 50K+ devs</span>
-                      <br class="md:hidden" /> with unlimited job postings
-                    </span>
-                  </li>
-                  <li class="flex items-center gap-4 md:gap-3">
-                    <div class="shrink-0 flex items-center justify-center rounded-full bg-success-300/10 size-12 md:size-10 border border-success-300/20">
-                      <.icon name="tabler-lock-open" class="size-8 md:size-6 text-success-300" />
-                    </div>
-                    <span>
-                      <span class="font-semibold text-success-300">Access top 1% users</span>
-                      <br class="md:hidden" /> matching your preferences
-                    </span>
-                  </li>
-                  <li class="flex items-center gap-4 md:gap-3">
-                    <div class="shrink-0 flex items-center justify-center rounded-full bg-success-300/10 size-12 md:size-10 border border-success-300/20">
-                      <.icon name="tabler-wand" class="size-8 md:size-6 text-success-300" />
-                    </div>
-                    <span>
-                      <span class="font-semibold text-success-300">Auto-rank applicants</span>
-                      <br class="md:hidden" /> for OSS contribution history
-                    </span>
-                  </li>
-                  <li class="flex items-center gap-4 md:gap-3">
-                    <div class="shrink-0 flex items-center justify-center rounded-full bg-success-300/10 size-12 md:size-10 border border-success-300/20">
-                      <.icon name="tabler-currency-dollar" class="size-8 md:size-6 text-success-300" />
-                    </div>
-                    <span>
-                      <span class="font-semibold text-success-300">Trial top candidates</span>
-                      <br class="md:hidden" /> using contracts and bounties
-                    </span>
-                  </li>
-                  <li class="flex items-center gap-4 md:gap-3">
-                    <div class="shrink-0 flex items-center justify-center rounded-full bg-success-300/10 size-12 md:size-10 border border-success-300/20">
-                      <.icon name="tabler-moneybag" class="size-8 md:size-6 text-success-300" />
-                    </div>
-                    <span>
-                      <span class="font-semibold text-success-300">0% placement fee</span>
-                      <br class="md:hidden" /> for successful hires
-                    </span>
-                  </li>
-                </ul>
-              </div>
-              <div class="flex flex-col justify-center items-center text-center">
-                <.button
-                  phx-click="show_payment_drawer"
-                  variant="none"
-                  class="group bg-emerald-900/10 text-emerald-300 transition-colors duration-75 hover:bg-emerald-800/10 hover:text-emerald-300 hover:drop-shadow-[0_1px_5px_#34d39980] focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#34d39980] border border-emerald-400/40 hover:border-emerald-400/50 focus:border-emerald-400/50 h-[8rem]"
-                  size="xl"
-                >
-                  <div class="flex flex-col items-center gap-1 font-semibold">
-                    <span>Activate subscription</span>
-                  </div>
-                </.button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </.section>
+      <.offer
+        :if={@current_org.hiring_subscription != :active}
+        user={@current_org}
+        handle={@current_org.handle}
+      />
     </div>
 
     {share_drawer(assigns)}
 
     {payment_drawer(assigns)}
     """
+  end
+
+  defp offer(assigns) do
+    case Algora.Cloud.get_job_offer(assigns) do
+      nil -> ~H""
+      offer -> offer
+    end
   end
 
   @impl true

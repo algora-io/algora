@@ -713,6 +713,31 @@ defmodule Algora.Workspace do
     Repo.aggregate(query, :sum, :contribution_count) || 0
   end
 
+  @spec upsert_contributor(String.t(), String.t(), integer()) ::
+          {:ok, Contributor.t()} | {:error, Ecto.Changeset.t()}
+  def upsert_contributor(user_id, repository_id, contribution_count) do
+    attrs = %{
+      user_id: user_id,
+      repository_id: repository_id,
+      contribution_count: contribution_count,
+      last_fetched_at: DateTime.utc_now()
+    }
+
+    case Repo.get_by(Contributor, user_id: user_id, repository_id: repository_id) do
+      nil ->
+        %Contributor{} |> Contributor.changeset(attrs) |> Repo.insert()
+
+      contributor ->
+        if contributor.contributions < contribution_count do
+          contributor
+          |> Contributor.changeset(attrs)
+          |> Repo.update()
+        else
+          {:ok, contributor}
+        end
+    end
+  end
+
   @spec upsert_user_contribution(String.t(), String.t(), integer()) ::
           {:ok, UserContribution.t()} | {:error, Ecto.Changeset.t()}
   def upsert_user_contribution(user_id, repository_id, contribution_count) do
@@ -724,8 +749,17 @@ defmodule Algora.Workspace do
     }
 
     case Repo.get_by(UserContribution, user_id: user_id, repository_id: repository_id) do
-      nil -> %UserContribution{} |> UserContribution.changeset(attrs) |> Repo.insert()
-      contribution -> contribution |> UserContribution.changeset(attrs) |> Repo.update()
+      nil ->
+        %UserContribution{} |> UserContribution.changeset(attrs) |> Repo.insert()
+
+      contribution ->
+        if contribution.contribution_count < contribution_count do
+          contribution
+          |> UserContribution.changeset(attrs)
+          |> Repo.update()
+        else
+          {:ok, contribution}
+        end
     end
   end
 

@@ -62,7 +62,7 @@ config :algora, Oban,
     notify_transfer: 1,
     prompt_payout_connect: 1,
     activity_discord: 1,
-    sync_contribution: 1
+    sync_contribution: 20
   ]
 
 # Configures the mailer

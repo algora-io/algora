@@ -683,6 +683,13 @@ defmodule Algora.Workspace do
       end
 
     query =
+      if opts[:strict_tech_stack] do
+        where(query, [uc, u, r, repo_owner], fragment("? && ?::citext[]", r.tech_stack, ^(opts[:tech_stack] || [])))
+      else
+        query
+      end
+
+    query =
       case opts[:limit] do
         nil -> query
         limit -> limit(query, ^limit)

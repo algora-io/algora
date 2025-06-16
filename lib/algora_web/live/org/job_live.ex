@@ -289,7 +289,10 @@ defmodule AlgoraWeb.Org.JobLive do
                         job={@job}
                         contributions={Map.get(@contributions_map, match.user.id, [])}
                         contract_type="bring_your_own"
-                        anonymized={@current_org.hiring_subscription != :active}
+                        anonymized={
+                          @current_org.hiring_subscription != :active and
+                            not (@current_user && @current_user.is_admin)
+                        }
                         heatmap_data={Map.get(@heatmaps_map, match.user.id)}
                       />
                     </div>

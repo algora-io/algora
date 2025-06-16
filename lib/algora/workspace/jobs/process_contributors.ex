@@ -4,28 +4,24 @@ defmodule Algora.Workspace.Jobs.ProcessContributors do
     queue: :sync_contribution,
     max_attempts: 3
 
-  alias Algora.Github
-  alias Algora.Workspace
   alias Algora.Workspace.Jobs.ImportContributor
 
   require Logger
 
   @impl Oban.Worker
   def perform(%Oban.Job{args: %{"contributors_data" => contributors_data, "repo_id" => repo_id}}) do
-    token = Github.TokenPool.get_token()
-
     jobs =
       contributors_data
       |> Enum.reduce([], fn contributor_data, acc ->
-        provider_login = contributor_data["login"]
+        id = contributor_data["id"]
         contributions = contributor_data["contributions"]
 
-        case Workspace.ensure_user(token, provider_login) do
+        case Algora.Repo.fetch(Algora.Accounts.User, id) do
           {:ok, user} ->
             [%{provider_login: user.provider_login, contributions: contributions} | acc]
 
           {:error, reason} ->
-            Logger.error("Failed to fetch user #{provider_login}: #{reason}")
+            Logger.error("Failed to fetch user #{id}: #{reason}")
             acc
         end
       end)

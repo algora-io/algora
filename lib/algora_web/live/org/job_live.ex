@@ -1027,7 +1027,7 @@ defmodule AlgoraWeb.Org.JobLive do
         </div>
       </div>
       <div class="grid grid-cols-[repeat(17,1fr)] gap-1">
-        <%= for week <- get_in(@heatmap_data, ["weeks"]) |> Enum.take(-17) do %>
+        <%= for week <- get_in(@heatmap_data, ["weeks"]) |> Enum.filter(fn week -> length(week["contributionDays"]) == 7 end) |> Enum.take(-17) do %>
           <div class="grid grid-rows-7 gap-1">
             <%= for day <- week["contributionDays"] do %>
               <div

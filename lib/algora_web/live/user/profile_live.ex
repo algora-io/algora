@@ -50,7 +50,7 @@ defmodule AlgoraWeb.User.ProfileLive do
               <p class="text-muted-foreground">@{User.handle(@user)}</p>
             </div>
 
-            <p class="max-w-2xl text-foreground">{@user.bio}</p>
+            <p class="max-w-3xl text-foreground whitespace-pre-line">{@user.bio}</p>
 
             <div class="flex flex-wrap gap-4">
               <%= for tech <- @user.tech_stack do %>

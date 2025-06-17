@@ -97,6 +97,9 @@ defmodule Algora.Accounts.User do
     field :system_bio, :string
     field :system_bio_meta, :map, default: %{}
 
+    field :location_meta, :map
+    field :location_iso_lvl4, :string
+
     has_many :identities, Identity
     has_many :memberships, Member, foreign_key: :user_id
     has_many :members, Member, foreign_key: :org_id

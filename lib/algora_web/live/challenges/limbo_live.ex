@@ -26,7 +26,7 @@ defmodule AlgoraWeb.Challenges.LimboLive do
             <div class="relative z-20">
               <section class="mb-24 md:mb-36 min-h-[calc(100svh-36px)] md:min-h-0">
                 <div class="relative z-20 mx-auto max-w-[100rem] px-6 lg:px-8">
-                  <div class="max-w-5xl pt-28 md:pt-36 2xl:pt-72">
+                  <div class="max-w-5xl pt-24 2xl:pt-72">
                     <a
                       rel="noopener"
                       target="_blank"
@@ -41,22 +41,22 @@ defmodule AlgoraWeb.Challenges.LimboLive do
                         style="aspect-ratio: 821/240;"
                       />
                     </a>
-                    <h1 class="mt-8 mb-2 text-[1.4rem] font-black tracking-tighter mix-blend-exclusion sm:text-5xl/[3rem] md:text-6xl/[4rem] lg:text-7xl/[5rem]">
+                    <h1 class="mt-6 mb-2 text-[1.4rem] font-black tracking-tighter mix-blend-exclusion sm:text-5xl/[3rem] md:text-6xl/[4rem] lg:text-7xl/[5rem]">
                       Turso is rewriting SQLite in Rust<br />
                       <span style="background: radial-gradient(53.44% 245.78% at 13.64% 46.56%, rgb(110, 231, 183) 0%, rgb(45, 212, 191) 100%) text; -webkit-text-fill-color: transparent;">
                         Find a bug to win <span class="font-display">$1,000</span>
                       </span>
                     </h1>
-                    <p class="max-w-xl xl:max-w-2xl mt-6 text-base font-medium tracking-tight text-white/90 shadow-black [text-shadow:_0_1px_0_var(--tw-shadow-color)] md:mt-8 md:text-lg md:text-white/80">
+                    <p class="max-w-xl xl:max-w-2xl mt-4 text-base font-medium tracking-tight text-white/90 shadow-black [text-shadow:_0_1px_0_var(--tw-shadow-color)] md:mt-6 md:text-lg md:text-white/80">
                       SQLite, while legendary, has remained closed to community contributions. We at Turso are changing that by building a modern
                       SQLite alternative in Rust - one that's open source and community-driven. Our goal isn't just features, but
                       rock-solid reliability through <a
                         href="https://turso.tech/blog/introducing-limbo-a-complete-rewrite-of-sqlite-in-rust"
                         class="font-semibold text-white underline"
                       >Deterministic Simulation Testing</a>. <br /><br />
-                      We are so confident in DST's ability to find the rarest bugs, that we are offering cash bounties for those who can find cases where a bug survived this testing. In this initial phase of the project, we will offer
+                      We are so confident in the long-term ability of the DST to find the rarest bugs that even at the current early stage, we are offering cash bounties for those who can find cases where a bug survived this testing. In this initial phase of the project, we still expect many bugs to exist, and we'll offer
                       <span class="font-display font-bold text-foreground">$1,000</span>
-                      for any bugs that lead to data corruption. After our first official release, we will expand the scope of bugs and size of the bounty.
+                      for any bugs that lead to data loss or data corruption. As our releases progress, we will continuously expand the scope of bugs and size of the bounty.
                     </p>
                   </div>
                 </div>

@@ -219,7 +219,7 @@ defmodule AlgoraWeb.Component.NotFoundComponent do
           <p class="description">
             Sorry, the page you're looking for doesn't exist or has been moved.
           </p>
-          <a href="/" class="home-button">
+          <.link navigate="/" class="home-button">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="16"
@@ -234,7 +234,7 @@ defmodule AlgoraWeb.Component.NotFoundComponent do
               <path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M5 12l14 0" /><path d="M5 12l6 6" /><path d="M5 12l6 -6" />
             </svg>
             Go back home
-          </a>
+          </.link>
         </div>
       </body>
     </html>

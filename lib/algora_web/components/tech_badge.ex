@@ -114,6 +114,9 @@ defmodule AlgoraWeb.Components.TechBadge do
       "kafka" ->
         "apachekafka"
 
+      "vim script" ->
+        "vim"
+
       t ->
         t
         |> String.replace("+", "plus")
@@ -200,7 +203,8 @@ defmodule AlgoraWeb.Components.TechBadge do
       "ObjectiveC",
       "Envoy",
       "RabbitMQ",
-      "Flutter"
+      "Flutter",
+      "Vim"
     ]
   end
 end

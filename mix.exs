@@ -101,6 +101,7 @@ defmodule Algora.MixProject do
       {:cmark, "~> 0.10"},
       {:csv, "~> 3.2"},
       {:instructor, "~> 0.1.0"},
+      {:openai_ex, "~> 0.9.12"},
       {:hound, "~> 1.1", only: [:dev]},
       # ex_aws
       {:ex_aws, "~> 2.1"},

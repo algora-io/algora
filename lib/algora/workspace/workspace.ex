@@ -641,6 +641,12 @@ defmodule Algora.Workspace do
 
   @spec list_user_contributions(list(String.t()), Keyword.t()) :: {:ok, list(map())} | {:error, term()}
   def list_user_contributions(ids, opts \\ []) do
+    tech_stack = opts[:tech_stack] || []
+
+    tech_stack = if "Haskell" in tech_stack, do: ["Haskell"], else: tech_stack
+
+    strict_tech_stack = "Haskell" in tech_stack || opts[:strict_tech_stack]
+
     query =
       from uc in UserContribution,
         where: uc.user_id in ^ids,
@@ -660,7 +666,7 @@ defmodule Algora.Workspace do
                  ilike(repo_owner.provider_login, "%firstcontributions%") or
                  repo_owner.provider_login == "up-for-grabs"),
         order_by: [
-          desc: fragment("CASE WHEN ? && ?::citext[] THEN 1 ELSE 0 END", r.tech_stack, ^(opts[:tech_stack] || [])),
+          desc: fragment("CASE WHEN ? && ?::citext[] THEN 1 ELSE 0 END", r.tech_stack, ^tech_stack),
           desc: r.stargazers_count
         ],
         select: %UserContribution{
@@ -683,8 +689,8 @@ defmodule Algora.Workspace do
       end
 
     query =
-      if opts[:strict_tech_stack] do
-        where(query, [uc, u, r, repo_owner], fragment("? && ?::citext[]", r.tech_stack, ^(opts[:tech_stack] || [])))
+      if strict_tech_stack do
+        where(query, [uc, u, r, repo_owner], fragment("? && ?::citext[]", r.tech_stack, ^tech_stack))
       else
         query
       end

@@ -199,7 +199,7 @@ defmodule AlgoraWeb.Org.JobLive do
                 </div>
               </div>
             </div>
-            <div class="hidden md:flex flex-col items-center">
+            <div class="hidden md:flex flex-col items-center shrink-0">
               <h3 class="text-lg font-semibold">
                 Share on socials
               </h3>
@@ -549,14 +549,21 @@ defmodule AlgoraWeb.Org.JobLive do
     {:noreply, socket}
   end
 
+  defp job_opts(socket) do
+    case socket.assigns.job.location do
+      "US-NY" -> [location: "east coast"]
+      _ -> []
+    end
+  end
+
   defp assign_applicants(socket) do
     all_applicants = Jobs.list_job_applications(socket.assigns.job)
 
     # Get total matches count first (efficient query)
-    total_matches_count = Settings.get_job_matches_count(socket.assigns.job)
+    total_matches_count = Settings.get_job_matches_count(socket.assigns.job, job_opts(socket))
 
     # Load 12 matches for sorting by contributions
-    all_matches = Settings.get_job_matches(socket.assigns.job, limit: 12)
+    all_matches = Settings.get_job_matches(socket.assigns.job, job_opts(socket) ++ [limit: 12])
 
     developers =
       all_matches

@@ -103,45 +103,47 @@ defmodule Algora.Settings do
   end
 
   def get_job_matches(job, opts \\ []) do
-    limit = Keyword.get(opts, :limit, 1000)
+    opts = Keyword.put_new(opts, :limit, 1000)
 
     case get("job_matches:#{job.id}") do
       %{"matches" => matches} when is_list(matches) ->
         matches
         |> load_matches()
-        |> Enum.take(limit)
+        |> Enum.take(opts[:limit])
 
       _ ->
         [
           tech_stack: job.tech_stack,
-          limit: limit,
-          email_required: true,
+          email_required: false,
           sort_by:
             case get_job_criteria(job) do
               criteria when map_size(criteria) > 0 -> criteria
               _ -> [{"solver", true}]
             end
         ]
+        |> Keyword.merge(opts)
         |> Algora.Cloud.list_top_matches()
         |> load_matches_2()
     end
   end
 
-  def get_job_matches_count(job) do
+  def get_job_matches_count(job, opts \\ []) do
     case get("job_matches:#{job.id}") do
       %{"matches" => matches} when is_list(matches) ->
         length(matches)
 
       _ ->
-        Algora.Cloud.count_top_matches(
+        [
           tech_stack: job.tech_stack,
-          email_required: true,
+          email_required: false,
           sort_by:
             case get_job_criteria(job) do
               criteria when map_size(criteria) > 0 -> criteria
               _ -> [{"solver", true}]
             end
-        )
+        ]
+        |> Keyword.merge(opts)
+        |> Algora.Cloud.count_top_matches()
     end
   end
 

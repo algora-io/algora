@@ -35,6 +35,7 @@ defmodule AlgoraWeb.Components.TechBadge do
   defp icon_url("huggingface"), do: "/images/logos/huggingface.png"
   defp icon_url("youtube"), do: "/images/logos/youtube.png"
   defp icon_url("tiktok"), do: "/images/logos/tiktok.png"
+
   defp icon_url(tech), do: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/#{icon_path(tech)}"
 
   defp icon_path("aws"), do: "amazonwebservices/amazonwebservices-plain-wordmark.svg"
@@ -59,6 +60,7 @@ defmodule AlgoraWeb.Components.TechBadge do
   defp icon_class("bash"), do: "bg-white invert saturate-0"
   defp icon_class("twitter"), do: "bg-white invert saturate-0"
   defp icon_class("apachekafka"), do: "bg-white invert saturate-0"
+  defp icon_class("emacs"), do: "bg-white invert saturate-0"
   defp icon_class(_tech), do: "bg-transparent"
 
   defp normalize(tech) do
@@ -116,6 +118,9 @@ defmodule AlgoraWeb.Components.TechBadge do
 
       "vim script" ->
         "vim"
+
+      "emacs lisp" ->
+        "emacs"
 
       t ->
         t
@@ -204,7 +209,8 @@ defmodule AlgoraWeb.Components.TechBadge do
       "Envoy",
       "RabbitMQ",
       "Flutter",
-      "Vim"
+      "Vim",
+      "Emacs"
     ]
   end
 end

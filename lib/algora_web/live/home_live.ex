@@ -12,6 +12,7 @@ defmodule AlgoraWeb.HomeLive do
   alias Algora.Bounties
   alias Algora.Jobs
   alias Algora.Jobs.JobPosting
+  alias Algora.Organizations
   alias Algora.Payments
   alias Algora.Payments.Transaction
   alias Algora.Repo
@@ -58,13 +59,18 @@ defmodule AlgoraWeb.HomeLive do
     total_countries = get_countries_count()
 
     stats = [
+      %{label: "Full-time SWEs Hired", value: "30+"},
+      %{label: "Happy Customers", value: "100+"},
+      %{label: "Rewarded Contributors", value: format_number(total_contributors)},
+      %{label: "Countries", value: format_number(total_countries)},
       %{label: "Paid Out", value: format_money(get_total_paid_out())},
-      %{label: "Completed Bounties", value: format_number(get_completed_bounties_count())},
-      %{label: "Contributors", value: format_number(total_contributors)},
-      %{label: "Countries", value: format_number(total_countries)}
+      %{label: "Completed Bounties", value: format_number(get_completed_bounties_count())}
     ]
 
     featured_devs = Accounts.list_featured_developers()
+
+    # Get company and people avatars for the section
+    company_people_examples = get_company_people_examples()
 
     jobs_by_user = Enum.group_by(Jobs.list_jobs(), & &1.user)
 
@@ -82,6 +88,15 @@ defmodule AlgoraWeb.HomeLive do
       )
 
     bounties = bounties0 ++ bounties1
+
+    # Fetch organizations with bounty stats
+    orgs = Organizations.list_orgs(limit: 6)
+
+    orgs_with_stats =
+      Enum.map(orgs, fn org ->
+        stats = Bounties.fetch_stats(org_id: org.id)
+        Map.put(org, :bounty_stats, stats)
+      end)
 
     case socket.assigns[:current_user] do
       %{handle: handle} = user when is_binary(handle) ->
@@ -103,6 +118,8 @@ defmodule AlgoraWeb.HomeLive do
          |> assign(:user_metadata, AsyncResult.loading())
          |> assign(:transactions, Payments.list_featured_transactions())
          |> assign(:bounties, bounties)
+         |> assign(:orgs_with_stats, orgs_with_stats)
+         |> assign(:company_people_examples, company_people_examples)
          |> assign_events()
          |> assign_user_applications()}
     end
@@ -138,104 +155,85 @@ defmodule AlgoraWeb.HomeLive do
       <% end %>
 
       <main class="bg-black relative overflow-hidden">
-        <section class="relative isolate xl:pb-16 2xl:pb-44">
-          <div class="h-full mx-auto container px-6 lg:px-8 flex flex-col items-center justify-center pt-28 2xl:pt-48 pb-12">
-            <div class="h-full mx-auto lg:mx-0 flex lg:max-w-none items-center justify-center text-center w-full">
-              <div class="w-full flex flex-col lg:flex-row lg:justify-center gap-6">
-                <div class="w-full flex flex-col items-center lg:items-start text-center lg:text-left">
-                  <h1 class="font-display text-4xl sm:text-5xl md:text-6xl font-semibold tracking-tight text-foreground">
-                    Meet your <br class="xl:hidden" />
-                    <span class="text-emerald-400">new hire today</span>
-                  </h1>
-                  <p class="mt-2 2xl:mt-4 text-base xl:text-lg text-foreground max-w-2xl">
-                    Access a network of top 1% engineers,<br class="xl:hidden" />
-                    pre-vetted through OSS contributions. <br />
-                    <span class="font-semibold">Only pay when you hire.</span>
-                  </p>
-                  <ul class="mt-2 2xl:mt-6 flex flex-col gap-1 xl:gap-2 text-sm">
-                    <li class="flex items-center text-left text-foreground/80">
-                      <.icon
-                        name="tabler-square-rounded-number-1"
-                        class="size-6 mr-2 shrink-0 text-foreground/80"
-                      />
-                      <span class="font-medium leading-7 whitespace-nowrap">
-                        Submit JD
-                      </span>
-                    </li>
-                    <li class="flex items-center text-left text-foreground/80">
-                      <.icon
-                        name="tabler-square-rounded-number-2"
-                        class="size-6 mr-2 shrink-0 text-foreground/80"
-                      />
-                      <span class="font-medium leading-7 whitespace-nowrap">
-                        Receive matches <span class="text-emerald-300">within hours</span>
-                      </span>
-                    </li>
-                    <li class="flex items-center text-left text-foreground/80">
-                      <.icon
-                        name="tabler-square-rounded-number-3"
-                        class="size-6 mr-2 shrink-0 text-foreground/80"
-                      />
-                      <span class="font-medium leading-7 whitespace-nowrap">
-                        Interview <span class="text-emerald-300">within days</span>
-                      </span>
-                    </li>
-                  </ul>
-                  <img
-                    src="/images/screenshots/job-candidates.png"
-                    alt="Job candidates"
-                    class="-ml-2 mt-4 2xl:mt-10 object-cover w-full max-w-xl xl:max-w-[45rem]"
-                    style="aspect-ratio: 1524/737;"
-                  />
-                </div>
-                <div class="w-full max-w-xl mx-auto lg:max-w-lg 2xl:max-w-[34rem] text-left">
-                  <div class="rounded-xl bg-card text-card-foreground shadow-2xl ring-1 ring-white/15">
-                    <div class="p-6 2xl:p-10">
-                      <h2 class="text-2xl 2xl:text-3xl font-semibold leading-7 text-white">
-                        View your candidates
-                      </h2>
-                      <p class="pt-2 text-sm text-muted-foreground">
-                        Share JD to receive matches within hours
-                      </p>
+        <section class="relative isolate pt-28 pb-16">
+          <div class="mx-auto max-w-4xl px-6 lg:px-8 text-center">
+            <h1 class="pt-12 sm:pt-20 font-display text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-semibold tracking-tight text-foreground">
+              Open source <br />
+              <span class="text-emerald-400">hiring platform</span>
+            </h1>
+            <p class="mt-6 text-sm sm:text-3xl font-medium text-foreground mx-auto">
+              Algora connects companies with
+              <span class="sm:hidden inline">OSS</span><span class="hidden sm:inline">open source</span>
+              engineers <br />for full-time jobs and paid open source contributions.
+            </p>
+            <div class="mt-12 flex items-center justify-center gap-6">
+              <.button
+                id="start-hiring-cta"
+                phx-hook="ScrollToForm"
+                class="h-12 sm:h-14 rounded-md px-8 sm:px-12 text-base sm:text-lg"
+              >
+                Start hiring today
+              </.button>
+              <.button
+                id="start-hiring-cta"
+                phx-hook="ScrollToForm"
+                class="h-12 sm:h-14 rounded-md px-8 sm:px-12 text-base sm:text-lg"
+                variant="secondary"
+              >
+                Watch demo
+              </.button>
+            </div>
+          </div>
+        </section>
 
-                      <.form
-                        for={@form}
-                        phx-submit="submit"
-                        class="mt-4 2xl:mt-6 flex flex-col gap-4 2xl:gap-6"
-                      >
-                        <.input
-                          field={@form[:job_description]}
-                          type="textarea"
-                          label="Job description / careers URL"
-                          rows="3"
-                          placeholder="Tell us about the role and your requirements..."
-                          class="resize-none"
-                        />
-                        <.input
-                          field={@form[:candidate_description]}
-                          type="textarea"
-                          label="Describe your ideal candidate, heuristics, green/red flags etc."
-                          rows="3"
-                          placeholder={placeholder_text()}
-                          class="resize-none"
-                        />
-                        <.input
-                          field={@form[:email]}
-                          type="email"
-                          label="Work email"
-                          placeholder="you@company.com"
-                        />
-                        <div class="flex flex-col gap-4">
-                          <.button class="w-full" type="submit">Receive your candidates</.button>
-                          <div class="text-xs text-muted-foreground text-center">
-                            No credit card required - only pay when you hire
-                          </div>
-                        </div>
-                      </.form>
-                    </div>
+        <section class="relative isolate py-4 sm:py-16">
+          <div class="mx-auto max-w-7xl px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 text-center">
+              <%= for stat <- @stats do %>
+                <div>
+                  <div class="text-2xl sm:text-3xl md:text-4xl font-bold font-display text-emerald-400">
+                    {stat.value}
+                  </div>
+                  <div class="text-sm sm:text-base text-muted-foreground mt-2">
+                    {stat.label}
                   </div>
                 </div>
-              </div>
+              <% end %>
+            </div>
+          </div>
+        </section>
+
+        <section class="relative isolate py-16 sm:pb-40">
+          <div class="mx-auto max-w-7xl px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+              <%= for example <- @company_people_examples do %>
+                <div class="relative flex items-center gap-4 p-6 bg-card rounded-xl border">
+                  <img
+                    src={example.person_avatar}
+                    alt={example.person_name}
+                    class="size-12 rounded-full"
+                  />
+                  <.icon name="tabler-arrow-right" class="size-4 text-muted-foreground" />
+                  <img
+                    src={example.company_avatar}
+                    alt={example.company_name}
+                    class="size-12 rounded-full"
+                  />
+                  <div class="flex-1">
+                    <div class="text-sm font-medium">
+                      {example.person_name}
+                      <.icon name="tabler-arrow-right" class="size-2 text-foreground" /> {example.company_name}
+                    </div>
+                    <div class="text-xs text-muted-foreground mt-1">{example.person_title}</div>
+                  </div>
+                  <.badge
+                    variant="secondary"
+                    class="absolute -top-2 -left-2 text-xs px-2 py-1 text-emerald-400 bg-emerald-950"
+                  >
+                    Full-time hire!
+                  </.badge>
+                </div>
+              <% end %>
             </div>
           </div>
         </section>
@@ -326,17 +324,284 @@ defmodule AlgoraWeb.HomeLive do
 
         <section class="relative isolate pb-16 sm:pb-40">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
-            <h2 class="font-display text-xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-semibold tracking-tight text-foreground text-center mb-4 !leading-[1.25]">
-              Community highlights
+            <h2 class="font-display text-xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight text-foreground text-center mb-8">
+              Open positions
             </h2>
-            <p class="mt-2 text-lg text-muted-foreground text-center">
-              See what's poppin' on Algora
+
+            <div class="flex flex-wrap justify-center gap-3 mb-8">
+              <.button variant="secondary" size="sm" class="text-xs">
+                All
+              </.button>
+              <.button variant="outline" size="sm" class="text-xs">
+                San Francisco
+              </.button>
+              <.button variant="outline" size="sm" class="text-xs">
+                Remote
+              </.button>
+              <.button variant="outline" size="sm" class="text-xs">
+                Python
+              </.button>
+              <.button variant="outline" size="sm" class="text-xs">
+                TypeScript
+              </.button>
+              <.button variant="outline" size="sm" class="text-xs">
+                Rust
+              </.button>
+              <.button variant="outline" size="sm" class="text-xs">
+                AI/ML
+              </.button>
+            </div>
+
+            <%= if Enum.empty?(@jobs_by_user) do %>
+              <div class="text-center py-12">
+                <.icon name="tabler-briefcase" class="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p class="text-muted-foreground">No open positions at the moment</p>
+              </div>
+            <% else %>
+              <div class="flex flex-col sm:grid gap-6 max-w-4xl mx-auto">
+                <%= for {user, jobs} <- Enum.take(@jobs_by_user, 3) do %>
+                  <%= for job <- Enum.take(jobs, 1) do %>
+                    <div class="flex items-center justify-between p-6 bg-card rounded-xl border hover:shadow-lg transition-shadow">
+                      <div class="flex items-center gap-4">
+                        <.avatar class="h-12 w-12">
+                          <.avatar_image src={user.avatar_url} />
+                          <.avatar_fallback>
+                            {Algora.Util.initials(user.name)}
+                          </.avatar_fallback>
+                        </.avatar>
+                        <div>
+                          <div class="font-semibold text-foreground line-clamp-1">{job.title}</div>
+                          <div class="text-sm text-muted-foreground">{user.name}</div>
+                          <div class="flex gap-2 mt-2">
+                            <%= for tech <- Enum.take(job.tech_stack || [], 2) do %>
+                              <.tech_badge tech={tech} size="sm" />
+                            <% end %>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="text-right">
+                        <%= if MapSet.member?(@user_applications, job.id) do %>
+                          <.button size="sm" disabled class="opacity-50">
+                            Applied
+                          </.button>
+                        <% else %>
+                          <.button size="sm" phx-click="apply_job" phx-value-job-id={job.id}>
+                            Apply
+                          </.button>
+                        <% end %>
+                      </div>
+                    </div>
+                  <% end %>
+                <% end %>
+              </div>
+
+              <div class="text-center mt-8">
+                <.button navigate={~p"/jobs"} variant="outline">
+                  View all positions
+                </.button>
+              </div>
+            <% end %>
+          </div>
+        </section>
+
+        <section class="relative isolate pb-16 sm:pb-40">
+          <div class="mx-auto max-w-7xl px-6 lg:px-8">
+            <h2 class="font-display text-xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight text-foreground text-center mb-8">
+              Active bounty programs
+            </h2>
+            <p class="text-center text-muted-foreground mb-12">
+              Contribute to open source and get paid by top companies when your PRs are merged
             </p>
 
-            <div class="mt-8 grid gap-4 max-w-2xl mx-auto">
-              <%= for event <- events() do %>
-                <.event_card event={event} />
-              <% end %>
+            <%= if Enum.empty?(@orgs_with_stats) do %>
+              <div class="text-center py-12">
+                <.icon name="tabler-trophy" class="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p class="text-muted-foreground">No active bounty programs at the moment</p>
+              </div>
+            <% else %>
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+                <%= for org <- @orgs_with_stats do %>
+                  <.link navigate={~p"/#{org.handle}/home"} class="group">
+                    <div class="relative h-full p-6 bg-card rounded-xl border hover:border-emerald-400/50 hover:shadow-lg transition-all duration-200 group-hover:scale-[1.02]">
+                      <div class="flex items-center gap-4 mb-4">
+                        <img src={org.avatar_url} alt={org.name} class="size-12 rounded-full" />
+                        <div>
+                          <h3 class="font-semibold text-foreground group-hover:text-emerald-400 transition-colors">
+                            {org.name}
+                          </h3>
+                          <p class="text-sm text-muted-foreground line-clamp-1">
+                            {org.bio}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div class="grid grid-cols-3 gap-4 mb-4">
+                        <div class="text-center p-3 bg-background/50 rounded-lg">
+                          <div class="text-lg font-bold font-display text-emerald-400">
+                            {org.bounty_stats.open_bounties_count || 0}
+                          </div>
+                          <div class="text-xs text-muted-foreground">Open bounties</div>
+                        </div>
+                        <div class="text-center p-3 bg-background/50 rounded-lg">
+                          <div class="text-lg font-bold font-display text-emerald-400">
+                            {org.bounty_stats.rewarded_bounties_count || 0}
+                          </div>
+                          <div class="text-xs text-muted-foreground">Rewarded bounties</div>
+                        </div>
+                        <div class="text-center p-3 bg-background/50 rounded-lg">
+                          <div class="text-lg font-bold font-display text-emerald-400">
+                            {org.bounty_stats.solvers_count || 0}
+                          </div>
+                          <div class="text-xs text-muted-foreground">Developers rewarded</div>
+                        </div>
+                      </div>
+
+                      <%= if org.bounty_stats.total_awarded_amount do %>
+                        <div class="text-center p-3 bg-emerald-400/10 rounded-lg border border-emerald-400/20">
+                          <div class="text-sm font-medium text-emerald-400">
+                            <span class="font-display">
+                              {format_money(org.bounty_stats.total_awarded_amount)}
+                            </span>
+                            paid out
+                          </div>
+                        </div>
+                      <% end %>
+
+                      <div class="flex items-center justify-center mt-4 gap-2 text-xs text-muted-foreground group-hover:text-emerald-400 transition-colors">
+                        <span>View bounties</span>
+                        <.icon name="tabler-arrow-right" class="size-3" />
+                      </div>
+                    </div>
+                  </.link>
+                <% end %>
+              </div>
+
+              <div class="text-center mt-8">
+                <.button navigate={~p"/bounties"} variant="outline">
+                  View all bounties
+                </.button>
+              </div>
+            <% end %>
+          </div>
+        </section>
+
+        <section class="relative isolate pb-16 sm:pb-40">
+          <div class="mx-auto max-w-7xl px-6 lg:px-8">
+            <h2 class="font-display text-xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-semibold tracking-tight text-foreground text-center mb-4 !leading-[1.25]">
+              Our journey
+            </h2>
+            <p class="mt-2 text-lg text-muted-foreground text-center">
+              From coding marketplace to the largest open source hiring platform
+            </p>
+
+            <div class="mt-12 max-w-4xl mx-auto">
+              <div class="relative">
+                <!-- Timeline line -->
+                <div class="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-emerald-400 via-emerald-400/50 to-transparent">
+                </div>
+
+                <div class="space-y-12">
+                  <!-- 2022 -->
+                  <div class="relative flex items-start gap-6">
+                    <div class="flex-shrink-0 w-16 h-16 bg-emerald-400 rounded-full flex items-center justify-center text-black font-bold text-lg">
+                      2022
+                    </div>
+                    <div class="flex-1 pb-8">
+                      <h3 class="text-xl font-semibold text-foreground mb-2">
+                        "Uber for Coding" concept
+                      </h3>
+                      <p class="text-muted-foreground mb-4">
+                        Started as an on-demand platform where companies could press a button and get developers. The concept resonated with the community and gained traction on Hacker News.
+                      </p>
+                      <.link
+                        href="https://news.ycombinator.com/item?id=32129089"
+                        target="_blank"
+                        class="inline-flex items-center gap-2 text-sm text-foreground/90 hover:text-foreground transition-colors group"
+                      >
+                        <.icon
+                          name="tabler-brand-ycombinator"
+                          class="size-5 text-orange-500 group-hover:text-orange-400 transition-colors"
+                        /> View HN discussion
+                      </.link>
+                    </div>
+                  </div>
+                  
+    <!-- 2023 -->
+                  <div class="relative flex items-start gap-6">
+                    <div class="flex-shrink-0 w-16 h-16 bg-emerald-400 rounded-full flex items-center justify-center text-black font-bold text-lg">
+                      2023
+                    </div>
+                    <div class="flex-1 pb-8">
+                      <h3 class="text-xl font-semibold text-foreground mb-2">
+                        Pivoted to open source bounties
+                      </h3>
+                      <p class="text-muted-foreground mb-4">
+                        Launched a new platform focused on open source projects with bounties and payments. This pivot unlocked a massive opportunity in the developer ecosystem.
+                      </p>
+                      <.link
+                        href="https://news.ycombinator.com/item?id=32129089"
+                        target="_blank"
+                        class="inline-flex items-center gap-2 text-sm text-foreground/90 hover:text-foreground transition-colors group"
+                      >
+                        <.icon
+                          name="tabler-brand-ycombinator"
+                          class="size-5 text-orange-500 group-hover:text-orange-400 transition-colors"
+                        /> View HN discussion
+                      </.link>
+                    </div>
+                  </div>
+                  
+    <!-- 2024 -->
+                  <div class="relative flex items-start gap-6">
+                    <div class="flex-shrink-0 w-16 h-16 bg-emerald-400 rounded-full flex items-center justify-center text-black font-bold text-lg">
+                      2024
+                    </div>
+                    <div class="flex-1 pb-8">
+                      <h3 class="text-xl font-semibold text-foreground mb-2">
+                        Became the largest OSS hiring platform
+                      </h3>
+                      <p class="text-muted-foreground mb-4">
+                        Through our bounty platform, we helped hundreds of open source engineers get hired by top companies. We discovered we had built a powerful sourcing and hiring engine.
+                      </p>
+                      <div class="flex gap-6 text-sm">
+                        <div class="text-left">
+                          <div class="text-lg font-bold font-display text-emerald-400">
+                            {format_number(get_contributors_count())}
+                          </div>
+                          <div class="text-muted-foreground">Full-time engineers hired</div>
+                        </div>
+                        <div class="text-left">
+                          <div class="text-lg font-bold font-display text-emerald-400">
+                            {format_money(get_total_paid_out())}
+                          </div>
+                          <div class="text-muted-foreground">Paid to developers</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+    <!-- 2025 -->
+                  <div class="relative flex items-start gap-6">
+                    <div class="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-emerald-400 to-emerald-500 rounded-full flex items-center justify-center text-black font-bold text-lg shadow-lg">
+                      2025
+                    </div>
+                    <div class="flex-1">
+                      <h3 class="text-xl font-semibold text-foreground mb-2">
+                        The future: Uber for hiring
+                      </h3>
+                      <p class="text-muted-foreground mb-4">
+                        Today, companies simply share their job description and receive qualified candidates within hours. We've transformed from a coding marketplace into the most efficient hiring platform for technical talent.
+                      </p>
+                      <div class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-400/10 border border-emerald-400/20 rounded-lg">
+                        <.icon name="tabler-rocket" class="size-4 text-emerald-400" />
+                        <span class="text-sm font-medium text-emerald-400">
+                          New HN launch coming in July
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -778,6 +1043,54 @@ defmodule AlgoraWeb.HomeLive do
       />
     </.link>
     """
+  end
+
+  defp get_company_people_examples do
+    [
+      %{
+        company_name: "Qdrant",
+        company_avatar: "https://github.com/qdrant.png",
+        person_name: "Tim",
+        person_avatar: "https://algora-console.fly.storage.tigris.dev/avatars/timvisee.jpeg",
+        person_title: "Lead Software Engineer"
+      },
+      %{
+        company_name: "Trigger.dev",
+        company_avatar: "https://github.com/triggerdotdev.png",
+        person_name: "Nick",
+        person_avatar: "https://github.com/nicktrn.png",
+        person_title: "Founding Engineer"
+      },
+      %{
+        company_name: "Firecrawl",
+        company_avatar: "https://github.com/mendableai.png",
+        person_name: "Gergő",
+        person_avatar: "https://github.com/mogery.png",
+        person_title: "Software Engineer"
+      },
+      %{
+        company_name: "Tailcall",
+        company_avatar:
+          "https://algora.io/asset/storage/v1/object/public/images/org/cli0b0kdt0000mh0fngt4r4bk-1741007407053",
+        person_name: "Kiryl",
+        person_avatar: "https://algora.io/asset/storage/v1/object/public/images/user/clg4rtl2n0002jv0fg30lto6l",
+        person_title: "Founding Engineer"
+      },
+      %{
+        company_name: "Cal.com",
+        company_avatar: "https://github.com/calcom.png",
+        person_name: "Efraín",
+        person_avatar: "https://github.com/roae.png",
+        person_title: "Software Engineer"
+      },
+      %{
+        company_name: "Golem Cloud",
+        company_avatar: "https://github.com/golemcloud.png",
+        person_name: "Maxim",
+        person_avatar: "https://github.com/mschuwalow.png",
+        person_title: "Lead Engineer"
+      }
+    ]
   end
 
   defp events do

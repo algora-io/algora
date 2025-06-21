@@ -147,28 +147,31 @@ defmodule AlgoraWeb.HomeLive do
       <% end %>
 
       <main class="bg-black relative overflow-hidden">
-        <section class="relative isolate pt-28 pb-16">
+        <section class="relative isolate pt-28 pb-8 sm:pb-16">
           <div class="mx-auto max-w-4xl px-6 lg:px-8 text-center">
             <h1 class="pt-12 sm:pt-20 font-display text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-semibold tracking-tight text-foreground">
               Open source <br />
               <span class="text-emerald-400">hiring platform</span>
             </h1>
-            <p class="mt-6 text-sm sm:text-3xl font-medium text-foreground mx-auto">
+            <p class="mt-4 sm:mt-6 text-sm sm:text-3xl font-medium text-foreground mx-auto">
               Algora connects companies with
               <span class="sm:hidden inline">OSS</span><span class="hidden sm:inline">open source</span>
-              engineers <br />for full-time jobs and paid open source contributions.
+              engineers <br />for full-time jobs and paid
+              <span class="sm:hidden inline">OSS</span><span class="hidden sm:inline">open source</span>
+              contributions.
             </p>
-            <div class="mt-12 flex items-center justify-center gap-6">
+            <div class="mt-12 flex items-center justify-center gap-4 sm:gap-6">
               <.button
                 navigate={~p"/onboarding/org"}
-                class="h-12 sm:h-14 rounded-md px-8 sm:px-12 text-base sm:text-lg"
+                class="h-12 sm:h-14 rounded-md px-6 sm:px-12 text-base sm:text-lg"
               >
                 Start hiring today
               </.button>
               <.button
-                id="start-hiring-cta"
-                phx-hook="ScrollToForm"
-                class="h-12 sm:h-14 rounded-md px-8 sm:px-12 text-base sm:text-lg"
+                href="https://www.youtube.com/watch?v=Jne9mVas9i0"
+                target="_blank"
+                rel="noopener"
+                class="h-12 sm:h-14 rounded-md px-6 sm:px-12 text-base sm:text-lg"
                 variant="secondary"
               >
                 Watch demo
@@ -198,22 +201,22 @@ defmodule AlgoraWeb.HomeLive do
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
               <%= for example <- @company_people_examples do %>
-                <div class="relative flex items-center gap-4 p-6 bg-card rounded-xl border">
+                <div class="relative flex items-center gap-3 p-6 bg-card rounded-xl border shrink-0">
                   <img
                     src={example.person_avatar}
                     alt={example.person_name}
-                    class="size-12 rounded-full"
+                    class="size-8 sm:size-12 rounded-full"
                   />
-                  <.icon name="tabler-arrow-right" class="size-4 text-muted-foreground" />
+                  <.icon name="tabler-arrow-right" class="size-4 text-muted-foreground shrink-0" />
                   <img
                     src={example.company_avatar}
                     alt={example.company_name}
-                    class="size-12 rounded-full"
+                    class="size-8 sm:size-12 rounded-full"
                   />
                   <div class="flex-1">
-                    <div class="text-sm font-medium">
+                    <div class="text-sm font-medium whitespace-nowrap">
                       {example.person_name}
-                      <.icon name="tabler-arrow-right" class="size-2 text-foreground" /> {example.company_name}
+                      <.icon name="tabler-arrow-right" class="size-3 text-foreground" /> {example.company_name}
                     </div>
                     <div class="text-xs text-muted-foreground mt-1">{example.person_title}</div>
                   </div>
@@ -237,7 +240,7 @@ defmodule AlgoraWeb.HomeLive do
               alt="Y Combinator Logo"
               loading="lazy"
             />
-            <h2 class="mt-4 sm:mt-8 font-display text-xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-semibold tracking-tight text-foreground text-center mb-4 !leading-[1.25]">
+            <h2 class="mt-4 sm:mt-8 font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-semibold tracking-tight text-foreground text-center mb-4 !leading-[1.25]">
               Trusted by <br class="md:hidden" /> open source YC founders
             </h2>
 
@@ -315,9 +318,12 @@ defmodule AlgoraWeb.HomeLive do
 
         <section class="relative isolate pb-16 sm:pb-40">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
-            <h2 class="font-display text-xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight text-foreground text-center mb-8">
+            <h2 class="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight text-foreground text-center mb-2">
               Open positions
             </h2>
+            <p class="text-center text-muted-foreground mb-8">
+              Discover jobs at top startups
+            </p>
 
             <%!-- <div class="flex flex-wrap justify-center gap-3 mb-8">
               <.button variant="secondary" size="sm" class="text-xs">
@@ -352,31 +358,38 @@ defmodule AlgoraWeb.HomeLive do
               <div class="flex flex-col sm:grid gap-6 max-w-4xl mx-auto">
                 <%= for {user, jobs} <- Enum.take(@jobs_by_user, 3) do %>
                   <%= for job <- Enum.take(jobs, 1) do %>
-                    <div class="flex items-center justify-between p-6 bg-card rounded-xl border hover:shadow-lg transition-shadow">
-                      <div class="flex items-center gap-4">
-                        <.avatar class="h-12 w-12">
-                          <.avatar_image src={user.avatar_url} />
-                          <.avatar_fallback>
-                            {Algora.Util.initials(user.name)}
-                          </.avatar_fallback>
-                        </.avatar>
-                        <div>
-                          <div class="font-semibold text-foreground line-clamp-1">{job.title}</div>
-                          <div class="text-sm text-muted-foreground">{user.name}</div>
-                          <div class="flex gap-2 mt-2">
-                            <%= for tech <- Enum.take(job.tech_stack || [], 2) do %>
-                              <.tech_badge tech={tech} size="sm" />
-                            <% end %>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-between p-6 bg-card rounded-xl border hover:shadow-lg transition-shadow">
+                      <div>
+                        <div class="flex items-start gap-4">
+                          <.avatar class="size-12">
+                            <.avatar_image src={user.avatar_url} />
+                            <.avatar_fallback>
+                              {Algora.Util.initials(user.name)}
+                            </.avatar_fallback>
+                          </.avatar>
+                          <div>
+                            <div class="font-semibold text-foreground">{job.title}</div>
+                            <div class="text-sm text-muted-foreground">{user.name}</div>
                           </div>
                         </div>
+                        <div class="flex gap-2 mt-2 sm:pl-12">
+                          <%= for tech <- Enum.take(job.tech_stack || [], 3) do %>
+                            <.tech_badge tech={tech} size="sm" />
+                          <% end %>
+                        </div>
                       </div>
-                      <div class="text-right">
+                      <div>
                         <%= if MapSet.member?(@user_applications, job.id) do %>
-                          <.button size="sm" disabled class="opacity-50">
+                          <.button size="sm" disabled class="opacity-50 w-full sm:w-auto">
                             Applied
                           </.button>
                         <% else %>
-                          <.button size="sm" phx-click="apply_job" phx-value-job-id={job.id}>
+                          <.button
+                            size="sm"
+                            phx-click="apply_job"
+                            phx-value-job-id={job.id}
+                            class="w-full sm:w-auto"
+                          >
                             Apply
                           </.button>
                         <% end %>
@@ -397,10 +410,10 @@ defmodule AlgoraWeb.HomeLive do
 
         <section class="relative isolate pb-16 sm:pb-40">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
-            <h2 class="font-display text-xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight text-foreground text-center mb-8">
+            <h2 class="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight text-foreground text-center mb-2">
               Active bounty programs
             </h2>
-            <p class="text-center text-muted-foreground mb-12">
+            <p class="text-center text-muted-foreground mb-8">
               Contribute to open source and get paid by top companies when your PRs are merged
             </p>
 
@@ -414,13 +427,13 @@ defmodule AlgoraWeb.HomeLive do
                 <%= for org <- @orgs_with_stats do %>
                   <.link navigate={~p"/#{org.handle}/home"} class="group">
                     <div class="relative h-full p-6 bg-card rounded-xl border hover:border-emerald-400/50 hover:shadow-lg transition-all duration-200 group-hover:scale-[1.02]">
-                      <div class="flex items-center gap-4 mb-4">
+                      <div class="flex items-start gap-4 mb-4">
                         <img src={org.avatar_url} alt={org.name} class="size-12 rounded-full" />
                         <div>
-                          <h3 class="font-semibold text-foreground group-hover:text-emerald-400 transition-colors">
+                          <h3 class="text-lg font-semibold text-foreground/90 group-hover:text-foreground transition-colors">
                             {org.name}
                           </h3>
-                          <p class="text-sm text-muted-foreground line-clamp-1">
+                          <p class="text-sm text-muted-foreground line-clamp-2">
                             {org.bio}
                           </p>
                         </div>
@@ -1042,11 +1055,11 @@ defmodule AlgoraWeb.HomeLive do
         person_title: "Lead Software Engineer"
       },
       %{
-        company_name: "Trigger.dev",
-        company_avatar: "https://github.com/triggerdotdev.png",
-        person_name: "Nick",
-        person_avatar: "https://github.com/nicktrn.png",
-        person_title: "Founding Engineer"
+        company_name: "Golem Cloud",
+        company_avatar: "https://github.com/golemcloud.png",
+        person_name: "Maxim",
+        person_avatar: "https://github.com/mschuwalow.png",
+        person_title: "Lead Engineer"
       },
       %{
         company_name: "Firecrawl",
@@ -1056,14 +1069,6 @@ defmodule AlgoraWeb.HomeLive do
         person_title: "Software Engineer"
       },
       %{
-        company_name: "Tailcall",
-        company_avatar:
-          "https://algora.io/asset/storage/v1/object/public/images/org/cli0b0kdt0000mh0fngt4r4bk-1741007407053",
-        person_name: "Kiryl",
-        person_avatar: "https://algora.io/asset/storage/v1/object/public/images/user/clg4rtl2n0002jv0fg30lto6l",
-        person_title: "Founding Engineer"
-      },
-      %{
         company_name: "Cal.com",
         company_avatar: "https://github.com/calcom.png",
         person_name: "Efraín",
@@ -1071,11 +1076,19 @@ defmodule AlgoraWeb.HomeLive do
         person_title: "Software Engineer"
       },
       %{
-        company_name: "Golem Cloud",
-        company_avatar: "https://github.com/golemcloud.png",
-        person_name: "Maxim",
-        person_avatar: "https://github.com/mschuwalow.png",
-        person_title: "Lead Engineer"
+        company_name: "Trigger.dev",
+        company_avatar: "https://github.com/triggerdotdev.png",
+        person_name: "Nick",
+        person_avatar: "https://github.com/nicktrn.png",
+        person_title: "Founding Engineer"
+      },
+      %{
+        company_name: "Tailcall",
+        company_avatar:
+          "https://algora.io/asset/storage/v1/object/public/images/org/cli0b0kdt0000mh0fngt4r4bk-1741007407053",
+        person_name: "Kiryl",
+        person_avatar: "https://algora.io/asset/storage/v1/object/public/images/user/clg4rtl2n0002jv0fg30lto6l",
+        person_title: "Founding Engineer"
       }
     ]
   end

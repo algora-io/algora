@@ -318,7 +318,7 @@ defmodule AlgoraWeb.HomeLive do
 
         <section class="relative isolate pb-16 sm:pb-40">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
-            <h2 class="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight text-foreground text-center mb-2">
+            <h2 class="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-semibold tracking-tight text-foreground text-center mb-2">
               Open positions
             </h2>
             <p class="text-center text-muted-foreground mb-8">
@@ -410,7 +410,7 @@ defmodule AlgoraWeb.HomeLive do
 
         <section class="relative isolate pb-16 sm:pb-40">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
-            <h2 class="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight text-foreground text-center mb-2">
+            <h2 class="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-semibold tracking-tight text-foreground text-center mb-2">
               Active bounty programs
             </h2>
             <p class="text-center text-muted-foreground mb-8">

@@ -45,14 +45,6 @@ defmodule AlgoraWeb.HomeLive do
     end
   end
 
-  defp placeholder_text do
-    """
-    - GitHub looks like a green carpet, red flag if wearing suit in pfp
-    - Has contributions to open source inference engines (like vLLM)
-    - Posts regularly on X and LinkedIn
-    """
-  end
-
   @impl true
   def mount(params, _session, socket) do
     total_contributors = get_contributors_count()
@@ -168,8 +160,7 @@ defmodule AlgoraWeb.HomeLive do
             </p>
             <div class="mt-12 flex items-center justify-center gap-6">
               <.button
-                id="start-hiring-cta"
-                phx-hook="ScrollToForm"
+                navigate={~p"/onboarding/org"}
                 class="h-12 sm:h-14 rounded-md px-8 sm:px-12 text-base sm:text-lg"
               >
                 Start hiring today
@@ -328,7 +319,7 @@ defmodule AlgoraWeb.HomeLive do
               Open positions
             </h2>
 
-            <div class="flex flex-wrap justify-center gap-3 mb-8">
+            <%!-- <div class="flex flex-wrap justify-center gap-3 mb-8">
               <.button variant="secondary" size="sm" class="text-xs">
                 All
               </.button>
@@ -350,7 +341,7 @@ defmodule AlgoraWeb.HomeLive do
               <.button variant="outline" size="sm" class="text-xs">
                 AI/ML
               </.button>
-            </div>
+            </div> --%>
 
             <%= if Enum.empty?(@jobs_by_user) do %>
               <div class="text-center py-12">
@@ -487,7 +478,7 @@ defmodule AlgoraWeb.HomeLive do
 
         <section class="relative isolate pb-16 sm:pb-40">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
-            <h2 class="font-display text-xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-semibold tracking-tight text-foreground text-center mb-4 !leading-[1.25]">
+            <h2 class="font-display text-4xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-semibold tracking-tight text-foreground text-center mb-4 !leading-[1.25]">
               Our journey
             </h2>
             <p class="mt-2 text-lg text-muted-foreground text-center">
@@ -508,10 +499,10 @@ defmodule AlgoraWeb.HomeLive do
                     </div>
                     <div class="flex-1 pb-8">
                       <h3 class="text-xl font-semibold text-foreground mb-2">
-                        "Uber for Coding" concept
+                        "Uber for Coding" introduced
                       </h3>
                       <p class="text-muted-foreground mb-4">
-                        Started as an on-demand platform where companies could press a button and get developers. The concept resonated with the community and gained traction on Hacker News.
+                        Launched an on-demand marketplace where companies would match with a developer for contract work with a click of a button. The top HN comment branded us "delusional entrepreneurs", and we struggled to make it work for the next 6 months.
                       </p>
                       <.link
                         href="https://news.ycombinator.com/item?id=32129089"
@@ -533,13 +524,13 @@ defmodule AlgoraWeb.HomeLive do
                     </div>
                     <div class="flex-1 pb-8">
                       <h3 class="text-xl font-semibold text-foreground mb-2">
-                        Pivoted to open source bounties
+                        Open source bounties launched
                       </h3>
                       <p class="text-muted-foreground mb-4">
-                        Launched a new platform focused on open source projects with bounties and payments. This pivot unlocked a massive opportunity in the developer ecosystem.
+                        Launched a new platform focused on open source projects with bounties and payments integrated on GitHub. We successfully reduced friction and increased trust for paid open source contributions, and fulfilled our vision of "press a button and get work done".
                       </p>
                       <.link
-                        href="https://news.ycombinator.com/item?id=32129089"
+                        href="https://news.ycombinator.com/item?id=35412226"
                         target="_blank"
                         class="inline-flex items-center gap-2 text-sm text-foreground/90 hover:text-foreground transition-colors group"
                       >
@@ -558,25 +549,22 @@ defmodule AlgoraWeb.HomeLive do
                     </div>
                     <div class="flex-1 pb-8">
                       <h3 class="text-xl font-semibold text-foreground mb-2">
-                        Became the largest OSS hiring platform
+                        Sustainable & profitable
                       </h3>
                       <p class="text-muted-foreground mb-4">
-                        Through our bounty platform, we helped hundreds of open source engineers get hired by top companies. We discovered we had built a powerful sourcing and hiring engine.
+                        Algora Public Benefit Corporation became a bootstrapped, profitable business. Dozens of customers hired full-time the engineers they met with Algora. We unlocked a bigger adjacent problem to solve: full-time hiring.
+                        <%!-- Through our bounty platform, we helped hundreds of open source engineers get hired by top companies. We discovered we had built a powerful sourcing and hiring engine. --%>
                       </p>
-                      <div class="flex gap-6 text-sm">
-                        <div class="text-left">
-                          <div class="text-lg font-bold font-display text-emerald-400">
-                            {format_number(get_contributors_count())}
-                          </div>
-                          <div class="text-muted-foreground">Full-time engineers hired</div>
-                        </div>
-                        <div class="text-left">
-                          <div class="text-lg font-bold font-display text-emerald-400">
-                            {format_money(get_total_paid_out())}
-                          </div>
-                          <div class="text-muted-foreground">Paid to developers</div>
-                        </div>
-                      </div>
+                      <.link
+                        href="https://news.ycombinator.com/item?id=37769595"
+                        target="_blank"
+                        class="inline-flex items-center gap-2 text-sm text-foreground/90 hover:text-foreground transition-colors group"
+                      >
+                        <.icon
+                          name="tabler-brand-ycombinator"
+                          class="size-5 text-orange-500 group-hover:text-orange-400 transition-colors"
+                        /> View HN discussion
+                      </.link>
                     </div>
                   </div>
                   
@@ -590,7 +578,7 @@ defmodule AlgoraWeb.HomeLive do
                         The future: Uber for hiring
                       </h3>
                       <p class="text-muted-foreground mb-4">
-                        Today, companies simply share their job description and receive qualified candidates within hours. We've transformed from a coding marketplace into the most efficient hiring platform for technical talent.
+                        Today, companies simply share their job description and receive qualified candidates within hours. We've transformed from a coding marketplace into the most efficient hiring platform for technical talent globally.
                       </p>
                       <div class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-400/10 border border-emerald-400/20 rounded-lg">
                         <.icon name="tabler-rocket" class="size-4 text-emerald-400" />
@@ -613,8 +601,7 @@ defmodule AlgoraWeb.HomeLive do
             </h2>
             <div class="mt-6 sm:mt-10 flex gap-4 justify-center">
               <.button
-                id="start-hiring-button"
-                phx-hook="ScrollToTop"
+                navigate={~p"/onboarding/org"}
                 class="h-10 sm:h-14 rounded-md px-8 sm:px-12 text-sm sm:text-xl"
               >
                 Start hiring

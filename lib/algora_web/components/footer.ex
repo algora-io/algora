@@ -203,6 +203,15 @@ defmodule AlgoraWeb.Components.Footer do
             </.link>
             <.link
               class="rounded-xl border-2 border-gray-500 p-3 text-gray-400 transition-colors hover:border-gray-400 hover:text-gray-300 sm:p-3"
+              href={Constants.get(:linkedin_url)}
+              rel="noopener"
+              target="_blank"
+            >
+              <span class="sr-only">LinkedIn</span>
+              <.icon name="tabler-brand-linkedin" class="h-6 w-6 sm:h-8 sm:w-8" />
+            </.link>
+            <.link
+              class="rounded-xl border-2 border-gray-500 p-3 text-gray-400 transition-colors hover:border-gray-400 hover:text-gray-300 sm:p-3"
               href={Constants.get(:youtube_url)}
               rel="noopener"
               target="_blank"

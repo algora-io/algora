@@ -12,6 +12,7 @@ defmodule AlgoraWeb.Constants do
       youtube_url: "https://www.youtube.com/@algora-io",
       discord_url: ~p"/discord",
       github_url: "https://github.com/algora-io",
+      linkedin_url: "https://linkedin.com/company/algorapbc",
       calendar_url: "https://cal.com/ioannisflo",
       github_repo_url: "https://github.com/algora-io/algora",
       github_repo_api_url: "https://api.github.com/repos/algora-io/algora",

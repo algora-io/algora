@@ -61,6 +61,7 @@ defmodule AlgoraWeb.Components.TechBadge do
   defp icon_class("twitter"), do: "bg-white invert saturate-0"
   defp icon_class("apachekafka"), do: "bg-white invert saturate-0"
   defp icon_class("emacs"), do: "bg-white invert saturate-0"
+  defp icon_class("flask"), do: "bg-white invert saturate-0"
   defp icon_class(_tech), do: "bg-transparent"
 
   defp normalize(tech) do
@@ -210,7 +211,8 @@ defmodule AlgoraWeb.Components.TechBadge do
       "RabbitMQ",
       "Flutter",
       "Vim",
-      "Emacs"
+      "Emacs",
+      "Flask"
     ]
   end
 end

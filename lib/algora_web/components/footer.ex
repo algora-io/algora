@@ -173,9 +173,9 @@ defmodule AlgoraWeb.Components.Footer do
             # "mt-16 sm:mt-20 lg:mt-24"
           ])
         }>
-          <div class="flex gap-4 sm:gap-6 md:order-2">
+          <div class="flex gap-3 sm:gap-6 md:order-2">
             <.link
-              class="rounded-xl border-2 border-gray-500 p-3 text-gray-400 transition-colors hover:border-gray-400 hover:text-gray-300 sm:p-3"
+              class="rounded-xl border-2 border-gray-500 p-2 text-gray-400 transition-colors hover:border-gray-400 hover:text-gray-300 sm:p-3"
               href={Constants.get(:discord_url)}
               rel="noopener"
               target="_blank"
@@ -184,7 +184,7 @@ defmodule AlgoraWeb.Components.Footer do
               <.icon name="tabler-brand-discord-filled" class="h-6 w-6 sm:h-8 sm:w-8" />
             </.link>
             <.link
-              class="rounded-xl border-2 border-gray-500 p-3 text-gray-400 transition-colors hover:border-gray-400 hover:text-gray-300 sm:p-3"
+              class="rounded-xl border-2 border-gray-500 p-2 text-gray-400 transition-colors hover:border-gray-400 hover:text-gray-300 sm:p-3"
               href={Constants.get(:twitter_url)}
               rel="noopener"
               target="_blank"
@@ -193,7 +193,7 @@ defmodule AlgoraWeb.Components.Footer do
               <.icon name="tabler-brand-x" class="h-6 w-6 sm:h-8 sm:w-8" />
             </.link>
             <.link
-              class="rounded-xl border-2 border-gray-500 p-3 text-gray-400 transition-colors hover:border-gray-400 hover:text-gray-300 sm:p-3"
+              class="rounded-xl border-2 border-gray-500 p-2 text-gray-400 transition-colors hover:border-gray-400 hover:text-gray-300 sm:p-3"
               href={Constants.get(:github_url)}
               rel="noopener"
               target="_blank"
@@ -202,7 +202,7 @@ defmodule AlgoraWeb.Components.Footer do
               <Logos.github class="h-6 w-6 sm:h-8 sm:w-8" />
             </.link>
             <.link
-              class="rounded-xl border-2 border-gray-500 p-3 text-gray-400 transition-colors hover:border-gray-400 hover:text-gray-300 sm:p-3"
+              class="rounded-xl border-2 border-gray-500 p-2 text-gray-400 transition-colors hover:border-gray-400 hover:text-gray-300 sm:p-3"
               href={Constants.get(:linkedin_url)}
               rel="noopener"
               target="_blank"
@@ -211,7 +211,7 @@ defmodule AlgoraWeb.Components.Footer do
               <.icon name="tabler-brand-linkedin" class="h-6 w-6 sm:h-8 sm:w-8" />
             </.link>
             <.link
-              class="rounded-xl border-2 border-gray-500 p-3 text-gray-400 transition-colors hover:border-gray-400 hover:text-gray-300 sm:p-3"
+              class="rounded-xl border-2 border-gray-500 p-2 text-gray-400 transition-colors hover:border-gray-400 hover:text-gray-300 sm:p-3"
               href={Constants.get(:youtube_url)}
               rel="noopener"
               target="_blank"
@@ -220,7 +220,7 @@ defmodule AlgoraWeb.Components.Footer do
               <.icon name="tabler-brand-youtube-filled" class="h-6 w-6 sm:h-8 sm:w-8" />
             </.link>
             <.link
-              class="rounded-xl border-2 border-gray-500 p-3 text-gray-400 transition-colors hover:border-gray-400 hover:text-gray-300 sm:p-3"
+              class="rounded-xl border-2 border-gray-500 p-2 text-gray-400 transition-colors hover:border-gray-400 hover:text-gray-300 sm:p-3"
               href={"mailto:" <> Constants.get(:email)}
             >
               <span class="sr-only">Email</span>

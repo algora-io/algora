@@ -4,46 +4,20 @@ defmodule AlgoraWeb.HomeLive do
   use LiveSvelte.Components
 
   import AlgoraWeb.Components.ModalVideo
-  import Ecto.Changeset
   import Ecto.Query
 
   alias Algora.Accounts
   alias Algora.Accounts.User
   alias Algora.Bounties
   alias Algora.Jobs
-  alias Algora.Jobs.JobPosting
   alias Algora.Organizations
-  alias Algora.Payments
   alias Algora.Payments.Transaction
   alias Algora.Repo
   alias AlgoraWeb.Components.Footer
   alias AlgoraWeb.Components.Header
   alias AlgoraWeb.Data.PlatformStats
-  alias AlgoraWeb.Forms.BountyForm
-  alias AlgoraWeb.Forms.TipForm
-  alias Phoenix.LiveView.AsyncResult
 
   require Logger
-
-  defmodule Form do
-    @moduledoc false
-    use Ecto.Schema
-
-    @primary_key false
-    @derive {Jason.Encoder, only: [:email, :job_description, :candidate_description]}
-    embedded_schema do
-      field :email, :string
-      field :job_description, :string
-      field :candidate_description, :string
-    end
-
-    def changeset(form, attrs \\ %{}) do
-      form
-      |> Ecto.Changeset.cast(attrs, [:email, :job_description, :candidate_description])
-      |> Ecto.Changeset.validate_required([:email, :job_description])
-      |> Ecto.Changeset.validate_format(:email, ~r/@/)
-    end
-  end
 
   @impl true
   def mount(params, _session, socket) do
@@ -59,27 +33,10 @@ defmodule AlgoraWeb.HomeLive do
       %{label: "Completed Bounties", value: format_number(get_completed_bounties_count())}
     ]
 
-    featured_devs = Accounts.list_featured_developers()
-
     # Get company and people avatars for the section
     company_people_examples = get_company_people_examples()
 
     jobs_by_user = Enum.group_by(Jobs.list_jobs(), & &1.user)
-
-    bounties0 =
-      Bounties.list_bounties(
-        status: :open,
-        owner_handles: Algora.Settings.get_featured_orgs()
-      )
-
-    bounties1 =
-      Bounties.list_bounties(
-        status: :open,
-        limit: 3,
-        amount_gt: Money.new(:USD, 500)
-      )
-
-    bounties = bounties0 ++ bounties1
 
     # Fetch organizations with bounty stats
     orgs = Organizations.list_orgs(limit: 6)
@@ -101,39 +58,12 @@ defmodule AlgoraWeb.HomeLive do
          |> assign(:page_title_suffix, "")
          |> assign(:page_image, "#{AlgoraWeb.Endpoint.url()}/images/og/home.png")
          |> assign(:screenshot?, not is_nil(params["screenshot"]))
-         |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
-         |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
-         |> assign(:featured_devs, featured_devs)
          |> assign(:stats, stats)
-         |> assign(:form, to_form(Form.changeset(%Form{}, %{})))
          |> assign(:jobs_by_user, jobs_by_user)
-         |> assign(:user_metadata, AsyncResult.loading())
-         |> assign(:transactions, Payments.list_featured_transactions())
-         |> assign(:bounties, bounties)
          |> assign(:orgs_with_stats, orgs_with_stats)
          |> assign(:company_people_examples, company_people_examples)
-         |> assign_events()
          |> assign_user_applications()}
     end
-  end
-
-  defp assign_events(socket) do
-    events =
-      (socket.assigns.transactions || [])
-      |> Enum.map(fn tx -> %{item: tx, type: :transaction, timestamp: tx.succeeded_at} end)
-      |> Enum.concat(
-        (socket.assigns.jobs_by_user || [])
-        |> Enum.flat_map(fn {_user, jobs} -> jobs end)
-        |> Enum.map(fn job -> %{item: job, type: :job, timestamp: job.inserted_at} end)
-      )
-      |> Enum.concat(
-        Enum.map(socket.assigns.bounties || [], fn bounty ->
-          %{item: bounty, type: :bounty, timestamp: bounty.inserted_at}
-        end)
-      )
-      |> Enum.sort_by(& &1.timestamp, {:desc, DateTime})
-
-    assign(socket, :events, events)
   end
 
   @impl true
@@ -180,7 +110,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="relative isolate py-4 sm:py-16">
+        <section class="relative isolate py-4 sm:py-12">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 text-center">
               <%= for stat <- @stats do %>
@@ -324,30 +254,6 @@ defmodule AlgoraWeb.HomeLive do
             <p class="text-center text-muted-foreground mb-8">
               Discover jobs at top startups
             </p>
-
-            <%!-- <div class="flex flex-wrap justify-center gap-3 mb-8">
-              <.button variant="secondary" size="sm" class="text-xs">
-                All
-              </.button>
-              <.button variant="outline" size="sm" class="text-xs">
-                San Francisco
-              </.button>
-              <.button variant="outline" size="sm" class="text-xs">
-                Remote
-              </.button>
-              <.button variant="outline" size="sm" class="text-xs">
-                Python
-              </.button>
-              <.button variant="outline" size="sm" class="text-xs">
-                TypeScript
-              </.button>
-              <.button variant="outline" size="sm" class="text-xs">
-                Rust
-              </.button>
-              <.button variant="outline" size="sm" class="text-xs">
-                AI/ML
-              </.button>
-            </div> --%>
 
             <%= if Enum.empty?(@jobs_by_user) do %>
               <div class="text-center py-12">
@@ -566,7 +472,6 @@ defmodule AlgoraWeb.HomeLive do
                       </h3>
                       <p class="text-muted-foreground mb-4">
                         Algora Public Benefit Corporation became a bootstrapped, profitable business. Dozens of customers hired full-time the engineers they met with Algora. We unlocked a bigger adjacent problem to solve: full-time hiring.
-                        <%!-- Through our bounty platform, we helped hundreds of open source engineers get hired by top companies. We discovered we had built a powerful sourcing and hiring engine. --%>
                       </p>
                       <.link
                         href="https://news.ycombinator.com/item?id=37769595"
@@ -627,14 +532,6 @@ defmodule AlgoraWeb.HomeLive do
                 Explore platform
               </.button>
             </div>
-            <%!-- <div class="flex justify-center gap-4">
-              <.button navigate={~p"/auth/signup"}>
-                Get started
-              </.button>
-              <.button href={AlgoraWeb.Constants.get(:github_repo_url)} variant="secondary">
-                <.icon name="github" class="size-4 mr-2 -ml-1" /> View source code
-              </.button>
-            </div> --%>
           </div>
         </section>
 
@@ -646,59 +543,6 @@ defmodule AlgoraWeb.HomeLive do
 
     <.modal_video_dialog />
     """
-  end
-
-  @impl true
-  def handle_event("submit", %{"form" => params}, socket) do
-    case %Form{} |> Form.changeset(params) |> Ecto.Changeset.apply_action(:save) do
-      {:ok, data} ->
-        Algora.Activities.alert(Jason.encode!(data), :critical)
-        {:noreply, put_flash(socket, :info, "We'll send you matching candidates within the next few hours.")}
-
-      {:error, changeset} ->
-        {:noreply, assign(socket, form: to_form(changeset))}
-    end
-  end
-
-  @impl true
-  def handle_event("create_bounty", _params, socket) do
-    {:noreply, redirect(socket, to: ~p"/auth/signup")}
-  end
-
-  @impl true
-  def handle_event("create_tip", _params, socket) do
-    {:noreply, redirect(socket, to: ~p"/auth/signup")}
-  end
-
-  @impl true
-  def handle_event("email_changed", %{"job_posting" => %{"email" => email}}, socket) do
-    if String.match?(email, ~r/^[^\s]+@[^\s]+$/i) do
-      {:noreply, start_async(socket, :fetch_metadata, fn -> Algora.Crawler.fetch_user_metadata(email) end)}
-    else
-      {:noreply, socket}
-    end
-  end
-
-  @impl true
-  def handle_event("validate_job", %{"job_posting" => params}, socket) do
-    {:noreply, assign(socket, :form, to_form(JobPosting.changeset(socket.assigns.form.source, params)))}
-  end
-
-  @impl true
-  def handle_event("create_job", %{"job_posting" => params}, socket) do
-    with {:ok, user} <-
-           Accounts.get_or_register_user(params["email"], %{type: :organization, display_name: params["company_name"]}),
-         {:ok, job} <- params |> Map.put("user_id", user.id) |> Jobs.create_job_posting() do
-      Algora.Activities.alert("Job posting initialized: #{job.company_name}", :critical)
-      {:noreply, redirect(socket, external: AlgoraWeb.Constants.get(:calendar_url))}
-    else
-      {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, assign(socket, :form, to_form(changeset))}
-
-      {:error, reason} ->
-        Logger.error("Failed to create job posting: #{inspect(reason)}")
-        {:noreply, put_flash(socket, :error, "Something went wrong. Please try again.")}
-    end
   end
 
   @impl true
@@ -718,19 +562,6 @@ defmodule AlgoraWeb.HomeLive do
     else
       {:noreply, redirect(socket, external: Algora.Github.authorize_url(%{return_to: "/jobs"}))}
     end
-  end
-
-  @impl true
-  def handle_async(:fetch_metadata, {:ok, metadata}, socket) do
-    {:noreply,
-     socket
-     |> assign(:user_metadata, AsyncResult.ok(socket.assigns.user_metadata, metadata))
-     |> assign(:form, to_form(change(socket.assigns.form.source, company_name: get_in(metadata, [:org, :og_title]))))}
-  end
-
-  @impl true
-  def handle_async(:fetch_metadata, {:exit, reason}, socket) do
-    {:noreply, assign(socket, :user_metadata, AsyncResult.failed(socket.assigns.user_metadata, reason))}
   end
 
   defp get_total_paid_out do

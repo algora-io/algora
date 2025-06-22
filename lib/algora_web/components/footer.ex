@@ -118,14 +118,6 @@ defmodule AlgoraWeb.Components.Footer do
                     SDK
                   </a>
                 </li>
-                <li>
-                  <.link
-                    class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    navigate={~p"/pricing"}
-                  >
-                    Pricing
-                  </.link>
-                </li>
               </ul>
             </div>
             <div>

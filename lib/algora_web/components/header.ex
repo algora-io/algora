@@ -9,8 +9,7 @@ defmodule AlgoraWeb.Components.Header do
     [
       %{name: "Bounties", path: ~p"/bounties"},
       %{name: "Jobs", path: ~p"/jobs"},
-      %{name: "Docs", path: ~p"/docs"},
-      %{name: "Pricing", path: ~p"/pricing"}
+      %{name: "Docs", path: ~p"/docs"}
     ]
   end
 

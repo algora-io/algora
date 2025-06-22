@@ -132,7 +132,7 @@ defmodule AlgoraWeb.Org.JobsLive do
                       <div>
                         <%= if @current_user_role in [:admin, :mod] do %>
                           <.link
-                            navigate={~p"/org/#{@current_org.handle}/jobs/#{job.id}"}
+                            navigate={~p"/#{@current_org.handle}/jobs/#{job.id}"}
                             class="text-lg sm:text-2xl font-semibold underline"
                           >
                             {job.title}
@@ -216,13 +216,13 @@ defmodule AlgoraWeb.Org.JobsLive do
       else
         {:noreply,
          redirect(socket,
-           external: Algora.Github.authorize_url(%{return_to: "/org/#{socket.assigns.current_org.handle}/jobs"})
+           external: Algora.Github.authorize_url(%{return_to: "/#{socket.assigns.current_org.handle}/jobs"})
          )}
       end
     else
       {:noreply,
        redirect(socket,
-         external: Algora.Github.authorize_url(%{return_to: "/org/#{socket.assigns.current_org.handle}/jobs"})
+         external: Algora.Github.authorize_url(%{return_to: "/#{socket.assigns.current_org.handle}/jobs"})
        )}
     end
   end

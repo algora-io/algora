@@ -23,6 +23,7 @@ defmodule Algora.Application do
       Algora.Github.Poller.RootSupervisor,
       Algora.ScreenshotQueue,
       Algora.RateLimit,
+      AlgoraWeb.Data.HomeCache,
       # Start to serve requests, typically the last entry
       AlgoraWeb.Endpoint,
       Algora.Stargazer,

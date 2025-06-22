@@ -4,48 +4,35 @@ defmodule AlgoraWeb.HomeLive do
   use LiveSvelte.Components
 
   import AlgoraWeb.Components.ModalVideo
-  import Ecto.Query
 
   alias Algora.Accounts
-  alias Algora.Accounts.User
-  alias Algora.Bounties
   alias Algora.Jobs
-  alias Algora.Organizations
-  alias Algora.Payments.Transaction
-  alias Algora.Repo
   alias AlgoraWeb.Components.Footer
   alias AlgoraWeb.Components.Header
-  alias AlgoraWeb.Data.PlatformStats
+  alias AlgoraWeb.Data.HomeCache
 
   require Logger
 
   @impl true
   def mount(params, _session, socket) do
-    total_contributors = get_contributors_count()
-    total_countries = get_countries_count()
+    # Get cached platform stats
+    platform_stats = HomeCache.get_platform_stats()
 
     stats = [
       %{label: "Full-time SWEs Hired", value: "30+"},
       %{label: "Happy Customers", value: "100+"},
-      %{label: "Rewarded Contributors", value: format_number(total_contributors)},
-      %{label: "Countries", value: format_number(total_countries)},
-      %{label: "Paid Out", value: format_money(get_total_paid_out())},
-      %{label: "Completed Bounties", value: format_number(get_completed_bounties_count())}
+      %{label: "Rewarded Contributors", value: format_number(platform_stats.total_contributors)},
+      %{label: "Countries", value: format_number(platform_stats.total_countries)},
+      %{label: "Paid Out", value: format_money(platform_stats.total_paid_out)},
+      %{label: "Completed Bounties", value: format_number(platform_stats.completed_bounties_count)}
     ]
 
     # Get company and people avatars for the section
     company_people_examples = get_company_people_examples()
 
-    jobs_by_user = Enum.group_by(Jobs.list_jobs(), & &1.user)
-
-    # Fetch organizations with bounty stats
-    orgs = Organizations.list_orgs(limit: 6)
-
-    orgs_with_stats =
-      Enum.map(orgs, fn org ->
-        stats = Bounties.fetch_stats(org_id: org.id)
-        Map.put(org, :bounty_stats, stats)
-      end)
+    # Get cached jobs and orgs data
+    jobs_by_user = HomeCache.get_jobs_by_user()
+    orgs_with_stats = HomeCache.get_orgs_with_stats()
 
     case socket.assigns[:current_user] do
       %{handle: handle} = user when is_binary(handle) ->
@@ -564,73 +551,6 @@ defmodule AlgoraWeb.HomeLive do
     end
   end
 
-  defp get_total_paid_out do
-    subtotal =
-      Repo.one(
-        from(t in Transaction,
-          where: t.type == :credit,
-          where: t.status == :succeeded,
-          where: not is_nil(t.linked_transaction_id),
-          select: sum(t.net_amount)
-        )
-      ) || Money.new(0, :USD)
-
-    subtotal |> Money.add!(PlatformStats.get().extra_paid_out) |> Money.round(currency_digits: 0)
-  end
-
-  defp get_completed_bounties_count do
-    bounties_subtotal =
-      Repo.one(
-        from(t in Transaction,
-          where: t.type == :credit,
-          where: t.status == :succeeded,
-          where: not is_nil(t.linked_transaction_id),
-          where: not is_nil(t.bounty_id),
-          select: count(fragment("DISTINCT (?, ?)", t.bounty_id, t.user_id))
-        )
-      ) || 0
-
-    tips_subtotal =
-      Repo.one(
-        from(t in Transaction,
-          where: t.type == :credit,
-          where: t.status == :succeeded,
-          where: not is_nil(t.linked_transaction_id),
-          where: not is_nil(t.tip_id),
-          select: count(fragment("DISTINCT (?, ?)", t.tip_id, t.user_id))
-        )
-      ) || 0
-
-    bounties_subtotal + tips_subtotal + PlatformStats.get().extra_completed_bounties
-  end
-
-  defp get_contributors_count do
-    subtotal =
-      Repo.one(
-        from(t in Transaction,
-          where: t.type == :credit,
-          where: t.status == :succeeded,
-          where: not is_nil(t.linked_transaction_id),
-          select: count(fragment("DISTINCT ?", t.user_id))
-        )
-      ) || 0
-
-    subtotal + PlatformStats.get().extra_contributors
-  end
-
-  defp get_countries_count do
-    Repo.one(
-      from(u in User,
-        join: t in Transaction,
-        on: t.user_id == u.id,
-        where: t.type == :credit,
-        where: t.status == :succeeded,
-        where: not is_nil(t.linked_transaction_id),
-        where: not is_nil(u.country) and u.country != "",
-        select: count(fragment("DISTINCT ?", u.country))
-      )
-    ) || 0
-  end
 
   defp format_money(money), do: money |> Money.round(currency_digits: 0) |> Money.to_string!(no_fraction_if_integer: true)
 

@@ -34,11 +34,11 @@ defmodule AlgoraWeb.Challenges.AtopileLive do
                       rel="noopener"
                       target="_blank"
                       href="https://atopile.io"
-                      class="inline-flex items-center bg-[#090a0e]/75 hover:bg-[#000] ring-1 ring-[#f0551c] hover:ring-[#ff6b33] py-2 px-4 rounded-full font-medium text-[#f0551c]/90 hover:text-[#f0551c] text-sm sm:text-base transition-colors"
+                      class="inline-flex items-center bg-[#090a0e]/75 hover:bg-[#000] ring-1 ring-[#f0551c] hover:ring-[#ff6b33] py-2 px-4 rounded-full font-medium text-orange-500/90 hover:text-orange-500 text-sm sm:text-base transition-colors"
                     >
                       Challenge brought to you by
                       <img
-                        src="https://mintlify.s3.us-west-1.amazonaws.com/atopile/logo/dark.svg"
+                        src="/images/wordmarks/atopile.svg"
                         alt="atopile"
                         class="ml-2 h-4 sm:h-5"
                         style="aspect-ratio: 414/98;"
@@ -58,7 +58,7 @@ defmodule AlgoraWeb.Challenges.AtopileLive do
                     </p>
                   </div>
                 </div>
-                <div class="hidden lg:block top-[0px] absolute inset-0 z-10 h-[calc(100svh-0px)] md:h-[750px] 2xl:h-[900px] bg-gradient-to-r from-background from-1% to-transparent to-[69%]">
+                <div class="hidden lg:block top-[0px] absolute inset-0 z-10 h-[calc(100svh-0px)] md:h-[750px] 2xl:h-[900px] bg-gradient-to-r from-background from-[1%] to-transparent to-[69%]">
                 </div>
                 <div class="hidden lg:block top-[0px] absolute inset-0 z-10 h-[calc(100svh-0px)] md:h-[750px] 2xl:h-[900px] bg-gradient-to-t from-background from-1% to-transparent to-[30%]">
                 </div>

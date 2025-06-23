@@ -8,12 +8,12 @@ defmodule AlgoraWeb.Challenges.AtopileLive do
   def mount(_params, _session, socket) do
     {:ok,
      socket
-     |> assign(:page_title, "Atopile Ecosystem Challenge")
+     |> assign(:page_title, "Atopile Challenge")
      |> assign(
        :page_description,
        "Expand the atopile ecosystem - build packages, modules, utilities, and tools to win $1,000!"
      )
-     |> assign(:page_image, "https://github.com/atopile/atopile/raw/main/docs/assets/logo-horizontal-color.png")}
+     |> assign(:page_image, "#{AlgoraWeb.Endpoint.url()}/images/challenges/atopile/og.png")}
   end
 
   @impl true
@@ -58,7 +58,7 @@ defmodule AlgoraWeb.Challenges.AtopileLive do
                     </p>
                   </div>
                 </div>
-                <div class="hidden lg:block top-[0px] absolute inset-0 z-10 h-[calc(100svh-0px)] md:h-[750px] 2xl:h-[900px] bg-gradient-to-r from-background from-[1%] to-transparent to-[69%]">
+                <div class="hidden lg:block top-[0px] absolute inset-0 z-10 h-[calc(100svh-0px)] md:h-[750px] 2xl:h-[900px] bg-gradient-to-r from-background from-[10%] to-transparent to-[100%]">
                 </div>
                 <div class="hidden lg:block top-[0px] absolute inset-0 z-10 h-[calc(100svh-0px)] md:h-[750px] 2xl:h-[900px] bg-gradient-to-t from-background from-1% to-transparent to-[30%]">
                 </div>

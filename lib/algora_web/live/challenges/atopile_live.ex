@@ -51,7 +51,7 @@ defmodule AlgoraWeb.Challenges.AtopileLive do
                       </span>
                     </h1>
                     <p class="max-w-xl xl:max-w-2xl mt-4 text-base font-medium tracking-tight text-white/90 shadow-black [text-shadow:_0_1px_0_var(--tw-shadow-color)] md:mt-6 md:text-lg md:text-white/80">
-                      Hardware design has been stuck in the past for too long. Atopile is revolutionizing how we build electronics by bringing modern software development practices to hardware design. We need passionate builders to expand our ecosystem with packages, modules, utilities, and tools.<br /><br />
+                      Atopile is revolutionizing how we build electronics by bringing modern software development practices to hardware design. We need passionate builders to expand our ecosystem with packages, modules, utilities, and tools.<br /><br />
                       Publish packages, modules, utilities, or tools that expand the atopile ecosystem. Every accepted published contribution will go in the atopile directory, you'll receive credits, and earn a
                       <span class="font-display font-bold text-foreground">$1,000</span>
                       reward. To participate, you need electrical engineering knowledge (college students welcome!) and passion for building tools for builders.
@@ -157,6 +157,110 @@ defmodule AlgoraWeb.Challenges.AtopileLive do
                       </span>
                     </li>
                   </ul>
+                </div>
+              </section>
+              <section class="md:mb-18 mb-12 xl:pt-20 2xl:pt-52">
+                <div class="relative z-50 mx-auto max-w-7xl px-6 pt-6 lg:px-8">
+                  <h2 class="flex justify-center text-4xl font-black leading-none tracking-tighter mix-blend-exclusion md:text-7xl">
+                    Example packages
+                  </h2>
+                  <p class="text-center mt-4 text-base font-medium text-gray-200">
+                    Get inspired by existing packages in the
+                    <a
+                      target="_blank"
+                      class="font-semibold text-white underline"
+                      href="https://packages.atopile.io/"
+                    >
+                      atopile registry
+                    </a>
+                  </p>
+                  <div class="mt-8 grid grid-cols-1 gap-6 md:grid-cols-3">
+                    <div class="group relative overflow-hidden rounded-xl bg-white/5 border border-white/10 p-6 transition-all hover:border-[#f0551c]/50 hover:bg-white/10">
+                      <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold">
+                          <a
+                            href="https://packages.atopile.io/packages/atopile/buttons/releases/latest"
+                            target="_blank"
+                            rel="noopener"
+                            class="text-white hover:text-[#f0551c] transition-colors"
+                          >
+                            atopile/buttons
+                          </a>
+                        </h3>
+                        <span class="px-2 py-1 text-xs font-medium bg-[#f0551c]/20 text-[#f0551c] rounded-full">
+                          v0.1.7
+                        </span>
+                      </div>
+                      <p class="text-sm text-gray-400 mb-4">
+                        A collection of buttons for convenience
+                      </p>
+                      <a
+                        href="https://github.com/atopile/packages"
+                        target="_blank"
+                        rel="noopener"
+                        class="flex items-center gap-2 text-xs text-[#f0551c] hover:text-[#ff6b33] transition-colors"
+                      >
+                        <.icon name="github" class="size-4" />
+                        <span>Repository</span>
+                      </a>
+                    </div>
+                    <div class="group relative overflow-hidden rounded-xl bg-white/5 border border-white/10 p-6 transition-all hover:border-[#f0551c]/50 hover:bg-white/10">
+                      <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold">
+                          <a
+                            href="https://packages.atopile.io/packages/atopile/addressable-leds/releases/latest"
+                            target="_blank"
+                            rel="noopener"
+                            class="text-white hover:text-[#f0551c] transition-colors"
+                          >
+                            atopile/addressable-leds
+                          </a>
+                        </h3>
+                        <span class="px-2 py-1 text-xs font-medium bg-[#f0551c]/20 text-[#f0551c] rounded-full">
+                          v0.2.2
+                        </span>
+                      </div>
+                      <p class="text-sm text-gray-400 mb-4">
+                        SK6805 addressable RGB LEDs with integrated controller for creating colorful LED effects and...
+                      </p>
+                      <a
+                        href="https://github.com/atopile/packages"
+                        target="_blank"
+                        rel="noopener"
+                        class="flex items-center gap-2 text-xs text-[#f0551c] hover:text-[#ff6b33] transition-colors"
+                      >
+                        <.icon name="github" class="size-4" />
+                        <span>Repository</span>
+                      </a>
+                    </div>
+                    <div class="group relative overflow-hidden rounded-xl bg-white/5 border border-white/10 p-6 transition-all hover:border-[#f0551c]/50 hover:bg-white/10">
+                      <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold">
+                          <a
+                            href="https://packages.atopile.io/packages/atopile/indicator-leds/releases/latest"
+                            target="_blank"
+                            rel="noopener"
+                            class="text-white hover:text-[#f0551c] transition-colors"
+                          >
+                            atopile/indicator-leds
+                          </a>
+                        </h3>
+                        <span class="px-2 py-1 text-xs font-medium bg-[#f0551c]/20 text-[#f0551c] rounded-full">
+                          v0.1.1
+                        </span>
+                      </div>
+                      <p class="text-sm text-gray-400 mb-4">Indicator LEDs for convenience</p>
+                      <a
+                        href="https://github.com/atopile/packages"
+                        target="_blank"
+                        rel="noopener"
+                        class="flex items-center gap-2 text-xs text-[#f0551c] hover:text-[#ff6b33] transition-colors"
+                      >
+                        <.icon name="github" class="size-4" />
+                        <span>Repository</span>
+                      </a>
+                    </div>
+                  </div>
                 </div>
               </section>
               <section class="mx-auto my-24 max-w-7xl md:my-36">

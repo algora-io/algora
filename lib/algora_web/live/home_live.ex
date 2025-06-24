@@ -304,6 +304,47 @@ defmodule AlgoraWeb.HomeLive do
         <section class="relative isolate pb-16 sm:pb-40">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <h2 class="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-semibold tracking-tight text-foreground text-center mb-2">
+              Challenges
+            </h2>
+            <p class="text-center text-foreground mb-8">
+              Win <span class="font-bold font-display text-emerald-400">$1,000+</span>
+              and get noticed by top companies hiring
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto mb-16">
+              <.link
+                class="group relative flex aspect-[1200/630] flex-1 rounded-2xl border-2 border-solid border-border bg-cover hover:no-underline hover:scale-[1.02] transition-all duration-200"
+                style="background-image:url(/images/challenges/limbo/og.png)"
+                navigate={~p"/challenges/limbo"}
+              >
+              </.link>
+              <.link
+                class="group relative flex aspect-[1200/630] flex-1 rounded-2xl border-2 border-solid border-border bg-cover hover:no-underline hover:scale-[1.02] transition-all duration-200"
+                style="background-image:url(/images/challenges/atopile/og.png)"
+                navigate={~p"/challenges/atopile"}
+              >
+              </.link>
+              <.link 
+                class="group relative flex aspect-[1200/630] flex-1 rounded-2xl border-2 border-dashed border-border bg-card hover:no-underline hover:scale-[1.02] transition-all duration-200 hover:border-emerald-400/50"
+                navigate={~p"/challenges/new"}
+              >
+                <div class="flex flex-col items-center justify-center w-full h-full text-center p-6">
+                  <.icon name="tabler-plus" class="size-12 text-muted-foreground group-hover:text-emerald-400 transition-colors mb-4" />
+                  <h3 class="text-lg font-semibold text-foreground group-hover:text-emerald-400 transition-colors mb-2">
+                    Add Your Challenge
+                  </h3>
+                  <p class="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
+                    Have a coding challenge? Post it and offer bounties to attract top talent.
+                  </p>
+                </div>
+              </.link>
+            </div>
+          </div>
+        </section>
+
+        <section class="relative isolate pb-16 sm:pb-40">
+          <div class="mx-auto max-w-7xl px-6 lg:px-8">
+            <h2 class="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-semibold tracking-tight text-foreground text-center mb-2">
               Active bounty programs
             </h2>
             <p class="text-center text-muted-foreground mb-8">
@@ -550,7 +591,6 @@ defmodule AlgoraWeb.HomeLive do
       {:noreply, redirect(socket, external: Algora.Github.authorize_url(%{return_to: "/jobs"}))}
     end
   end
-
 
   defp format_money(money), do: money |> Money.round(currency_digits: 0) |> Money.to_string!(no_fraction_if_integer: true)
 

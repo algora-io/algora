@@ -301,7 +301,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="relative isolate pb-16 sm:pb-40">
+        <%!-- <section class="relative isolate pb-16 sm:pb-40">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <h2 class="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-semibold tracking-tight text-foreground text-center mb-2">
               Challenges
@@ -324,7 +324,13 @@ defmodule AlgoraWeb.HomeLive do
                 navigate={~p"/challenges/atopile"}
               >
               </.link>
-              <.link 
+              <.link
+                class="group relative flex aspect-[1200/630] flex-1 rounded-2xl border-2 border-solid border-border bg-cover hover:no-underline hover:scale-[1.02] transition-all duration-200"
+                style="background-image:url(/images/challenges/activepieces/og.png)"
+                navigate={~p"/challenges/activepieces"}
+              >
+              </.link>
+              <.link
                 class="group relative flex aspect-[1200/630] flex-1 rounded-2xl border-2 border-dashed border-border bg-card hover:no-underline hover:scale-[1.02] transition-all duration-200 hover:border-emerald-400/50"
                 navigate={~p"/challenges/new"}
               >
@@ -340,7 +346,7 @@ defmodule AlgoraWeb.HomeLive do
               </.link>
             </div>
           </div>
-        </section>
+        </section> --%>
 
         <section class="relative isolate pb-16 sm:pb-40">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">

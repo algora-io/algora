@@ -185,10 +185,10 @@ defmodule AlgoraWeb.Challenges.ActivepiecesLive do
                       Create designs, manage templates, and automate graphic design workflows
                     </p>
                     <div class="mt-4 flex items-center gap-2">
-                      <span class="rounded-full bg-[#843ee5]/10 px-2 py-1 text-xs font-medium text-[#843ee5]">
+                      <span class="font-display rounded-full bg-violet-500/10 px-2 py-1 text-xs font-bold text-violet-500 ring-violet-500/50 ring-1">
                         $100
                       </span>
-                      <span class="rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-500">
+                      <span class="font-display rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-500 ring-emerald-500/50 ring-1">
                         Active
                       </span>
                     </div>
@@ -197,7 +197,7 @@ defmodule AlgoraWeb.Challenges.ActivepiecesLive do
                     href="https://github.com/activepieces/activepieces/issues/8072"
                     target="_blank"
                     rel="noopener"
-                    class="group relative overflow-hidden rounded-lg border border-border bg-card p-6 transition-all hover:border-[#843ee5]/50 hover:no-underline block"
+                    class="group relative overflow-hidden rounded-lg border border-border bg-card p-6 transition-all hover:border-violet-500/50 hover:no-underline block"
                   >
                     <div class="flex items-center gap-4 mb-4">
                       <img
@@ -214,10 +214,10 @@ defmodule AlgoraWeb.Challenges.ActivepiecesLive do
                       Send emails, manage inbox, and automate email workflows through AI
                     </p>
                     <div class="mt-4 flex items-center gap-2">
-                      <span class="rounded-full bg-[#843ee5]/10 px-2 py-1 text-xs font-medium text-[#843ee5]">
+                      <span class="font-display rounded-full bg-violet-500/10 px-2 py-1 text-xs font-bold text-violet-500 ring-violet-500/50 ring-1">
                         $200
                       </span>
-                      <span class="rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-500">
+                      <span class="font-display rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-500 ring-emerald-500/50 ring-1">
                         Active
                       </span>
                     </div>
@@ -226,7 +226,7 @@ defmodule AlgoraWeb.Challenges.ActivepiecesLive do
                     href="https://github.com/activepieces/activepieces/issues/8021"
                     target="_blank"
                     rel="noopener"
-                    class="group relative overflow-hidden rounded-lg border border-border bg-card p-6 transition-all hover:border-[#843ee5]/50 hover:no-underline block"
+                    class="group relative overflow-hidden rounded-lg border border-border bg-card p-6 transition-all hover:border-violet-500/50 hover:no-underline block"
                   >
                     <div class="flex items-center gap-4 mb-4">
                       <img
@@ -243,10 +243,10 @@ defmodule AlgoraWeb.Challenges.ActivepiecesLive do
                       Automate web interactions and workflows using AI-powered browser automation
                     </p>
                     <div class="mt-4 flex items-center gap-2">
-                      <span class="rounded-full bg-[#843ee5]/10 px-2 py-1 text-xs font-medium text-[#843ee5]">
+                      <span class="font-display rounded-full bg-violet-500/10 px-2 py-1 text-xs font-bold text-violet-500 ring-violet-500/50 ring-1">
                         $100
                       </span>
-                      <span class="rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-500">
+                      <span class="font-display rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-500 ring-emerald-500/50 ring-1">
                         Active
                       </span>
                     </div>
@@ -255,7 +255,7 @@ defmodule AlgoraWeb.Challenges.ActivepiecesLive do
                     href="https://github.com/activepieces/activepieces/issues/8018"
                     target="_blank"
                     rel="noopener"
-                    class="group relative overflow-hidden rounded-lg border border-border bg-card p-6 transition-all hover:border-[#843ee5]/50 hover:no-underline block"
+                    class="group relative overflow-hidden rounded-lg border border-border bg-card p-6 transition-all hover:border-violet-500/50 hover:no-underline block"
                   >
                     <div class="flex items-center gap-4 mb-4">
                       <img
@@ -272,10 +272,10 @@ defmodule AlgoraWeb.Challenges.ActivepiecesLive do
                       Access vehicle data and manage connected car integrations through DIMO network
                     </p>
                     <div class="mt-4 flex items-center gap-2">
-                      <span class="rounded-full bg-[#843ee5]/10 px-2 py-1 text-xs font-medium text-[#843ee5]">
+                      <span class="font-display rounded-full bg-violet-500/10 px-2 py-1 text-xs font-bold text-violet-500 ring-violet-500/50 ring-1">
                         $200
                       </span>
-                      <span class="rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-500">
+                      <span class="font-display rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-500 ring-emerald-500/50 ring-1">
                         Active
                       </span>
                     </div>
@@ -284,7 +284,7 @@ defmodule AlgoraWeb.Challenges.ActivepiecesLive do
                     href="https://github.com/activepieces/activepieces/issues/7931"
                     target="_blank"
                     rel="noopener"
-                    class="group relative overflow-hidden rounded-lg border border-border bg-card p-6 transition-all hover:border-[#843ee5]/50 hover:no-underline block"
+                    class="group relative overflow-hidden rounded-lg border border-border bg-card p-6 transition-all hover:border-violet-500/50 hover:no-underline block"
                   >
                     <div class="flex items-center gap-4 mb-4">
                       <img
@@ -301,10 +301,10 @@ defmodule AlgoraWeb.Challenges.ActivepiecesLive do
                       Transcribe audio, analyze speech, and integrate voice recognition capabilities
                     </p>
                     <div class="mt-4 flex items-center gap-2">
-                      <span class="rounded-full bg-[#843ee5]/10 px-2 py-1 text-xs font-medium text-[#843ee5]">
+                      <span class="font-display rounded-full bg-violet-500/10 px-2 py-1 text-xs font-bold text-violet-500 ring-violet-500/50 ring-1">
                         $50
                       </span>
-                      <span class="rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-500">
+                      <span class="font-display rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-500 ring-emerald-500/50 ring-1">
                         Active
                       </span>
                     </div>
@@ -313,7 +313,7 @@ defmodule AlgoraWeb.Challenges.ActivepiecesLive do
                     href="https://github.com/activepieces/activepieces/issues/7927"
                     target="_blank"
                     rel="noopener"
-                    class="group relative overflow-hidden rounded-lg border border-border bg-card p-6 transition-all hover:border-[#843ee5]/50 hover:no-underline block"
+                    class="group relative overflow-hidden rounded-lg border border-border bg-card p-6 transition-all hover:border-violet-500/50 hover:no-underline block"
                   >
                     <div class="flex items-center gap-4 mb-4">
                       <img
@@ -330,10 +330,10 @@ defmodule AlgoraWeb.Challenges.ActivepiecesLive do
                       Extract data from documents and automate document processing workflows
                     </p>
                     <div class="mt-4 flex items-center gap-2">
-                      <span class="rounded-full bg-[#843ee5]/10 px-2 py-1 text-xs font-medium text-[#843ee5]">
+                      <span class="font-display rounded-full bg-violet-500/10 px-2 py-1 text-xs font-bold text-violet-500 ring-violet-500/50 ring-1">
                         $50
                       </span>
-                      <span class="rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-500">
+                      <span class="font-display rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-500 ring-emerald-500/50 ring-1">
                         Active
                       </span>
                     </div>
@@ -342,7 +342,7 @@ defmodule AlgoraWeb.Challenges.ActivepiecesLive do
                     href="https://github.com/activepieces/activepieces/issues/7925"
                     target="_blank"
                     rel="noopener"
-                    class="group relative overflow-hidden rounded-lg border border-border bg-card p-6 transition-all hover:border-[#843ee5]/50 hover:no-underline block"
+                    class="group relative overflow-hidden rounded-lg border border-border bg-card p-6 transition-all hover:border-violet-500/50 hover:no-underline block"
                   >
                     <div class="flex items-center gap-4 mb-4">
                       <img src="/images/logos/memdotai.jpeg" alt="Mem" class="w-12 h-12 rounded-lg" />
@@ -355,10 +355,10 @@ defmodule AlgoraWeb.Challenges.ActivepiecesLive do
                       Manage personal knowledge base and AI-powered note organization
                     </p>
                     <div class="mt-4 flex items-center gap-2">
-                      <span class="rounded-full bg-[#843ee5]/10 px-2 py-1 text-xs font-medium text-[#843ee5]">
+                      <span class="font-display rounded-full bg-violet-500/10 px-2 py-1 text-xs font-bold text-violet-500 ring-violet-500/50 ring-1">
                         $30
                       </span>
-                      <span class="rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-500">
+                      <span class="font-display rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-500 ring-emerald-500/50 ring-1">
                         Active
                       </span>
                     </div>
@@ -367,7 +367,7 @@ defmodule AlgoraWeb.Challenges.ActivepiecesLive do
                     href="https://github.com/activepieces/activepieces/issues/7923"
                     target="_blank"
                     rel="noopener"
-                    class="group relative overflow-hidden rounded-lg border border-border bg-card p-6 transition-all hover:border-[#843ee5]/50 hover:no-underline block"
+                    class="group relative overflow-hidden rounded-lg border border-border bg-card p-6 transition-all hover:border-violet-500/50 hover:no-underline block"
                   >
                     <div class="flex items-center gap-4 mb-4">
                       <img
@@ -384,10 +384,10 @@ defmodule AlgoraWeb.Challenges.ActivepiecesLive do
                       Create and manage AI chatbots, train on custom data, and handle conversations
                     </p>
                     <div class="mt-4 flex items-center gap-2">
-                      <span class="rounded-full bg-[#843ee5]/10 px-2 py-1 text-xs font-medium text-[#843ee5]">
+                      <span class="font-display rounded-full bg-violet-500/10 px-2 py-1 text-xs font-bold text-violet-500 ring-violet-500/50 ring-1">
                         $50
                       </span>
-                      <span class="rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-500">
+                      <span class="font-display rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-500 ring-emerald-500/50 ring-1">
                         Active
                       </span>
                     </div>
@@ -396,7 +396,7 @@ defmodule AlgoraWeb.Challenges.ActivepiecesLive do
                     href="https://github.com/activepieces/activepieces/issues/7921"
                     target="_blank"
                     rel="noopener"
-                    class="group relative overflow-hidden rounded-lg border border-border bg-card p-6 transition-all hover:border-[#843ee5]/50 hover:no-underline block"
+                    class="group relative overflow-hidden rounded-lg border border-border bg-card p-6 transition-all hover:border-violet-500/50 hover:no-underline block"
                   >
                     <div class="flex items-center gap-4 mb-4">
                       <img
@@ -413,10 +413,10 @@ defmodule AlgoraWeb.Challenges.ActivepiecesLive do
                       Manage projects, update sheets, and automate Smartsheet workflows
                     </p>
                     <div class="mt-4 flex items-center gap-2">
-                      <span class="rounded-full bg-[#843ee5]/10 px-2 py-1 text-xs font-medium text-[#843ee5]">
+                      <span class="font-display rounded-full bg-violet-500/10 px-2 py-1 text-xs font-bold text-violet-500 ring-violet-500/50 ring-1">
                         $100
                       </span>
-                      <span class="rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-500">
+                      <span class="font-display rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-500 ring-emerald-500/50 ring-1">
                         Active
                       </span>
                     </div>
@@ -425,7 +425,7 @@ defmodule AlgoraWeb.Challenges.ActivepiecesLive do
                     href="https://github.com/activepieces/activepieces/issues/7919"
                     target="_blank"
                     rel="noopener"
-                    class="group relative overflow-hidden rounded-lg border border-border bg-card p-6 transition-all hover:border-[#843ee5]/50 hover:no-underline block"
+                    class="group relative overflow-hidden rounded-lg border border-border bg-card p-6 transition-all hover:border-violet-500/50 hover:no-underline block"
                   >
                     <div class="flex items-center gap-4 mb-4">
                       <img
@@ -442,10 +442,10 @@ defmodule AlgoraWeb.Challenges.ActivepiecesLive do
                       Manage customer conversations, automate support workflows, and handle live chat
                     </p>
                     <div class="mt-4 flex items-center gap-2">
-                      <span class="rounded-full bg-[#843ee5]/10 px-2 py-1 text-xs font-medium text-[#843ee5]">
+                      <span class="font-display rounded-full bg-violet-500/10 px-2 py-1 text-xs font-bold text-violet-500 ring-violet-500/50 ring-1">
                         $100
                       </span>
-                      <span class="rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-500">
+                      <span class="font-display rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-500 ring-emerald-500/50 ring-1">
                         Active
                       </span>
                     </div>

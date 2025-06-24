@@ -93,7 +93,7 @@ defmodule AlgoraWeb.Challenges.ActivepiecesLive do
                       Join us on Discord!
                     </a>
                   </p>
-                  <ul class="mt-4 md:mt-8 space-y-4 md:space-y-2 mx-auto max-w-5xl">
+                  <ul class="mt-4 md:mt-8 space-y-4 md:space-y-2 mx-auto max-w-6xl">
                     <li class="flex w-full items-start pt-2 text-left text-white">
                       <.icon name="tabler-square-rounded-number-1" class="size-8 mr-2 shrink-0" />
                       <span class="text-base font-medium leading-7">
@@ -134,7 +134,7 @@ defmodule AlgoraWeb.Challenges.ActivepiecesLive do
                     <li class="flex w-full items-start pt-2 text-left text-white">
                       <.icon name="tabler-square-rounded-number-3" class="size-8 mr-2 shrink-0" />
                       <span class="text-base font-medium leading-7">
-                        Choose a service to integrate and build an MCP that enables LLMs to interact with that service through Activepieces. Focus on popular tools like Slack, Gmail, Notion, or any service with an API
+                        Choose a service to integrate from the list below and build an MCP that enables LLMs to interact with that service through Activepieces
                       </span>
                     </li>
                     <li class="flex w-full items-start pt-2 text-left text-white">
@@ -158,10 +158,7 @@ defmodule AlgoraWeb.Challenges.ActivepiecesLive do
                   Available MCP Bounties
                 </h2>
                 <p class="text-center mt-4 text-base font-medium text-gray-200 mb-8">
-                  Each integration earns up to
-                  <span class="font-display font-bold text-violet-400">$200</span>
-                  <span class="hidden sm:inline"> - </span>
-                  <br class="sm:hidden" />Build MCPs for these popular services
+                  Ready to contribute? Select a bounty to start building. Each bounty includes detailed requirements and compensation.
                 </p>
                 <div class="mx-auto grid gap-6 px-6 sm:grid-cols-2 lg:grid-cols-3 lg:px-8">
                   <a

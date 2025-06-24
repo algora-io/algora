@@ -71,10 +71,10 @@ defmodule AlgoraWeb.Challenges.ActivepiecesLive do
                 </div>
                 <div class="top-[0px] absolute inset-0 z-0 h-[calc(100svh-0px)] md:h-[750px] 2xl:h-[900px]">
                   <img
-                    src={~p"/images/challenges/activepieces/bg.webp"}
+                    src={~p"/images/challenges/activepieces/bg.png"}
                     alt="Background"
                     class="h-full w-full object-cover object-[60%_100%] md:object-[50%_100%] lg:object-[40%_100%] xl:object-[29%_100%] 2xl:object-[20%_100%]"
-                    style="aspect-ratio: 4096/1326;"
+                    style="aspect-ratio: 2688/1536;"
                   />
                 </div>
               </section>

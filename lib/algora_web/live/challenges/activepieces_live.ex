@@ -140,7 +140,7 @@ defmodule AlgoraWeb.Challenges.ActivepiecesLive do
                     <li class="flex w-full items-start pt-2 text-left text-white">
                       <.icon name="tabler-square-rounded-number-4" class="size-8 mr-2 shrink-0" />
                       <span class="text-base font-medium leading-7">
-                        Submit a PR with your MCP implementatio including comprehensive documentation and examples
+                        Submit a PR with your MCP implementation including comprehensive documentation and examples
                       </span>
                     </li>
                     <li class="flex w-full items-start pt-2 text-left text-white">

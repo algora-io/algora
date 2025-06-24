@@ -231,42 +231,42 @@ defmodule AlgoraWeb.Challenges.ElectricLive do
                     Electric SQL works with your favorite frameworks and tools
                   </p>
                   <div class="mt-8 grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-6">
-                    <div class="group relative overflow-hidden rounded-xl bg-white/5 border border-white/10 p-6 transition-all hover:border-[#d1b9fe]/50 hover:bg-white/10 flex flex-col items-center">
-                      <div class="flex items-center justify-center mb-3 h-12 w-12 rounded-lg bg-gradient-to-br from-green-500 to-green-600">
-                        <.icon name="tabler-triangle" class="size-6 text-white transform rotate-90" />
+                    <a href="https://electric-sql.com/docs/integrations/supabase" target="_blank" rel="noopener" class="group relative overflow-hidden rounded-xl bg-white/5 border border-white/10 p-6 transition-all hover:border-[#d1b9fe]/50 hover:bg-white/10 flex flex-col items-center hover:no-underline">
+                      <div class="flex items-center justify-center mb-3 h-12 w-12">
+                        <img src="https://electric-sql.com/img/integrations/supabase.svg" alt="Supabase" class="h-12 w-12" />
                       </div>
                       <span class="text-sm font-medium text-center text-gray-300">Supabase</span>
-                    </div>
-                    <div class="group relative overflow-hidden rounded-xl bg-white/5 border border-white/10 p-6 transition-all hover:border-[#d1b9fe]/50 hover:bg-white/10 flex flex-col items-center">
-                      <div class="flex items-center justify-center mb-3 h-12 w-12 rounded-lg bg-gradient-to-br from-cyan-400 to-cyan-500">
-                        <span class="text-white font-bold text-lg">N</span>
+                    </a>
+                    <a href="https://electric-sql.com/docs/integrations/neon" target="_blank" rel="noopener" class="group relative overflow-hidden rounded-xl bg-white/5 border border-white/10 p-6 transition-all hover:border-[#d1b9fe]/50 hover:bg-white/10 flex flex-col items-center hover:no-underline">
+                      <div class="flex items-center justify-center mb-3 h-12 w-12">
+                        <img src="https://electric-sql.com/img/integrations/neon.svg" alt="Neon" class="h-12 w-12" />
                       </div>
                       <span class="text-sm font-medium text-center text-gray-300">Neon</span>
-                    </div>
-                    <div class="group relative overflow-hidden rounded-xl bg-white/5 border border-white/10 p-6 transition-all hover:border-[#d1b9fe]/50 hover:bg-white/10 flex flex-col items-center">
-                      <div class="flex items-center justify-center mb-3 h-12 w-12 rounded-lg bg-gradient-to-br from-orange-500 to-red-500">
-                        <.icon name="tabler-flame" class="size-6 text-white" />
+                    </a>
+                    <a href="https://electric-sql.com/docs/integrations/phoenix" target="_blank" rel="noopener" class="group relative overflow-hidden rounded-xl bg-white/5 border border-white/10 p-6 transition-all hover:border-[#d1b9fe]/50 hover:bg-white/10 flex flex-col items-center hover:no-underline">
+                      <div class="flex items-center justify-center mb-3 h-12 w-12">
+                        <img src="https://electric-sql.com/img/integrations/phoenix.svg" alt="Phoenix" class="h-12 w-12" />
                       </div>
                       <span class="text-sm font-medium text-center text-gray-300">Phoenix</span>
-                    </div>
-                    <div class="group relative overflow-hidden rounded-xl bg-white/5 border border-white/10 p-6 transition-all hover:border-[#d1b9fe]/50 hover:bg-white/10 flex flex-col items-center">
-                      <div class="flex items-center justify-center mb-3 h-12 w-12 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600">
-                        <span class="text-white font-bold text-lg">N</span>
+                    </a>
+                    <a href="https://electric-sql.com/docs/integrations/next" target="_blank" rel="noopener" class="group relative overflow-hidden rounded-xl bg-white/5 border border-white/10 p-6 transition-all hover:border-[#d1b9fe]/50 hover:bg-white/10 flex flex-col items-center hover:no-underline">
+                      <div class="flex items-center justify-center mb-3 h-12 w-12">
+                        <img src="https://electric-sql.com/img/integrations/next.svg" alt="Next.js" class="h-12 w-12" />
                       </div>
                       <span class="text-sm font-medium text-center text-gray-300">Next.js</span>
-                    </div>
-                    <div class="group relative overflow-hidden rounded-xl bg-white/5 border border-white/10 p-6 transition-all hover:border-[#d1b9fe]/50 hover:bg-white/10 flex flex-col items-center">
-                      <div class="flex items-center justify-center mb-3 h-12 w-12 rounded-lg bg-gradient-to-br from-orange-400 to-yellow-500">
-                        <.icon name="tabler-brand-stackoverflow" class="size-6 text-white" />
+                    </a>
+                    <a href="https://electric-sql.com/docs/integrations/tanstack" target="_blank" rel="noopener" class="group relative overflow-hidden rounded-xl bg-white/5 border border-white/10 p-6 transition-all hover:border-[#d1b9fe]/50 hover:bg-white/10 flex flex-col items-center hover:no-underline">
+                      <div class="flex items-center justify-center mb-3 h-12 w-12">
+                        <img src="https://electric-sql.com/img/integrations/tanstack.svg" alt="TanStack" class="h-12 w-12" />
                       </div>
                       <span class="text-sm font-medium text-center text-gray-300">TanStack</span>
-                    </div>
-                    <div class="group relative overflow-hidden rounded-xl bg-white/5 border border-white/10 p-6 transition-all hover:border-[#d1b9fe]/50 hover:bg-white/10 flex flex-col items-center">
-                      <div class="flex items-center justify-center mb-3 h-12 w-12 rounded-lg bg-gradient-to-br from-blue-400 to-cyan-500">
-                        <.icon name="tabler-atom" class="size-6 text-white" />
+                    </a>
+                    <a href="https://electric-sql.com/docs/integrations/react" target="_blank" rel="noopener" class="group relative overflow-hidden rounded-xl bg-white/5 border border-white/10 p-6 transition-all hover:border-[#d1b9fe]/50 hover:bg-white/10 flex flex-col items-center hover:no-underline">
+                      <div class="flex items-center justify-center mb-3 h-12 w-12">
+                        <img src="https://electric-sql.com/img/integrations/react.svg" alt="React" class="h-12 w-12" />
                       </div>
                       <span class="text-sm font-medium text-center text-gray-300">React</span>
-                    </div>
+                    </a>
                   </div>
                 </div>
               </section>

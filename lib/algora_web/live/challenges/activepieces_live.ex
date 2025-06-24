@@ -158,7 +158,7 @@ defmodule AlgoraWeb.Challenges.ActivepiecesLive do
                   Available MCP Bounties
                 </h2>
                 <p class="text-center mt-4 text-base font-medium text-gray-200 mb-8">
-                  Ready to contribute? Select a bounty to start building. Each bounty includes detailed requirements and compensation.
+                  10 active bounties available totaling $1,250 in rewards. Select a bounty to start building. Each bounty includes detailed requirements and compensation.
                 </p>
                 <div class="mx-auto grid gap-6 px-6 sm:grid-cols-2 lg:grid-cols-3 lg:px-8">
                   <a
@@ -220,35 +220,6 @@ defmodule AlgoraWeb.Challenges.ActivepiecesLive do
                     </div>
                   </a>
                   <a
-                    href="https://github.com/activepieces/activepieces/issues/8021"
-                    target="_blank"
-                    rel="noopener"
-                    class="group relative overflow-hidden rounded-lg border border-border bg-card p-6 transition-all hover:border-violet-500/50 hover:no-underline block"
-                  >
-                    <div class="flex items-center gap-4 mb-4">
-                      <img
-                        src="https://github.com/skyvern-ai.png"
-                        alt="Skyvern"
-                        class="w-12 h-12 rounded-lg"
-                      />
-                      <div>
-                        <h3 class="text-lg font-semibold text-foreground">Skyvern MCP</h3>
-                        <p class="text-sm text-muted-foreground">Web automation</p>
-                      </div>
-                    </div>
-                    <p class="text-sm text-muted-foreground">
-                      AI agent platform automation with natural language and programmatic APIs. Actions include Run Agent Task, Run Workflow, Cancel Workflow, Find Workflow, Get workflow run details.
-                    </p>
-                    <div class="mt-4 flex items-center gap-2">
-                      <span class="font-display rounded-full bg-violet-500/10 px-2 py-1 text-xs font-bold text-violet-500 ring-violet-500/50 ring-1">
-                        $100
-                      </span>
-                      <span class="font-display rounded-full bg-gray-500/10 px-2 py-1 text-xs font-bold text-gray-500 ring-gray-500/50 ring-1">
-                        Completed
-                      </span>
-                    </div>
-                  </a>
-                  <a
                     href="https://github.com/activepieces/activepieces/issues/8018"
                     target="_blank"
                     rel="noopener"
@@ -274,118 +245,6 @@ defmodule AlgoraWeb.Challenges.ActivepiecesLive do
                       </span>
                       <span class="font-display rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-500 ring-emerald-500/50 ring-1">
                         Active
-                      </span>
-                    </div>
-                  </a>
-                  <a
-                    href="https://github.com/activepieces/activepieces/issues/7931"
-                    target="_blank"
-                    rel="noopener"
-                    class="group relative overflow-hidden rounded-lg border border-border bg-card p-6 transition-all hover:border-violet-500/50 hover:no-underline block"
-                  >
-                    <div class="flex items-center gap-4 mb-4">
-                      <img
-                        src="https://github.com/deepgram.png"
-                        alt="Deepgram"
-                        class="w-12 h-12 rounded-lg"
-                      />
-                      <div>
-                        <h3 class="text-lg font-semibold text-foreground">Deepgram MCP</h3>
-                        <p class="text-sm text-muted-foreground">Speech recognition</p>
-                      </div>
-                    </div>
-                    <p class="text-sm text-muted-foreground">
-                      Speech-to-text and text-to-speech integration with actions for Create Summary, Transcribe Audio, Create Transcription (Callback), List Projects, and Text to Speech.
-                    </p>
-                    <div class="mt-4 flex items-center gap-2">
-                      <span class="font-display rounded-full bg-violet-500/10 px-2 py-1 text-xs font-bold text-violet-500 ring-violet-500/50 ring-1">
-                        $50
-                      </span>
-                      <span class="font-display rounded-full bg-gray-500/10 px-2 py-1 text-xs font-bold text-gray-500 ring-gray-500/50 ring-1">
-                        Completed
-                      </span>
-                    </div>
-                  </a>
-                  <a
-                    href="https://github.com/activepieces/activepieces/issues/7927"
-                    target="_blank"
-                    rel="noopener"
-                    class="group relative overflow-hidden rounded-lg border border-border bg-card p-6 transition-all hover:border-violet-500/50 hover:no-underline block"
-                  >
-                    <div class="flex items-center gap-4 mb-4">
-                      <img
-                        src="/images/logos/airparser.jpeg"
-                        alt="Airparser"
-                        class="w-12 h-12 rounded-lg"
-                      />
-                      <div>
-                        <h3 class="text-lg font-semibold text-foreground">Airparser MCP</h3>
-                        <p class="text-sm text-muted-foreground">Document parsing</p>
-                      </div>
-                    </div>
-                    <p class="text-sm text-muted-foreground">
-                      GPT-powered document parser for extracting structured data from emails, PDFs, and documents. Includes "Upload Document for Parsing" and "Extract Data from Document" actions plus triggers.
-                    </p>
-                    <div class="mt-4 flex items-center gap-2">
-                      <span class="font-display rounded-full bg-violet-500/10 px-2 py-1 text-xs font-bold text-violet-500 ring-violet-500/50 ring-1">
-                        $50
-                      </span>
-                      <span class="font-display rounded-full bg-gray-500/10 px-2 py-1 text-xs font-bold text-gray-500 ring-gray-500/50 ring-1">
-                        Completed
-                      </span>
-                    </div>
-                  </a>
-                  <a
-                    href="https://github.com/activepieces/activepieces/issues/7925"
-                    target="_blank"
-                    rel="noopener"
-                    class="group relative overflow-hidden rounded-lg border border-border bg-card p-6 transition-all hover:border-violet-500/50 hover:no-underline block"
-                  >
-                    <div class="flex items-center gap-4 mb-4">
-                      <img src="/images/logos/memdotai.jpeg" alt="Mem" class="w-12 h-12 rounded-lg" />
-                      <div>
-                        <h3 class="text-lg font-semibold text-foreground">Mem MCP</h3>
-                        <p class="text-sm text-muted-foreground">AI knowledge base</p>
-                      </div>
-                    </div>
-                    <p class="text-sm text-muted-foreground">
-                      AI-powered note-taking platform integration with Create Mem, Create Note, and Delete Note actions. Includes comprehensive unit tests.
-                    </p>
-                    <div class="mt-4 flex items-center gap-2">
-                      <span class="font-display rounded-full bg-violet-500/10 px-2 py-1 text-xs font-bold text-violet-500 ring-violet-500/50 ring-1">
-                        $30
-                      </span>
-                      <span class="font-display rounded-full bg-gray-500/10 px-2 py-1 text-xs font-bold text-gray-500 ring-gray-500/50 ring-1">
-                        Completed
-                      </span>
-                    </div>
-                  </a>
-                  <a
-                    href="https://github.com/activepieces/activepieces/issues/7923"
-                    target="_blank"
-                    rel="noopener"
-                    class="group relative overflow-hidden rounded-lg border border-border bg-card p-6 transition-all hover:border-violet-500/50 hover:no-underline block"
-                  >
-                    <div class="flex items-center gap-4 mb-4">
-                      <img
-                        src="/images/logos/chatbase.jpeg"
-                        alt="Chatbase"
-                        class="w-12 h-12 rounded-lg"
-                      />
-                      <div>
-                        <h3 class="text-lg font-semibold text-foreground">Chatbase MCP</h3>
-                        <p class="text-sm text-muted-foreground">AI chatbot platform</p>
-                      </div>
-                    </div>
-                    <p class="text-sm text-muted-foreground">
-                      AI-powered chatbot platform for customer service and engagement. Includes "Lead Submitted" trigger, "Send Prompt to Chatbot" and "Create Chatbot" actions, "List All Chatbots" search.
-                    </p>
-                    <div class="mt-4 flex items-center gap-2">
-                      <span class="font-display rounded-full bg-violet-500/10 px-2 py-1 text-xs font-bold text-violet-500 ring-violet-500/50 ring-1">
-                        $50
-                      </span>
-                      <span class="font-display rounded-full bg-gray-500/10 px-2 py-1 text-xs font-bold text-gray-500 ring-gray-500/50 ring-1">
-                        Completed
                       </span>
                     </div>
                   </a>
@@ -419,31 +278,176 @@ defmodule AlgoraWeb.Challenges.ActivepiecesLive do
                     </div>
                   </a>
                   <a
-                    href="https://github.com/activepieces/activepieces/issues/7919"
+                    href="https://github.com/activepieces/activepieces/issues/7917"
                     target="_blank"
                     rel="noopener"
                     class="group relative overflow-hidden rounded-lg border border-border bg-card p-6 transition-all hover:border-violet-500/50 hover:no-underline block"
                   >
                     <div class="flex items-center gap-4 mb-4">
                       <img
-                        src="https://github.com/crisp-im.png"
-                        alt="Crisp"
+                        src="https://github.com/pandadoc.png"
+                        alt="PandaDoc"
                         class="w-12 h-12 rounded-lg"
                       />
                       <div>
-                        <h3 class="text-lg font-semibold text-foreground">Crisp MCP</h3>
-                        <p class="text-sm text-muted-foreground">Customer support</p>
+                        <h3 class="text-lg font-semibold text-foreground">PandaDoc MCP</h3>
+                        <p class="text-sm text-muted-foreground">Document automation</p>
                       </div>
                     </div>
                     <p class="text-sm text-muted-foreground">
-                      Multichannel messaging platform for customer communication with triggers (New Conversation, Status Changed, New Contact) and actions (Create/Update Contact, Create Conversation, Add Note, Change State).
+                      Document automation platform with triggers (Document Completed, State Changed, Updated), write actions (Create Document from Template, Create Attachment, Create/Update Contact), and read actions.
                     </p>
                     <div class="mt-4 flex items-center gap-2">
                       <span class="font-display rounded-full bg-violet-500/10 px-2 py-1 text-xs font-bold text-violet-500 ring-violet-500/50 ring-1">
                         $100
                       </span>
-                      <span class="font-display rounded-full bg-gray-500/10 px-2 py-1 text-xs font-bold text-gray-500 ring-gray-500/50 ring-1">
-                        Completed
+                      <span class="font-display rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-500 ring-emerald-500/50 ring-1">
+                        Active
+                      </span>
+                    </div>
+                  </a>
+                  <a
+                    href="https://github.com/activepieces/activepieces/issues/7894"
+                    target="_blank"
+                    rel="noopener"
+                    class="group relative overflow-hidden rounded-lg border border-border bg-card p-6 transition-all hover:border-violet-500/50 hover:no-underline block"
+                  >
+                    <div class="flex items-center gap-4 mb-4">
+                      <img
+                        src="https://github.com/HeyGen-Official.png"
+                        alt="HeyGen"
+                        class="w-12 h-12 rounded-lg"
+                      />
+                      <div>
+                        <h3 class="text-lg font-semibold text-foreground">HeyGen MCP</h3>
+                        <p class="text-sm text-muted-foreground">AI video generation</p>
+                      </div>
+                    </div>
+                    <p class="text-sm text-muted-foreground">
+                      AI video generation platform with triggers (Video Generation Completed/Failed), write actions (Create Avatar Video, Translate Video, Upload Asset, Create Video From Template), and read actions.
+                    </p>
+                    <div class="mt-4 flex items-center gap-2">
+                      <span class="font-display rounded-full bg-violet-500/10 px-2 py-1 text-xs font-bold text-violet-500 ring-violet-500/50 ring-1">
+                        $100
+                      </span>
+                      <span class="font-display rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-500 ring-emerald-500/50 ring-1">
+                        Active
+                      </span>
+                    </div>
+                  </a>
+                  <a
+                    href="https://github.com/activepieces/activepieces/issues/7861"
+                    target="_blank"
+                    rel="noopener"
+                    class="group relative overflow-hidden rounded-lg border border-border bg-card p-6 transition-all hover:border-violet-500/50 hover:no-underline block"
+                  >
+                    <div class="flex items-center gap-4 mb-4">
+                      <img
+                        src="https://github.com/cognitoforms.png"
+                        alt="Cognito Forms"
+                        class="w-12 h-12 rounded-lg"
+                      />
+                      <div>
+                        <h3 class="text-lg font-semibold text-foreground">Cognito Forms MCP</h3>
+                        <p class="text-sm text-muted-foreground">Form builder</p>
+                      </div>
+                    </div>
+                    <p class="text-sm text-muted-foreground">
+                      Form builder platform with triggers (New Entry Submitted, Entry Updated), write actions (Create/Update/Delete Entry), and read actions (Get Entry Details).
+                    </p>
+                    <div class="mt-4 flex items-center gap-2">
+                      <span class="font-display rounded-full bg-violet-500/10 px-2 py-1 text-xs font-bold text-violet-500 ring-violet-500/50 ring-1">
+                        $50
+                      </span>
+                      <span class="font-display rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-500 ring-emerald-500/50 ring-1">
+                        Active
+                      </span>
+                    </div>
+                  </a>
+                  <a
+                    href="https://github.com/activepieces/activepieces/issues/7670"
+                    target="_blank"
+                    rel="noopener"
+                    class="group relative overflow-hidden rounded-lg border border-border bg-card p-6 transition-all hover:border-violet-500/50 hover:no-underline block"
+                  >
+                    <div class="flex items-center gap-4 mb-4">
+                      <img
+                        src="https://github.com/pcloud.png"
+                        alt="pCloud"
+                        class="w-12 h-12 rounded-lg"
+                      />
+                      <div>
+                        <h3 class="text-lg font-semibold text-foreground">pCloud MCP</h3>
+                        <p class="text-sm text-muted-foreground">Cloud storage</p>
+                      </div>
+                    </div>
+                    <p class="text-sm text-muted-foreground">
+                      Cloud storage platform with triggers (New File Uploaded, Folder Created), write actions (Upload File, Create Folder, Download File Content, Copy File), and search actions (Find File/Folder).
+                    </p>
+                    <div class="mt-4 flex items-center gap-2">
+                      <span class="font-display rounded-full bg-violet-500/10 px-2 py-1 text-xs font-bold text-violet-500 ring-violet-500/50 ring-1">
+                        $100
+                      </span>
+                      <span class="font-display rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-500 ring-emerald-500/50 ring-1">
+                        Active
+                      </span>
+                    </div>
+                  </a>
+                  <a
+                    href="https://github.com/activepieces/activepieces/issues/7492"
+                    target="_blank"
+                    rel="noopener"
+                    class="group relative overflow-hidden rounded-lg border border-border bg-card p-6 transition-all hover:border-violet-500/50 hover:no-underline block"
+                  >
+                    <div class="flex items-center gap-4 mb-4">
+                      <img
+                        src="https://github.com/IntuitDeveloper.png"
+                        alt="QuickBooks"
+                        class="w-12 h-12 rounded-lg"
+                      />
+                      <div>
+                        <h3 class="text-lg font-semibold text-foreground">QuickBooks MCP</h3>
+                        <p class="text-sm text-muted-foreground">Accounting platform</p>
+                      </div>
+                    </div>
+                    <p class="text-sm text-muted-foreground">
+                      Accounting and business management platform with triggers (New Customer, New Invoice, Payment Received), write actions (Create Customer/Invoice/Payment), and read actions (Get Customer/Invoice details).
+                    </p>
+                    <div class="mt-4 flex items-center gap-2">
+                      <span class="font-display rounded-full bg-violet-500/10 px-2 py-1 text-xs font-bold text-violet-500 ring-violet-500/50 ring-1">
+                        $100
+                      </span>
+                      <span class="font-display rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-500 ring-emerald-500/50 ring-1">
+                        Active
+                      </span>
+                    </div>
+                  </a>
+                  <a
+                    href="https://github.com/activepieces/activepieces/issues/7491"
+                    target="_blank"
+                    rel="noopener"
+                    class="group relative overflow-hidden rounded-lg border border-border bg-card p-6 transition-all hover:border-violet-500/50 hover:no-underline block"
+                  >
+                    <div class="flex items-center gap-4 mb-4">
+                      <img
+                        src="https://github.com/hcengineering.png"
+                        alt="Huly"
+                        class="w-12 h-12 rounded-lg"
+                      />
+                      <div>
+                        <h3 class="text-lg font-semibold text-foreground">Huly MCP</h3>
+                        <p class="text-sm text-muted-foreground">Project management</p>
+                      </div>
+                    </div>
+                    <p class="text-sm text-muted-foreground">
+                      All-in-one project management platform with triggers (New Issue, Status Changed, Comment Added), write actions (Create/Update Issue, Add Comment, Update Status), and read actions (Get Issue/Project details).
+                    </p>
+                    <div class="mt-4 flex items-center gap-2">
+                      <span class="font-display rounded-full bg-violet-500/10 px-2 py-1 text-xs font-bold text-violet-500 ring-violet-500/50 ring-1">
+                        $100
+                      </span>
+                      <span class="font-display rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-500 ring-emerald-500/50 ring-1">
+                        Active
                       </span>
                     </div>
                   </a>

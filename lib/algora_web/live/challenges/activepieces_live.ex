@@ -11,7 +11,7 @@ defmodule AlgoraWeb.Challenges.ActivepiecesLive do
      |> assign(:page_title, "Activepieces MCP Challenge")
      |> assign(
        :page_description,
-       "Build MCPs for Activepieces and earn $200 per integration - expand the open-source automation ecosystem!"
+       "Build MCPs for Activepieces and earn $200 per integration!"
      )
      |> assign(:page_image, "#{AlgoraWeb.Endpoint.url()}/images/challenges/activepieces/og.png")}
   end

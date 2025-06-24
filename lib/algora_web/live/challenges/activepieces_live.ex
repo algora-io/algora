@@ -179,7 +179,7 @@ defmodule AlgoraWeb.Challenges.ActivepiecesLive do
                       </div>
                     </div>
                     <p class="text-sm text-muted-foreground">
-                      Create designs, manage templates, and automate graphic design workflows
+                      Build MCP for uploading assets, creating/importing/exporting designs, managing folders, and finding designs. 8 specific actions required including Upload Asset, Create Design, Export Design.
                     </p>
                     <div class="mt-4 flex items-center gap-2">
                       <span class="font-display rounded-full bg-violet-500/10 px-2 py-1 text-xs font-bold text-violet-500 ring-violet-500/50 ring-1">
@@ -208,7 +208,7 @@ defmodule AlgoraWeb.Challenges.ActivepiecesLive do
                       </div>
                     </div>
                     <p class="text-sm text-muted-foreground">
-                      Send emails, manage inbox, and automate email workflows through AI
+                      Extend Gmail integration with new triggers (starred emails, conversations, attachments, labels) and actions (reply, drafts, labels, archive/delete, find). Comprehensive email automation.
                     </p>
                     <div class="mt-4 flex items-center gap-2">
                       <span class="font-display rounded-full bg-violet-500/10 px-2 py-1 text-xs font-bold text-violet-500 ring-violet-500/50 ring-1">
@@ -237,14 +237,14 @@ defmodule AlgoraWeb.Challenges.ActivepiecesLive do
                       </div>
                     </div>
                     <p class="text-sm text-muted-foreground">
-                      Automate web interactions and workflows using AI-powered browser automation
+                      AI agent platform automation with natural language and programmatic APIs. Actions include Run Agent Task, Run Workflow, Cancel Workflow, Find Workflow, Get workflow run details.
                     </p>
                     <div class="mt-4 flex items-center gap-2">
                       <span class="font-display rounded-full bg-violet-500/10 px-2 py-1 text-xs font-bold text-violet-500 ring-violet-500/50 ring-1">
                         $100
                       </span>
-                      <span class="font-display rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-500 ring-emerald-500/50 ring-1">
-                        Active
+                      <span class="font-display rounded-full bg-gray-500/10 px-2 py-1 text-xs font-bold text-gray-500 ring-gray-500/50 ring-1">
+                        Completed
                       </span>
                     </div>
                   </a>
@@ -266,7 +266,7 @@ defmodule AlgoraWeb.Challenges.ActivepiecesLive do
                       </div>
                     </div>
                     <p class="text-sm text-muted-foreground">
-                      Access vehicle data and manage connected car integrations through DIMO network
+                      Blockchain-based vehicle protocol with multiple APIs: Attestation, Device Definition, Token Exchange, Identity, Telemetry, and Webhooks. Requires developer license and vehicle data permissions.
                     </p>
                     <div class="mt-4 flex items-center gap-2">
                       <span class="font-display rounded-full bg-violet-500/10 px-2 py-1 text-xs font-bold text-violet-500 ring-violet-500/50 ring-1">
@@ -295,14 +295,14 @@ defmodule AlgoraWeb.Challenges.ActivepiecesLive do
                       </div>
                     </div>
                     <p class="text-sm text-muted-foreground">
-                      Transcribe audio, analyze speech, and integrate voice recognition capabilities
+                      Speech-to-text and text-to-speech integration with actions for Create Summary, Transcribe Audio, Create Transcription (Callback), List Projects, and Text to Speech.
                     </p>
                     <div class="mt-4 flex items-center gap-2">
                       <span class="font-display rounded-full bg-violet-500/10 px-2 py-1 text-xs font-bold text-violet-500 ring-violet-500/50 ring-1">
                         $50
                       </span>
-                      <span class="font-display rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-500 ring-emerald-500/50 ring-1">
-                        Active
+                      <span class="font-display rounded-full bg-gray-500/10 px-2 py-1 text-xs font-bold text-gray-500 ring-gray-500/50 ring-1">
+                        Completed
                       </span>
                     </div>
                   </a>
@@ -324,14 +324,14 @@ defmodule AlgoraWeb.Challenges.ActivepiecesLive do
                       </div>
                     </div>
                     <p class="text-sm text-muted-foreground">
-                      Extract data from documents and automate document processing workflows
+                      GPT-powered document parser for extracting structured data from emails, PDFs, and documents. Includes "Upload Document for Parsing" and "Extract Data from Document" actions plus triggers.
                     </p>
                     <div class="mt-4 flex items-center gap-2">
                       <span class="font-display rounded-full bg-violet-500/10 px-2 py-1 text-xs font-bold text-violet-500 ring-violet-500/50 ring-1">
                         $50
                       </span>
-                      <span class="font-display rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-500 ring-emerald-500/50 ring-1">
-                        Active
+                      <span class="font-display rounded-full bg-gray-500/10 px-2 py-1 text-xs font-bold text-gray-500 ring-gray-500/50 ring-1">
+                        Completed
                       </span>
                     </div>
                   </a>
@@ -349,14 +349,14 @@ defmodule AlgoraWeb.Challenges.ActivepiecesLive do
                       </div>
                     </div>
                     <p class="text-sm text-muted-foreground">
-                      Manage personal knowledge base and AI-powered note organization
+                      AI-powered note-taking platform integration with Create Mem, Create Note, and Delete Note actions. Includes comprehensive unit tests.
                     </p>
                     <div class="mt-4 flex items-center gap-2">
                       <span class="font-display rounded-full bg-violet-500/10 px-2 py-1 text-xs font-bold text-violet-500 ring-violet-500/50 ring-1">
                         $30
                       </span>
-                      <span class="font-display rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-500 ring-emerald-500/50 ring-1">
-                        Active
+                      <span class="font-display rounded-full bg-gray-500/10 px-2 py-1 text-xs font-bold text-gray-500 ring-gray-500/50 ring-1">
+                        Completed
                       </span>
                     </div>
                   </a>
@@ -378,14 +378,14 @@ defmodule AlgoraWeb.Challenges.ActivepiecesLive do
                       </div>
                     </div>
                     <p class="text-sm text-muted-foreground">
-                      Create and manage AI chatbots, train on custom data, and handle conversations
+                      AI-powered chatbot platform for customer service and engagement. Includes "Lead Submitted" trigger, "Send Prompt to Chatbot" and "Create Chatbot" actions, "List All Chatbots" search.
                     </p>
                     <div class="mt-4 flex items-center gap-2">
                       <span class="font-display rounded-full bg-violet-500/10 px-2 py-1 text-xs font-bold text-violet-500 ring-violet-500/50 ring-1">
                         $50
                       </span>
-                      <span class="font-display rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-500 ring-emerald-500/50 ring-1">
-                        Active
+                      <span class="font-display rounded-full bg-gray-500/10 px-2 py-1 text-xs font-bold text-gray-500 ring-gray-500/50 ring-1">
+                        Completed
                       </span>
                     </div>
                   </a>
@@ -407,7 +407,7 @@ defmodule AlgoraWeb.Challenges.ActivepiecesLive do
                       </div>
                     </div>
                     <p class="text-sm text-muted-foreground">
-                      Manage projects, update sheets, and automate Smartsheet workflows
+                      Spreadsheet and project management platform with triggers (New Row Added, Updated Row, New Attachment/Comment) and actions (Add/Update Row, Attach File, Find Rows/Attachments/Sheets).
                     </p>
                     <div class="mt-4 flex items-center gap-2">
                       <span class="font-display rounded-full bg-violet-500/10 px-2 py-1 text-xs font-bold text-violet-500 ring-violet-500/50 ring-1">
@@ -436,14 +436,14 @@ defmodule AlgoraWeb.Challenges.ActivepiecesLive do
                       </div>
                     </div>
                     <p class="text-sm text-muted-foreground">
-                      Manage customer conversations, automate support workflows, and handle live chat
+                      Multichannel messaging platform for customer communication with triggers (New Conversation, Status Changed, New Contact) and actions (Create/Update Contact, Create Conversation, Add Note, Change State).
                     </p>
                     <div class="mt-4 flex items-center gap-2">
                       <span class="font-display rounded-full bg-violet-500/10 px-2 py-1 text-xs font-bold text-violet-500 ring-violet-500/50 ring-1">
                         $100
                       </span>
-                      <span class="font-display rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-500 ring-emerald-500/50 ring-1">
-                        Active
+                      <span class="font-display rounded-full bg-gray-500/10 px-2 py-1 text-xs font-bold text-gray-500 ring-gray-500/50 ring-1">
+                        Completed
                       </span>
                     </div>
                   </a>

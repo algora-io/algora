@@ -111,6 +111,7 @@ defmodule AlgoraWeb.Router do
       live "/challenges/turso", Challenges.LimboLive
       live "/challenges/activepieces", Challenges.ActivepiecesLive
       live "/challenges/atopile", Challenges.AtopileLive
+      live "/challenges/electric", Challenges.ElectricLive
       live "/challenges/prettier", Challenges.PrettierLive
       live "/challenges/golem", Challenges.GolemLive
       live "/challenges/tsperf", Challenges.TsperfLive

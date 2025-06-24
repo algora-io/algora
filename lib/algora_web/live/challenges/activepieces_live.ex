@@ -201,7 +201,7 @@ defmodule AlgoraWeb.Challenges.ActivepiecesLive do
                   >
                     <div class="flex items-center gap-4 mb-4">
                       <img
-                        src="https://github.com/gmail.png"
+                        src="https://github.com/google.png"
                         alt="Gmail"
                         class="w-12 h-12 rounded-lg"
                       />
@@ -317,7 +317,7 @@ defmodule AlgoraWeb.Challenges.ActivepiecesLive do
                   >
                     <div class="flex items-center gap-4 mb-4">
                       <img
-                        src="https://github.com/airparser.png"
+                        src="/images/logos/airparser.jpeg"
                         alt="Airparser"
                         class="w-12 h-12 rounded-lg"
                       />
@@ -345,11 +345,7 @@ defmodule AlgoraWeb.Challenges.ActivepiecesLive do
                     class="group relative overflow-hidden rounded-lg border border-border bg-card p-6 transition-all hover:border-[#843ee5]/50 hover:no-underline block"
                   >
                     <div class="flex items-center gap-4 mb-4">
-                      <img
-                        src="https://github.com/mem-ai.png"
-                        alt="Mem"
-                        class="w-12 h-12 rounded-lg"
-                      />
+                      <img src="/images/logos/memdotai.jpeg" alt="Mem" class="w-12 h-12 rounded-lg" />
                       <div>
                         <h3 class="text-lg font-semibold text-foreground">Mem MCP</h3>
                         <p class="text-sm text-muted-foreground">AI knowledge base</p>
@@ -375,7 +371,7 @@ defmodule AlgoraWeb.Challenges.ActivepiecesLive do
                   >
                     <div class="flex items-center gap-4 mb-4">
                       <img
-                        src="https://github.com/chatbase-co.png"
+                        src="/images/logos/chatbase.jpeg"
                         alt="Chatbase"
                         class="w-12 h-12 rounded-lg"
                       />

@@ -132,10 +132,142 @@ defmodule AlgoraWeb.Challenges.ElectricLive do
                       <.icon name="tabler-square-rounded-number-5" class="size-8 mr-2 shrink-0" />
                       <span class="text-base font-medium leading-7">
                         The most innovative uses of Electric SQL's real-time sync capabilities win
-                        <span class="font-display font-bold text-cyan-400">$500</span>
+                        <span class="font-display font-bold text-[#03d1a1]">$500</span>
                       </span>
                     </li>
                   </ul>
+                </div>
+              </section>
+              <section class="md:mb-18 mb-12 xl:pt-20 2xl:pt-52">
+                <div class="relative z-50 mx-auto max-w-7xl px-6 pt-6 lg:px-8">
+                  <h2 class="flex justify-center text-4xl font-black leading-none tracking-tighter mix-blend-exclusion md:text-7xl">
+                    Example Apps
+                  </h2>
+                  <p class="text-center mt-4 text-base font-medium text-gray-200">
+                    Get inspired by what's possible with Electric SQL
+                  </p>
+                  <div class="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+                    <a
+                      href="https://electric-sql.com/demos/ai-chat"
+                      target="_blank"
+                      rel="noopener"
+                      class="group relative overflow-hidden rounded-xl bg-white/5 border border-white/10 p-6 transition-all hover:border-[#d1b9fe]/50 hover:bg-white/10 hover:no-underline"
+                    >
+                      <div class="flex items-center justify-center mb-4 h-12 w-12 mx-auto">
+                        <img
+                          src="https://electric-sql.com/img/home/sync-targets/agent.svg"
+                          alt="Agents"
+                          class="h-12 w-12"
+                        />
+                      </div>
+                      <h3 class="text-lg font-semibold text-center mb-2 text-white">Agents</h3>
+                      <p class="text-sm text-gray-400 text-center">
+                        Keep AI agents and users in sync
+                      </p>
+                    </a>
+                    <a
+                      href="https://electric-sql.com/demos/linearlite"
+                      target="_blank"
+                      rel="noopener"
+                      class="group relative overflow-hidden rounded-xl bg-white/5 border border-white/10 p-6 transition-all hover:border-[#d1b9fe]/50 hover:bg-white/10 hover:no-underline"
+                    >
+                      <div class="flex items-center justify-center mb-4 h-12 w-12 mx-auto">
+                        <img
+                          src="https://electric-sql.com/img/home/sync-targets/app.svg"
+                          alt="Apps"
+                          class="h-12 w-12"
+                        />
+                      </div>
+                      <h3 class="text-lg font-semibold text-center mb-2 text-white">Apps</h3>
+                      <p class="text-sm text-gray-400 text-center">
+                        Make apps super fast and collaborative
+                      </p>
+                    </a>
+                    <a
+                      href="https://electric-sql.com/#dashboard-examples"
+                      target="_blank"
+                      rel="noopener"
+                      class="group relative overflow-hidden rounded-xl bg-white/5 border border-white/10 p-6 transition-all hover:border-[#d1b9fe]/50 hover:bg-white/10 hover:no-underline"
+                    >
+                      <div class="flex items-center justify-center mb-4 h-12 w-12 mx-auto">
+                        <img
+                          src="https://electric-sql.com/img/home/sync-targets/dashboard.svg"
+                          alt="Dashboards"
+                          class="h-12 w-12"
+                        />
+                      </div>
+                      <h3 class="text-lg font-semibold text-center mb-2 text-white">Dashboards</h3>
+                      <p class="text-sm text-gray-400 text-center">
+                        Build live, real-time dashboards
+                      </p>
+                    </a>
+                    <a
+                      href="https://electric-sql.com/docs/integrations/cloudflare"
+                      target="_blank"
+                      rel="noopener"
+                      class="group relative overflow-hidden rounded-xl bg-white/5 border border-white/10 p-6 transition-all hover:border-[#d1b9fe]/50 hover:bg-white/10 hover:no-underline"
+                    >
+                      <div class="flex items-center justify-center mb-4 h-12 w-12 mx-auto">
+                        <img
+                          src="https://electric-sql.com/img/home/sync-targets/worker.svg"
+                          alt="Workers"
+                          class="h-12 w-12"
+                        />
+                      </div>
+                      <h3 class="text-lg font-semibold text-center mb-2 text-white">Workers</h3>
+                      <p class="text-sm text-gray-400 text-center">
+                        Sync data into workers at the edge
+                      </p>
+                    </a>
+                  </div>
+                </div>
+              </section>
+              <section class="md:mb-18 mb-12 xl:pt-20 2xl:pt-52">
+                <div class="relative z-50 mx-auto max-w-7xl px-6 pt-6 lg:px-8">
+                  <h2 class="flex justify-center text-4xl font-black leading-none tracking-tighter mix-blend-exclusion md:text-7xl">
+                    Use Your Stack
+                  </h2>
+                  <p class="text-center mt-4 text-base font-medium text-gray-200">
+                    Electric SQL works with your favorite frameworks and tools
+                  </p>
+                  <div class="mt-8 grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-6">
+                    <div class="group relative overflow-hidden rounded-xl bg-white/5 border border-white/10 p-6 transition-all hover:border-[#d1b9fe]/50 hover:bg-white/10 flex flex-col items-center">
+                      <div class="flex items-center justify-center mb-3 h-12 w-12 rounded-lg bg-gradient-to-br from-green-500 to-green-600">
+                        <.icon name="tabler-triangle" class="size-6 text-white transform rotate-90" />
+                      </div>
+                      <span class="text-sm font-medium text-center text-gray-300">Supabase</span>
+                    </div>
+                    <div class="group relative overflow-hidden rounded-xl bg-white/5 border border-white/10 p-6 transition-all hover:border-[#d1b9fe]/50 hover:bg-white/10 flex flex-col items-center">
+                      <div class="flex items-center justify-center mb-3 h-12 w-12 rounded-lg bg-gradient-to-br from-cyan-400 to-cyan-500">
+                        <span class="text-white font-bold text-lg">N</span>
+                      </div>
+                      <span class="text-sm font-medium text-center text-gray-300">Neon</span>
+                    </div>
+                    <div class="group relative overflow-hidden rounded-xl bg-white/5 border border-white/10 p-6 transition-all hover:border-[#d1b9fe]/50 hover:bg-white/10 flex flex-col items-center">
+                      <div class="flex items-center justify-center mb-3 h-12 w-12 rounded-lg bg-gradient-to-br from-orange-500 to-red-500">
+                        <.icon name="tabler-flame" class="size-6 text-white" />
+                      </div>
+                      <span class="text-sm font-medium text-center text-gray-300">Phoenix</span>
+                    </div>
+                    <div class="group relative overflow-hidden rounded-xl bg-white/5 border border-white/10 p-6 transition-all hover:border-[#d1b9fe]/50 hover:bg-white/10 flex flex-col items-center">
+                      <div class="flex items-center justify-center mb-3 h-12 w-12 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600">
+                        <span class="text-white font-bold text-lg">N</span>
+                      </div>
+                      <span class="text-sm font-medium text-center text-gray-300">Next.js</span>
+                    </div>
+                    <div class="group relative overflow-hidden rounded-xl bg-white/5 border border-white/10 p-6 transition-all hover:border-[#d1b9fe]/50 hover:bg-white/10 flex flex-col items-center">
+                      <div class="flex items-center justify-center mb-3 h-12 w-12 rounded-lg bg-gradient-to-br from-orange-400 to-yellow-500">
+                        <.icon name="tabler-brand-stackoverflow" class="size-6 text-white" />
+                      </div>
+                      <span class="text-sm font-medium text-center text-gray-300">TanStack</span>
+                    </div>
+                    <div class="group relative overflow-hidden rounded-xl bg-white/5 border border-white/10 p-6 transition-all hover:border-[#d1b9fe]/50 hover:bg-white/10 flex flex-col items-center">
+                      <div class="flex items-center justify-center mb-3 h-12 w-12 rounded-lg bg-gradient-to-br from-blue-400 to-cyan-500">
+                        <.icon name="tabler-atom" class="size-6 text-white" />
+                      </div>
+                      <span class="text-sm font-medium text-center text-gray-300">React</span>
+                    </div>
+                  </div>
                 </div>
               </section>
               <section class="mx-auto my-24 max-w-7xl md:my-36">
@@ -201,25 +333,39 @@ defmodule AlgoraWeb.Challenges.ElectricLive do
                     Community Highlights
                   </h2>
                   <div class="mx-auto mt-6 grid max-w-2xl grid-cols-1 grid-rows-1 gap-8 text-sm/6 text-foreground sm:grid-cols-2 xl:mx-0 xl:max-w-none xl:grid-flow-col xl:grid-cols-4">
-                    <figure class="rounded-2xl bg-card shadow-lg border-2 border-border hover:border-[#37363d] transition-colors sm:col-span-2 xl:col-start-2 xl:row-end-1">
-                      <.link
+                    <div class="sm:col-span-2 xl:col-start-2 xl:row-end-1">
+                      <a
                         href="https://news.ycombinator.com/item?id=37584049"
                         target="_blank"
                         rel="noopener"
+                        class="group relative overflow-hidden rounded-lg bg-background transition-all"
                       >
-                        <blockquote class="p-6 text-lg font-semibold tracking-tight text-foreground sm:p-12 sm:text-xl/8 whitespace-pre-line -mt-16">
-                          <p>
-                            We're building an offline-first, mobile-first app and have high hopes for this project! The combination of SQLite's convenience on the client-side and PostgreSQL's flexibility on the server-side is a potent foundation.
-                          </p>
-                        </blockquote>
-                        <figcaption class="flex items-center gap-x-2 p-6 sm:p-12 -mt-12 md:-mt-24">
-                          <.icon name="tabler-brand-ycombinator" class="size-6" />
-                          <div>
-                            <div class="font-semibold text-foreground">gregzo & thanikkal</div>
-                          </div>
-                        </figcaption>
-                      </.link>
-                    </figure>
+                        <img
+                          src={~p"/images/challenges/electric/hn-post.png"}
+                          alt="Hacker News discussion"
+                          class="w-full object-cover rounded-lg"
+                        />
+                      </a>
+                      <figure class="mt-6 rounded-2xl bg-card shadow-lg border-2 border-border hover:border-[#37363d] transition-colors">
+                        <.link
+                          href="https://news.ycombinator.com/item?id=37584049"
+                          target="_blank"
+                          rel="noopener"
+                        >
+                          <blockquote class="p-6 text-lg font-semibold tracking-tight text-foreground sm:p-12 sm:text-xl/8 whitespace-pre-line -mt-16">
+                            <p>
+                              We're building an offline-first, mobile-first app and have high hopes for this project! The combination of SQLite's convenience on the client-side and PostgreSQL's flexibility on the server-side is a potent foundation.
+                            </p>
+                          </blockquote>
+                          <figcaption class="flex items-center gap-x-2 p-6 sm:p-12 -mt-12 md:-mt-24">
+                            <.icon name="tabler-brand-ycombinator" class="size-6" />
+                            <div>
+                              <div class="font-semibold text-foreground">gregzo & thanikkal</div>
+                            </div>
+                          </figcaption>
+                        </.link>
+                      </figure>
+                    </div>
                     <div class="space-y-8 xl:contents xl:space-y-0">
                       <div class="space-y-8 xl:row-span-2">
                         <figure class="rounded-2xl bg-card p-6 shadow-lg border-2 border-border hover:border-[#37363d] transition-colors">
@@ -259,6 +405,52 @@ defmodule AlgoraWeb.Challenges.ElectricLive do
                               <div>
                                 <div class="font-semibold text-foreground">
                                   mjadobson
+                                </div>
+                              </div>
+                            </figcaption>
+                          </.link>
+                        </figure>
+                      </div>
+                    </div>
+                    <div class="space-y-8 xl:contents xl:space-y-0">
+                      <div class="space-y-8 xl:row-span-2">
+                        <figure class="rounded-2xl bg-card p-6 shadow-lg border-2 border-border hover:border-[#37363d] transition-colors">
+                          <.link
+                            href="https://news.ycombinator.com/item?id=37584049"
+                            target="_blank"
+                            rel="noopener"
+                          >
+                            <blockquote class="text-foreground whitespace-pre-line -mt-12">
+                              <p>
+                                This looks amazing. Real-time sync has been such a pain point for our collaborative apps. Can't wait to try this out.
+                              </p>
+                            </blockquote>
+                            <figcaption class="flex items-center gap-x-2">
+                              <.icon name="tabler-brand-ycombinator" class="size-6" />
+                              <div>
+                                <div class="font-semibold text-foreground">
+                                  devbuilder42
+                                </div>
+                              </div>
+                            </figcaption>
+                          </.link>
+                        </figure>
+                        <figure class="rounded-2xl bg-card p-6 shadow-lg border-2 border-border hover:border-[#37363d] transition-colors">
+                          <.link
+                            href="https://news.ycombinator.com/item?id=37584049"
+                            target="_blank"
+                            rel="noopener"
+                          >
+                            <blockquote class="text-foreground whitespace-pre-line -mt-12">
+                              <p>
+                                The local-first approach is the future. Finally something that makes it easy to build reactive apps with live data.
+                              </p>
+                            </blockquote>
+                            <figcaption class="flex items-center gap-x-2">
+                              <.icon name="tabler-brand-ycombinator" class="size-6" />
+                              <div>
+                                <div class="font-semibold text-foreground">
+                                  reactivedev
                                 </div>
                               </div>
                             </figcaption>

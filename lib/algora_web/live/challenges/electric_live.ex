@@ -42,7 +42,7 @@ defmodule AlgoraWeb.Challenges.ElectricLive do
                       />
                     </a>
                     <h1 class="mt-6 mb-2 text-[1.4rem] font-black tracking-tighter mix-blend-exclusion sm:text-5xl/[3rem] md:text-6xl/[4rem] lg:text-6xl/[4rem]">
-                      Sync with Electric SQL<br />
+                      Sync AI with Electric SQL<br />
                       <span style="background: radial-gradient(53.44% 245.78% at 13.64% 46.56%, rgb(29, 254, 238) 0%, rgb(52, 211, 153) 100%) text; -webkit-text-fill-color: transparent;">
                         Win <span class="font-display">$500</span>
                       </span>

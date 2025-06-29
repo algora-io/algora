@@ -660,6 +660,7 @@ defmodule Algora.Workspace do
                  ilike(r.name, "%algorithms%") or
                  ilike(r.name, "%exercises%") or
                  ilike(r.name, "%tutorials%") or
+                 r.name == "DefinitelyTyped" or
                  r.name == "developer-roadmap"),
         where:
           not (ilike(repo_owner.provider_login, "%algorithms%") or

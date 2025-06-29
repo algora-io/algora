@@ -166,8 +166,13 @@ defmodule AlgoraWeb.Org.JobLive do
                 </div>
               </div>
               <div class="pt-8">
-                <div class="text-lg font-semibold">
-                  {@job.title}
+                <div class="flex items-center gap-2">
+                  <div class="text-lg font-semibold">
+                    {@job.title}
+                  </div>
+                  <%= if @job.id == "b4sFSeJvb2rteUEX" do %>
+                    <.badge variant="success">Contract to Hire</.badge>
+                  <% end %>
                 </div>
                 <div
                   :if={@job.description}
@@ -885,10 +890,10 @@ defmodule AlgoraWeb.Org.JobLive do
                     {@user.provider_meta["twitter_username"]}
                   </span>
                 </.link> --%>
-                <div :if={@user.provider_meta["location"]} class="flex items-center gap-1">
+                <div :if={@user.location} class="flex items-center gap-1">
                   <.icon name="tabler-map-pin" class="shrink-0 h-4 w-4" />
                   <span class="line-clamp-1">
-                    {@user.provider_meta["location"]}
+                    {@user.location}
                   </span>
                 </div>
               </div>
@@ -1304,10 +1309,10 @@ defmodule AlgoraWeb.Org.JobLive do
                   {@selected_developer.provider_meta["twitter_handle"]}
                 </span>
               </.link>
-              <div :if={@selected_developer.provider_meta["location"]} class="flex items-center gap-1">
+              <div :if={@selected_developer.location} class="flex items-center gap-1">
                 <.icon name="tabler-map-pin" class="h-4 w-4" />
                 <span class="whitespace-nowrap">
-                  {@selected_developer.provider_meta["location"]}
+                  {@selected_developer.location}
                 </span>
               </div>
               <div :if={@selected_developer.provider_meta["company"]} class="flex items-center gap-1">

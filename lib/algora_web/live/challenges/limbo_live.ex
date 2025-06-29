@@ -8,7 +8,7 @@ defmodule AlgoraWeb.Challenges.LimboLive do
   def mount(_params, _session, socket) do
     {:ok,
      socket
-     |> assign(:page_title, "Limbo Challenge")
+     |> assign(:page_title, "Turso Challenge")
      |> assign(:page_description, "Turso rewrote SQLite in Rust - find a bug to win $1,000!")
      |> assign(:page_image, "#{AlgoraWeb.Endpoint.url()}/images/challenges/limbo/og.png")}
   end
@@ -52,9 +52,10 @@ defmodule AlgoraWeb.Challenges.LimboLive do
                       SQLite alternative in Rust - one that's open source and community-driven. Our goal isn't just features, but
                       rock-solid reliability through <a
                         href="https://turso.tech/blog/introducing-limbo-a-complete-rewrite-of-sqlite-in-rust"
-                        class="font-semibold text-white underline"
+                        class="font-semibold text-white"
+                        style="border-bottom: 2px solid white"
                       >Deterministic Simulation Testing</a>. <br /><br />
-                      We are so confident in the long-term ability of the DST to find the rarest bugs that even at the current early stage, we are offering cash bounties for those who can find cases where a bug survived this testing. In this initial phase of the project, we still expect many bugs to exist, and we'll offer
+                      We are so confident in the long-term ability of the DST to find the rarest bugs that even at the current early stage, we are offering cash bounties for those who can find cases where a bug survived this testing. During the alpha phase of the project, we still expect some bugs to exist, and we'll offer
                       <span class="font-display font-bold text-foreground">$1,000</span>
                       for any bugs that lead to data loss or data corruption. As our releases progress, we will continuously expand the scope of bugs and size of the bounty.
                     </p>
@@ -102,11 +103,11 @@ defmodule AlgoraWeb.Challenges.LimboLive do
                           rel="noopener"
                           target="_blank"
                           class="font-semibold text-white underline inline-flex"
-                          href="https://github.com/tursodatabase/limbo/blob/main/CONTRIBUTING.md"
+                          href="https://github.com/tursodatabase/turso/blob/main/CONTRIBUTING.md"
                         >
                           Set up your development environment
                         </a>
-                        and build the Limbo CLI locally
+                        and build the Turso CLI locally
                       </span>
                     </li>
                     <li class="flex w-full items-start pt-2 text-left text-white">
@@ -117,7 +118,7 @@ defmodule AlgoraWeb.Challenges.LimboLive do
                           rel="noopener"
                           target="_blank"
                           class="font-semibold text-white underline inline-flex"
-                          href="https://github.com/tursodatabase/limbo/tree/main/simulator"
+                          href="https://github.com/tursodatabase/turso/tree/main/simulator"
                         >
                           simulator
                         </a>
@@ -386,7 +387,7 @@ defmodule AlgoraWeb.Challenges.LimboLive do
                         </.link>
                         <.link
                           class="rounded-xl border-2 border-[#1ebba2] p-3 text-[#4ff7d3] transition-colors hover:border-[#4ff7d3] hover:text-[#75ffe1] sm:p-5"
-                          href="https://github.com/tursodatabase/limbo"
+                          href="https://github.com/tursodatabase/turso"
                           rel="noopener"
                           target="_blank"
                         >
@@ -421,12 +422,12 @@ defmodule AlgoraWeb.Challenges.LimboLive do
                     <a
                       rel="noopener"
                       target="_blank"
-                      href="https://github.com/tursodatabase/limbo"
+                      href="https://github.com/tursodatabase/turso"
                       class="group/card h-full border border-white/10 bg-black md:gap-8 group relative flex-1 overflow-hidden rounded-xl bg-cover shadow-[0px_3.26536px_2.21381px_0px_rgba(84,_58,_42,_0.08),_0px_7.84712px_5.32008px_0px_rgba(84,_58,_42,_0.11),_0px_14.77543px_10.01724px_0px_rgba(84,_58,_42,_0.14),_0px_26.35684px_17.86905px_0px_rgba(84,_58,_42,_0.16),_0px_49.29758px_33.42209px_0px_rgba(84,_58,_42,_0.19),_0px_118px_80px_0px_rgba(84,_58,_42,_0.27)] hover:no-underline"
                     >
                       <img
-                        src="https://fly.storage.tigris.dev/algora-console/repositories/tursodatabase/limbo/og.png"
-                        alt="limbo"
+                        src="https://fly.storage.tigris.dev/algora-console/repositories/tursodatabase/turso/og.png"
+                        alt="Turso"
                         class="rounded-lg aspect-[1200/630] w-full h-full bg-muted"
                       />
                     </a>

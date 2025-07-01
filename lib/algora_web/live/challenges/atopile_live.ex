@@ -17,6 +17,13 @@ defmodule AlgoraWeb.Challenges.AtopileLive do
   end
 
   @impl true
+  def handle_event("subscribe_challenge", %{"email" => email}, socket) do
+    Algora.Activities.alert("New challenge subscription [atopile] from #{email}", :critical)
+
+    {:noreply, put_flash(socket, :info, "Thank you for subscribing! We'll notify you when the challenge goes live.")}
+  end
+
+  @impl true
   def render(assigns) do
     ~H"""
     <div class="relative bg-background">
@@ -56,6 +63,27 @@ defmodule AlgoraWeb.Challenges.AtopileLive do
                       <span class="font-display font-bold text-foreground">$1,000</span>
                       reward. To participate, you need electrical engineering knowledge (college students welcome!) and passion for building tools for builders.
                     </p>
+                    <div class="mt-8 max-w-2xl">
+                      <.form
+                        for={%{}}
+                        phx-submit="subscribe_challenge"
+                        class="flex flex-col sm:flex-row gap-3"
+                      >
+                        <input
+                          type="email"
+                          name="email"
+                          placeholder="Enter your email"
+                          required
+                          class="flex-1 rounded-lg bg-white/5 backdrop-blur-sm border-2 border-[#f0551c] ring-2 ring-transparent px-4 py-3 text-white placeholder-white/75 focus:border-[#ff6b33] focus:outline-none focus:ring-2 focus:ring-[#ff6b33]/30 transition-all"
+                        />
+                        <button
+                          type="submit"
+                          class="bg-[#f0551c] hover:bg-[#ff6b33] px-6 py-3 rounded-lg text-white font-semibold transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl"
+                        >
+                          Get Notified
+                        </button>
+                      </.form>
+                    </div>
                   </div>
                 </div>
                 <div class="hidden lg:block top-[0px] absolute inset-0 z-10 h-[calc(100svh-0px)] md:h-[750px] 2xl:h-[900px] bg-gradient-to-r from-background from-[10%] to-transparent to-[100%]">

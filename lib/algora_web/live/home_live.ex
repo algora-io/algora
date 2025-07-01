@@ -10,6 +10,7 @@ defmodule AlgoraWeb.HomeLive do
   alias AlgoraWeb.Components.Footer
   alias AlgoraWeb.Components.Header
   alias AlgoraWeb.Data.HomeCache
+  alias AlgoraWeb.Forms.ChallengeForm
 
   require Logger
 
@@ -49,6 +50,8 @@ defmodule AlgoraWeb.HomeLive do
          |> assign(:jobs_by_user, jobs_by_user)
          |> assign(:orgs_with_stats, orgs_with_stats)
          |> assign(:company_people_examples, company_people_examples)
+         |> assign(:show_challenge_drawer, false)
+         |> assign(:challenge_form, to_form(ChallengeForm.changeset(%ChallengeForm{}, %{})))
          |> assign_user_applications()}
     end
   end
@@ -301,52 +304,62 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <%!-- <section class="relative isolate pb-16 sm:pb-40">
+        <section class="relative isolate pb-16 sm:pb-40">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <h2 class="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-semibold tracking-tight text-foreground text-center mb-2">
               Challenges
             </h2>
-            <p class="text-center text-foreground mb-8">
-              Win <span class="font-bold font-display text-emerald-400">$1,000+</span>
-              and get noticed by top companies hiring
-            </p>
+            <p class="text-center text-foreground mb-8"></p>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto mb-16">
-              <.link
-                class="group relative flex aspect-[1200/630] flex-1 rounded-2xl border-2 border-solid border-border bg-cover hover:no-underline hover:scale-[1.02] transition-all duration-200"
-                style="background-image:url(/images/challenges/limbo/og.png)"
-                navigate={~p"/challenges/limbo"}
-              >
-              </.link>
-              <.link
-                class="group relative flex aspect-[1200/630] flex-1 rounded-2xl border-2 border-solid border-border bg-cover hover:no-underline hover:scale-[1.02] transition-all duration-200"
-                style="background-image:url(/images/challenges/atopile/og.png)"
-                navigate={~p"/challenges/atopile"}
-              >
-              </.link>
-              <.link
-                class="group relative flex aspect-[1200/630] flex-1 rounded-2xl border-2 border-solid border-border bg-cover hover:no-underline hover:scale-[1.02] transition-all duration-200"
-                style="background-image:url(/images/challenges/activepieces/og.png)"
-                navigate={~p"/challenges/activepieces"}
-              >
-              </.link>
-              <.link
-                class="group relative flex aspect-[1200/630] flex-1 rounded-2xl border-2 border-dashed border-border bg-card hover:no-underline hover:scale-[1.02] transition-all duration-200 hover:border-emerald-400/50"
-                navigate={~p"/challenges/new"}
+              <div class="flex flex-col">
+                <.link
+                  class="group relative flex aspect-[1200/630] flex-1 rounded-2xl border-2 border-solid border-border bg-cover hover:no-underline hover:scale-[1.02] transition-all duration-200"
+                  style="background-image:url(/images/challenges/limbo/og.png)"
+                  navigate={~p"/challenges/limbo"}
+                >
+                </.link>
+                <div class="flex items-center justify-center gap-1 mt-4 text-base font-medium text-foreground">
+                  <span>Sponsored by</span>
+                  <img src="/images/wordmarks/turso-aqua.svg" alt="Turso" class="h-6" />
+                </div>
+              </div>
+              <div class="flex flex-col">
+                <div class="relative">
+                  <.link
+                    class="group relative flex aspect-[1200/630] flex-1 rounded-2xl border-2 border-solid border-border bg-cover hover:no-underline hover:scale-[1.02] transition-all duration-200 opacity-75 hover:opacity-100"
+                    style="background-image:url(/images/challenges/atopile/og.png)"
+                    navigate={~p"/challenges/atopile"}
+                  >
+                  </.link>
+                  <div class="absolute -top-2 -right-2 bg-orange-900 text-orange-200 text-xs font-semibold px-3 py-1.5 rounded-full border border-orange-700/50 shadow-lg">
+                    Coming Soon
+                  </div>
+                </div>
+                <div class="flex items-center justify-center gap-2 mt-4 text-base font-medium text-foreground">
+                  <span>Sponsored by</span>
+                  <img src="/images/wordmarks/atopile.svg" alt="Atopile" class="h-5" />
+                </div>
+              </div>
+              <div
+                class="group relative flex aspect-[1200/630] flex-1 rounded-2xl border-2 border-dashed border-border bg-card hover:no-underline hover:scale-[1.02] transition-all duration-200 hover:border-emerald-400/50 cursor-pointer"
+                phx-click="show_challenge_drawer"
               >
                 <div class="flex flex-col items-center justify-center w-full h-full text-center p-6">
-                  <.icon name="tabler-plus" class="size-12 text-muted-foreground group-hover:text-emerald-400 transition-colors mb-4" />
+                  <.icon
+                    name="tabler-plus"
+                    class="size-12 text-muted-foreground group-hover:text-emerald-400 transition-colors mb-4"
+                  />
                   <h3 class="text-lg font-semibold text-foreground group-hover:text-emerald-400 transition-colors mb-2">
-                    Add Your Challenge
+                    Create a Challenge
                   </h3>
                   <p class="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
-                    Have a coding challenge? Post it and offer bounties to attract top talent.
                   </p>
                 </div>
-              </.link>
+              </div>
             </div>
           </div>
-        </section> --%>
+        </section>
 
         <section class="relative isolate pb-16 sm:pb-40">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
@@ -576,6 +589,10 @@ defmodule AlgoraWeb.HomeLive do
     </div>
 
     <.modal_video_dialog />
+    <.challenge_drawer
+      show_challenge_drawer={@show_challenge_drawer}
+      challenge_form={@challenge_form}
+    />
     """
   end
 
@@ -595,6 +612,34 @@ defmodule AlgoraWeb.HomeLive do
       end
     else
       {:noreply, redirect(socket, external: Algora.Github.authorize_url(%{return_to: "/jobs"}))}
+    end
+  end
+
+  @impl true
+  def handle_event("show_challenge_drawer", _, socket) do
+    {:noreply, assign(socket, :show_challenge_drawer, true)}
+  end
+
+  @impl true
+  def handle_event("close_challenge_drawer", _, socket) do
+    {:noreply, assign(socket, :show_challenge_drawer, false)}
+  end
+
+  @impl true
+  def handle_event("submit_challenge", %{"challenge_form" => params}, socket) do
+    case ChallengeForm.changeset(%ChallengeForm{}, params) do
+      %{valid?: true} = changeset ->
+        data = Ecto.Changeset.apply_changes(changeset)
+        Algora.Activities.alert("New challenge submission from #{data.email}: #{data.description}", :critical)
+
+        {:noreply,
+         socket
+         |> assign(:show_challenge_drawer, false)
+         |> put_flash(:info, "Thank you for your submission! We'll be in touch soon.")}
+
+      %{valid?: false} = changeset ->
+        dbg(changeset)
+        {:noreply, assign(socket, :challenge_form, to_form(changeset))}
     end
   end
 
@@ -888,5 +933,46 @@ defmodule AlgoraWeb.HomeLive do
         person_title: "Founding Engineer"
       }
     ]
+  end
+
+  defp challenge_drawer(assigns) do
+    ~H"""
+    <.drawer show={@show_challenge_drawer} on_cancel="close_challenge_drawer" direction="right">
+      <.drawer_header>
+        <.drawer_title>Submit Challenge</.drawer_title>
+        <.drawer_description>
+          Tell us about your coding challenge and we'll help you set it up.
+        </.drawer_description>
+      </.drawer_header>
+      <.drawer_content class="mt-4">
+        <.form for={@challenge_form} phx-submit="submit_challenge">
+          <div class="space-y-6 max-w-md">
+            <.input
+              field={@challenge_form[:email]}
+              label="Email"
+              type="email"
+              required
+              placeholder="your@email.com"
+            />
+            <.input
+              field={@challenge_form[:description]}
+              label="Challenge Description"
+              type="textarea"
+              required
+              placeholder="Describe your coding challenge..."
+            />
+            <div class="flex justify-end gap-4">
+              <.button variant="outline" type="button" phx-click="close_challenge_drawer">
+                Cancel
+              </.button>
+              <.button type="submit">
+                Submit
+              </.button>
+            </div>
+          </div>
+        </.form>
+      </.drawer_content>
+    </.drawer>
+    """
   end
 end

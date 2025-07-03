@@ -648,7 +648,7 @@ const Hooks = {
         const amount = parseInt(value) || 0;
         
         let strength = 0;
-        let label = "Enter amount";
+        let label = "";
         let color = "bg-gray-200";
         
         if (amount >= 500000) {

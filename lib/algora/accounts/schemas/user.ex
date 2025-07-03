@@ -403,11 +403,15 @@ defmodule Algora.Accounts.User do
       :us_work_authorization,
       :linkedin_url,
       :twitter_url,
+      :youtube_url,
+      :website_url,
       :location,
       :preferences
     ])
     |> validate_url(:linkedin_url)
     |> validate_url(:twitter_url)
+    |> validate_url(:youtube_url)
+    |> validate_url(:website_url)
   end
 
   defp validate_url(changeset, field) do

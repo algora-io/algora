@@ -640,17 +640,49 @@ const Hooks = {
       const input = this.el.querySelector("input[type='text']");
       const strengthBar = this.el.querySelector("[data-strength-bar]");
       const strengthLabel = this.el.querySelector("[data-strength-label]");
-      
+
       if (!input || !strengthBar || !strengthLabel) return;
-      
+
+      const minAmount = 50000;
+
+      const expandShorthand = (value: string): string => {
+        const trimmed = value.trim().toLowerCase();
+
+        // Handle 'k' for thousands (e.g., "100k" -> "100000")
+        if (trimmed.endsWith("k")) {
+          const number = parseFloat(trimmed.slice(0, -1));
+          if (!isNaN(number)) {
+            return Math.floor(number * 1000).toString();
+          }
+        }
+
+        // Handle 'm' for millions (e.g., "1m" -> "1000000")
+        if (trimmed.endsWith("m")) {
+          const number = parseFloat(trimmed.slice(0, -1));
+          if (!isNaN(number)) {
+            return Math.floor(number * 1000000).toString();
+          }
+        }
+
+        // Return just the digits if no shorthand
+        return value.replace(/[^0-9]/g, "");
+      };
+
+      const formatWithCommas = (value: string): string => {
+        // First expand any shorthand notation
+        const expanded = expandShorthand(value);
+        // Add commas for thousands separators
+        return expanded.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      };
+
       const updateStrength = () => {
-        const value = input.value.replace(/[^0-9]/g, "");
+        const value = expandShorthand(input.value);
         const amount = parseInt(value) || 0;
-        
+
         let strength = 0;
         let label = "";
         let color = "bg-gray-200";
-        
+
         if (amount >= 500000) {
           strength = 100;
           label = "Big D Energy 💪";
@@ -679,47 +711,88 @@ const Hooks = {
           strength = 40;
           label = "Solid Pay 💼";
           color = "bg-red-400";
-        } else if (amount >= 50000) {
+        } else if (amount >= minAmount) {
           strength = 30;
           label = "Decent 👍";
           color = "bg-pink-400";
-        } else if (amount >= 25000) {
-          strength = 20;
-          label = "Getting There 🌱";
-          color = "bg-cyan-400";
-        } else if (amount > 0) {
-          strength = 10;
-          label = "Starting Out 🌟";
-          color = "bg-gray-400";
         }
-        
+
         // Update strength bar
         strengthBar.style.width = `${strength}%`;
         strengthBar.className = `h-2 rounded-full transition-all duration-300 ${color}`;
-        
+
         // Show/hide the entire indicator section
-        const indicatorSection = strengthBar.closest('.mt-2');
-        if (amount > 0) {
-          indicatorSection.style.display = 'block';
+        const indicatorSection = strengthBar.closest(".mt-2");
+        if (amount >= minAmount) {
+          indicatorSection.style.display = "block";
         } else {
-          indicatorSection.style.display = 'none';
+          indicatorSection.style.display = "none";
         }
-        
+
         // Update label
         strengthLabel.textContent = label;
         strengthLabel.className = `text-sm font-medium transition-colors duration-300 ${
-          strength >= 80 ? "text-purple-600" : 
-          strength >= 60 ? "text-blue-600" : 
-          strength >= 40 ? "text-green-600" : 
-          strength >= 20 ? "text-yellow-600" : 
-          "text-gray-600"
+          strength >= 80
+            ? "text-purple-600"
+            : strength >= 60
+            ? "text-blue-600"
+            : strength >= 40
+            ? "text-green-600"
+            : strength >= 20
+            ? "text-yellow-600"
+            : "text-gray-600"
         }`;
       };
-      
-      input.addEventListener("input", updateStrength);
+
+      const handleInput = (e: Event) => {
+        const target = e.target as HTMLInputElement;
+        const cursorPosition = target.selectionStart || 0;
+        const oldValue = target.value;
+
+        // Check if user just typed 'k' or 'm' to trigger expansion
+        const shouldExpand =
+          oldValue.toLowerCase().endsWith("k") ||
+          oldValue.toLowerCase().endsWith("m");
+
+        let formattedValue: string;
+        let newCursorPosition = cursorPosition;
+
+        if (shouldExpand) {
+          // Expand shorthand and format with commas
+          formattedValue = formatWithCommas(oldValue);
+          // Place cursor at the end after expansion
+          newCursorPosition = formattedValue.length;
+        } else {
+          // Just format with commas, preserving user input
+          const digitsOnly = oldValue.replace(/[^0-9]/g, "");
+          formattedValue = digitsOnly.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+          // Adjust cursor position to account for added/removed commas
+          const oldCommas = (oldValue.match(/,/g) || []).length;
+          const newCommas = (formattedValue.match(/,/g) || []).length;
+          newCursorPosition = cursorPosition + (newCommas - oldCommas);
+        }
+
+        // Only update if the value changed to prevent cursor jumping
+        if (oldValue !== formattedValue) {
+          target.value = formattedValue;
+
+          // Set cursor position after the DOM updates
+          setTimeout(() => {
+            target.setSelectionRange(newCursorPosition, newCursorPosition);
+          }, 0);
+        }
+
+        updateStrength();
+      };
+
+      input.addEventListener("input", handleInput);
       input.addEventListener("keyup", updateStrength);
-      
-      // Initial update
+
+      // Initial formatting and update
+      if (input.value) {
+        input.value = formatWithCommas(input.value);
+      }
       updateStrength();
     },
   },

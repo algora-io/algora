@@ -635,6 +635,86 @@ const Hooks = {
       });
     },
   },
+  CompensationStrengthIndicator: {
+    mounted() {
+      const input = this.el.querySelector("input[type='text']");
+      const strengthBar = this.el.querySelector("[data-strength-bar]");
+      const strengthLabel = this.el.querySelector("[data-strength-label]");
+      
+      if (!input || !strengthBar || !strengthLabel) return;
+      
+      const updateStrength = () => {
+        const value = input.value.replace(/[^0-9]/g, "");
+        const amount = parseInt(value) || 0;
+        
+        let strength = 0;
+        let label = "Enter amount";
+        let color = "bg-gray-200";
+        
+        if (amount >= 500000) {
+          strength = 100;
+          label = "Big D Energy 💪";
+          color = "bg-purple-500";
+        } else if (amount >= 400000) {
+          strength = 90;
+          label = "Baller Status 🔥";
+          color = "bg-indigo-500";
+        } else if (amount >= 300000) {
+          strength = 80;
+          label = "High Roller 🎯";
+          color = "bg-blue-500";
+        } else if (amount >= 200000) {
+          strength = 70;
+          label = "Big League 🚀";
+          color = "bg-green-500";
+        } else if (amount >= 150000) {
+          strength = 60;
+          label = "Major League 💰";
+          color = "bg-yellow-500";
+        } else if (amount >= 100000) {
+          strength = 50;
+          label = "Six Figures 📈";
+          color = "bg-orange-500";
+        } else if (amount >= 75000) {
+          strength = 40;
+          label = "Solid Pay 💼";
+          color = "bg-red-400";
+        } else if (amount >= 50000) {
+          strength = 30;
+          label = "Decent 👍";
+          color = "bg-pink-400";
+        } else if (amount >= 25000) {
+          strength = 20;
+          label = "Getting There 🌱";
+          color = "bg-cyan-400";
+        } else if (amount > 0) {
+          strength = 10;
+          label = "Starting Out 🌟";
+          color = "bg-gray-400";
+        }
+        
+        // Update strength bar
+        strengthBar.style.width = `${strength}%`;
+        strengthBar.className = `h-2 rounded-full transition-all duration-300 ${color}`;
+        
+        // Update label
+        strengthLabel.textContent = label;
+        strengthLabel.className = `text-sm font-medium transition-colors duration-300 ${
+          strength >= 80 ? "text-purple-600" : 
+          strength >= 60 ? "text-blue-600" : 
+          strength >= 40 ? "text-green-600" : 
+          strength >= 20 ? "text-yellow-600" : 
+          "text-gray-600"
+        }`;
+      };
+      
+      input.addEventListener("input", updateStrength);
+      input.addEventListener("keyup", updateStrength);
+      
+      // Initial update
+      updateStrength();
+    },
+  },
 } satisfies Record<string, Partial<ViewHook> & Record<string, unknown>>;
 
 // Accessible focus handling

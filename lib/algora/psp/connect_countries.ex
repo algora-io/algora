@@ -136,6 +136,15 @@ defmodule Algora.PSP.ConnectCountries do
     end
   end
 
+  def abbr_from_code("US"), do: "US"
+
+  def abbr_from_code(code) do
+    case Enum.find(list(), &(elem(&1, 1) == code)) do
+      nil -> code
+      {name, _} -> name
+    end
+  end
+
   @spec list_codes() :: [String.t()]
   def list_codes, do: Enum.map(list(), &elem(&1, 1))
 

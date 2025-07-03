@@ -697,6 +697,14 @@ const Hooks = {
         strengthBar.style.width = `${strength}%`;
         strengthBar.className = `h-2 rounded-full transition-all duration-300 ${color}`;
         
+        // Show/hide the entire indicator section
+        const indicatorSection = strengthBar.closest('.mt-2');
+        if (amount > 0) {
+          indicatorSection.style.display = 'block';
+        } else {
+          indicatorSection.style.display = 'none';
+        }
+        
         // Update label
         strengthLabel.textContent = label;
         strengthLabel.className = `text-sm font-medium transition-colors duration-300 ${

@@ -684,37 +684,37 @@ const Hooks = {
         let color = "bg-gray-200";
 
         if (amount >= 500000) {
-          strength = 100;
-          label = "Big D Energy 💪";
-          color = "bg-purple-500";
+          strength = 99;
+          label = "Big D Energy";
+          color = "bg-emerald-500";
         } else if (amount >= 400000) {
           strength = 90;
-          label = "Baller Status 🔥";
-          color = "bg-indigo-500";
+          label = "Baller Status";
+          color = "bg-emerald-500";
         } else if (amount >= 300000) {
           strength = 80;
-          label = "High Roller 🎯";
-          color = "bg-blue-500";
+          label = "High Roller";
+          color = "bg-emerald-500";
         } else if (amount >= 200000) {
           strength = 70;
-          label = "Big League 🚀";
-          color = "bg-green-500";
+          label = "Big League";
+          color = "bg-emerald-500";
         } else if (amount >= 150000) {
           strength = 60;
-          label = "Major League 💰";
-          color = "bg-yellow-500";
+          label = "Major League";
+          color = "bg-emerald-500";
         } else if (amount >= 100000) {
           strength = 50;
-          label = "Six Figures 📈";
-          color = "bg-orange-500";
+          label = "Six Figures";
+          color = "bg-emerald-500";
         } else if (amount >= 75000) {
           strength = 40;
-          label = "Solid Pay 💼";
-          color = "bg-red-400";
+          label = "Solid Pay";
+          color = "bg-emerald-500";
         } else if (amount >= minAmount) {
           strength = 30;
-          label = "Decent 👍";
-          color = "bg-pink-400";
+          label = "Decent";
+          color = "bg-emerald-500";
         }
 
         // Update strength bar
@@ -733,13 +733,13 @@ const Hooks = {
         strengthLabel.textContent = label;
         strengthLabel.className = `text-sm font-medium transition-colors duration-300 ${
           strength >= 80
-            ? "text-purple-600"
+            ? "text-emerald-500"
             : strength >= 60
-            ? "text-blue-600"
+            ? "text-emerald-500"
             : strength >= 40
-            ? "text-green-600"
+            ? "text-emerald-500"
             : strength >= 20
-            ? "text-yellow-600"
+            ? "text-emerald-500"
             : "text-gray-600"
         }`;
       };

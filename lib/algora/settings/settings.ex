@@ -106,44 +106,69 @@ defmodule Algora.Settings do
     opts = Keyword.put_new(opts, :limit, 1000)
 
     case get("job_matches:#{job.id}") do
+      %{"matches_2" => matches} when is_list(matches) ->
+        matches
+        |> Enum.map(fn %{"user_id" => id} -> %{user_id: id} end)
+        |> load_matches_2()
+
       %{"matches" => matches} when is_list(matches) ->
         matches
         |> load_matches()
         |> Enum.take(opts[:limit])
 
       _ ->
-        [
-          tech_stack: job.tech_stack,
-          email_required: false,
-          sort_by:
-            case get_job_criteria(job) do
-              criteria when map_size(criteria) > 0 -> criteria
-              _ -> [{"solver", true}]
-            end
-        ]
-        |> Keyword.merge(opts)
-        |> Algora.Cloud.list_top_matches()
-        |> load_matches_2()
+        matches =
+          [
+            tech_stack: job.tech_stack,
+            email_required: false,
+            sort_by:
+              case get_job_criteria(job) do
+                criteria when map_size(criteria) > 0 -> criteria
+                _ -> [{"solver", true}]
+              end
+          ]
+          |> Keyword.merge(opts)
+          |> Algora.Cloud.list_top_matches()
+
+        # Cache the raw matches for future calls
+        _count = get_job_matches_count(job, opts)
+        set_job_matches_2(job.id, matches)
+
+        load_matches_2(matches)
     end
   end
 
+  def set_job_matches_count(job_id, count) when is_binary(job_id) and is_integer(count) do
+    set("job_matches_count:#{job_id}", %{"count" => count})
+  end
+
   def get_job_matches_count(job, opts \\ []) do
-    case get("job_matches:#{job.id}") do
-      %{"matches" => matches} when is_list(matches) ->
-        length(matches)
+    case get("job_matches_count:#{job.id}") do
+      %{"count" => count} when is_integer(count) ->
+        count
 
       _ ->
-        [
-          tech_stack: job.tech_stack,
-          email_required: false,
-          sort_by:
-            case get_job_criteria(job) do
-              criteria when map_size(criteria) > 0 -> criteria
-              _ -> [{"solver", true}]
-            end
-        ]
-        |> Keyword.merge(opts)
-        |> Algora.Cloud.count_top_matches()
+        count =
+          case get("job_matches:#{job.id}") do
+            %{"matches" => matches} when is_list(matches) ->
+              length(matches)
+
+            _ ->
+              [
+                tech_stack: job.tech_stack,
+                email_required: false,
+                sort_by:
+                  case get_job_criteria(job) do
+                    criteria when map_size(criteria) > 0 -> criteria
+                    _ -> [{"solver", true}]
+                  end
+              ]
+              |> Keyword.merge(opts)
+              |> Algora.Cloud.count_top_matches()
+          end
+
+        set_job_matches_count(job.id, count)
+        count
     end
   end
 
@@ -180,6 +205,10 @@ defmodule Algora.Settings do
 
   def set_job_matches(job_id, matches) when is_binary(job_id) and is_list(matches) do
     set("job_matches:#{job_id}", %{"matches" => matches})
+  end
+
+  def set_job_matches_2(job_id, matches) when is_binary(job_id) and is_list(matches) do
+    set("job_matches:#{job_id}", %{"matches_2" => matches})
   end
 
   def get_tech_matches(tech) do

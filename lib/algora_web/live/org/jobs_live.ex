@@ -142,7 +142,7 @@ defmodule AlgoraWeb.Org.JobsLive do
                             {job.title}
                           </div>
                         <% end %>
-                        <%= if job.id == "b4sFSeJvb2rteUEX" do %>
+                        <%= if job.id in ["b4sFSeJvb2rteUEX", "M9yTwVXFjvQM2WJf"] do %>
                           <.badge variant="success">Contract to Hire</.badge>
                         <% end %>
                       </div>

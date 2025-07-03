@@ -62,6 +62,7 @@ defmodule Algora.Accounts.User do
     field :min_compensation, Money
     field :willing_to_relocate, :boolean, default: false
     field :us_work_authorization, :boolean, default: false
+    field :preferences, :string
 
     field :total_earned, Money, virtual: true
     field :transactions_count, :integer, virtual: true
@@ -402,7 +403,8 @@ defmodule Algora.Accounts.User do
       :us_work_authorization,
       :linkedin_url,
       :twitter_url,
-      :location
+      :location,
+      :preferences
     ])
     |> validate_url(:linkedin_url)
     |> validate_url(:twitter_url)

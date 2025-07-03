@@ -85,7 +85,7 @@ defmodule AlgoraWeb.HomeLive do
                 navigate={~p"/onboarding/org"}
                 class="h-12 sm:h-14 rounded-md px-6 sm:px-12 text-base sm:text-lg"
               >
-                Start hiring today
+                Hire with Algora
               </.button>
               <.button
                 href="https://www.youtube.com/watch?v=Jne9mVas9i0"

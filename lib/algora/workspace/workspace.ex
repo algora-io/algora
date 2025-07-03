@@ -653,7 +653,6 @@ defmodule Algora.Workspace do
         join: u in assoc(uc, :user),
         join: r in assoc(uc, :repository),
         join: repo_owner in assoc(r, :user),
-        where: repo_owner.type == :organization or r.stargazers_count > 200,
         # where: fragment("? && ?::citext[]", r.tech_stack, ^(opts[:tech_stack] || [])),
         where:
           not (ilike(r.name, "%awesome%") or
@@ -681,6 +680,13 @@ defmodule Algora.Workspace do
             user: map(repo_owner, [:id, :provider_login, :type, :name, :avatar_url, :stargazers_count])
           }
         }
+
+    query =
+      if opts[:display_all] do
+        query
+      else
+        where(query, [uc, u, r, repo_owner], repo_owner.type == :organization or r.stargazers_count > 200)
+      end
 
     query =
       if opts[:exclude_personal] do

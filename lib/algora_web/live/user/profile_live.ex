@@ -14,7 +14,7 @@ defmodule AlgoraWeb.User.ProfileLive do
       {:ok, user} ->
         transactions = Payments.list_received_transactions(user.id, limit: page_size())
 
-        contributions = Algora.Workspace.list_user_contributions([user.id], limit: 20)
+        contributions = Algora.Workspace.list_user_contributions([user.id], limit: 20, display_all: true)
 
         {:ok,
          socket

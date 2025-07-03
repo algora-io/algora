@@ -170,7 +170,7 @@ defmodule AlgoraWeb.Org.JobLive do
                   <div class="text-lg font-semibold">
                     {@job.title}
                   </div>
-                  <%= if @job.id == "b4sFSeJvb2rteUEX" do %>
+                  <%= if @job.id in ["b4sFSeJvb2rteUEX", "M9yTwVXFjvQM2WJf"] do %>
                     <.badge variant="success">Contract to Hire</.badge>
                   <% end %>
                 </div>
@@ -301,10 +301,22 @@ defmodule AlgoraWeb.Org.JobLive do
                   <% end %>
                   <%= if @current_org.hiring_subscription != :active && length(@truncated_matches) > 0 do %>
                     <div class="relative lg:col-span-3">
-                      <img
-                        src={~p"/images/screenshots/job-matches-more.png"}
-                        class="w-full aspect-[1368/398]"
-                      />
+                      <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                        <%= for {match, index} <- @next_matches |> Enum.with_index() do %>
+                          <div class={"blur-sm #{if index > 0, do: "hidden lg:block"}"}>
+                            <.match_card
+                              current_user={@current_user}
+                              user={match.user}
+                              tech_stack={@job.tech_stack |> Enum.take(1)}
+                              job={@job}
+                              contributions={Map.get(@contributions_map, match.user.id, [])}
+                              contract_type="bring_your_own"
+                              anonymized={@current_org.hiring_subscription != :active}
+                              heatmap_data={Map.get(@heatmaps_map, match.user.id)}
+                            />
+                          </div>
+                        <% end %>
+                      </div>
                       <div class="absolute inset-0 flex items-center font-bold text-foreground justify-center text-3xl md:text-4xl">
                         + {length(@matches) - length(@truncated_matches)} more matches
                       </div>
@@ -593,16 +605,14 @@ defmodule AlgoraWeb.Org.JobLive do
 
     # Sort matches by total contributions (0 if no heatmap) and take top 6
     sorted_matches =
-      all_matches
-      |> Enum.sort_by(fn match ->
+      Enum.sort_by(all_matches, fn match ->
         heatmap_data = Map.get(heatmaps_map, match.user.id)
         total_contributions = if heatmap_data, do: get_in(heatmap_data, ["totalContributions"]) || 0, else: 0
         # negative for descending sort
         -total_contributions
       end)
-      |> Enum.take(6)
 
-    truncated_matches = Algora.Cloud.truncate_matches(socket.assigns.current_org, sorted_matches)
+    truncated_matches = Algora.Cloud.truncate_matches(socket.assigns.current_org, Enum.take(sorted_matches, 6))
 
     # Create a fake matches list with the right count for UI compatibility
     fake_matches = List.duplicate(%{}, total_matches_count)
@@ -611,6 +621,7 @@ defmodule AlgoraWeb.Org.JobLive do
     |> assign(:developers, developers)
     |> assign(:applicants, sort_by_contributions(socket.assigns.job, all_applicants, contributions_map))
     |> assign(:matches, fake_matches)
+    |> assign(:next_matches, sorted_matches |> Enum.drop(length(truncated_matches)) |> Enum.take(3))
     |> assign(:truncated_matches, truncated_matches)
     |> assign(:contributions_map, contributions_map)
     |> assign(:heatmaps_map, heatmaps_map)

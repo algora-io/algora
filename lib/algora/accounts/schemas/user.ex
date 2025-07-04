@@ -25,6 +25,7 @@ defmodule Algora.Accounts.User do
 
     field :type, Ecto.Enum, values: [:individual, :organization, :bot], default: :individual
     field :email, :string
+    field :internal_email, :string
     field :name, :string
     field :display_name, :string
     field :handle, :string
@@ -406,7 +407,8 @@ defmodule Algora.Accounts.User do
       :youtube_url,
       :website_url,
       :location,
-      :preferences
+      :preferences,
+      :internal_email
     ])
     |> validate_url(:linkedin_url)
     |> validate_url(:twitter_url)

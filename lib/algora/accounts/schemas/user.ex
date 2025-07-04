@@ -65,6 +65,12 @@ defmodule Algora.Accounts.User do
     field :us_work_authorization, :boolean, default: false
     field :preferences, :string
 
+    field :refer_to_company, :boolean, default: false
+    field :company_domain, :string
+    field :friends_recommendations, :boolean, default: false
+    field :friends_github_handles, :string
+    field :opt_out_algora, :boolean, default: false
+
     field :total_earned, Money, virtual: true
     field :transactions_count, :integer, virtual: true
     field :contributed_projects_count, :integer, virtual: true
@@ -397,6 +403,9 @@ defmodule Algora.Accounts.User do
   end
 
   def job_preferences_changeset(%User{} = user, params) do
+    # Convert checkbox values to proper booleans
+    params = normalize_checkbox_params(params)
+    
     user
     |> cast(params, [
       :min_compensation,
@@ -408,12 +417,30 @@ defmodule Algora.Accounts.User do
       :website_url,
       :location,
       :preferences,
-      :internal_email
+      :internal_email,
+      :refer_to_company,
+      :company_domain,
+      :friends_recommendations,
+      :friends_github_handles,
+      :opt_out_algora
     ])
     |> validate_url(:linkedin_url)
     |> validate_url(:twitter_url)
     |> validate_url(:youtube_url)
     |> validate_url(:website_url)
+  end
+
+  defp normalize_checkbox_params(params) do
+    checkbox_fields = ["refer_to_company", "friends_recommendations", "opt_out_algora"]
+    
+    Enum.reduce(checkbox_fields, params, fn field, acc ->
+      case Map.get(acc, field) do
+        "on" -> Map.put(acc, field, true)
+        nil -> Map.put(acc, field, false)
+        value when is_boolean(value) -> acc
+        _ -> Map.put(acc, field, false)
+      end
+    end)
   end
 
   defp validate_url(changeset, field) do

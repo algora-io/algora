@@ -890,13 +890,6 @@ defmodule AlgoraWeb.HomeLive do
   defp get_company_people_examples do
     [
       %{
-        company_name: "Qdrant",
-        company_avatar: "https://github.com/qdrant.png",
-        person_name: "Tim",
-        person_avatar: "https://algora-console.fly.storage.tigris.dev/avatars/timvisee.jpeg",
-        person_title: "Lead Software Engineer"
-      },
-      %{
         company_name: "Golem Cloud",
         company_avatar: "https://github.com/golemcloud.png",
         person_name: "Maxim",
@@ -916,6 +909,13 @@ defmodule AlgoraWeb.HomeLive do
         person_name: "Efraín",
         person_avatar: "https://github.com/roae.png",
         person_title: "Software Engineer"
+      },
+      %{
+        company_name: "Hanko",
+        company_avatar: "https://avatars.githubusercontent.com/u/20222142?v=4",
+        person_name: "Ashutosh",
+        person_avatar: "https://avatars.githubusercontent.com/u/62984427?v=4",
+        person_title: "Developer Advocate"
       },
       %{
         company_name: "Trigger.dev",

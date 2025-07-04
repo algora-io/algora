@@ -26,6 +26,7 @@ defmodule Algora.Accounts.User do
     field :type, Ecto.Enum, values: [:individual, :organization, :bot], default: :individual
     field :email, :string
     field :internal_email, :string
+    field :internal_notes, :string
     field :name, :string
     field :display_name, :string
     field :handle, :string
@@ -418,6 +419,7 @@ defmodule Algora.Accounts.User do
       :location,
       :preferences,
       :internal_email,
+      :internal_notes,
       :refer_to_company,
       :company_domain,
       :friends_recommendations,

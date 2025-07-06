@@ -192,7 +192,8 @@ defmodule AlgoraWeb.BountiesLive do
                 </div>
                 <div class="pt-8 flex flex-col items-center lg:mx-auto gap-3">
                   <.button
-                    navigate={~p"/onboarding/org"}
+                    href={AlgoraWeb.Constants.get(:calendar_url)}
+                    rel="noopener"
                     size="xl"
                     class="w-full text-lg drop-shadow-[0_1px_5px_#34d39980]"
                   >
@@ -554,7 +555,8 @@ defmodule AlgoraWeb.BountiesLive do
           </h2>
           <div class="mt-6 sm:mt-10 flex gap-4 justify-center">
             <.button
-              navigate={~p"/onboarding/org"}
+              href={AlgoraWeb.Constants.get(:calendar_url)}
+              rel="noopener"
               class="h-10 sm:h-14 rounded-md px-8 sm:px-12 text-sm sm:text-xl"
             >
               Companies

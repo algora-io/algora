@@ -25,6 +25,8 @@ defmodule Algora.Accounts.User do
 
     field :type, Ecto.Enum, values: [:individual, :organization, :bot], default: :individual
     field :email, :string
+    field :internal_email, :string
+    field :internal_notes, :string
     field :name, :string
     field :display_name, :string
     field :handle, :string
@@ -62,6 +64,13 @@ defmodule Algora.Accounts.User do
     field :min_compensation, Money
     field :willing_to_relocate, :boolean, default: false
     field :us_work_authorization, :boolean, default: false
+    field :preferences, :string
+
+    field :refer_to_company, :boolean, default: false
+    field :company_domain, :string
+    field :friends_recommendations, :boolean, default: false
+    field :friends_github_handles, :string
+    field :opt_out_algora, :boolean, default: false
 
     field :total_earned, Money, virtual: true
     field :transactions_count, :integer, virtual: true
@@ -402,10 +411,22 @@ defmodule Algora.Accounts.User do
       :us_work_authorization,
       :linkedin_url,
       :twitter_url,
-      :location
+      :youtube_url,
+      :website_url,
+      :location,
+      :preferences,
+      :internal_email,
+      :internal_notes,
+      :refer_to_company,
+      :company_domain,
+      :friends_recommendations,
+      :friends_github_handles,
+      :opt_out_algora
     ])
     |> validate_url(:linkedin_url)
     |> validate_url(:twitter_url)
+    |> validate_url(:youtube_url)
+    |> validate_url(:website_url)
   end
 
   defp validate_url(changeset, field) do

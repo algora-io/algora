@@ -129,7 +129,7 @@ defmodule AlgoraWeb.Org.JobsLive do
                 <%= for job <- @jobs do %>
                   <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
-                      <div>
+                      <div class="flex items-center gap-2">
                         <%= if @current_user_role in [:admin, :mod] do %>
                           <.link
                             navigate={~p"/#{@current_org.handle}/jobs/#{job.id}"}
@@ -141,6 +141,9 @@ defmodule AlgoraWeb.Org.JobsLive do
                           <div class="text-lg font-semibold">
                             {job.title}
                           </div>
+                        <% end %>
+                        <%= if job.id in ["b4sFSeJvb2rteUEX", "M9yTwVXFjvQM2WJf"] do %>
+                          <.badge variant="success">Contract to Hire</.badge>
                         <% end %>
                       </div>
                       <div

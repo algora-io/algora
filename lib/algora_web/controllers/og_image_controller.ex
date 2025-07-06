@@ -149,16 +149,21 @@ defmodule AlgoraWeb.OGImageController do
 
     url = Path.join([AlgoraWeb.Endpoint.url() | path]) <> params
     object_path = Path.join(["og"] ++ path ++ ["og.png"])
+    caller_pid = Keyword.get(opts, :notify_pid)
 
     case ScreenshotQueue.generate_image(url, @opts |> Keyword.put(:path, filepath) |> Keyword.merge(opts)) do
       {:ok, _log} ->
         case File.read(filepath) do
           {:ok, body} ->
             Task.start(fn ->
-              Algora.S3.upload(body, object_path,
+              result = Algora.S3.upload(body, object_path,
                 content_type: "image/png",
                 cache_control: "public, max-age=#{max_age(path)}"
               )
+
+              if caller_pid do
+                send(caller_pid, {:screenshot_upload_complete, object_path, result})
+              end
 
               File.rm(filepath)
             end)
@@ -166,11 +171,17 @@ defmodule AlgoraWeb.OGImageController do
             {:ok, body}
 
           error ->
+            if caller_pid do
+              send(caller_pid, {:screenshot_upload_complete, object_path, error})
+            end
             File.rm(filepath)
             error
         end
 
       error ->
+        if caller_pid do
+          send(caller_pid, {:screenshot_upload_complete, object_path, error})
+        end
         error
     end
   end

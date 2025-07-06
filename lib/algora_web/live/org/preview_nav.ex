@@ -146,8 +146,7 @@ defmodule AlgoraWeb.Org.PreviewNav do
         items: [
           %{href: "/", tab: :home, icon: "tabler-home", label: "Home"},
           %{href: ~p"/community", tab: :community, icon: "tabler-users", label: "Community", class: "lg:hidden"},
-          %{href: ~p"/docs", tab: :docs, icon: "tabler-book", label: "Docs", class: "lg:hidden"},
-          %{href: ~p"/pricing", tab: :pricing, icon: "tabler-credit-card", label: "Pricing", class: "lg:hidden"}
+          %{href: ~p"/docs", tab: :docs, icon: "tabler-book", label: "Docs", class: "lg:hidden"}
         ]
       }
     ]

@@ -35,6 +35,11 @@ defmodule AlgoraWeb.Components.TechBadge do
   defp icon_url("huggingface"), do: "/images/logos/huggingface.png"
   defp icon_url("youtube"), do: "/images/logos/youtube.png"
   defp icon_url("tiktok"), do: "/images/logos/tiktok.png"
+  defp icon_url("openai"), do: "https://avatars.githubusercontent.com/u/14957082?s=200&v=4"
+  defp icon_url("claude"), do: "https://avatars.githubusercontent.com/u/76263028?s=200&v=4"
+  defp icon_url("gemini"), do: "https://avatars.githubusercontent.com/u/161781182?s=200&v=4"
+  defp icon_url("grok"), do: "https://avatars.githubusercontent.com/u/130314967?s=200&v=4"
+  defp icon_url("clickhouse"), do: "https://avatars.githubusercontent.com/u/54801242?s=200&v=4"
 
   defp icon_url(tech), do: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/#{icon_path(tech)}"
 
@@ -62,6 +67,7 @@ defmodule AlgoraWeb.Components.TechBadge do
   defp icon_class("apachekafka"), do: "bg-white invert saturate-0"
   defp icon_class("emacs"), do: "bg-white invert saturate-0"
   defp icon_class("flask"), do: "bg-white invert saturate-0"
+  defp icon_class("prisma"), do: "bg-white invert saturate-0"
   defp icon_class(_tech), do: "bg-transparent"
 
   defp normalize(tech) do
@@ -122,6 +128,9 @@ defmodule AlgoraWeb.Components.TechBadge do
 
       "emacs lisp" ->
         "emacs"
+
+      "tailwind" ->
+        "tailwindcss"
 
       t ->
         t
@@ -212,7 +221,17 @@ defmodule AlgoraWeb.Components.TechBadge do
       "Flutter",
       "Vim",
       "Emacs",
-      "Flask"
+      "Flask",
+      "OpenAI",
+      "Claude",
+      "Gemini",
+      "Grok",
+      "Solidity",
+      "Zig",
+      "Prisma",
+      "TailwindCSS",
+      "tRPC",
+      "Clickhouse"
     ]
   end
 end

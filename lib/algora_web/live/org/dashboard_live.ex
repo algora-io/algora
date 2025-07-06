@@ -400,7 +400,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
           </div>
         </div>
 
-        <.section
+        <%!-- <.section
           :if={@matches != []}
           title="Algora Matches"
           subtitle="Top 1% Algora developers in your tech stack available to hire now"
@@ -432,7 +432,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
               />
             <% end %>
           </div>
-        </.section>
+        </.section> --%>
 
         <.section
           :if={@experts != []}

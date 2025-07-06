@@ -1366,6 +1366,7 @@ defmodule AlgoraWeb.CoreComponents do
   defdelegate menu_separator(assigns), to: Menu
   defdelegate menu_shortcut(assigns), to: Menu
   defdelegate menu(assigns), to: Menu
+  defdelegate multiline(assigns), to: AlgoraWeb.Components.UI.Multiline
   defdelegate popover_content(assigns), to: Popover
   defdelegate popover_trigger(assigns), to: Popover
   defdelegate popover(assigns), to: Popover

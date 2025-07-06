@@ -653,13 +653,13 @@ defmodule Algora.Workspace do
         join: u in assoc(uc, :user),
         join: r in assoc(uc, :repository),
         join: repo_owner in assoc(r, :user),
-        where: repo_owner.type == :organization or r.stargazers_count > 200,
         # where: fragment("? && ?::citext[]", r.tech_stack, ^(opts[:tech_stack] || [])),
         where:
           not (ilike(r.name, "%awesome%") or
                  ilike(r.name, "%algorithms%") or
                  ilike(r.name, "%exercises%") or
                  ilike(r.name, "%tutorials%") or
+                 r.name == "DefinitelyTyped" or
                  r.name == "developer-roadmap"),
         where:
           not (ilike(repo_owner.provider_login, "%algorithms%") or
@@ -682,6 +682,13 @@ defmodule Algora.Workspace do
         }
 
     query =
+      if opts[:display_all] do
+        query
+      else
+        where(query, [uc, u, r, repo_owner], repo_owner.type == :organization or r.stargazers_count > 200)
+      end
+
+    query =
       if opts[:exclude_personal] do
         where(query, [uc, u, r, repo_owner], repo_owner.type == :organization)
       else
@@ -690,7 +697,11 @@ defmodule Algora.Workspace do
 
     query =
       if strict_tech_stack do
-        where(query, [uc, u, r, repo_owner], fragment("? && ?::citext[]", r.tech_stack, ^tech_stack))
+        where(
+          query,
+          [uc, u, r, repo_owner],
+          fragment("(SELECT ARRAY(SELECT unnest(?) LIMIT 1)) && ?::citext[]", r.tech_stack, ^tech_stack)
+        )
       else
         query
       end

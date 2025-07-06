@@ -1,4 +1,4 @@
-defmodule AlgoraWeb.Challenges.LimboLive do
+defmodule AlgoraWeb.Challenges.AtopileLive do
   @moduledoc false
   use AlgoraWeb, :live_view
 
@@ -8,9 +8,19 @@ defmodule AlgoraWeb.Challenges.LimboLive do
   def mount(_params, _session, socket) do
     {:ok,
      socket
-     |> assign(:page_title, "Turso Challenge")
-     |> assign(:page_description, "Turso rewrote SQLite in Rust - find a bug to win $1,000!")
-     |> assign(:page_image, "#{AlgoraWeb.Endpoint.url()}/images/challenges/limbo/og.png")}
+     |> assign(:page_title, "Atopile Challenge")
+     |> assign(
+       :page_description,
+       "Expand the atopile ecosystem - build packages, modules, utilities, and tools to win $1,000!"
+     )
+     |> assign(:page_image, "#{AlgoraWeb.Endpoint.url()}/images/challenges/atopile/og.png")}
+  end
+
+  @impl true
+  def handle_event("subscribe_challenge", %{"email" => email}, socket) do
+    Algora.Activities.alert("New challenge subscription [atopile] from #{email}", :critical)
+
+    {:noreply, put_flash(socket, :info, "Thank you for subscribing! We'll notify you when the challenge goes live.")}
   end
 
   @impl true
@@ -30,38 +40,53 @@ defmodule AlgoraWeb.Challenges.LimboLive do
                     <a
                       rel="noopener"
                       target="_blank"
-                      href="https://turso.tech"
-                      class="inline-flex items-center bg-[#1b252e]/75 hover:bg-[#11181f] ring-1 ring-[#4ff7d3] hover:ring-[#75ffe1] py-2 px-4 rounded-full font-medium text-[#4ff7d3]/90 hover:text-[#4ff7d3] text-sm sm:text-base transition-colors"
+                      href="https://atopile.io"
+                      class="inline-flex items-center bg-[#090a0e]/75 hover:bg-[#000] ring-1 ring-[#f0551c] hover:ring-[#ff6b33] py-2 px-4 rounded-full font-medium text-orange-500/90 hover:text-orange-500 text-sm sm:text-base transition-colors"
                     >
                       Challenge brought to you by
                       <img
-                        src={~p"/images/wordmarks/turso-aqua.svg"}
-                        alt="Turso"
-                        class="ml-1 h-6 sm:h-7"
-                        style="aspect-ratio: 821/240;"
+                        src="/images/wordmarks/atopile.svg"
+                        alt="atopile"
+                        class="ml-2 h-4 sm:h-5"
+                        style="aspect-ratio: 414/98;"
                       />
                     </a>
-                    <h1 class="mt-6 mb-2 text-[1.4rem] font-black tracking-tighter mix-blend-exclusion sm:text-5xl/[3rem] md:text-6xl/[4rem] lg:text-7xl/[5rem]">
-                      Turso is rewriting SQLite in Rust<br />
-                      <span style="background: radial-gradient(53.44% 245.78% at 13.64% 46.56%, rgb(110, 231, 183) 0%, rgb(45, 212, 191) 100%) text; -webkit-text-fill-color: transparent;">
-                        Find a bug to win <span class="font-display">$1,000</span>
+                    <h1 class="mt-6 mb-2 text-[1.2rem] font-black tracking-tighter mix-blend-exclusion sm:text-5xl/[3rem] md:text-6xl/[4rem] lg:text-6xl/[4rem]">
+                      Build the Future of Hardware Design<br />
+                      <span style="background: radial-gradient(53.44% 245.78% at 13.64% 46.56%, rgb(240, 85, 28) 0%, rgb(234, 88, 12) 100%) text; -webkit-text-fill-color: transparent;">
+                        Expand atopile to win <span class="font-display">$1,000</span>
                       </span>
                     </h1>
                     <p class="max-w-xl xl:max-w-2xl mt-4 text-base font-medium tracking-tight text-white/90 shadow-black [text-shadow:_0_1px_0_var(--tw-shadow-color)] md:mt-6 md:text-lg md:text-white/80">
-                      SQLite, while legendary, has remained closed to community contributions. We at Turso are changing that by building a modern
-                      SQLite alternative in Rust - one that's open source and community-driven. Our goal isn't just features, but
-                      rock-solid reliability through <a
-                        href="https://turso.tech/blog/introducing-limbo-a-complete-rewrite-of-sqlite-in-rust"
-                        class="font-semibold text-white"
-                        style="border-bottom: 2px solid white"
-                      >Deterministic Simulation Testing</a>. <br /><br />
-                      We are so confident in the long-term ability of the DST to find the rarest bugs that even at the current early stage, we are offering cash bounties for those who can find cases where a bug survived this testing. During the alpha phase of the project, we still expect some bugs to exist, and we'll offer
+                      Atopile is revolutionizing how we build electronics by bringing modern software development practices to hardware design. We need passionate builders to expand our ecosystem with packages, modules, utilities, and tools.<br /><br />
+                      Publish packages, modules, utilities, or tools that expand the atopile ecosystem. Every accepted published contribution will go in the atopile directory, you'll receive credits, and earn a
                       <span class="font-display font-bold text-foreground">$1,000</span>
-                      for any bugs that lead to data loss or data corruption. As our releases progress, we will continuously expand the scope of bugs and size of the bounty.
+                      reward. To participate, you need electrical engineering knowledge (college students welcome!) and passion for building tools for builders.
                     </p>
+                    <div class="mt-8 max-w-2xl">
+                      <.form
+                        for={%{}}
+                        phx-submit="subscribe_challenge"
+                        class="flex flex-col sm:flex-row gap-3"
+                      >
+                        <input
+                          type="email"
+                          name="email"
+                          placeholder="Enter your email"
+                          required
+                          class="flex-1 rounded-lg bg-white/5 backdrop-blur-sm border-2 border-[#f0551c] ring-2 ring-transparent px-4 py-3 text-white placeholder-white/75 focus:border-[#ff6b33] focus:outline-none focus:ring-2 focus:ring-[#ff6b33]/30 transition-all"
+                        />
+                        <button
+                          type="submit"
+                          class="bg-[#f0551c] hover:bg-[#ff6b33] px-6 py-3 rounded-lg text-white font-semibold transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl"
+                        >
+                          Get Notified
+                        </button>
+                      </.form>
+                    </div>
                   </div>
                 </div>
-                <div class="hidden lg:block top-[0px] absolute inset-0 z-10 h-[calc(100svh-0px)] md:h-[750px] 2xl:h-[900px] bg-gradient-to-r from-background from-1% to-transparent to-[69%]">
+                <div class="hidden lg:block top-[0px] absolute inset-0 z-10 h-[calc(100svh-0px)] md:h-[750px] 2xl:h-[900px] bg-gradient-to-r from-background from-[10%] to-transparent to-[100%]">
                 </div>
                 <div class="hidden lg:block top-[0px] absolute inset-0 z-10 h-[calc(100svh-0px)] md:h-[750px] 2xl:h-[900px] bg-gradient-to-t from-background from-1% to-transparent to-[30%]">
                 </div>
@@ -73,10 +98,10 @@ defmodule AlgoraWeb.Challenges.LimboLive do
                 </div>
                 <div class="top-[0px] absolute inset-0 z-0 h-[calc(100svh-0px)] md:h-[750px] 2xl:h-[900px]">
                   <img
-                    src={~p"/images/challenges/limbo/bg.webp"}
+                    src={~p"/images/challenges/atopile/tmps18ne6vg.png"}
                     alt="Background"
-                    class="h-full w-full object-cover object-[60%_100%] md:object-[50%_100%] lg:object-[40%_100%] xl:object-[29%_100%] 2xl:object-[20%_100%]"
-                    style="aspect-ratio: 4096/1326;"
+                    class="h-full w-full object-cover object-[60%_50%]"
+                    style="aspect-ratio: 1932/672;"
                   />
                 </div>
               </section>
@@ -90,9 +115,9 @@ defmodule AlgoraWeb.Challenges.LimboLive do
                     <a
                       target="_blank"
                       class="font-semibold text-white underline"
-                      href="https://discord.gg/jgjmyYgHwB"
+                      href="https://x.com/atopile_io"
                     >
-                      Join us on Discord!
+                      Reach out on X!
                     </a>
                   </p>
                   <ul class="mt-4 md:mt-8 space-y-4 md:space-y-2 mx-auto max-w-5xl">
@@ -103,51 +128,167 @@ defmodule AlgoraWeb.Challenges.LimboLive do
                           rel="noopener"
                           target="_blank"
                           class="font-semibold text-white underline inline-flex"
-                          href="https://github.com/tursodatabase/turso/blob/main/CONTRIBUTING.md"
+                          href="https://atopile.io/atopile/quickstart"
                         >
                           Set up your development environment
                         </a>
-                        and build the Turso CLI locally
+                        and familiarize yourself with atopile's syntax and workflow
                       </span>
                     </li>
                     <li class="flex w-full items-start pt-2 text-left text-white">
                       <.icon name="tabler-square-rounded-number-2" class="size-8 mr-2 shrink-0" />
                       <span class="text-base font-medium leading-7">
-                        Explore the
                         <a
                           rel="noopener"
                           target="_blank"
                           class="font-semibold text-white underline inline-flex"
-                          href="https://github.com/tursodatabase/turso/tree/main/simulator"
+                          href="https://packages.atopile.io/"
                         >
-                          simulator
+                          Explore packages
                         </a>
-                        directory to understand our Deterministic Simulation Testing framework
+                        to see examples and identify gaps
                       </span>
                     </li>
                     <li class="flex w-full items-start pt-2 text-left text-white">
                       <.icon name="tabler-square-rounded-number-3" class="size-8 mr-2 shrink-0" />
                       <span class="text-base font-medium leading-7">
-                        Improve the Deterministic Simulator to expose a new data corruption bug that the simulator would not have been able to catch before. A data corruption bug is a bug in which the database loses data in a way that cannot be recovered by a future patch
+                        Create a new package, module, utility, or tool that extends atopile's capabilities. This could be:
+                        <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                          <li>Hardware modules (power supplies, motor drivers, sensors)</li>
+                          <li>Development tools and utilities</li>
+                          <li>Testing frameworks for hardware</li>
+                          <li>Integration tools with other EDA software</li>
+                          <li>Educational examples and tutorials</li>
+                        </ul>
                       </span>
                     </li>
                     <li class="flex w-full items-start pt-2 text-left text-white">
                       <.icon name="tabler-square-rounded-number-4" class="size-8 mr-2 shrink-0" />
                       <span class="text-base font-medium leading-7">
-                        Submit a PR with the Deterministic Simulator improvements to catch the bug. If your PR is merged, you'll receive an
-                        <span class="font-display font-bold text-[#4ff7d3]">$800</span>
-                        reward
+                        <a
+                          rel="noopener"
+                          target="_blank"
+                          class="font-semibold text-white underline inline-flex"
+                          href="https://atopile.io/atopile/guides/publish"
+                        >
+                          Publish your package
+                        </a>
+                        to the atopile registry. Include comprehensive documentation and examples
                       </span>
                     </li>
                     <li class="flex w-full items-start pt-2 text-left text-white">
                       <.icon name="tabler-square-rounded-number-5" class="size-8 mr-2 shrink-0" />
                       <span class="text-base font-medium leading-7">
-                        Fix the identified bug for an additional
-                        <span class="font-display font-bold text-[#4ff7d3]">$200</span>
-                        reward
+                        If your contribution is accepted and published, you'll receive
+                        <span class="font-display font-bold text-orange-500">$1,000</span>
+                        and recognition in the atopile community
                       </span>
                     </li>
                   </ul>
+                </div>
+              </section>
+              <section class="md:mb-18 mb-12 xl:pt-20 2xl:pt-52">
+                <div class="relative z-50 mx-auto max-w-7xl px-6 pt-6 lg:px-8">
+                  <h2 class="flex justify-center text-4xl font-black leading-none tracking-tighter mix-blend-exclusion md:text-7xl">
+                    Example packages
+                  </h2>
+                  <p class="text-center mt-4 text-base font-medium text-gray-200">
+                    Get inspired by existing packages in the
+                    <a
+                      target="_blank"
+                      class="font-semibold text-white underline"
+                      href="https://packages.atopile.io/"
+                    >
+                      atopile registry
+                    </a>
+                  </p>
+                  <div class="mt-8 grid grid-cols-1 gap-6 md:grid-cols-3">
+                    <div class="group relative overflow-hidden rounded-xl bg-white/5 border border-white/10 p-6 transition-all hover:border-[#f0551c]/50 hover:bg-white/10">
+                      <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold">
+                          <a
+                            href="https://packages.atopile.io/packages/atopile/buttons/releases/latest"
+                            target="_blank"
+                            rel="noopener"
+                            class="text-white hover:text-[#f0551c] transition-colors"
+                          >
+                            atopile/buttons
+                          </a>
+                        </h3>
+                        <span class="px-2 py-1 text-xs font-medium bg-[#f0551c]/20 text-[#f0551c] rounded-full">
+                          v0.1.7
+                        </span>
+                      </div>
+                      <p class="text-sm text-gray-400 mb-4">
+                        A collection of buttons for convenience
+                      </p>
+                      <a
+                        href="https://github.com/atopile/packages"
+                        target="_blank"
+                        rel="noopener"
+                        class="flex items-center gap-2 text-xs text-[#f0551c] hover:text-[#ff6b33] transition-colors"
+                      >
+                        <.icon name="github" class="size-4" />
+                        <span>Repository</span>
+                      </a>
+                    </div>
+                    <div class="group relative overflow-hidden rounded-xl bg-white/5 border border-white/10 p-6 transition-all hover:border-[#f0551c]/50 hover:bg-white/10">
+                      <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold">
+                          <a
+                            href="https://packages.atopile.io/packages/atopile/addressable-leds/releases/latest"
+                            target="_blank"
+                            rel="noopener"
+                            class="text-white hover:text-[#f0551c] transition-colors"
+                          >
+                            atopile/addressable-leds
+                          </a>
+                        </h3>
+                        <span class="px-2 py-1 text-xs font-medium bg-[#f0551c]/20 text-[#f0551c] rounded-full">
+                          v0.2.2
+                        </span>
+                      </div>
+                      <p class="text-sm text-gray-400 mb-4">
+                        SK6805 addressable RGB LEDs with integrated controller for creating colorful LED effects and...
+                      </p>
+                      <a
+                        href="https://github.com/atopile/packages"
+                        target="_blank"
+                        rel="noopener"
+                        class="flex items-center gap-2 text-xs text-[#f0551c] hover:text-[#ff6b33] transition-colors"
+                      >
+                        <.icon name="github" class="size-4" />
+                        <span>Repository</span>
+                      </a>
+                    </div>
+                    <div class="group relative overflow-hidden rounded-xl bg-white/5 border border-white/10 p-6 transition-all hover:border-[#f0551c]/50 hover:bg-white/10">
+                      <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold">
+                          <a
+                            href="https://packages.atopile.io/packages/atopile/indicator-leds/releases/latest"
+                            target="_blank"
+                            rel="noopener"
+                            class="text-white hover:text-[#f0551c] transition-colors"
+                          >
+                            atopile/indicator-leds
+                          </a>
+                        </h3>
+                        <span class="px-2 py-1 text-xs font-medium bg-[#f0551c]/20 text-[#f0551c] rounded-full">
+                          v0.1.1
+                        </span>
+                      </div>
+                      <p class="text-sm text-gray-400 mb-4">Indicator LEDs for convenience</p>
+                      <a
+                        href="https://github.com/atopile/packages"
+                        target="_blank"
+                        rel="noopener"
+                        class="flex items-center gap-2 text-xs text-[#f0551c] hover:text-[#ff6b33] transition-colors"
+                      >
+                        <.icon name="github" class="size-4" />
+                        <span>Repository</span>
+                      </a>
+                    </div>
+                  </div>
                 </div>
               </section>
               <section class="mx-auto my-24 max-w-7xl md:my-36">
@@ -155,7 +296,7 @@ defmodule AlgoraWeb.Challenges.LimboLive do
                   Media
                 </h2>
                 <div class="mx-auto grid gap-6 px-6 sm:grid-cols-2 lg:px-8">
-                  <a class="block pt-6 md:pt-12" href="https://www.youtube.com/watch?v=c9SM0Ra_o84">
+                  <a class="block pt-6 md:pt-12" href="https://www.youtube.com/watch?v=7-Q0XVpfW3Y">
                     <div class="relative z-30 mx-auto max-w-7xl">
                       <div class="relative mx-auto">
                         <div class="group/card h-full border border-white/10 bg-black md:gap-8 group relative flex-1 overflow-hidden rounded-xl bg-cover shadow-[0px_3.26536px_2.21381px_0px_rgba(69,_10,_10,_0.08),_0px_7.84712px_5.32008px_0px_rgba(69,_10,_10,_0.11),_0px_14.77543px_10.01724px_0px_rgba(69,_10,_10,_0.14),_0px_26.35684px_17.86905px_0px_rgba(69,_10,_10,_0.16),_0px_49.29758px_33.42209px_0px_rgba(69,_10,_10,_0.19),_0px_118px_80px_0px_rgba(69,_10,_10,_0.27)] ring-2 ring-red-500 hover:no-underline">
@@ -172,15 +313,15 @@ defmodule AlgoraWeb.Challenges.LimboLive do
                           </div>
                           <div class="relative flex aspect-[16/9] h-full w-full items-center justify-center text-balance bg-gray-950 text-center text-xl font-medium text-red-100 sm:text-2xl">
                             <img
-                              src="https://i.ytimg.com/vi/c9SM0Ra_o84/maxresdefault.jpg"
-                              alt="Turso is rewriting SQLite in Rust | Glauber Costa"
+                              src={~p"/images/challenges/atopile/thumbnail1.png"}
+                              alt="atopile product demo"
                             />
                           </div>
                         </div>
                       </div>
                     </div>
                   </a>
-                  <a class="block pt-6 md:pt-12" href="https://www.youtube.com/watch?v=PPjXM8G8ax0">
+                  <a class="block pt-6 md:pt-12" href="https://www.youtube.com/watch?v=glofO5vRMw8">
                     <div class="relative z-30 mx-auto max-w-7xl">
                       <div class="relative mx-auto">
                         <div class="group/card h-full border border-white/10 bg-black md:gap-8 group relative flex-1 overflow-hidden rounded-xl bg-cover shadow-[0px_3.26536px_2.21381px_0px_rgba(69,_10,_10,_0.08),_0px_7.84712px_5.32008px_0px_rgba(69,_10,_10,_0.11),_0px_14.77543px_10.01724px_0px_rgba(69,_10,_10,_0.14),_0px_26.35684px_17.86905px_0px_rgba(69,_10,_10,_0.16),_0px_49.29758px_33.42209px_0px_rgba(69,_10,_10,_0.19),_0px_118px_80px_0px_rgba(69,_10,_10,_0.27)] ring-2 ring-red-500 hover:no-underline">
@@ -197,8 +338,8 @@ defmodule AlgoraWeb.Challenges.LimboLive do
                           </div>
                           <div class="relative flex aspect-[16/9] h-full w-full items-center justify-center text-balance bg-gray-950 text-center text-xl font-medium text-red-100 sm:text-2xl">
                             <img
-                              src={~p"/images/challenges/limbo/primeagen.png"}
-                              alt="The SQLite Rewrite In Rust"
+                              src="https://i.ytimg.com/vi/glofO5vRMw8/maxresdefault.jpg"
+                              alt="1. Installing atopile"
                             />
                           </div>
                         </div>
@@ -212,74 +353,58 @@ defmodule AlgoraWeb.Challenges.LimboLive do
                   <h2 class="flex justify-center text-4xl font-black leading-none tracking-tighter mix-blend-exclusion md:text-7xl">
                     Discussions
                   </h2>
-                  <div class="mt-6 md:mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2">
-                    <a
-                      href="https://news.ycombinator.com/item?id=42378843"
-                      target="_blank"
-                      rel="noopener"
-                      class="group relative overflow-hidden rounded-lg border border-border bg-background transition-all hover:border-[#37363d]"
-                    >
-                      <img
-                        src={~p"/images/challenges/limbo/hn-post.png"}
-                        alt="Hacker News discussion"
-                        class="w-full object-cover"
-                      />
-                    </a>
-                    <a
-                      href="https://www.reddit.com/r/programming/comments/1hb6vg1/introducing_limbo_a_complete_rewrite_of_sqlite_in/"
-                      target="_blank"
-                      rel="noopener"
-                      class="group relative overflow-hidden rounded-lg border border-border bg-background transition-all hover:border-[#37363d]"
-                    >
-                      <img
-                        src={~p"/images/challenges/limbo/reddit-post.png"}
-                        alt="Reddit discussion"
-                        class="w-full object-cover"
-                      />
-                    </a>
-                  </div>
                   <div class="mx-auto mt-6 grid max-w-2xl grid-cols-1 grid-rows-1 gap-8 text-sm/6 text-foreground sm:grid-cols-2 xl:mx-0 xl:max-w-none xl:grid-flow-col xl:grid-cols-4">
-                    <figure class="rounded-2xl bg-card shadow-lg border-2 border-border hover:border-[#37363d] transition-colors sm:col-span-2 xl:col-start-2 xl:row-end-1">
-                      <.link
-                        href="https://www.reddit.com/r/programming/comments/1hb6vg1/introducing_limbo_a_complete_rewrite_of_sqlite_in/"
+                    <div class="sm:col-span-2 xl:col-start-2 xl:row-end-1">
+                      <a
+                        href="https://news.ycombinator.com/item?id=39263854"
                         target="_blank"
                         rel="noopener"
+                        class="group relative overflow-hidden rounded-lg bg-background transition-all"
                       >
-                        <blockquote class="p-6 text-lg font-semibold tracking-tight text-foreground sm:p-12 sm:text-xl/8 whitespace-pre-line -mt-16">
-                          <p>
-                            SQLite is the most well tested software on Earth, any rewrite WILL contain bugs that don't exist in SQLite.
-
-                            Not only has SQLite been tested to run on almost any conceivable device, but its testsuite must be able to reproduce the issue before any bug is closed. This together with its 20 yr+ age makes SQLite closest to perfection of any program written.
-
-                            Making it "more secure" using Rust simply doesn't make sense when you're competing with perfection.
-                          </p>
-                        </blockquote>
-                        <figcaption class="flex items-center gap-x-2 p-6 sm:p-12 -mt-12 md:-mt-24">
-                          <.icon name="tabler-brand-reddit" class="size-6" />
-                          <div>
-                            <div class="font-semibold text-foreground">Dako1905</div>
-                          </div>
-                        </figcaption>
-                      </.link>
-                    </figure>
+                        <img
+                          src={~p"/images/challenges/atopile/hn-post.webp"}
+                          alt="Hacker News discussion"
+                          class="w-full object-cover rounded-lg"
+                        />
+                      </a>
+                      <figure class="mt-6 rounded-2xl bg-card shadow-lg border-2 border-border hover:border-[#37363d] transition-colors">
+                        <.link
+                          href="https://news.ycombinator.com/item?id=39263854"
+                          target="_blank"
+                          rel="noopener"
+                        >
+                          <blockquote class="p-6 text-lg font-semibold tracking-tight text-foreground sm:p-12 sm:text-xl/8 whitespace-pre-line -mt-16">
+                            <p>
+                              99% of people who put a regulator into their schematic will want an appropriate input and output capacitor... It'll be very exciting if we can move towards a more modular world, where designs can be composed.
+                            </p>
+                          </blockquote>
+                          <figcaption class="flex items-center gap-x-2 p-6 sm:p-12 -mt-12 md:-mt-24">
+                            <.icon name="tabler-brand-ycombinator" class="size-6" />
+                            <div>
+                              <div class="font-semibold text-foreground">Michael T</div>
+                            </div>
+                          </figcaption>
+                        </.link>
+                      </figure>
+                    </div>
                     <div class="space-y-8 xl:contents xl:space-y-0">
                       <div class="space-y-8 xl:row-span-2">
                         <figure class="rounded-2xl bg-card p-6 shadow-lg border-2 border-border hover:border-[#37363d] transition-colors">
                           <.link
-                            href="https://news.ycombinator.com/item?id=42378843"
+                            href="https://news.ycombinator.com/item?id=39263854"
                             target="_blank"
                             rel="noopener"
                           >
                             <blockquote class="text-foreground whitespace-pre-line -mt-12">
                               <p>
-                                Given the code quality and rigid testing, SQLite is probably the last project that should be rewritten. It'd be great to see all other C code rewritten first!
+                                Looks really useful! As a hardware designer I've had plenty of copy pasting bits of schematics to duplicate common functionality. Seems like this could be really helpful in preventing mistakes and increasing quality.
                               </p>
                             </blockquote>
                             <figcaption class="flex items-center gap-x-2">
                               <.icon name="tabler-brand-ycombinator" class="size-6" />
                               <div>
                                 <div class="font-semibold text-foreground">
-                                  danieljanes
+                                  Liftyee
                                 </div>
                               </div>
                             </figcaption>
@@ -287,20 +412,20 @@ defmodule AlgoraWeb.Challenges.LimboLive do
                         </figure>
                         <figure class="rounded-2xl bg-card p-6 shadow-lg border-2 border-border hover:border-[#37363d] transition-colors">
                           <.link
-                            href="https://news.ycombinator.com/item?id=42378843"
+                            href="https://news.ycombinator.com/item?id=39263854"
                             target="_blank"
                             rel="noopener"
                           >
                             <blockquote class="text-foreground whitespace-pre-line -mt-12">
                               <p>
-                                This is going to sound pedantic, but SQLite is not Open Source. It's Public Domain. The distinction is subtle, but it is important.
+                                LOVE IT LOVE IT LOVE IT!!! I'm doing a lot of home automation work, and I absolutely hate that I need to use breadboards, hunt for pre-assembled components, or to spend days designing a PCB.
                               </p>
                             </blockquote>
                             <figcaption class="flex items-center gap-x-2">
                               <.icon name="tabler-brand-ycombinator" class="size-6" />
                               <div>
                                 <div class="font-semibold text-foreground">
-                                  bruce511
+                                  Cyberax
                                 </div>
                               </div>
                             </figcaption>
@@ -312,22 +437,20 @@ defmodule AlgoraWeb.Challenges.LimboLive do
                       <div class="space-y-8 xl:row-span-2">
                         <figure class="rounded-2xl bg-card p-6 shadow-lg border-2 border-border hover:border-[#37363d] transition-colors">
                           <.link
-                            href="https://www.reddit.com/r/programming/comments/1hb6vg1/introducing_limbo_a_complete_rewrite_of_sqlite_in/"
+                            href="https://news.ycombinator.com/item?id=39263854"
                             target="_blank"
                             rel="noopener"
                           >
                             <blockquote class="text-foreground whitespace-pre-line -mt-12">
                               <p>
-                                > SQLite's test suite is proprietary
-
-                                huh TIL. Kinda makes sense, but also kinda sucks. So if you try to contribute to SQLite you can't run the tests yourself to see if you broke anything?"
+                                This has sooo much promise... Imagine optimizing for cost, removing redundancy, simplifying footprints, and prioritizing in-stock inventory over new order components.
                               </p>
                             </blockquote>
                             <figcaption class="flex items-center gap-x-2">
-                              <.icon name="tabler-brand-reddit" class="size-6" />
+                              <.icon name="tabler-brand-ycombinator" class="size-6" />
                               <div>
                                 <div class="font-semibold text-foreground">
-                                  larikang
+                                  Mikeortman
                                 </div>
                               </div>
                             </figcaption>
@@ -335,20 +458,20 @@ defmodule AlgoraWeb.Challenges.LimboLive do
                         </figure>
                         <figure class="rounded-2xl bg-card p-6 shadow-lg border-2 border-border hover:border-[#37363d] transition-colors">
                           <.link
-                            href="https://www.reddit.com/r/programming/comments/1hb6vg1/introducing_limbo_a_complete_rewrite_of_sqlite_in/"
+                            href="https://news.ycombinator.com/item?id=39263854"
                             target="_blank"
                             rel="noopener"
                           >
                             <blockquote class="text-foreground whitespace-pre-line -mt-12">
                               <p>
-                                well you can't contribute to SQLite, the code is "open-source" but the project is maintained by a set number of people
+                                We are hoping that ato modules can become a convenient language for the community to share modules with each other, in a similar fashion to python and pypi.
                               </p>
                             </blockquote>
                             <figcaption class="flex items-center gap-x-2">
-                              <.icon name="tabler-brand-reddit" class="size-6" />
+                              <.icon name="tabler-brand-ycombinator" class="size-6" />
                               <div>
                                 <div class="font-semibold text-foreground">
-                                  PhyToonToon
+                                  atopile team
                                 </div>
                               </div>
                             </figcaption>
@@ -368,17 +491,8 @@ defmodule AlgoraWeb.Challenges.LimboLive do
                       </h2>
                       <div class="flex gap-4 sm:gap-6">
                         <.link
-                          class="rounded-xl border-2 border-[#1ebba2] p-3 text-[#4ff7d3] transition-colors hover:border-[#4ff7d3] hover:text-[#75ffe1] sm:p-5"
-                          href="https://discord.gg/jgjmyYgHwB"
-                          rel="noopener"
-                          target="_blank"
-                        >
-                          <span class="sr-only">Discord</span>
-                          <.icon name="tabler-brand-discord-filled" class="h-6 w-6 sm:h-12 sm:w-12" />
-                        </.link>
-                        <.link
-                          class="rounded-xl border-2 border-[#1ebba2] p-3 text-[#4ff7d3] transition-colors hover:border-[#4ff7d3] hover:text-[#75ffe1] sm:p-5"
-                          href="https://x.com/tursodatabase"
+                          class="rounded-xl border-2 border-[#f0551c] p-3 text-[#f0551c] transition-colors hover:border-[#ff6b33] hover:text-[#ff6b33] sm:p-5"
+                          href="https://x.com/atopile_io"
                           rel="noopener"
                           target="_blank"
                         >
@@ -386,26 +500,10 @@ defmodule AlgoraWeb.Challenges.LimboLive do
                           <.icon name="tabler-brand-x" class="h-6 w-6 sm:h-12 sm:w-12" />
                         </.link>
                         <.link
-                          class="rounded-xl border-2 border-[#1ebba2] p-3 text-[#4ff7d3] transition-colors hover:border-[#4ff7d3] hover:text-[#75ffe1] sm:p-5"
-                          href="https://github.com/tursodatabase/turso"
+                          class="rounded-xl border-2 border-[#f0551c] p-3 text-[#f0551c] transition-colors hover:border-[#ff6b33] hover:text-[#ff6b33] sm:p-5"
+                          href="https://linkedin.com/company/atopile"
                           rel="noopener"
                           target="_blank"
-                        >
-                          <span class="sr-only">GitHub</span>
-                          <.icon name="github" class="h-6 w-6 sm:h-12 sm:w-12" />
-                        </.link>
-                        <.link
-                          class="rounded-xl border-2 border-[#1ebba2] p-3 text-[#4ff7d3] transition-colors hover:border-[#4ff7d3] hover:text-[#75ffe1] sm:p-5"
-                          href="https://www.youtube.com/@tursodatabase"
-                          rel="noopener"
-                          target="_blank"
-                        >
-                          <span class="sr-only">YouTube</span>
-                          <.icon name="tabler-brand-youtube-filled" class="h-6 w-6 sm:h-12 sm:w-12" />
-                        </.link>
-                        <.link
-                          class="rounded-xl border-2 border-[#1ebba2] p-3 text-[#4ff7d3] transition-colors hover:border-[#4ff7d3] hover:text-[#75ffe1] sm:p-5"
-                          href="https://www.linkedin.com/company/turso"
                         >
                           <span class="sr-only">LinkedIn</span>
                           <svg
@@ -417,18 +515,36 @@ defmodule AlgoraWeb.Challenges.LimboLive do
                             <path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M17 2a5 5 0 0 1 5 5v10a5 5 0 0 1 -5 5h-10a5 5 0 0 1 -5 -5v-10a5 5 0 0 1 5 -5zm-9 8a1 1 0 0 0 -1 1v5a1 1 0 0 0 2 0v-5a1 1 0 0 0 -1 -1m6 0a3 3 0 0 0 -1.168 .236l-.125 .057a1 1 0 0 0 -1.707 .707v5a1 1 0 0 0 2 0v-3a1 1 0 0 1 2 0v3a1 1 0 0 0 2 0v-3a3 3 0 0 0 -3 -3m-6 -3a1 1 0 0 0 -.993 .883l-.007 .127a1 1 0 0 0 1.993 .117l.007 -.127a1 1 0 0 0 -1 -1" />
                           </svg>
                         </.link>
+                        <.link
+                          class="rounded-xl border-2 border-[#f0551c] p-3 text-[#f0551c] transition-colors hover:border-[#ff6b33] hover:text-[#ff6b33] sm:p-5"
+                          href="https://github.com/atopile/atopile"
+                          rel="noopener"
+                          target="_blank"
+                        >
+                          <span class="sr-only">GitHub</span>
+                          <.icon name="github" class="h-6 w-6 sm:h-12 sm:w-12" />
+                        </.link>
+                        <.link
+                          class="rounded-xl border-2 border-[#f0551c] p-3 text-[#f0551c] transition-colors hover:border-[#ff6b33] hover:text-[#ff6b33] sm:p-5"
+                          href="https://www.youtube.com/@atopile_io"
+                          rel="noopener"
+                          target="_blank"
+                        >
+                          <span class="sr-only">YouTube</span>
+                          <.icon name="tabler-brand-youtube-filled" class="h-6 w-6 sm:h-12 sm:w-12" />
+                        </.link>
                       </div>
                     </div>
                     <a
                       rel="noopener"
                       target="_blank"
-                      href="https://github.com/tursodatabase/turso"
+                      href="https://github.com/atopile/atopile"
                       class="group/card h-full border border-white/10 bg-black md:gap-8 group relative flex-1 overflow-hidden rounded-xl bg-cover shadow-[0px_3.26536px_2.21381px_0px_rgba(84,_58,_42,_0.08),_0px_7.84712px_5.32008px_0px_rgba(84,_58,_42,_0.11),_0px_14.77543px_10.01724px_0px_rgba(84,_58,_42,_0.14),_0px_26.35684px_17.86905px_0px_rgba(84,_58,_42,_0.16),_0px_49.29758px_33.42209px_0px_rgba(84,_58,_42,_0.19),_0px_118px_80px_0px_rgba(84,_58,_42,_0.27)] hover:no-underline"
                     >
                       <img
-                        src="https://fly.storage.tigris.dev/algora-console/repositories/tursodatabase/turso/og.png"
-                        alt="Turso"
-                        class="rounded-lg aspect-[1200/630] w-full h-full bg-muted"
+                        src="https://fly.storage.tigris.dev/algora-console/repositories/atopile/atopile/og.png"
+                        alt="atopile"
+                        class="rounded-lg aspect-[1200/630] w-full h-full bg-muted object-cover"
                       />
                     </a>
                   </div>

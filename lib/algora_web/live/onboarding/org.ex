@@ -97,38 +97,89 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         </div>
       </header>
 
-      <div class="flex-1 p-4 md:py-4 flex items-center justify-center max-h-[calc(100vh-11rem)] overflow-y-auto scrollbar-thin">
-        <div class="w-full max-w-[28rem] text-left">
-          <.form for={@form} phx-submit="submit" class="flex flex-col gap-6">
-            <.input
-              field={@form[:email]}
-              type="email"
-              label="Work email"
-              placeholder="you@company.com"
-            />
-            <.input
-              field={@form[:job_description]}
-              type="textarea"
-              label="Job description / careers URL"
-              rows="3"
-              class="resize-none"
-              placeholder="Tell us about the role and your requirements..."
-            />
-            <.input
-              field={@form[:candidate_description]}
-              type="textarea"
-              label="Describe your ideal candidate, heuristics, green/red flags etc."
-              rows="3"
-              class="resize-none"
-              placeholder={placeholder_text()}
-            />
-            <div class="flex flex-col gap-4">
-              <.button class="w-full" type="submit">Receive your candidates</.button>
-              <div class="text-xs text-muted-foreground text-center">
-                No credit card required - only pay when you hire
+      <div class="flex-1 p-4 md:py-4 flex items-center justify-center overflow-hidden">
+        <div class="w-full">
+          <!-- Cal.com embed -->
+          <div style="width: 100%; height: 100%; overflow: scroll" id="cal-embed"></div>
+          <script type="text/javascript">
+            (function (C, A, L) {
+              let p = function (a, ar) {
+                a.q.push(ar);
+              };
+              let d = C.document;
+              C.Cal =
+                C.Cal ||
+                function () {
+                  let cal = C.Cal;
+                  let ar = arguments;
+                  if (!cal.loaded) {
+                    cal.ns = {};
+                    cal.q = cal.q || [];
+                    d.head.appendChild(d.createElement("script")).src = A;
+                    cal.loaded = true;
+                  }
+                  if (ar[0] === L) {
+                    const api = function () {
+                      p(api, arguments);
+                    };
+                    const namespace = ar[1];
+                    api.q = api.q || [];
+                    if (typeof namespace === "string") {
+                      cal.ns[namespace] = cal.ns[namespace] || api;
+                      p(cal.ns[namespace], ar);
+                      p(cal, ["initNamespace", namespace]);
+                    } else p(cal, ar);
+                    return;
+                  }
+                  p(cal, ar);
+                };
+            })(window, "https://app.cal.com/embed/embed.js", "init");
+            Cal("init", { origin: "https://app.cal.com" });
+
+            Cal("inline", {
+              elementOrSelector: "#cal-embed",
+              calLink: "ioannisflo/15min",
+              config: {
+                theme: "dark",
+              },
+            });
+          </script>
+          
+    <!-- Commented out original form -->
+          <!--
+          <div class="w-full max-w-[28rem] text-left">
+            <.form for={@form} phx-submit="submit" class="flex flex-col gap-6">
+              <.input
+                field={@form[:email]}
+                type="email"
+                label="Work email"
+                placeholder="you@company.com"
+              />
+              <.input
+                field={@form[:job_description]}
+                type="textarea"
+                label="Job description / careers URL"
+                rows="3"
+                class="resize-none"
+                placeholder="Tell us about the role and your requirements..."
+              />
+              <.input
+                field={@form[:candidate_description]}
+                type="textarea"
+                label="Describe your ideal candidate, heuristics, green/red flags etc."
+                rows="3"
+                class="resize-none"
+                placeholder={placeholder_text()}
+              />
+              <div class="flex flex-col gap-4">
+                <.button class="w-full" type="submit">Receive your candidates</.button>
+                <div class="text-xs text-muted-foreground text-center">
+                  No credit card required - only pay when you hire
+                </div>
               </div>
-            </div>
-          </.form>
+            </.form>
+          </div>
+          -->
         </div>
       </div>
 

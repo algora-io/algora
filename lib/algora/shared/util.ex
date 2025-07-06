@@ -105,10 +105,13 @@ defmodule Algora.Util do
     end
   end
 
-  def format_pct(percentage) do
+  def format_pct(percentage, opts \\ []) do
+    precision = opts[:precision] || 0
+
     percentage
     |> Decimal.mult(100)
     |> Decimal.normalize()
+    |> Decimal.round(precision)
     |> Decimal.to_string(:normal)
     |> Kernel.<>("%")
   end

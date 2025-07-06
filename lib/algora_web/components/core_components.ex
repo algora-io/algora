@@ -21,6 +21,7 @@ defmodule AlgoraWeb.CoreComponents do
   alias AlgoraWeb.Components.UI.DropdownMenu
   alias AlgoraWeb.Components.UI.HoverCard
   alias AlgoraWeb.Components.UI.Menu
+  alias AlgoraWeb.Components.UI.Multiline
   alias AlgoraWeb.Components.UI.Popover
   alias AlgoraWeb.Components.UI.RadioGroup
   alias AlgoraWeb.Components.UI.Select
@@ -1379,13 +1380,14 @@ defmodule AlgoraWeb.CoreComponents do
   defdelegate hover_card_content(assigns), to: HoverCard
   defdelegate hover_card_trigger(assigns), to: HoverCard
   defdelegate hover_card(assigns), to: HoverCard
+  defdelegate markdown(assigns), to: Multiline
   defdelegate menu_group(assigns), to: Menu
   defdelegate menu_item(assigns), to: Menu
   defdelegate menu_label(assigns), to: Menu
   defdelegate menu_separator(assigns), to: Menu
   defdelegate menu_shortcut(assigns), to: Menu
   defdelegate menu(assigns), to: Menu
-  defdelegate multiline(assigns), to: AlgoraWeb.Components.UI.Multiline
+  defdelegate multiline(assigns), to: Multiline
   defdelegate popover_content(assigns), to: Popover
   defdelegate popover_trigger(assigns), to: Popover
   defdelegate popover(assigns), to: Popover

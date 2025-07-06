@@ -24,6 +24,7 @@ defmodule Algora.Jobs.JobPosting do
     field :seniority, :string
 
     belongs_to :user, User, null: false
+    has_many :interviews, AlgoraCloud.Interviews.JobInterview, foreign_key: :job_posting_id
 
     timestamps()
   end

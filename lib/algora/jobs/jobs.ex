@@ -59,11 +59,11 @@ defmodule Algora.Jobs do
     # Need to handle different query structures based on joins
     case query.joins do
       # When we have interview join, the user table is the 3rd binding ([j, i, u])
-      [_interview_join, _user_join] -> where(query, [j, i, u], u.provider_login in ^handles)
+      [_interview_join, _user_join] -> where(query, [j, i, u], u.provider_login in ^handles or u.handle in ^handles)
       # When we only have user join, it's the 2nd binding ([j, u])
-      [_user_join] -> where(query, [j, u], u.provider_login in ^handles)
+      [_user_join] -> where(query, [j, u], u.provider_login in ^handles or u.handle in ^handles)
       # No joins yet, will be added later
-      [] -> where(query, [j, u], u.provider_login in ^handles)
+      [] -> where(query, [j, u], u.provider_login in ^handles or u.handle in ^handles)
     end
   end
 
@@ -81,11 +81,11 @@ defmodule Algora.Jobs do
     case opts[:order_by] do
       :last_interview_desc ->
         # Sort by most recent interview, then by job posting date
-        # Use COALESCE to handle NULL values for jobs without interviews
+        # Use LEFT JOIN to include all jobs, even those without interviews
         query
         |> join(:left, [j], i in "job_interviews", on: i.job_posting_id == j.id)
         |> group_by([j], [j.id, j.inserted_at])
-        |> order_by([j, i], [desc: coalesce(max(i.inserted_at), j.inserted_at), desc: j.inserted_at])
+        |> order_by([j, i], desc: coalesce(max(i.inserted_at), j.inserted_at), desc: j.inserted_at)
 
       _ ->
         # Default ordering by job posting date
@@ -94,7 +94,7 @@ defmodule Algora.Jobs do
   end
 
   defp apply_preloads(jobs, opts) do
-    preloads = [:user | (opts[:preload] || [])]
+    preloads = [:user | opts[:preload] || []]
     Repo.preload(jobs, preloads)
   end
 

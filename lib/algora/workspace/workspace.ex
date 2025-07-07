@@ -697,11 +697,7 @@ defmodule Algora.Workspace do
 
     query =
       if strict_tech_stack do
-        where(
-          query,
-          [uc, u, r, repo_owner],
-          fragment("(SELECT ARRAY(SELECT unnest(?) LIMIT 1)) && ?::citext[]", r.tech_stack, ^tech_stack)
-        )
+        where(query, [uc, u, r, repo_owner], fragment("? && ?::citext[]", r.tech_stack, ^tech_stack))
       else
         query
       end

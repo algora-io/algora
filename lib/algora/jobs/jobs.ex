@@ -12,16 +12,23 @@ defmodule Algora.Jobs do
   alias Algora.Payments.Transaction
   alias Algora.Repo
   alias Algora.Util
+  alias AlgoraCloud.Interviews.JobInterview
 
   require Logger
 
   def list_jobs(opts \\ []) do
     JobPosting
-    |> apply_ordering(opts)
+    |> maybe_filter_by_status(opts[:status])
     |> maybe_filter_by_user(opts)
     |> join(:inner, [j], u in User, on: u.id == j.user_id)
-    |> maybe_filter_by_users(opts[:handles])
     |> maybe_filter_by_tech_stack(opts[:tech_stack])
+    |> join(:left, [j], i in JobInterview, on: i.job_posting_id == j.id)
+    |> group_by([j, u, i], [u.contract_signed, j.id, j.inserted_at])
+    |> order_by([j, u, i],
+      desc: u.contract_signed,
+      desc: coalesce(max(i.inserted_at), j.inserted_at),
+      desc: j.inserted_at
+    )
     |> maybe_limit(opts[:limit])
     |> Repo.all()
     |> apply_preloads(opts)
@@ -29,10 +36,9 @@ defmodule Algora.Jobs do
 
   def count_jobs(opts \\ []) do
     JobPosting
-    |> order_by([j], desc: j.inserted_at)
+    |> maybe_filter_by_status(opts[:status])
     |> maybe_filter_by_user(opts)
     |> join(:inner, [j], u in User, on: u.id == j.user_id)
-    |> maybe_filter_by_users(opts[:handles])
     |> maybe_filter_by_tech_stack(opts[:tech_stack])
     |> Repo.aggregate(:count)
   end
@@ -53,18 +59,14 @@ defmodule Algora.Jobs do
 
   defp maybe_filter_by_user(query, _), do: query
 
-  defp maybe_filter_by_users(query, nil), do: query
+  defp maybe_filter_by_status(query, nil), do: where(query, [j], j.status in [:active])
 
-  defp maybe_filter_by_users(query, handles) do
-    # Need to handle different query structures based on joins
-    case query.joins do
-      # When we have interview join, the user table is the 3rd binding ([j, i, u])
-      [_interview_join, _user_join] -> where(query, [j, i, u], u.provider_login in ^handles or u.handle in ^handles)
-      # When we only have user join, it's the 2nd binding ([j, u])
-      [_user_join] -> where(query, [j, u], u.provider_login in ^handles or u.handle in ^handles)
-      # No joins yet, will be added later
-      [] -> where(query, [j, u], u.provider_login in ^handles or u.handle in ^handles)
-    end
+  defp maybe_filter_by_status(query, :all) do
+    where(query, [j], j.status in [:active, :processing])
+  end
+
+  defp maybe_filter_by_status(query, status) do
+    where(query, [j], j.status == ^status)
   end
 
   defp maybe_filter_by_tech_stack(query, nil), do: query
@@ -76,22 +78,6 @@ defmodule Algora.Jobs do
 
   defp maybe_limit(query, nil), do: query
   defp maybe_limit(query, limit), do: limit(query, ^limit)
-
-  defp apply_ordering(query, opts) do
-    case opts[:order_by] do
-      :last_interview_desc ->
-        # Sort by most recent interview, then by job posting date
-        # Use LEFT JOIN to include all jobs, even those without interviews
-        query
-        |> join(:left, [j], i in "job_interviews", on: i.job_posting_id == j.id)
-        |> group_by([j], [j.id, j.inserted_at])
-        |> order_by([j, i], desc: coalesce(max(i.inserted_at), j.inserted_at), desc: j.inserted_at)
-
-      _ ->
-        # Default ordering by job posting date
-        order_by(query, [j], desc: j.inserted_at)
-    end
-  end
 
   defp apply_preloads(jobs, opts) do
     preloads = [:user | opts[:preload] || []]

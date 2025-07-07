@@ -26,7 +26,7 @@ defmodule Algora.Jobs do
     |> group_by([j, u, i], [u.contract_signed, j.id, j.inserted_at])
     |> order_by([j, u, i],
       desc: u.contract_signed,
-      desc: coalesce(max(i.inserted_at), j.inserted_at),
+      desc_nulls_last: max(i.inserted_at),
       desc: j.inserted_at
     )
     |> maybe_limit(opts[:limit])

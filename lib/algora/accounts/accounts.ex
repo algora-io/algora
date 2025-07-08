@@ -160,6 +160,7 @@ defmodule Algora.Accounts do
       avatar_url: u.avatar_url,
       bio: u.bio,
       system_bio: u.system_bio,
+      system_tags: u.system_tags,
       location: u.location,
       country: u.country,
       tech_stack: u.tech_stack,

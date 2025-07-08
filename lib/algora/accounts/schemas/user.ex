@@ -39,6 +39,7 @@ defmodule Algora.Accounts.User do
     field :stargazers_count, :integer, default: 0
     field :domain, :string
     field :tech_stack, {:array, :string}, default: []
+    field :discovery_tech_stack, {:array, :string}, default: []
     field :categories, {:array, :string}, default: []
     field :featured, :boolean, default: false
     field :priority, :integer, default: 0

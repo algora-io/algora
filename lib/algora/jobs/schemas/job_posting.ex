@@ -22,9 +22,11 @@ defmodule Algora.Jobs.JobPosting do
     field :regions, {:array, :string}, default: []
     field :compensation, :string
     field :seniority, :string
+    field :system_tags, {:array, :string}, default: []
 
     belongs_to :user, User, null: false
     has_many :interviews, AlgoraCloud.Interviews.JobInterview, foreign_key: :job_posting_id
+    has_many :matches, AlgoraCloud.Matches.JobMatch, foreign_key: :job_posting_id
 
     timestamps()
   end
@@ -46,7 +48,8 @@ defmodule Algora.Jobs.JobPosting do
       :compensation,
       :seniority,
       :countries,
-      :regions
+      :regions,
+      :system_tags
     ])
     |> generate_id()
     |> validate_required([:url, :company_name, :company_url, :email])

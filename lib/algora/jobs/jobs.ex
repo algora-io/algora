@@ -13,6 +13,7 @@ defmodule Algora.Jobs do
   alias Algora.Repo
   alias Algora.Util
   alias AlgoraCloud.Interviews.JobInterview
+  alias AlgoraCloud.Matches.JobMatch
 
   require Logger
 
@@ -23,10 +24,12 @@ defmodule Algora.Jobs do
     |> join(:inner, [j], u in User, on: u.id == j.user_id)
     |> maybe_filter_by_tech_stack(opts[:tech_stack])
     |> join(:left, [j], i in JobInterview, on: i.job_posting_id == j.id)
-    |> group_by([j, u, i], [u.contract_signed, j.id, j.inserted_at])
-    |> order_by([j, u, i],
+    |> join(:left, [j], m in JobMatch, on: m.job_posting_id == j.id)
+    |> group_by([j, u, i, m], [u.contract_signed, j.id, j.inserted_at])
+    |> order_by([j, u, i, m],
       desc: u.contract_signed,
       desc_nulls_last: max(i.inserted_at),
+      desc_nulls_last: max(m.inserted_at),
       desc: j.inserted_at
     )
     |> maybe_limit(opts[:limit])

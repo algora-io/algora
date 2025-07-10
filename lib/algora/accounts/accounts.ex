@@ -161,6 +161,7 @@ defmodule Algora.Accounts do
       bio: u.bio,
       system_bio: u.system_bio,
       system_tags: u.system_tags,
+      min_compensation: u.min_compensation,
       location: u.location,
       country: u.country,
       tech_stack: u.tech_stack,

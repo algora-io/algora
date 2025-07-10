@@ -112,6 +112,8 @@ defmodule Algora.Accounts.User do
     field :location_meta, :map
     field :location_iso_lvl4, :string
 
+    field :email_recipients, {:array, :map}, default: []
+
     has_many :identities, Identity
     has_many :memberships, Member, foreign_key: :user_id
     has_many :members, Member, foreign_key: :org_id
@@ -424,7 +426,8 @@ defmodule Algora.Accounts.User do
       :company_domain,
       :friends_recommendations,
       :friends_github_handles,
-      :opt_out_algora
+      :opt_out_algora,
+      :email_recipients
     ])
     |> validate_url(:linkedin_url)
     |> validate_url(:twitter_url)

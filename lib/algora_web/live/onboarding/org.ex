@@ -30,13 +30,6 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     {:ok, assign(socket, :form, to_form(Form.changeset(%Form{}, %{})))}
   end
 
-  defp placeholder_text do
-    """
-    - GitHub looks like a green carpet, red flag if wearing suit in pfp
-    - Has contributions to open source inference engines (like vLLM)
-    - Posts regularly on X and LinkedIn
-    """
-  end
 
   @impl true
   def handle_event("submit", %{"form" => params}, socket) do

@@ -25,8 +25,8 @@ defmodule Algora.Jobs.JobPosting do
     field :system_tags, {:array, :string}, default: []
 
     belongs_to :user, User, null: false
-    has_many :interviews, AlgoraCloud.Interviews.JobInterview, foreign_key: :job_posting_id
-    has_many :matches, AlgoraCloud.Matches.JobMatch, foreign_key: :job_posting_id
+    has_many :interviews, Algora.Interviews.JobInterview, foreign_key: :job_posting_id
+    has_many :matches, Algora.Matches.JobMatch, foreign_key: :job_posting_id
 
     timestamps()
   end

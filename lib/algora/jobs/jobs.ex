@@ -6,14 +6,14 @@ defmodule Algora.Jobs do
 
   alias Algora.Accounts.User
   alias Algora.Bounties.LineItem
+  alias Algora.Interviews.JobInterview
   alias Algora.Jobs.JobApplication
   alias Algora.Jobs.JobPosting
+  alias Algora.Matches.JobMatch
   alias Algora.Payments
   alias Algora.Payments.Transaction
   alias Algora.Repo
   alias Algora.Util
-  alias AlgoraCloud.Interviews.JobInterview
-  alias AlgoraCloud.Matches.JobMatch
 
   require Logger
 

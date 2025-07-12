@@ -55,10 +55,11 @@ if config_env() == :prod do
   config :algora, Algora.Repo,
     # ssl: true,
     url: database_url,
-    pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
+    pool_size: String.to_integer(System.get_env("POOL_SIZE") || "20"),
     socket_options: maybe_ipv6,
     migration_primary_key: [type: :string],
-    migration_timestamps: [type: :utc_datetime_usec]
+    migration_timestamps: [type: :utc_datetime_usec],
+    queue_target: 5000
 
   config :ex_aws,
     json_codec: Jason,

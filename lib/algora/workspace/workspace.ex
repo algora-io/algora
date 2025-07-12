@@ -882,4 +882,30 @@ defmodule Algora.Workspace do
       end)
     end)
   end
+
+  def remove_existing_amount_labels(token, owner, repo, number) do
+    case Github.list_labels(token, owner, repo, number) do
+      {:ok, labels} ->
+        amount_labels =
+          labels
+          |> Enum.filter(fn label -> String.starts_with?(label["name"], "$") end)
+          |> Enum.map(fn label -> label["name"] end)
+
+        case amount_labels do
+          [] ->
+            :ok
+
+          _ ->
+            Enum.each(amount_labels, fn label_name ->
+              Github.remove_label_from_issue(token, owner, repo, number, label_name)
+            end)
+
+            :ok
+        end
+
+      {:error, reason} ->
+        Logger.warning("Failed to list labels for #{owner}/#{repo}##{number}: #{inspect(reason)}")
+        :ok
+    end
+  end
 end

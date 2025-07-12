@@ -24,13 +24,17 @@ defmodule Algora.Github.Behaviour do
               {:ok, map()} | {:error, String.t()}
   @callback update_issue_comment(token(), String.t(), String.t(), integer(), String.t()) ::
               {:ok, map()} | {:error, String.t()}
+  @callback delete_issue_comment(token(), String.t(), String.t(), integer()) ::
+              {:ok, map()} | {:error, String.t()}
   @callback list_user_repositories(token(), String.t(), keyword()) :: {:ok, [map()]} | {:error, String.t()}
   @callback list_repository_events(token(), String.t(), String.t(), keyword()) :: {:ok, [map()]} | {:error, String.t()}
   @callback list_repository_comments(token(), String.t(), String.t(), keyword()) :: {:ok, [map()]} | {:error, String.t()}
   @callback list_repository_languages(token(), String.t(), String.t()) :: {:ok, [map()]} | {:error, String.t()}
   @callback list_repository_contributors(token(), String.t(), String.t()) :: {:ok, [map()]} | {:error, String.t()}
   @callback add_labels(token(), String.t(), String.t(), integer(), [String.t()]) :: {:ok, [map()]} | {:error, String.t()}
+  @callback list_labels(token(), String.t(), String.t(), integer()) :: {:ok, [map()]} | {:error, String.t()}
   @callback create_label(token(), String.t(), String.t(), map()) :: {:ok, map()} | {:error, String.t()}
   @callback get_label(token(), String.t(), String.t(), String.t()) :: {:ok, map()} | {:error, String.t()}
   @callback remove_label(token(), String.t(), String.t(), String.t()) :: {:ok, map()} | {:error, String.t()}
+  @callback remove_label_from_issue(token(), String.t(), String.t(), integer(), String.t()) :: {:ok, map()} | {:error, String.t()}
 end

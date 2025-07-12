@@ -47,7 +47,8 @@ defmodule Algora.Bounties.Bounty do
       :shared_with,
       :hours_per_week,
       :hourly_rate,
-      :contract_type
+      :contract_type,
+      :status
     ])
     |> validate_required([:amount, :ticket_id, :owner_id, :creator_id])
     |> generate_id()

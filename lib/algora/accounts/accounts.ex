@@ -31,6 +31,7 @@ defmodule Algora.Accounts do
           | {:limit, non_neg_integer()}
           | {:handle, String.t()}
           | {:handles, [String.t()]}
+          | {:provider_logins, [String.t()]}
           | {:earnings_gt, Money.t()}
           | {:sort_by_country, String.t()}
           | {:sort_by_tech_stack, [String.t()]}
@@ -55,6 +56,9 @@ defmodule Algora.Accounts do
 
       {:handles, handles}, query ->
         from([b] in query, where: b.handle in ^handles)
+
+      {:provider_logins, logins}, query ->
+        from([b] in query, where: b.provider_login in ^logins)
 
       {:earnings_gt, min_amount}, query ->
         from([b, earnings: e] in query,

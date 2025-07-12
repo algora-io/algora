@@ -4,11 +4,11 @@ defmodule AlgoraWeb.Org.BountiesLive do
   use Ecto.Schema
 
   import Ecto.Changeset
-  import Ecto.Query
 
   alias Algora.Accounts.User
   alias Algora.Bounties
   alias Algora.Bounties.Bounty
+  alias Algora.Github
   alias Algora.Payments
   alias Algora.Repo
   alias Algora.Types.USD
@@ -364,15 +364,49 @@ defmodule AlgoraWeb.Org.BountiesLive do
   end
 
   def handle_event("delete-bounty", %{"id" => bounty_id}, socket) do
-    bounty = Repo.get!(Bounty, bounty_id)
+    bounty =
+      Bounty
+      |> Repo.get(bounty_id)
+      |> Repo.preload([:owner, [ticket: [repository: :user]]])
 
-    case Bounties.delete_bounty(bounty) do
-      {:ok, _bounty} ->
-        {:noreply,
-         socket
-         |> put_flash(:info, "Bounty deleted successfully")
-         |> assign_bounties()}
-
+    with {:ok, installation} <-
+           Workspace.fetch_installation_by(
+             provider: "github",
+             connected_user_id: bounty.ticket.repository.user.id
+           ),
+         {:ok, token} <- Github.get_installation_token(installation.provider_id),
+         {:ok, cr} <-
+           Workspace.fetch_command_response(bounty.ticket_id, :bounty),
+         dbg(cr),
+         {:ok, _} <-
+           Github.delete_issue_comment(
+             token,
+             bounty.ticket.repository.user.provider_login,
+             bounty.ticket.repository.name,
+             cr.provider_response_id
+           ),
+         :ok <-
+           Workspace.remove_existing_amount_labels(
+             token,
+             bounty.ticket.repository.user.provider_login,
+             bounty.ticket.repository.name,
+             bounty.ticket.number
+           ),
+         {:ok, _} <-
+           Github.remove_label_from_issue(
+             token,
+             bounty.ticket.repository.user.provider_login,
+             bounty.ticket.repository.name,
+             bounty.ticket.number,
+             "💎 Bounty"),
+           
+         {:ok, _} <- Workspace.delete_command_response(cr.id),
+         {:ok, _bounty} <- Bounties.delete_bounty(bounty) do
+      {:noreply,
+       socket
+       |> put_flash(:info, "Bounty deleted successfully")
+       |> assign_bounties()}
+    else
       {:error, _changeset} ->
         {:noreply, put_flash(socket, :error, "Failed to delete bounty")}
     end

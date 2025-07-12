@@ -127,6 +127,10 @@ defmodule Algora.Github do
     do: client().update_issue_comment(token, owner, repo, comment_id, body)
 
   @impl true
+  def delete_issue_comment(token, owner, repo, comment_id),
+    do: client().delete_issue_comment(token, owner, repo, comment_id)
+
+  @impl true
   def list_user_repositories(token, username, opts \\ []), do: client().list_user_repositories(token, username, opts)
 
   @impl true
@@ -146,6 +150,9 @@ defmodule Algora.Github do
   def add_labels(token, owner, repo, number, labels), do: client().add_labels(token, owner, repo, number, labels)
 
   @impl true
+  def list_labels(token, owner, repo, number), do: client().list_labels(token, owner, repo, number)
+
+  @impl true
   def create_label(token, owner, repo, label), do: client().create_label(token, owner, repo, label)
 
   @impl true
@@ -153,4 +160,7 @@ defmodule Algora.Github do
 
   @impl true
   def remove_label(token, owner, repo, label), do: client().remove_label(token, owner, repo, label)
+
+  @impl true
+  def remove_label_from_issue(token, owner, repo, number, label), do: client().remove_label_from_issue(token, owner, repo, number, label)
 end

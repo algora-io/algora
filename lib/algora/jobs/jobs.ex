@@ -22,6 +22,7 @@ defmodule Algora.Jobs do
     |> maybe_filter_by_status(opts)
     |> maybe_filter_by_user(opts)
     |> join(:inner, [j], u in User, on: u.id == j.user_id)
+    |> maybe_filter_by_handle(opts[:handle])
     |> maybe_filter_by_tech_stack(opts[:tech_stack])
     |> join(:left, [j], i in JobInterview, on: i.job_posting_id == j.id)
     |> join(:left, [j], m in JobMatch, on: m.job_posting_id == j.id)
@@ -62,10 +63,17 @@ defmodule Algora.Jobs do
 
   defp maybe_filter_by_user(query, _), do: query
 
+  defp maybe_filter_by_handle(query, nil), do: query
+
+  defp maybe_filter_by_handle(query, handle) do
+    where(query, [j, u], u.handle == ^handle)
+  end
+
   defp maybe_filter_by_status(query, opts) do
     cond do
       opts[:status] == :all -> where(query, [j], j.status in [:active, :processing])
       opts[:user_id] -> where(query, [j], j.status in [:active, :processing])
+      opts[:handle] -> where(query, [j, u], j.status in [:active, :processing])
       true -> where(query, [j], j.status in [:active])
     end
   end

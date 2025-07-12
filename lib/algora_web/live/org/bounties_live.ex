@@ -364,63 +364,86 @@ defmodule AlgoraWeb.Org.BountiesLive do
   end
 
   def handle_event("delete-bounty", %{"id" => bounty_id}, socket) do
-    bounty =
-      Bounty
-      |> Repo.get(bounty_id)
-      |> Repo.preload([:owner, [ticket: [repository: :user]]])
+    cond do
+      socket.assigns.current_user_role in [:admin, :mod] ->
+        bounty =
+          Bounty
+          |> Repo.get(bounty_id)
+          |> Repo.preload([:owner, [ticket: [repository: :user]]])
 
-    with {:ok, installation} <-
-           Workspace.fetch_installation_by(
-             provider: "github",
-             connected_user_id: bounty.ticket.repository.user.id
-           ),
-         {:ok, token} <- Github.get_installation_token(installation.provider_id),
-         {:ok, cr} <-
-           Workspace.fetch_command_response(bounty.ticket_id, :bounty),
-         dbg(cr),
-         {:ok, _} <-
-           Github.delete_issue_comment(
-             token,
-             bounty.ticket.repository.user.provider_login,
-             bounty.ticket.repository.name,
-             cr.provider_response_id
-           ),
-         :ok <-
-           Workspace.remove_existing_amount_labels(
-             token,
-             bounty.ticket.repository.user.provider_login,
-             bounty.ticket.repository.name,
-             bounty.ticket.number
-           ),
-         {:ok, _} <-
-           Github.remove_label_from_issue(
-             token,
-             bounty.ticket.repository.user.provider_login,
-             bounty.ticket.repository.name,
-             bounty.ticket.number,
-             "💎 Bounty"),
-           
-         {:ok, _} <- Workspace.delete_command_response(cr.id),
-         {:ok, _bounty} <- Bounties.delete_bounty(bounty) do
-      {:noreply,
-       socket
-       |> put_flash(:info, "Bounty deleted successfully")
-       |> assign_bounties()}
-    else
-      {:error, _changeset} ->
-        {:noreply, put_flash(socket, :error, "Failed to delete bounty")}
+        with {:ok, installation} <-
+               Workspace.fetch_installation_by(
+                 provider: "github",
+                 connected_user_id: bounty.ticket.repository.user.id
+               ),
+             {:ok, token} <- Github.get_installation_token(installation.provider_id),
+             {:ok, cr} <-
+               Workspace.fetch_command_response(bounty.ticket_id, :bounty),
+             {:ok, _} <-
+               Github.delete_issue_comment(
+                 token,
+                 bounty.ticket.repository.user.provider_login,
+                 bounty.ticket.repository.name,
+                 cr.provider_response_id
+               ),
+             :ok <-
+               Workspace.remove_existing_amount_labels(
+                 token,
+                 bounty.ticket.repository.user.provider_login,
+                 bounty.ticket.repository.name,
+                 bounty.ticket.number
+               ),
+             {:ok, _} <-
+               Github.remove_label_from_issue(
+                 token,
+                 bounty.ticket.repository.user.provider_login,
+                 bounty.ticket.repository.name,
+                 bounty.ticket.number,
+                 "💎 Bounty"),
+               
+             {:ok, _} <- Workspace.delete_command_response(cr.id),
+             {:ok, _bounty} <- Bounties.delete_bounty(bounty) do
+          {:noreply,
+           socket
+           |> put_flash(:info, "Bounty deleted successfully")
+           |> assign_bounties()}
+        else
+          {:error, _changeset} ->
+            {:noreply, put_flash(socket, :error, "Failed to delete bounty")}
+        end
+
+      is_nil(socket.assigns.current_user) ->
+        {:noreply,
+         redirect(socket,
+           to: ~p"/auth/login?#{%{return_to: ~p"/#{socket.assigns.current_org.handle}/bounties"}}"
+         )}
+
+      true ->
+        {:noreply, put_flash(socket, :error, "You are not authorized to delete bounties")}
     end
   end
 
   def handle_event("edit-bounty-amount", %{"id" => bounty_id}, socket) do
-    [bounty] = Bounties.list_bounties(id: bounty_id)
-    changeset = edit_amount_changeset(%{amount: bounty.amount})
+    cond do
+      socket.assigns.current_user_role in [:admin, :mod] ->
+        [bounty] = Bounties.list_bounties(id: bounty_id)
+        changeset = edit_amount_changeset(%{amount: bounty.amount})
 
-    {:noreply,
-     socket
-     |> assign(:editing_bounty, bounty)
-     |> assign(:edit_form, to_form(changeset))
-     |> assign(:show_edit_modal, true)}
+        {:noreply,
+         socket
+         |> assign(:editing_bounty, bounty)
+         |> assign(:edit_form, to_form(changeset))
+         |> assign(:show_edit_modal, true)}
+
+      is_nil(socket.assigns.current_user) ->
+        {:noreply,
+         redirect(socket,
+           to: ~p"/auth/login?#{%{return_to: ~p"/#{socket.assigns.current_org.handle}/bounties"}}"
+         )}
+
+      true ->
+        {:noreply, put_flash(socket, :error, "You are not authorized to edit bounty amounts")}
+    end
   end
 
   def handle_event("validate-amount", params, socket) do

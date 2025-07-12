@@ -12,7 +12,6 @@ defmodule Algora.Bounties do
   alias Algora.Bounties.Jobs
   alias Algora.Bounties.LineItem
   alias Algora.Bounties.Tip
-  alias Algora.Github
   alias Algora.Organizations.Member
   alias Algora.Payments
   alias Algora.Payments.Transaction
@@ -20,7 +19,6 @@ defmodule Algora.Bounties do
   alias Algora.Repo
   alias Algora.Util
   alias Algora.Workspace
-  alias Algora.Workspace.CommandResponse
   alias Algora.Workspace.Installation
   alias Algora.Workspace.Ticket
 

@@ -322,7 +322,6 @@ defmodule AlgoraWeb.Org.BountiesLive do
       <.drawer_content>
         <.form
           for={@edit_form}
-          as="edit_amount"
           phx-submit="save-bounty-amount"
           phx-change="validate-amount"
           class="space-y-4"

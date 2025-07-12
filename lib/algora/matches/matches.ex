@@ -77,14 +77,14 @@ defmodule Algora.Matches do
         }
       end)
 
-    Repo.transaction(fn ->
+    Repo.transact(fn ->
       # Delete existing matches for this job posting
       Repo.delete_all(from(m in JobMatch, where: m.job_posting_id == ^job_posting_id))
 
       # Insert new matches
       case Repo.insert_all(JobMatch, matches, on_conflict: :nothing) do
-        {count, _} -> count
-        error -> Repo.rollback(error)
+        {0, _} -> {:error, "No matches created"}
+        {count, _} -> {:ok, count}
       end
     end)
   end

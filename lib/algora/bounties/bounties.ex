@@ -12,6 +12,7 @@ defmodule Algora.Bounties do
   alias Algora.Bounties.Jobs
   alias Algora.Bounties.LineItem
   alias Algora.Bounties.Tip
+  alias Algora.Github
   alias Algora.Organizations.Member
   alias Algora.Payments
   alias Algora.Payments.Transaction
@@ -19,6 +20,7 @@ defmodule Algora.Bounties do
   alias Algora.Repo
   alias Algora.Util
   alias Algora.Workspace
+  alias Algora.Workspace.CommandResponse
   alias Algora.Workspace.Installation
   alias Algora.Workspace.Ticket
 
@@ -1585,4 +1587,17 @@ defmodule Algora.Bounties do
   def get_attempt_emoji(%Attempt{status: :inactive}), do: "🔴"
   def get_attempt_emoji(%Attempt{warnings_count: count}) when count > 0, do: "🟡"
   def get_attempt_emoji(%Attempt{status: :active}), do: "🟢"
+
+  @spec delete_bounty(Bounty.t()) :: {:ok, Bounty.t()} | {:error, Ecto.Changeset.t()}
+  def delete_bounty(%Bounty{} = bounty) do
+    Repo.transact(fn ->
+      with {:ok, updated_bounty} <-
+             bounty
+             |> Bounty.changeset(%{status: :cancelled})
+             |> Repo.update() do
+        broadcast()
+        {:ok, updated_bounty}
+      end
+    end)
+  end
 end

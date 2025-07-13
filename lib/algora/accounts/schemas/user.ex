@@ -435,6 +435,10 @@ defmodule Algora.Accounts.User do
     |> validate_url(:website_url)
   end
 
+  def hiring_changeset(%User{} = user, params) do
+    cast(user, params, [:preferences, :executive_name, :executive_role, :billing_name, :billing_address])
+  end
+
   defp validate_url(changeset, field) do
     validate_format(changeset, field, ~r/^https?:\/\/.*/, message: "must be a valid URL")
   end

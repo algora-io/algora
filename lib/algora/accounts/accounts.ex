@@ -254,6 +254,10 @@ defmodule Algora.Accounts do
     user |> User.job_preferences_changeset(attrs) |> Repo.update()
   end
 
+  def update_hiring_preferences(%User{} = user, attrs) do
+    user |> User.hiring_changeset(attrs) |> Repo.update()
+  end
+
   ## Database getters
 
   @doc """

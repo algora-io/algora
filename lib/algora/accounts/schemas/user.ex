@@ -93,6 +93,7 @@ defmodule Algora.Accounts.User do
     field :slack_url, :string
     field :linkedin_url, :string
     field :linkedin_meta, :map, default: %{}
+    field :employment_info, :map, default: %{}
 
     field :og_title, :string
     field :og_image_url, :string
@@ -427,7 +428,8 @@ defmodule Algora.Accounts.User do
       :friends_recommendations,
       :friends_github_handles,
       :opt_out_algora,
-      :email_recipients
+      :email_recipients,
+      :employment_info
     ])
     |> validate_url(:linkedin_url)
     |> validate_url(:twitter_url)

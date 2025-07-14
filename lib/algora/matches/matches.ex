@@ -47,8 +47,19 @@ defmodule Algora.Matches do
       |> Enum.concat(job.countries)
       |> Enum.uniq()
 
+    existing_matches =
+      Repo.all(
+        from(m in JobMatch,
+          where: m.job_posting_id == ^job_posting_id,
+          where: m.status in [:highlighted, :approved]
+        )
+      )
+
+    existing_user_ids = Enum.map(existing_matches, & &1.user_id)
+
     [
-      limit: 3,
+      limit: 6 - length(existing_matches),
+      ids_not: existing_user_ids,
       tech_stack: job.tech_stack,
       has_min_compensation: true,
       system_tags: job.system_tags,
@@ -79,7 +90,12 @@ defmodule Algora.Matches do
 
     Repo.transact(fn ->
       # Delete existing matches for this job posting
-      Repo.delete_all(from(m in JobMatch, where: m.job_posting_id == ^job_posting_id))
+      Repo.delete_all(
+        from(m in JobMatch,
+          where: m.job_posting_id == ^job_posting_id,
+          where: m.status not in [:highlighted, :approved]
+        )
+      )
 
       # Insert new matches
       case Repo.insert_all(JobMatch, matches, on_conflict: :nothing) do

@@ -95,6 +95,13 @@ defmodule Algora.Matches do
     |> Repo.update()
   end
 
+  def update_job_match_status(match_id, status) do
+    case Repo.get(JobMatch, match_id) do
+      nil -> {:error, :not_found}
+      job_match -> update_job_match(job_match, %{status: status})
+    end
+  end
+
   def delete_job_match(%JobMatch{} = job_match) do
     Repo.delete(job_match)
   end

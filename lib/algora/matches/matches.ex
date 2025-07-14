@@ -55,11 +55,19 @@ defmodule Algora.Matches do
         )
       )
 
-    existing_user_ids = Enum.map(existing_matches, & &1.user_id)
+    discarded_matches =
+      Repo.all(
+        from(m in JobMatch,
+          where: m.job_posting_id == ^job_posting_id,
+          where: m.status == :discarded
+        )
+      )
+
+    ids_not = Enum.map(existing_matches, & &1.user_id) ++ Enum.map(discarded_matches, & &1.user_id)
 
     [
       limit: 6 - length(existing_matches),
-      ids_not: existing_user_ids,
+      ids_not: ids_not,
       tech_stack: job.tech_stack,
       has_min_compensation: true,
       system_tags: job.system_tags,
@@ -93,7 +101,7 @@ defmodule Algora.Matches do
       Repo.delete_all(
         from(m in JobMatch,
           where: m.job_posting_id == ^job_posting_id,
-          where: m.status not in [:highlighted, :approved]
+          where: m.status not in [:highlighted, :approved, :discarded]
         )
       )
 

@@ -30,7 +30,6 @@ defmodule Algora.Jobs do
     |> order_by([j, u, i, m],
       desc: u.contract_signed,
       desc_nulls_last: max(i.inserted_at),
-      desc_nulls_last: max(m.inserted_at),
       desc: j.inserted_at
     )
     |> maybe_limit(opts[:limit])

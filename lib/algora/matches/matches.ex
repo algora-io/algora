@@ -59,16 +59,43 @@ defmodule Algora.Matches do
 
     ids_not = Enum.map(existing_matches, & &1.user_id) ++ Enum.map(discarded_matches, & &1.user_id)
 
-    [
-      limit: 6 - length(existing_matches),
+    opts = [
+      limit: 6,
       ids_not: ids_not,
       tech_stack: job.tech_stack,
       has_min_compensation: true,
       not_discarded: true,
-      system_tags: job.system_tags,
-      sort_by: [{"countries", job.countries}, {"regions", job.regions}]
+      system_tags: job.system_tags
     ]
-    |> Algora.Cloud.list_top_matches()
+
+    m1 =
+      opts
+      |> Keyword.put(
+        :sort_by,
+        [{"location_iso_lvl4s", [job.location_iso_lvl4]}, {"countries", job.countries}, {"regions", job.regions}]
+      )
+      |> Algora.Cloud.list_top_matches()
+
+    m2 =
+      opts
+      |> Keyword.put(
+        :sort_by,
+        [{"countries", job.countries}, {"regions", job.regions}]
+      )
+      |> Algora.Cloud.list_top_matches()
+
+    m3 =
+      opts
+      |> Keyword.put(
+        :sort_by,
+        [{"regions", job.regions}]
+      )
+      |> Algora.Cloud.list_top_matches()
+
+    matches = m1 ++ m2 ++ m3
+
+    matches
+    |> Enum.uniq_by(& &1.user_id)
     |> Algora.Settings.load_matches_2()
   end
 

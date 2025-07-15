@@ -41,12 +41,6 @@ defmodule Algora.Matches do
   def fetch_job_matches(job_posting_id) do
     job = Repo.get!(JobPosting, job_posting_id)
 
-    job_countries =
-      job.regions
-      |> Enum.flat_map(&Algora.PSP.ConnectCountries.get_countries/1)
-      |> Enum.concat(job.countries)
-      |> Enum.uniq()
-
     existing_matches =
       Repo.all(
         from(m in JobMatch,
@@ -71,7 +65,7 @@ defmodule Algora.Matches do
       tech_stack: job.tech_stack,
       has_min_compensation: true,
       system_tags: job.system_tags,
-      sort_by: [{"countries", job_countries}]
+      sort_by: [{"countries", job.countries}, {"regions", job.regions}]
     ]
     |> Algora.Cloud.list_top_matches()
     |> Algora.Settings.load_matches_2()

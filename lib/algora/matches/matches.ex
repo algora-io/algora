@@ -60,7 +60,6 @@ defmodule Algora.Matches do
     ids_not = Enum.map(existing_matches, & &1.user_id) ++ Enum.map(discarded_matches, & &1.user_id)
 
     opts = [
-      limit: 6,
       ids_not: ids_not,
       tech_stack: job.tech_stack,
       has_min_compensation: true,
@@ -69,13 +68,15 @@ defmodule Algora.Matches do
     ]
 
     location_iso_lvl4 =
-      if job.location_iso_lvl4 && job.countries && String.starts_with?(job.location_iso_lvl4, job.countries) do
+      if job.location_iso_lvl4 && job.countries &&
+           Enum.any?(job.countries, &String.starts_with?(job.location_iso_lvl4, &1)) do
         job.location_iso_lvl4
       end
 
     m1 =
       if location_iso_lvl4 do
         opts
+        |> Keyword.put(:limit, 6)
         |> Keyword.put(:location_iso_lvl4, location_iso_lvl4)
         |> Algora.Cloud.list_top_matches()
       else
@@ -84,13 +85,15 @@ defmodule Algora.Matches do
 
     m2 =
       opts
+      |> Keyword.put(:limit, max(6 - length(m1), 3))
       |> Keyword.put(:location_iso_lvl4_not, location_iso_lvl4)
       |> Keyword.put(:countries, job.countries)
       |> Algora.Cloud.list_top_matches()
 
     m3 =
       opts
-      |> Keyword.put(:regions, job.regions)
+      |> Keyword.put(:limit, 3)
+      |> Keyword.put(:sort_by, [{"regions", job.regions}])
       |> Algora.Cloud.list_top_matches()
 
     matches = m1 ++ m2 ++ m3

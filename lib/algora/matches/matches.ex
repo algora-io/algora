@@ -64,6 +64,7 @@ defmodule Algora.Matches do
       ids_not: ids_not,
       tech_stack: job.tech_stack,
       has_min_compensation: true,
+      not_discarded: true,
       system_tags: job.system_tags,
       sort_by: [{"countries", job.countries}, {"regions", job.regions}]
     ]

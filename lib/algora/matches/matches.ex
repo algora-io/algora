@@ -68,28 +68,29 @@ defmodule Algora.Matches do
       system_tags: job.system_tags
     ]
 
+    location_iso_lvl4 =
+      if job.location_iso_lvl4 && job.countries && String.starts_with?(job.location_iso_lvl4, job.countries) do
+        job.location_iso_lvl4
+      end
+
     m1 =
-      opts
-      |> Keyword.put(
-        :sort_by,
-        [{"location_iso_lvl4s", [job.location_iso_lvl4]}, {"countries", job.countries}, {"regions", job.regions}]
-      )
-      |> Algora.Cloud.list_top_matches()
+      if location_iso_lvl4 do
+        opts
+        |> Keyword.put(:location_iso_lvl4, location_iso_lvl4)
+        |> Algora.Cloud.list_top_matches()
+      else
+        []
+      end
 
     m2 =
       opts
-      |> Keyword.put(
-        :sort_by,
-        [{"countries", job.countries}, {"regions", job.regions}]
-      )
+      |> Keyword.put(:location_iso_lvl4_not, location_iso_lvl4)
+      |> Keyword.put(:countries, job.countries)
       |> Algora.Cloud.list_top_matches()
 
     m3 =
       opts
-      |> Keyword.put(
-        :sort_by,
-        [{"regions", job.regions}]
-      )
+      |> Keyword.put(:regions, job.regions)
       |> Algora.Cloud.list_top_matches()
 
     matches = m1 ++ m2 ++ m3

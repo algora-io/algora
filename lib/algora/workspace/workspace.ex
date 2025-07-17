@@ -652,6 +652,7 @@ defmodule Algora.Workspace do
         where: uc.user_id in ^ids,
         join: u in assoc(uc, :user),
         join: r in assoc(uc, :repository),
+        where: r.tech_stack != [],
         join: repo_owner in assoc(r, :user),
         # where: fragment("? && ?::citext[]", r.tech_stack, ^(opts[:tech_stack] || [])),
         where:
@@ -660,7 +661,9 @@ defmodule Algora.Workspace do
                  ilike(r.name, "%exercises%") or
                  ilike(r.name, "%tutorials%") or
                  r.name == "DefinitelyTyped" or
-                 r.name == "developer-roadmap"),
+                 r.name == "developer-roadmap" or
+                 r.name == "freeCodeCamp" or
+                 r.name == "hiring-without-whiteboards"),
         where:
           not (ilike(repo_owner.provider_login, "%algorithms%") or
                  ilike(repo_owner.provider_login, "%firstcontributions%") or

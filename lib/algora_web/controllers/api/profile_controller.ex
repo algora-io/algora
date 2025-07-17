@@ -6,14 +6,14 @@ defmodule AlgoraWeb.API.ProfileController do
   alias Algora.Reviews
   alias Algora.Workspace
 
-  def show(conn, %{"user_handle" => handle}) do
+  def show(conn, %{"user_handle" => handle} = params) do
+    limit = parse_limit(params["limit"])
+
     with {:ok, user} <- Accounts.fetch_developer_by(handle: handle) do
-      transactions = Payments.list_received_transactions(user.id, limit: 10)
+      transactions = Payments.list_received_transactions(user.id, limit: limit)
       enriched_transactions = enrich_transactions(transactions)
-
-      reviews = Reviews.list_reviews(reviewee_id: user.id, limit: 10)
-
-      contributions = Workspace.list_user_contributions([user.id], limit: 20, display_all: true)
+      reviews = Reviews.list_reviews(reviewee_id: user.id, limit: limit)
+      contributions = Workspace.list_user_contributions([user.id], limit: limit, display_all: true)
 
       json(conn, %{
         id: user.id,
@@ -33,6 +33,15 @@ defmodule AlgoraWeb.API.ProfileController do
         send_resp(conn, 404, Jason.encode!(%{error: "User not found"}))
     end
   end
+
+  defp parse_limit(limit) when is_binary(limit) do
+    case Integer.parse(limit) do
+      {num, _} when num > 0 and num <= 100 -> num
+      _ -> 10
+    end
+  end
+
+  defp parse_limit(_), do: 10
 
   defp enrich_transactions(transactions) do
     Enum.map(transactions, fn tx ->

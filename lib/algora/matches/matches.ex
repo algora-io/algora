@@ -8,7 +8,7 @@ defmodule Algora.Matches do
   alias Algora.Repo
 
   def list_job_matches(opts \\ []) do
-    order_by_clause = opts[:order_by] || [desc: :inserted_at]
+    order_by_clause = opts[:order_by] || [asc: :updated_at]
 
     JobMatch
     |> filter_by_job_posting_id(opts[:job_posting_id])

@@ -18,21 +18,35 @@ defmodule Algora.Jobs do
   require Logger
 
   def list_jobs(opts \\ []) do
-    JobPosting
-    |> maybe_filter_by_status(opts)
-    |> maybe_filter_by_user(opts)
-    |> join(:inner, [j], u in User, on: u.id == j.user_id)
-    |> maybe_filter_by_handle(opts[:handle])
-    |> maybe_filter_by_tech_stack(opts[:tech_stack])
-    |> join(:left, [j], i in JobInterview, on: i.job_posting_id == j.id)
-    |> join(:left, [j], m in JobMatch, on: m.job_posting_id == j.id)
-    |> group_by([j, u, i, m], [u.contract_signed, j.id, j.inserted_at])
-    |> order_by([j, u, i, m],
-      desc: u.contract_signed,
-      desc_nulls_last: max(i.inserted_at),
-      desc: j.inserted_at
-    )
-    |> maybe_limit(opts[:limit])
+    query =
+      JobPosting
+      |> maybe_filter_by_status(opts)
+      |> maybe_filter_by_user(opts)
+      |> join(:inner, [j], u in User, on: u.id == j.user_id)
+      |> maybe_filter_by_handle(opts[:handle])
+      |> maybe_filter_by_tech_stack(opts[:tech_stack])
+      |> join(:left, [j], i in JobInterview, on: i.job_posting_id == j.id)
+      |> join(:left, [j], m in JobMatch, on: m.job_posting_id == j.id)
+      |> group_by([j, u, i, m], [u.contract_signed, j.id, j.inserted_at])
+      |> order_by([j, u, i, m],
+        desc: u.contract_signed,
+        desc_nulls_last: max(i.inserted_at),
+        desc: j.inserted_at
+      )
+      |> maybe_limit(opts[:limit])
+
+    query =
+      if opts[:remove_dripped] do
+        where(
+          query,
+          [j, u],
+          u.contract_signed or fragment("not exists (select 1 from drips where drips.org_id = ?)", u.id)
+        )
+      else
+        query
+      end
+
+    query
     |> Repo.all()
     |> apply_preloads(opts)
   end

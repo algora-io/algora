@@ -1,4 +1,4 @@
-defmodule AlgoraWeb.API.UserController do
+defmodule AlgoraWeb.API.ProfileController do
   use AlgoraWeb, :controller
 
   alias Algora.Accounts

@@ -36,7 +36,7 @@ defmodule AlgoraWeb.API.ProfileController do
 
   defp parse_limit(limit) when is_binary(limit) do
     case Integer.parse(limit) do
-      {num, _} when num > 0 and num <= 100 -> num
+      {num, _} when num > 0 and num <= 1000 -> num
       _ -> 10
     end
   end

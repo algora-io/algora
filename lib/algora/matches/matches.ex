@@ -62,7 +62,7 @@ defmodule Algora.Matches do
     opts = [
       ids_not: ids_not,
       tech_stack: job.tech_stack,
-      has_min_compensation: true,
+      by_language_contributions: true,
       not_discarded: true,
       system_tags: job.system_tags
     ]

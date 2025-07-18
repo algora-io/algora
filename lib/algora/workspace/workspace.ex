@@ -663,7 +663,8 @@ defmodule Algora.Workspace do
                  r.name == "DefinitelyTyped" or
                  r.name == "developer-roadmap" or
                  r.name == "freeCodeCamp" or
-                 r.name == "hiring-without-whiteboards"),
+                 r.name == "hiring-without-whiteboards" or
+                 r.name == "papers-we-love"),
         where:
           not (ilike(repo_owner.provider_login, "%algorithms%") or
                  ilike(repo_owner.provider_login, "%firstcontributions%") or

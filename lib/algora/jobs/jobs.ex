@@ -46,6 +46,17 @@ defmodule Algora.Jobs do
         query
       end
 
+    query =
+      if opts[:dripped_only] do
+        where(
+          query,
+          [j, u],
+          not u.contract_signed and fragment("exists (select 1 from drips where drips.org_id = ?)", u.id)
+        )
+      else
+        query
+      end
+
     query
     |> Repo.all()
     |> apply_preloads(opts)

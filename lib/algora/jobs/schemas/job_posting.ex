@@ -23,6 +23,8 @@ defmodule Algora.Jobs.JobPosting do
     field :compensation, :string
     field :seniority, :string
     field :system_tags, {:array, :string}, default: []
+    field :primary_tech, :string
+    field :primary_tag, :string
 
     field :location_meta, :map
     field :location_iso_lvl4, :string
@@ -54,7 +56,9 @@ defmodule Algora.Jobs.JobPosting do
       :regions,
       :system_tags,
       :location_meta,
-      :location_iso_lvl4
+      :location_iso_lvl4,
+      :primary_tech,
+      :primary_tag
     ])
     |> generate_id()
     |> validate_required([:url, :company_name, :company_url, :email])

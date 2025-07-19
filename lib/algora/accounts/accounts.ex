@@ -31,6 +31,7 @@ defmodule Algora.Accounts do
           | {:limit, non_neg_integer()}
           | {:handle, String.t()}
           | {:handles, [String.t()]}
+          | {:provider_logins, [String.t()]}
           | {:earnings_gt, Money.t()}
           | {:sort_by_country, String.t()}
           | {:sort_by_tech_stack, [String.t()]}
@@ -55,6 +56,9 @@ defmodule Algora.Accounts do
 
       {:handles, handles}, query ->
         from([b] in query, where: b.handle in ^handles)
+
+      {:provider_logins, logins}, query ->
+        from([b] in query, where: b.provider_login in ^logins)
 
       {:earnings_gt, min_amount}, query ->
         from([b, earnings: e] in query,
@@ -160,6 +164,8 @@ defmodule Algora.Accounts do
       avatar_url: u.avatar_url,
       bio: u.bio,
       system_bio: u.system_bio,
+      system_tags: u.system_tags,
+      min_compensation: u.min_compensation,
       location: u.location,
       country: u.country,
       tech_stack: u.tech_stack,
@@ -246,6 +252,10 @@ defmodule Algora.Accounts do
 
   def update_job_preferences(%User{} = user, attrs) do
     user |> User.job_preferences_changeset(attrs) |> Repo.update()
+  end
+
+  def update_hiring_preferences(%User{} = user, attrs) do
+    user |> User.hiring_changeset(attrs) |> Repo.update()
   end
 
   ## Database getters

@@ -102,7 +102,7 @@ defmodule Algora.MixProject do
       {:csv, "~> 3.2"},
       {:instructor, "~> 0.1.0"},
       {:openai_ex, "~> 0.9.12"},
-      {:hound, "~> 1.1", only: [:dev]},
+      {:hound, "~> 1.1"},
       # ex_aws
       {:ex_aws, "~> 2.1"},
       {:ex_aws_s3, "~> 2.0"},

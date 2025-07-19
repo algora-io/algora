@@ -16,6 +16,10 @@ defmodule AlgoraWeb.OGImageController do
     end
   end
 
+  def generate(conn, %{"path" => ["user", username]} = params) do
+    generate(conn, %{params | "path" => ["profile", username]}, "?embed=true")
+  end
+
   def generate(conn, %{"path" => ["go", repo_owner, repo_name] = path} = params) do
     object_path = Path.join(["og"] ++ path ++ ["og.png"])
     url = Path.join(Algora.S3.bucket_url(), object_path)
@@ -67,14 +71,14 @@ defmodule AlgoraWeb.OGImageController do
     end
   end
 
-  def generate(conn, %{"path" => path} = params) do
+  def generate(conn, %{"path" => path} = params, search_params \\ nil) do
     object_path = Path.join(["og"] ++ path ++ ["og.png"])
     url = Path.join(Algora.S3.bucket_url(), object_path)
 
     case :get |> Finch.build(url) |> Finch.request(Algora.Finch) do
       {:ok, %Finch.Response{status: status, body: body, headers: headers}} when status in 200..299 ->
         if should_regenerate?(params, headers) do
-          case take_and_upload_screenshot(path) do
+          case take_and_upload_screenshot(path, search_params) do
             {:ok, body} ->
               conn
               |> put_resp_content_type("image/png")
@@ -92,7 +96,7 @@ defmodule AlgoraWeb.OGImageController do
         end
 
       _error ->
-        case take_and_upload_screenshot(path) do
+        case take_and_upload_screenshot(path, search_params) do
           {:ok, body} ->
             conn
             |> put_resp_content_type("image/png")
@@ -156,10 +160,11 @@ defmodule AlgoraWeb.OGImageController do
         case File.read(filepath) do
           {:ok, body} ->
             Task.start(fn ->
-              result = Algora.S3.upload(body, object_path,
-                content_type: "image/png",
-                cache_control: "public, max-age=#{max_age(path)}"
-              )
+              result =
+                Algora.S3.upload(body, object_path,
+                  content_type: "image/png",
+                  cache_control: "public, max-age=#{max_age(path)}"
+                )
 
               if caller_pid do
                 send(caller_pid, {:screenshot_upload_complete, object_path, result})
@@ -174,6 +179,7 @@ defmodule AlgoraWeb.OGImageController do
             if caller_pid do
               send(caller_pid, {:screenshot_upload_complete, object_path, error})
             end
+
             File.rm(filepath)
             error
         end
@@ -182,6 +188,7 @@ defmodule AlgoraWeb.OGImageController do
         if caller_pid do
           send(caller_pid, {:screenshot_upload_complete, object_path, error})
         end
+
         error
     end
   end

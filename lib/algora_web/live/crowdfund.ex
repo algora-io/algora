@@ -64,8 +64,7 @@ defmodule AlgoraWeb.CrowdfundLive do
      |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
      |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
      |> assign(:repo_form, to_form(RepoForm.changeset(%RepoForm{}, %{})))
-     |> assign(:pending_action, nil)
-     |> assign(:plans1, AlgoraWeb.PricingLive.get_plans1())}
+     |> assign(:pending_action, nil)}
   end
 
   attr :src, :string, required: true

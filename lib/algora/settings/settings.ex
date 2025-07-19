@@ -316,4 +316,28 @@ defmodule Algora.Settings do
   def set_subscription_price(price) do
     set("subscription", %{"price" => Algora.MoneyUtils.serialize(price)})
   end
+
+  def get_campaign_timestamp do
+    case get("campaign_timestamp") do
+      %{"timestamp" => timestamp} when is_binary(timestamp) -> timestamp
+      _ -> nil
+    end
+  end
+
+  def set_campaign_timestamp(timestamp) when is_binary(timestamp) do
+    set("campaign_timestamp", %{"timestamp" => timestamp})
+  end
+
+  def update_campaign_timestamp do
+    timestamp = DateTime.utc_now() |> format_timestamp()
+    set_campaign_timestamp(timestamp)
+  end
+
+  defp format_timestamp(datetime) do
+    datetime
+    |> DateTime.to_string()
+    |> String.replace(~r/\D/, "-")
+    |> String.replace(~r/-+/, "-")
+    |> String.trim_trailing("-")
+  end
 end

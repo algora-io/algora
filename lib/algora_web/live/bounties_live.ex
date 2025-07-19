@@ -758,7 +758,7 @@ defmodule AlgoraWeb.BountiesLive do
     assigns = assign(assigns, :job, assigns.event.item)
 
     ~H"""
-    <div>
+    <div :if={@job.user.handle}>
       <div class="relative -ml-[2.75rem]">
         <span
           :if={!@last?}

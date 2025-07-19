@@ -21,6 +21,7 @@ defmodule AlgoraWeb.CoreComponents do
   alias AlgoraWeb.Components.UI.DropdownMenu
   alias AlgoraWeb.Components.UI.HoverCard
   alias AlgoraWeb.Components.UI.Menu
+  alias AlgoraWeb.Components.UI.Multiline
   alias AlgoraWeb.Components.UI.Popover
   alias AlgoraWeb.Components.UI.RadioGroup
   alias AlgoraWeb.Components.UI.Select
@@ -1161,6 +1162,25 @@ defmodule AlgoraWeb.CoreComponents do
   attr :class, :string, default: nil
   attr :rest, :global, doc: "the arbitrary HTML attributes to add to the icon"
 
+  def icon(%{name: "tabler-seedling" <> _} = assigns) do
+    ~H"""
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      class="icon icon-tabler icons-tabler-outline icon-tabler-seedling"
+    >
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M12 10a6 6 0 0 0 -6 -6h-3v2a6 6 0 0 0 6 6h3" /><path d="M12 14a6 6 0 0 1 6 -6h3v1a6 6 0 0 1 -6 6h-3" /><path d="M12 20l0 -10" />
+    </svg>
+    """
+  end
+
   def icon(%{name: "tabler-" <> _} = assigns) do
     ~H"""
     <span class={[@name, @class]} {@rest} />
@@ -1360,13 +1380,14 @@ defmodule AlgoraWeb.CoreComponents do
   defdelegate hover_card_content(assigns), to: HoverCard
   defdelegate hover_card_trigger(assigns), to: HoverCard
   defdelegate hover_card(assigns), to: HoverCard
+  defdelegate markdown(assigns), to: Multiline
   defdelegate menu_group(assigns), to: Menu
   defdelegate menu_item(assigns), to: Menu
   defdelegate menu_label(assigns), to: Menu
   defdelegate menu_separator(assigns), to: Menu
   defdelegate menu_shortcut(assigns), to: Menu
   defdelegate menu(assigns), to: Menu
-  defdelegate multiline(assigns), to: AlgoraWeb.Components.UI.Multiline
+  defdelegate multiline(assigns), to: Multiline
   defdelegate popover_content(assigns), to: Popover
   defdelegate popover_trigger(assigns), to: Popover
   defdelegate popover(assigns), to: Popover

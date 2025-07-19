@@ -1585,4 +1585,17 @@ defmodule Algora.Bounties do
   def get_attempt_emoji(%Attempt{status: :inactive}), do: "🔴"
   def get_attempt_emoji(%Attempt{warnings_count: count}) when count > 0, do: "🟡"
   def get_attempt_emoji(%Attempt{status: :active}), do: "🟢"
+
+  @spec delete_bounty(Bounty.t()) :: {:ok, Bounty.t()} | {:error, Ecto.Changeset.t()}
+  def delete_bounty(%Bounty{} = bounty) do
+    Repo.transact(fn ->
+      with {:ok, updated_bounty} <-
+             bounty
+             |> Bounty.changeset(%{status: :cancelled})
+             |> Repo.update() do
+        broadcast()
+        {:ok, updated_bounty}
+      end
+    end)
+  end
 end

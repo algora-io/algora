@@ -39,6 +39,7 @@ defmodule Algora.Accounts.User do
     field :stargazers_count, :integer, default: 0
     field :domain, :string
     field :tech_stack, {:array, :string}, default: []
+    field :discovery_tech_stack, {:array, :string}, default: []
     field :categories, {:array, :string}, default: []
     field :featured, :boolean, default: false
     field :priority, :integer, default: 0
@@ -50,6 +51,7 @@ defmodule Algora.Accounts.User do
     field :max_open_attempts, :integer, default: 3
     field :manual_assignment, :boolean, default: false
     field :is_admin, :boolean, default: false
+    field :contract_signed, :boolean, default: false
     field :last_active_at, :utc_datetime_usec
 
     field :seeking_bounties, :boolean, default: false
@@ -91,6 +93,7 @@ defmodule Algora.Accounts.User do
     field :slack_url, :string
     field :linkedin_url, :string
     field :linkedin_meta, :map, default: %{}
+    field :employment_info, :map, default: %{}
 
     field :og_title, :string
     field :og_image_url, :string
@@ -105,9 +108,12 @@ defmodule Algora.Accounts.User do
 
     field :system_bio, :string
     field :system_bio_meta, :map, default: %{}
+    field :system_tags, {:array, :string}, default: []
 
     field :location_meta, :map
     field :location_iso_lvl4, :string
+
+    field :email_recipients, {:array, :map}, default: []
 
     has_many :identities, Identity
     has_many :memberships, Member, foreign_key: :user_id
@@ -421,12 +427,18 @@ defmodule Algora.Accounts.User do
       :company_domain,
       :friends_recommendations,
       :friends_github_handles,
-      :opt_out_algora
+      :opt_out_algora,
+      :email_recipients,
+      :employment_info
     ])
     |> validate_url(:linkedin_url)
     |> validate_url(:twitter_url)
     |> validate_url(:youtube_url)
     |> validate_url(:website_url)
+  end
+
+  def hiring_changeset(%User{} = user, params) do
+    cast(user, params, [:preferences, :executive_name, :executive_role, :billing_name, :billing_address])
   end
 
   defp validate_url(changeset, field) do

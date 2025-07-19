@@ -363,5 +363,5 @@
 <div :if={assigns[:screenshot?]} class="relative">
   <.flash_group flash={@flash} />
   {@inner_content}
-  <AlgoraWeb.Components.Footer.footer />
+  <AlgoraWeb.Components.Footer.footer :if={!assigns[:embed?]} />
 </div>

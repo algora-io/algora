@@ -105,12 +105,17 @@ defmodule Algora.Util do
     end
   end
 
-  def format_pct(percentage) do
-    percentage
-    |> Decimal.mult(100)
-    |> Decimal.normalize()
-    |> Decimal.to_string(:normal)
-    |> Kernel.<>("%")
+  def format_pct(percentage, opts \\ []) do
+    pct = percentage |> Decimal.mult(100) |> Decimal.normalize()
+
+    pct =
+      if opts[:precision] do
+        Decimal.round(pct, opts[:precision])
+      else
+        pct
+      end
+
+    pct |> Decimal.to_string(:normal) |> Kernel.<>("%")
   end
 
   def normalize_struct(%Money{} = money) do

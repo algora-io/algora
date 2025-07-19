@@ -1,14 +1,36 @@
 defmodule AlgoraWeb.Org.BountiesLive do
   @moduledoc false
   use AlgoraWeb, :live_view
+  use Ecto.Schema
+
+  import Ecto.Changeset
 
   alias Algora.Accounts.User
   alias Algora.Bounties
   alias Algora.Bounties.Bounty
+  alias Algora.Github
   alias Algora.Payments
+  alias Algora.Repo
+  alias Algora.Types.USD
+  alias Algora.Workspace
+
+  embedded_schema do
+    field :amount, USD
+  end
+
+  def edit_amount_changeset(attrs \\ %{}) do
+    %__MODULE__{}
+    |> cast(attrs, [:amount])
+    |> validate_required([:amount])
+    |> Algora.Validations.validate_money_positive(:amount)
+  end
 
   def mount(_params, _session, socket) do
-    {:ok, socket}
+    {:ok,
+     socket
+     |> assign(:show_edit_modal, false)
+     |> assign(:editing_bounty, nil)
+     |> assign(:edit_form, to_form(edit_amount_changeset()))}
   end
 
   def render(assigns) do
@@ -159,6 +181,26 @@ defmodule AlgoraWeb.Org.BountiesLive do
                       </div>
                     <% end %>
                   </td>
+                  <td class="[&:has([role=checkbox])]:pr-0 p-4 align-middle">
+                    <div class="flex items-center gap-2">
+                      <.button
+                        phx-click="edit-bounty-amount"
+                        phx-value-id={bounty.id}
+                        variant="secondary"
+                        size="sm"
+                      >
+                        Edit Amount
+                      </.button>
+                      <.button
+                        phx-click="delete-bounty"
+                        phx-value-id={bounty.id}
+                        variant="destructive"
+                        size="sm"
+                      >
+                        Delete
+                      </.button>
+                    </div>
+                  </td>
                 </tr>
                 <%= for {_group_id, claims} <- claim_groups do %>
                   <tr
@@ -268,6 +310,39 @@ defmodule AlgoraWeb.Org.BountiesLive do
         </div>
       </div>
     </div>
+
+    <!-- Edit Amount Drawer -->
+    <.drawer show={@show_edit_modal} direction="right" on_cancel="cancel-edit">
+      <.drawer_header>
+        <.drawer_title>Edit Bounty Amount</.drawer_title>
+        <.drawer_description>
+          Update the bounty amount for this issue
+        </.drawer_description>
+      </.drawer_header>
+      <.drawer_content>
+        <.form
+          for={@edit_form}
+          phx-submit="save-bounty-amount"
+          phx-change="validate-amount"
+          class="space-y-4"
+        >
+          <.input
+            label="New Amount"
+            icon="tabler-currency-dollar"
+            field={@edit_form[:amount]}
+            placeholder="e.g., 1000"
+          />
+          <div class="flex gap-3 justify-end">
+            <.button type="button" variant="secondary" phx-click="cancel-edit">
+              Cancel
+            </.button>
+            <.button type="submit" variant="default">
+              Save
+            </.button>
+          </div>
+        </.form>
+      </.drawer_content>
+    </.drawer>
     """
   end
 
@@ -285,6 +360,173 @@ defmodule AlgoraWeb.Org.BountiesLive do
        :open -> assign_more_bounties(socket)
        :paid -> assign_more_transactions(socket)
      end}
+  end
+
+  def handle_event("delete-bounty", %{"id" => bounty_id}, socket) do
+    cond do
+      socket.assigns.current_user_role in [:admin, :mod] ->
+        bounty =
+          Bounty
+          |> Repo.get(bounty_id)
+          |> Repo.preload([:owner, [ticket: [repository: :user]]])
+
+        with {:ok, installation} <-
+               Workspace.fetch_installation_by(
+                 provider: "github",
+                 connected_user_id: bounty.ticket.repository.user.id
+               ),
+             {:ok, token} <- Github.get_installation_token(installation.provider_id),
+             {:ok, cr} <-
+               Workspace.fetch_command_response(bounty.ticket_id, :bounty),
+             {:ok, _} <-
+               Github.delete_issue_comment(
+                 token,
+                 bounty.ticket.repository.user.provider_login,
+                 bounty.ticket.repository.name,
+                 cr.provider_response_id
+               ),
+             :ok <-
+               Workspace.remove_existing_amount_labels(
+                 token,
+                 bounty.ticket.repository.user.provider_login,
+                 bounty.ticket.repository.name,
+                 bounty.ticket.number
+               ),
+             {:ok, _} <-
+               Github.remove_label_from_issue(
+                 token,
+                 bounty.ticket.repository.user.provider_login,
+                 bounty.ticket.repository.name,
+                 bounty.ticket.number,
+                 "💎 Bounty"),
+               
+             {:ok, _} <- Workspace.delete_command_response(cr.id),
+             {:ok, _bounty} <- Bounties.delete_bounty(bounty) do
+          {:noreply,
+           socket
+           |> put_flash(:info, "Bounty deleted successfully")
+           |> assign_bounties()}
+        else
+          {:error, _changeset} ->
+            {:noreply, put_flash(socket, :error, "Failed to delete bounty")}
+        end
+
+      is_nil(socket.assigns.current_user) ->
+        {:noreply,
+         redirect(socket,
+           to: ~p"/auth/login?#{%{return_to: ~p"/#{socket.assigns.current_org.handle}/bounties"}}"
+         )}
+
+      true ->
+        {:noreply, put_flash(socket, :error, "You are not authorized to delete bounties")}
+    end
+  end
+
+  def handle_event("edit-bounty-amount", %{"id" => bounty_id}, socket) do
+    cond do
+      socket.assigns.current_user_role in [:admin, :mod] ->
+        [bounty] = Bounties.list_bounties(id: bounty_id)
+        changeset = edit_amount_changeset(%{amount: bounty.amount})
+
+        {:noreply,
+         socket
+         |> assign(:editing_bounty, bounty)
+         |> assign(:edit_form, to_form(changeset))
+         |> assign(:show_edit_modal, true)}
+
+      is_nil(socket.assigns.current_user) ->
+        {:noreply,
+         redirect(socket,
+           to: ~p"/auth/login?#{%{return_to: ~p"/#{socket.assigns.current_org.handle}/bounties"}}"
+         )}
+
+      true ->
+        {:noreply, put_flash(socket, :error, "You are not authorized to edit bounty amounts")}
+    end
+  end
+
+  def handle_event("validate-amount", params, socket) do
+    form_params =
+      case params do
+        %{"edit_amount" => form_params} -> form_params
+        %{"bounties_live" => form_params} -> form_params
+        _ -> %{}
+      end
+
+    changeset =
+      form_params
+      |> edit_amount_changeset()
+      |> Map.put(:action, :validate)
+
+    {:noreply, assign(socket, :edit_form, to_form(changeset))}
+  end
+
+  def handle_event("save-bounty-amount", params, socket) do
+    form_params =
+      case params do
+        %{"edit_amount" => form_params} -> form_params
+        %{"bounties_live" => form_params} -> form_params
+        _ -> %{}
+      end
+
+    changeset = edit_amount_changeset(form_params)
+
+    case apply_action(changeset, :update) do
+      {:ok, %{amount: amount}} ->
+        bounty =
+          Bounty
+          |> Repo.get(socket.assigns.editing_bounty.id)
+          |> Repo.preload([:owner, [ticket: [repository: :user]]])
+
+        with {:ok, installation} <-
+               Workspace.fetch_installation_by(
+                 provider: "github",
+                 connected_user_id: bounty.ticket.repository.user.id
+               ),
+             {:ok, bounty} <-
+               bounty
+               |> Bounty.changeset(%{amount: amount})
+               |> Repo.update(),
+             {:ok, cr} <-
+               Workspace.fetch_command_response(bounty.ticket_id, :bounty),
+             {:ok, _job} <-
+               Bounties.notify_bounty(
+                 %{
+                   owner: bounty.owner,
+                   bounty: bounty,
+                   ticket_ref: %{
+                     owner: bounty.ticket.repository.user.provider_login,
+                     repo: bounty.ticket.repository.name,
+                     number: bounty.ticket.number
+                   }
+                 },
+                 installation_id: installation.provider_id,
+                 command_id: cr.provider_command_id,
+                 command_source: cr.command_source
+               ) do
+          {:noreply,
+           socket
+           |> assign(:show_edit_modal, false)
+           |> assign(:editing_bounty, nil)
+           |> assign(:edit_form, to_form(edit_amount_changeset()))
+           |> put_flash(:info, "Bounty amount updated successfully")
+           |> assign_bounties()}
+        else
+          {:error, _changeset} ->
+            {:noreply, put_flash(socket, :error, "Failed to update bounty amount")}
+        end
+
+      {:error, changeset} ->
+        {:noreply, assign(socket, :edit_form, to_form(changeset))}
+    end
+  end
+
+  def handle_event("cancel-edit", _params, socket) do
+    {:noreply,
+     socket
+     |> assign(:show_edit_modal, false)
+     |> assign(:editing_bounty, nil)
+     |> assign(:edit_form, to_form(edit_amount_changeset()))}
   end
 
   def handle_event(_event, _params, socket) do
@@ -387,4 +629,18 @@ defmodule AlgoraWeb.Org.BountiesLive do
   end
 
   defp page_size, do: 10
+
+  defp assign_bounties(socket) do
+    current_org = socket.assigns.current_org
+
+    bounties =
+      Bounties.list_bounties(
+        owner_id: current_org.id,
+        limit: page_size(),
+        status: :open,
+        current_user: socket.assigns[:current_user]
+      )
+
+    assign(socket, :bounty_rows, to_bounty_rows(bounties))
+  end
 end

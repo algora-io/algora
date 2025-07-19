@@ -32,8 +32,8 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
   defp placeholder_text do
     """
-    - GitHub looks like a green carpet, red flag if wearing suit in pfp
-    - Has contributions to open source inference engines (like vLLM)
+    - GitHub looks like a green carpet
+    - Has contributions to open source inference engines (e.g. vLLM)
     - Posts regularly on X and LinkedIn
     """
   end
@@ -135,29 +135,31 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
       <footer class="w-full py-4 border-t border-white/20">
         <div class="container mx-auto px-4">
           <div class="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div class="text-sm text-muted-foreground text-center md:text-left w-full md:w-auto">
+            <div class="text-sm text-foreground/90 text-center md:text-left w-full md:w-auto">
               © 2025 Algora PBC. All rights reserved.
             </div>
             <div class="grid grid-cols-1 md:flex md:flex-row items-stretch gap-2 w-full md:w-auto">
               <.link
-                class="w-full md:w-auto flex items-center justify-center gap-2 rounded-lg border border-gray-700 py-2 pl-2 pr-3.5 text-xs text-muted-foreground hover:text-foreground transition-colors hover:border-gray-600"
+                class="w-full md:w-auto flex items-center justify-center rounded-lg border border-gray-500 py-2 pl-2 pr-3.5 text-xs text-foreground/90 hover:text-foreground transition-colors hover:border-gray-400"
                 href={AlgoraWeb.Constants.get(:calendar_url)}
                 rel="noopener"
               >
                 <.icon name="tabler-calendar-clock" class="size-4" />
-                <span>Schedule a call</span>
+                <span class="ml-2">Schedule a call</span>
               </.link>
               <.link
-                class="w-full md:w-auto flex items-center justify-center gap-2 rounded-lg border border-gray-700 py-2 pl-2 pr-3.5 text-xs text-muted-foreground hover:text-foreground transition-colors hover:border-gray-600"
+                class="w-full md:w-auto flex items-center justify-center rounded-lg border border-gray-500 py-2 pl-2 pr-3.5 text-xs text-foreground/90 hover:text-foreground transition-colors hover:border-gray-400"
                 href="tel:+16504202207"
               >
-                <.icon name="tabler-phone" class="size-4" /> US <span>+1 (650) 420-2207</span>
+                <.icon name="tabler-phone" class="size-4" /> <span class="font-bold ml-1">US</span>
+                <span class="ml-2">+1 (650) 420-2207</span>
               </.link>
               <.link
-                class="w-full md:w-auto flex items-center justify-center gap-2 rounded-lg border border-gray-700 py-2 pl-2 pr-3.5 text-xs text-muted-foreground hover:text-foreground transition-colors hover:border-gray-600"
+                class="w-full md:w-auto flex items-center justify-center rounded-lg border border-gray-500 py-2 pl-2 pr-3.5 text-xs text-foreground/90 hover:text-foreground transition-colors hover:border-gray-400"
                 href="tel:+306973184144"
               >
-                <.icon name="tabler-phone" class="size-4" /> EU <span>+30 (697) 318-4144</span>
+                <.icon name="tabler-phone" class="size-4" /> <span class="font-bold ml-1">EU</span>
+                <span class="ml-2">+30 (697) 318-4144</span>
               </.link>
             </div>
           </div>

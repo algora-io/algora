@@ -80,6 +80,7 @@ defmodule Algora.Bounties.Jobs.NotifyBounty do
            Workspace.ensure_ticket(token, ticket_ref.owner, ticket_ref.repo, ticket_ref.number),
          bounties when bounties != [] <- Bounties.list_bounties(ticket_id: ticket.id),
          {:ok, _} <- Github.add_labels(token, ticket_ref.owner, ticket_ref.repo, ticket_ref.number, ["💎 Bounty"]),
+         :ok <- Workspace.remove_existing_amount_labels(token, ticket_ref.owner, ticket_ref.repo, ticket_ref.number),
          :ok <-
            Workspace.add_amount_label(token, ticket_ref.owner, ticket_ref.repo, ticket_ref.number, Money.parse(amount)) do
       attempts = Bounties.list_attempts_for_ticket(ticket.id)

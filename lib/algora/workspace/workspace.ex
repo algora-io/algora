@@ -652,6 +652,7 @@ defmodule Algora.Workspace do
         where: uc.user_id in ^ids,
         join: u in assoc(uc, :user),
         join: r in assoc(uc, :repository),
+        where: r.tech_stack != [],
         join: repo_owner in assoc(r, :user),
         # where: fragment("? && ?::citext[]", r.tech_stack, ^(opts[:tech_stack] || [])),
         where:
@@ -660,7 +661,10 @@ defmodule Algora.Workspace do
                  ilike(r.name, "%exercises%") or
                  ilike(r.name, "%tutorials%") or
                  r.name == "DefinitelyTyped" or
-                 r.name == "developer-roadmap"),
+                 r.name == "developer-roadmap" or
+                 r.name == "freeCodeCamp" or
+                 r.name == "hiring-without-whiteboards" or
+                 r.name == "papers-we-love"),
         where:
           not (ilike(repo_owner.provider_login, "%algorithms%") or
                  ilike(repo_owner.provider_login, "%firstcontributions%") or
@@ -697,11 +701,7 @@ defmodule Algora.Workspace do
 
     query =
       if strict_tech_stack do
-        where(
-          query,
-          [uc, u, r, repo_owner],
-          fragment("(SELECT ARRAY(SELECT unnest(?) LIMIT 1)) && ?::citext[]", r.tech_stack, ^tech_stack)
-        )
+        where(query, [uc, u, r, repo_owner], fragment("? && ?::citext[]", r.tech_stack, ^tech_stack))
       else
         query
       end
@@ -885,5 +885,31 @@ defmodule Algora.Workspace do
         {:error, reason}, _ -> {:halt, {:error, reason}}
       end)
     end)
+  end
+
+  def remove_existing_amount_labels(token, owner, repo, number) do
+    case Github.list_labels(token, owner, repo, number) do
+      {:ok, labels} ->
+        amount_labels =
+          labels
+          |> Enum.filter(fn label -> String.starts_with?(label["name"], "$") end)
+          |> Enum.map(fn label -> label["name"] end)
+
+        case amount_labels do
+          [] ->
+            :ok
+
+          _ ->
+            Enum.each(amount_labels, fn label_name ->
+              Github.remove_label_from_issue(token, owner, repo, number, label_name)
+            end)
+
+            :ok
+        end
+
+      {:error, reason} ->
+        Logger.warning("Failed to list labels for #{owner}/#{repo}##{number}: #{inspect(reason)}")
+        :ok
+    end
   end
 end

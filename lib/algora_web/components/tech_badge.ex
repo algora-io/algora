@@ -23,7 +23,7 @@ defmodule AlgoraWeb.Components.TechBadge do
           </.avatar_fallback>
         </.avatar>
       <% end %>
-      {@tech}
+      <span class="line-clamp-1">{@tech}</span>
     </.badge>
     """
   end

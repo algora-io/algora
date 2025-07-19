@@ -144,6 +144,11 @@ defmodule Algora.Support.GithubMock do
   end
 
   @impl true
+  def delete_issue_comment(_access_token, _owner, _repo, _comment_id) do
+    {:ok, %{"id" => random_id()}}
+  end
+
+  @impl true
   def list_user_repositories(_access_token, _username, _opts \\ []) do
     {:ok, []}
   end
@@ -174,6 +179,11 @@ defmodule Algora.Support.GithubMock do
   end
 
   @impl true
+  def list_labels(_access_token, _owner, _repo, _number) do
+    {:ok, []}
+  end
+
+  @impl true
   def create_label(_access_token, _owner, _repo, _label) do
     {:ok, %{"id" => random_id()}}
   end
@@ -185,6 +195,11 @@ defmodule Algora.Support.GithubMock do
 
   @impl true
   def remove_label(_access_token, _owner, _repo, _label) do
+    {:ok, %{"id" => random_id()}}
+  end
+
+  @impl true
+  def remove_label_from_issue(_access_token, _owner, _repo, _number, _label) do
     {:ok, %{"id" => random_id()}}
   end
 end

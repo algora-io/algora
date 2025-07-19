@@ -6,8 +6,10 @@ defmodule Algora.Jobs do
 
   alias Algora.Accounts.User
   alias Algora.Bounties.LineItem
+  alias Algora.Interviews.JobInterview
   alias Algora.Jobs.JobApplication
   alias Algora.Jobs.JobPosting
+  alias Algora.Matches.JobMatch
   alias Algora.Payments
   alias Algora.Payments.Transaction
   alias Algora.Repo
@@ -16,19 +18,55 @@ defmodule Algora.Jobs do
   require Logger
 
   def list_jobs(opts \\ []) do
-    JobPosting
-    |> order_by([j], desc: j.inserted_at)
-    |> maybe_filter_by_user(opts[:user_id])
-    |> maybe_filter_by_tech_stack(opts[:tech_stack])
-    |> maybe_limit(opts[:limit])
+    query =
+      JobPosting
+      |> maybe_filter_by_status(opts)
+      |> maybe_filter_by_user(opts)
+      |> join(:inner, [j], u in User, on: u.id == j.user_id)
+      |> maybe_filter_by_handle(opts[:handle])
+      |> maybe_filter_by_tech_stack(opts[:tech_stack])
+      |> join(:left, [j], i in JobInterview, on: i.job_posting_id == j.id)
+      |> join(:left, [j], m in JobMatch, on: m.job_posting_id == j.id)
+      |> group_by([j, u, i, m], [u.contract_signed, j.id, j.inserted_at])
+      |> order_by([j, u, i, m],
+        desc: u.contract_signed,
+        desc_nulls_last: max(i.inserted_at),
+        desc: j.inserted_at
+      )
+      |> maybe_limit(opts[:limit])
+
+    query =
+      if opts[:remove_dripped] do
+        where(
+          query,
+          [j, u],
+          u.contract_signed or fragment("not exists (select 1 from drips where drips.org_id = ?)", u.id)
+        )
+      else
+        query
+      end
+
+    query =
+      if opts[:dripped_only] do
+        where(
+          query,
+          [j, u],
+          not u.contract_signed and fragment("exists (select 1 from drips where drips.org_id = ?)", u.id)
+        )
+      else
+        query
+      end
+
+    query
     |> Repo.all()
-    |> Repo.preload(:user)
+    |> apply_preloads(opts)
   end
 
   def count_jobs(opts \\ []) do
     JobPosting
-    |> order_by([j], desc: j.inserted_at)
-    |> maybe_filter_by_user(opts[:user_id])
+    |> maybe_filter_by_status(opts[:status])
+    |> maybe_filter_by_user(opts)
+    |> join(:inner, [j], u in User, on: u.id == j.user_id)
     |> maybe_filter_by_tech_stack(opts[:tech_stack])
     |> Repo.aggregate(:count)
   end
@@ -39,10 +77,29 @@ defmodule Algora.Jobs do
     |> Repo.insert()
   end
 
-  defp maybe_filter_by_user(query, nil), do: where(query, [j], j.status in [:active])
+  defp maybe_filter_by_user(query, user_id: user_id, handles: handles) when is_nil(user_id) and is_nil(handles) do
+    where(query, [j, u], j.status in [:active])
+  end
 
-  defp maybe_filter_by_user(query, user_id) do
+  defp maybe_filter_by_user(query, user_id: user_id) do
     where(query, [j], j.user_id == ^user_id and j.status in [:active, :processing])
+  end
+
+  defp maybe_filter_by_user(query, _), do: query
+
+  defp maybe_filter_by_handle(query, nil), do: query
+
+  defp maybe_filter_by_handle(query, handle) do
+    where(query, [j, u], u.handle == ^handle)
+  end
+
+  defp maybe_filter_by_status(query, opts) do
+    cond do
+      opts[:status] == :all -> where(query, [j], j.status in [:active, :processing])
+      opts[:user_id] -> where(query, [j], j.status in [:active, :processing])
+      opts[:handle] -> where(query, [j, u], j.status in [:active, :processing])
+      true -> where(query, [j], j.status in [:active])
+    end
   end
 
   defp maybe_filter_by_tech_stack(query, nil), do: query
@@ -54,6 +111,11 @@ defmodule Algora.Jobs do
 
   defp maybe_limit(query, nil), do: query
   defp maybe_limit(query, limit), do: limit(query, ^limit)
+
+  defp apply_preloads(jobs, opts) do
+    preloads = [:user | opts[:preload] || []]
+    Repo.preload(jobs, preloads)
+  end
 
   @spec create_payment_session(User.t() | nil, JobPosting.t(), Money.t()) ::
           {:ok, String.t()} | {:error, atom()}

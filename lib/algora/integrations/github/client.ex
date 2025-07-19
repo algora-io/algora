@@ -242,6 +242,22 @@ defmodule Algora.Github.Client do
   end
 
   @impl true
+  def delete_issue_comment(access_token, owner, repo, comment_id) do
+    access_token
+    |> fetch(
+      "/repos/#{owner}/#{repo}/issues/comments/#{comment_id}",
+      "DELETE"
+    )
+    |> case do
+      {:error, %Jason.DecodeError{position: 0, token: nil, data: ""}} ->
+        {:ok, nil}
+
+      res ->
+        res
+    end
+  end
+
+  @impl true
   def list_user_repositories(access_token, username, opts \\ []) do
     fetch(access_token, "/users/#{username}/repos#{build_query(opts)}")
   end
@@ -274,6 +290,11 @@ defmodule Algora.Github.Client do
   end
 
   @impl true
+  def list_labels(access_token, owner, repo, number) do
+    fetch(access_token, "/repos/#{owner}/#{repo}/issues/#{number}/labels")
+  end
+
+  @impl true
   def create_label(access_token, owner, repo, label) do
     fetch(access_token, "/repos/#{owner}/#{repo}/labels", "POST", label)
   end
@@ -285,6 +306,27 @@ defmodule Algora.Github.Client do
 
   @impl true
   def remove_label(access_token, owner, repo, label) do
-    fetch(access_token, "/repos/#{owner}/#{repo}/labels/#{label}", "DELETE")
+    access_token
+    |> fetch("/repos/#{owner}/#{repo}/labels/#{label}", "DELETE")
+    |> case do
+      {:error, %Jason.DecodeError{position: 0, token: nil, data: ""}} ->
+        {:ok, nil}
+
+      res ->
+        res
+    end
+  end
+
+  @impl true
+  def remove_label_from_issue(access_token, owner, repo, number, label) do
+    access_token
+    |> fetch("/repos/#{owner}/#{repo}/issues/#{number}/labels/#{URI.encode(label)}", "DELETE")
+    |> case do
+      {:error, %Jason.DecodeError{position: 0, token: nil, data: ""}} ->
+        {:ok, nil}
+
+      res ->
+        res
+    end
   end
 end

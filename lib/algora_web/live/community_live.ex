@@ -72,7 +72,6 @@ defmodule AlgoraWeb.CommunityLive do
      |> assign(:stats, stats)
      |> assign(:featured_collabs, featured_collabs)
      |> assign(:featured_devs, featured_devs)
-     |> assign(:plans1, AlgoraWeb.PricingLive.get_plans1())
      |> assign(:total_contributors, total_contributors)
      |> assign(:total_countries, total_countries)
      |> assign(:selected_developer, nil)
@@ -509,44 +508,6 @@ defmodule AlgoraWeb.CommunityLive do
                 </div>
               </div>
             <% end %>
-          </div>
-        </section>
-
-        <section class="relative isolate py-16 sm:py-40 z-10">
-          <div class="mx-auto px-6 lg:px-8">
-            <div class="relative z-10 pb-4 xl:py-16">
-              <div class="mx-auto max-w-7xl sm:text-center">
-                <div class="mx-auto max-w-3xl space-y-2 lg:max-w-none">
-                  <h2 class="font-display text-2xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
-                    Simple, transparent pricing
-                  </h2>
-                  <p class="text-center font-medium text-base text-muted-foreground sm:text-xl mb-12 mx-auto">
-                    For individuals, OSS communities, and open/closed source companies
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div class="mx-auto lg:max-w-[95rem] mb-8 mt-8">
-              <div class="flex items-start gap-4">
-                <div class="flex-1">
-                  <h3 class="text-2xl font-semibold text-foreground mb-2">
-                    <div class="flex items-center gap-2">
-                      <.icon name="tabler-wallet" class="h-6 w-6 text-emerald-400" /> Payments
-                    </div>
-                  </h3>
-                  <p class="text-base text-foreground-light">
-                    Fund GitHub issues with USD rewards and pay when work is merged. Set up contracts for ongoing development work. Simple, outcome-based payments.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div class="mx-auto grid grid-cols-1 gap-4 lg:gap-8 lg:max-w-[95rem] lg:grid-cols-2">
-              <%= for plan <- @plans1 do %>
-                <AlgoraWeb.PricingLive.pricing_card1 plan={plan} plans={@plans1} />
-              <% end %>
-            </div>
           </div>
         </section>
 

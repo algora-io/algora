@@ -98,7 +98,8 @@ defmodule Algora.Workspace do
         where: t.number == ^number,
         where: r.name == ^repo,
         where: u.provider_login == ^owner,
-        preload: [repository: {r, user: u}]
+        preload: [repository: {r, user: u}],
+        limit: 1
       )
     )
   end

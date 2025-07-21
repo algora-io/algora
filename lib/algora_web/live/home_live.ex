@@ -1204,7 +1204,7 @@ defmodule AlgoraWeb.HomeLive do
 
   defp assign_events(socket) do
     transactions = Payments.list_featured_transactions()
-    bounties = Bounties.list_bounties(status: :open, limit: 10)
+    bounties = Bounties.list_bounties(status: :open, limit: 10, amount_gt: Money.new(:USD, 200))
     jobs_by_user = []
 
     events =

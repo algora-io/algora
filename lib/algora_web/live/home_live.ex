@@ -70,7 +70,7 @@ defmodule AlgoraWeb.HomeLive do
       <% end %>
 
       <main class="bg-black relative overflow-hidden">
-        <section class="relative isolate pt-28 pb-8 sm:pb-16">
+        <section class="relative isolate pt-20 pb-8 sm:pb-12">
           <div class="mx-auto max-w-4xl px-6 lg:px-8 text-center">
             <h1 class="pt-12 sm:pt-20 font-display text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-semibold tracking-tight text-foreground">
               Open source <br />
@@ -99,6 +99,30 @@ defmodule AlgoraWeb.HomeLive do
               >
                 Watch demo
               </.button>
+            </div>
+            <div class="mt-4 grid grid-cols-1 md:flex md:flex-row items-stretch justify-center gap-2 w-full md:w-auto">
+              <.link
+                class="w-full md:w-auto flex items-center justify-center rounded-lg border border-gray-500 py-2 pl-2 pr-3.5 text-xs text-foreground/90 hover:text-foreground transition-colors hover:border-gray-400"
+                href={AlgoraWeb.Constants.get(:calendar_url)}
+                rel="noopener"
+              >
+                <.icon name="tabler-calendar-clock" class="size-4" />
+                <span class="ml-2">Schedule a call</span>
+              </.link>
+              <.link
+                class="w-full md:w-auto flex items-center justify-center rounded-lg border border-gray-500 py-2 pl-2 pr-3.5 text-xs text-foreground/90 hover:text-foreground transition-colors hover:border-gray-400"
+                href="tel:+16504202207"
+              >
+                <.icon name="tabler-phone" class="size-4" /> <span class="font-bold ml-1">US</span>
+                <span class="ml-2">+1 (650) 420-2207</span>
+              </.link>
+              <.link
+                class="w-full md:w-auto flex items-center justify-center rounded-lg border border-gray-500 py-2 pl-2 pr-3.5 text-xs text-foreground/90 hover:text-foreground transition-colors hover:border-gray-400"
+                href="tel:+306973184144"
+              >
+                <.icon name="tabler-phone" class="size-4" /> <span class="font-bold ml-1">EU</span>
+                <span class="ml-2">+30 (697) 318-4144</span>
+              </.link>
             </div>
           </div>
         </section>

@@ -10,16 +10,17 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     use Ecto.Schema
 
     @primary_key false
-    @derive {Jason.Encoder, only: [:email, :job_description, :candidate_description]}
+    @derive {Jason.Encoder, only: [:email, :job_description, :candidate_description, :comp_range]}
     embedded_schema do
       field :email, :string
       field :job_description, :string
       field :candidate_description, :string
+      field :comp_range, :string
     end
 
     def changeset(form, attrs \\ %{}) do
       form
-      |> Ecto.Changeset.cast(attrs, [:email, :job_description, :candidate_description])
+      |> Ecto.Changeset.cast(attrs, [:email, :job_description, :candidate_description, :comp_range])
       |> Ecto.Changeset.validate_required([:email, :job_description])
       |> Ecto.Changeset.validate_format(:email, ~r/@/)
     end
@@ -43,7 +44,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     case %Form{} |> Form.changeset(params) |> Ecto.Changeset.apply_action(:save) do
       {:ok, data} ->
         Algora.Activities.alert(Jason.encode!(data), :critical)
-        {:noreply, put_flash(socket, :info, "We'll send you matching candidates within the next few hours.")}
+        {:noreply, put_flash(socket, :info, "Thanks for submitting your JD! We'll follow up soon")}
 
       {:error, changeset} ->
         {:noreply, assign(socket, form: to_form(changeset))}
@@ -115,9 +116,15 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
               placeholder="Tell us about the role and your requirements..."
             />
             <.input
+              field={@form[:comp_range]}
+              type="text"
+              label="Compensation range"
+              placeholder="$150k - $250k"
+            />
+            <.input
               field={@form[:candidate_description]}
               type="textarea"
-              label="Describe your ideal candidate, heuristics, green/red flags etc."
+              label="Describe your ideal candidate"
               rows="3"
               class="resize-none"
               placeholder={placeholder_text()}

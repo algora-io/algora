@@ -8,7 +8,6 @@ defmodule AlgoraWeb.Components.Header do
   defp nav_links do
     [
       %{name: "Bounties", path: ~p"/bounties"},
-      %{name: "Jobs", path: ~p"/jobs"},
       %{name: "Docs", path: ~p"/docs"}
     ]
   end

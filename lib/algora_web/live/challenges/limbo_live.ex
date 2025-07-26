@@ -136,7 +136,7 @@ defmodule AlgoraWeb.Challenges.LimboLive do
                       <span class="text-base font-medium leading-7">
                         Submit a PR with the Deterministic Simulator improvements to catch the bug. If your PR is merged, you'll receive an
                         <span class="font-display font-bold text-[#4ff7d3]">$800</span>
-                        reward
+                        reward. Note that only bugs present in the latest released version of Turso are eligible.
                       </span>
                     </li>
                     <li class="flex w-full items-start pt-2 text-left text-white">

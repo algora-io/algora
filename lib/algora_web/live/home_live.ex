@@ -280,7 +280,7 @@ defmodule AlgoraWeb.HomeLive do
                   <blockquote class="text-base xl:text-lg font-medium text-foreground/90 flex-grow">
                     <p>
                       We used Algora extensively at Ziverge to reward over
-                      <span class="text-success font-display">$115,000</span>
+                      <span class="text-success font-display">$127,000</span>
                       in <span class="text-success">open source bounties</span>. We introduced a whole
                       new generation of contributors to our ecosystem
                       and <span class="text-success">hired multiple engineers</span>.

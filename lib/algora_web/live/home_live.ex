@@ -281,7 +281,10 @@ defmodule AlgoraWeb.HomeLive do
                     <p>
                       We used Algora extensively at Ziverge to reward over
                       <span class="text-success font-display">$127,000</span>
-                      in <span class="text-success">open source bounties</span>. We introduced a whole
+                      in <span class="text-success">open source bounties</span>.
+                    </p>
+                    <p class="pt-2 xl:pt-4">
+                      We introduced a whole
                       new generation of contributors to our ecosystem
                       and <span class="text-success">hired multiple engineers</span>.
                     </p>

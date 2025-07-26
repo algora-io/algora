@@ -23,8 +23,8 @@ defmodule AlgoraWeb.HomeLive do
 
     stats = [
       %{label: "Full-time SWEs Hired", value: "30+"},
+      %{label: "1st Year Retention", value: "100%"},
       %{label: "Happy Customers", value: "100+"},
-      %{label: "Rewarded Contributors", value: format_number(platform_stats.total_contributors)},
       %{label: "Countries", value: format_number(platform_stats.total_countries)},
       %{label: "Paid Out", value: format_money(platform_stats.total_paid_out)},
       %{label: "Completed Bounties", value: format_number(platform_stats.completed_bounties_count)}
@@ -74,14 +74,11 @@ defmodule AlgoraWeb.HomeLive do
           <div class="mx-auto max-w-4xl px-6 lg:px-8 text-center">
             <h1 class="pt-12 sm:pt-20 font-display text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-semibold tracking-tight text-foreground">
               Open source <br />
-              <span class="text-emerald-400">hiring platform</span>
+              <span class="text-emerald-400">tech recruiting</span>
             </h1>
             <p class="mt-4 sm:mt-6 text-sm sm:text-3xl font-medium text-foreground mx-auto">
-              Algora connects companies with
-              <span class="sm:hidden inline">OSS</span><span class="hidden sm:inline">open source</span>
-              engineers <br />for full-time jobs and paid
-              <span class="sm:hidden inline">OSS</span><span class="hidden sm:inline">open source</span>
-              contributions.
+              Connecting the most prolific open source <br />
+              maintainers & contributors with their next jobs.
             </p>
             <div class="mt-12 flex items-center justify-center gap-4 sm:gap-6">
               <.button
@@ -91,38 +88,13 @@ defmodule AlgoraWeb.HomeLive do
                 Hire with Algora
               </.button>
               <.button
-                href="https://www.youtube.com/watch?v=Jne9mVas9i0"
-                target="_blank"
+                href={AlgoraWeb.Constants.get(:calendar_url)}
                 rel="noopener"
                 class="h-12 sm:h-14 rounded-md px-6 sm:px-12 text-base sm:text-lg"
                 variant="secondary"
               >
-                Watch demo
+                Talk to us
               </.button>
-            </div>
-            <div class="mt-4 grid grid-cols-1 md:flex md:flex-row items-stretch justify-center gap-2 w-full md:w-auto">
-              <.link
-                class="w-full md:w-auto flex items-center justify-center rounded-lg border border-gray-500 py-2 pl-2 pr-3.5 text-xs text-foreground/90 hover:text-foreground transition-colors hover:border-gray-400"
-                href={AlgoraWeb.Constants.get(:calendar_url)}
-                rel="noopener"
-              >
-                <.icon name="tabler-calendar-clock" class="size-4" />
-                <span class="ml-2">Schedule a call</span>
-              </.link>
-              <.link
-                class="w-full md:w-auto flex items-center justify-center rounded-lg border border-gray-500 py-2 pl-2 pr-3.5 text-xs text-foreground/90 hover:text-foreground transition-colors hover:border-gray-400"
-                href="tel:+16504202207"
-              >
-                <.icon name="tabler-phone" class="size-4" /> <span class="font-bold ml-1">US</span>
-                <span class="ml-2">+1 (650) 420-2207</span>
-              </.link>
-              <.link
-                class="w-full md:w-auto flex items-center justify-center rounded-lg border border-gray-500 py-2 pl-2 pr-3.5 text-xs text-foreground/90 hover:text-foreground transition-colors hover:border-gray-400"
-                href="tel:+306973184144"
-              >
-                <.icon name="tabler-phone" class="size-4" /> <span class="font-bold ml-1">EU</span>
-                <span class="ml-2">+30 (697) 318-4144</span>
-              </.link>
             </div>
           </div>
         </section>
@@ -230,7 +202,7 @@ defmodule AlgoraWeb.HomeLive do
               Trusted by <br class="md:hidden" /> open source YC founders
             </h2>
 
-            <div class="pt-4 sm:pt-8 flex flex-col md:flex-row gap-8 px-4">
+            <div class="pt-4 sm:pt-8 grid grid-cols-1 md:grid-cols-2 gap-8 px-4">
               <div class="flex-1 mx-auto max-w-xl flex flex-col justify-between border ring-1 ring-border transition-all bg-card group rounded-xl text-card-foreground shadow p-6">
                 <figure class="relative flex flex-col h-full">
                   <blockquote class="text-base xl:text-lg font-medium text-foreground/90 flex-grow">
@@ -238,7 +210,8 @@ defmodule AlgoraWeb.HomeLive do
                       "Algora helped us meet Nick, who after being contracted a few months, joined the Trigger founding team full-time.
                     </p>
                     <p class="pt-2 xl:pt-4">
-                      It was the easiest hire and turned out to be very very good."
+                      It was the <span class="text-success">easiest hire</span>
+                      and turned out to be <span class="text-success">very very good</span>."
                     </p>
                   </blockquote>
                   <figcaption class="mt-4 xl:mt-8 flex items-center gap-3 xl:gap-4">
@@ -267,11 +240,17 @@ defmodule AlgoraWeb.HomeLive do
                 <figure class="relative flex flex-col h-full">
                   <blockquote class="text-base xl:text-lg font-medium text-foreground/90 flex-grow">
                     <p>
-                      "Algora helped us meet Gergő and I couldn't be happier with the results. He's been working full-time with us for over a year now and is a key contributor to our product.
+                      "Algora helped us meet Gergő and I
+                      <span class="text-success">couldn't be happier</span>
+                      with the results. He's been working full-time with us for
+                      <span class="text-success">over a year</span>
+                      now and is a key contributor to our product.
                     </p>
 
                     <p class="pt-2 xl:pt-4">
-                      I think you realized this by now, but you have such a powerful sourcing/hiring engine in your hands!"
+                      I think you realized this by now, but you have such a
+                      <span class="text-success">powerful sourcing/hiring engine</span>
+                      in your hands!"
                     </p>
                   </blockquote>
                   <figcaption class="mt-4 xl:mt-8 flex items-center gap-3 xl:gap-4">
@@ -295,9 +274,73 @@ defmodule AlgoraWeb.HomeLive do
                   </figcaption>
                 </figure>
               </div>
-            </div>
-            <div class="mx-auto mt-8 max-w-5xl gap-12 text-sm leading-6 sm:mt-16">
-              <.yc_logo_cloud />
+
+              <div class="flex-1 mx-auto max-w-xl flex flex-col justify-between border ring-1 ring-border transition-all bg-card group rounded-xl text-card-foreground shadow p-6">
+                <figure class="relative flex flex-col h-full">
+                  <blockquote class="text-base xl:text-lg font-medium text-foreground/90 flex-grow">
+                    <p>
+                      We used Algora extensively at Ziverge to reward over
+                      <span class="text-success font-display">$115,000</span>
+                      in <span class="text-success">open source bounties</span>. We introduced a whole
+                      new generation of contributors to our ecosystem
+                      and <span class="text-success">hired multiple engineers</span>.
+                    </p>
+                  </blockquote>
+                  <figcaption class="mt-4 xl:mt-8 flex items-center gap-3 xl:gap-4">
+                    <img
+                      src={~p"/images/people/john-de-goes-2.jpg"}
+                      alt="John A De Goes"
+                      class="size-12 xl:size-16 rounded-full object-cover bg-gray-800"
+                      loading="lazy"
+                    />
+                    <div>
+                      <div class="text-sm xl:text-base font-semibold text-foreground">
+                        John A De Goes
+                      </div>
+                      <div class="text-xs xl:text-sm text-foreground/90 font-medium">
+                        Founder & CEO
+                      </div>
+                      <div class="text-xs xl:text-sm text-foreground/90 font-medium">
+                        Ziverge
+                      </div>
+                    </div>
+                  </figcaption>
+                </figure>
+              </div>
+
+              <div class="flex-1 mx-auto max-w-xl flex flex-col justify-between border ring-1 ring-border transition-all bg-card group rounded-xl text-card-foreground shadow p-6">
+                <figure class="relative flex flex-col h-full">
+                  <blockquote class="text-base xl:text-lg font-medium text-foreground/90 flex-grow">
+                    <p>
+                      "We met Tom through Algora from his contributions to our open source repository. We were so impressed with his work that we <span class="text-success">hired him full-time</span>.
+                    </p>
+                    <p class="pt-2 xl:pt-4">
+                      He's been an <span class="text-success">incredible addition</span>
+                      to the team and we're <span class="text-success">super happy</span>
+                      with the results."
+                    </p>
+                  </blockquote>
+                  <figcaption class="mt-4 xl:mt-8 flex items-center gap-3 xl:gap-4">
+                    <img
+                      src="https://avatars.githubusercontent.com/u/2353608?v=4"
+                      alt="Marcus Eagan"
+                      class="size-12 xl:size-16 rounded-full object-cover bg-gray-800"
+                      loading="lazy"
+                    />
+                    <div>
+                      <div class="text-sm xl:text-base font-semibold text-foreground">
+                        Marcus Eagan
+                      </div>
+                      <div class="text-xs xl:text-sm text-foreground/90 font-medium">
+                        Founder & CEO
+                      </div>
+                      <div class="text-xs xl:text-sm text-foreground/90 font-medium">
+                        TraceMachina
+                      </div>
+                    </div>
+                  </figcaption>
+                </figure>
+              </div>
             </div>
           </div>
         </section>

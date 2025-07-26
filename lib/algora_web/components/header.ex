@@ -46,7 +46,7 @@ defmodule AlgoraWeb.Components.Header do
           </button>
         </div>
         <!-- Desktop nav -->
-        <div class="hidden lg:flex-1 lg:flex lg:justify-center gap-4 mx-auto">
+        <%!-- <div class="hidden lg:flex-1 lg:flex lg:justify-center gap-4 mx-auto">
           <%= for link <- nav_links() do %>
             <.button
               navigate={link.path}
@@ -56,6 +56,23 @@ defmodule AlgoraWeb.Components.Header do
               {link.name}
             </.button>
           <% end %>
+        </div> --%>
+
+        <div class="hidden lg:flex-1 lg:flex lg:justify-center gap-4 mx-auto whitespace-nowrap">
+          <.link
+            class="w-full md:w-auto flex items-center justify-center rounded-lg border border-gray-500 py-2 pl-2 pr-3.5 text-xs text-foreground/90 hover:text-foreground transition-colors hover:border-gray-400"
+            href="tel:+16504202207"
+          >
+            <.icon name="tabler-phone" class="size-4" /> <span class="font-bold ml-1">US</span>
+            <span class="ml-2">+1 (650) 420-2207</span>
+          </.link>
+          <.link
+            class="w-full md:w-auto flex items-center justify-center rounded-lg border border-gray-500 py-2 pl-2 pr-3.5 text-xs text-foreground/90 hover:text-foreground transition-colors hover:border-gray-400"
+            href="tel:+306973184144"
+          >
+            <.icon name="tabler-phone" class="size-4" /> <span class="font-bold ml-1">FaceTime</span>
+            <span class="ml-2">+30 (697) 318-4144</span>
+          </.link>
         </div>
 
         <div class="hidden lg:flex-1 lg:flex lg:justify-end gap-2">
@@ -113,7 +130,7 @@ defmodule AlgoraWeb.Components.Header do
 
           <div class="mt-6 flow-root">
             <div class="-my-6 divide-y divide-border">
-              <div class="space-y-2 py-6">
+              <%!-- <div class="space-y-2 py-6">
                 <%= for link <- nav_links() do %>
                   <.link
                     navigate={link.path}
@@ -122,6 +139,23 @@ defmodule AlgoraWeb.Components.Header do
                     {link.name}
                   </.link>
                 <% end %>
+              </div> --%>
+              <div class="space-y-4 py-6">
+                <.link
+                  class="w-full md:w-auto flex items-center rounded-lg border border-gray-500 py-2 pl-2 pr-3.5 text-xs text-foreground/90 hover:text-foreground transition-colors hover:border-gray-400"
+                  href="tel:+16504202207"
+                >
+                  <.icon name="tabler-phone" class="size-4" /> <span class="font-bold ml-1">US</span>
+                  <span class="ml-2">+1 (650) 420-2207</span>
+                </.link>
+                <.link
+                  class="w-full md:w-auto flex items-center rounded-lg border border-gray-500 py-2 pl-2 pr-3.5 text-xs text-foreground/90 hover:text-foreground transition-colors hover:border-gray-400"
+                  href="tel:+306973184144"
+                >
+                  <.icon name="tabler-phone" class="size-4" />
+                  <span class="font-bold ml-1">FaceTime</span>
+                  <span class="ml-2">+30 (697) 318-4144</span>
+                </.link>
               </div>
               <div class="py-6 space-y-4">
                 <.button

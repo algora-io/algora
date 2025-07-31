@@ -76,6 +76,9 @@ defmodule AlgoraWeb.Components.TechBadge do
       "golang" ->
         "go"
 
+      "hcl" ->
+        "terraform"
+
       "plpgsql" ->
         "postgresql"
 

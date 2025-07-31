@@ -184,8 +184,7 @@ defmodule AlgoraWeb.Data.HomeCache do
   end
 
   defp compute_jobs_by_user do
-    Algora.Jobs.list_jobs()
-    |> Enum.group_by(& &1.user)
+    Enum.group_by(Algora.Jobs.list_jobs(), & &1.user)
   end
 
   defp compute_orgs_with_stats do

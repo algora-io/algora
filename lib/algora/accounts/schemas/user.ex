@@ -59,6 +59,7 @@ defmodule Algora.Accounts.User do
     field :seeking_jobs, :boolean, default: false
     field :hiring, :boolean, default: false
     field :hiring_subscription, Ecto.Enum, values: [:inactive, :trial, :active], default: :inactive
+    field :hiring_keywords, :string
 
     field :hourly_rate_min, Money
     field :hourly_rate_max, Money
@@ -438,7 +439,7 @@ defmodule Algora.Accounts.User do
   end
 
   def hiring_changeset(%User{} = user, params) do
-    cast(user, params, [:preferences, :executive_name, :executive_role, :billing_name, :billing_address])
+    cast(user, params, [:preferences, :executive_name, :executive_role, :billing_name, :billing_address, :hiring_keywords])
   end
 
   defp validate_url(changeset, field) do

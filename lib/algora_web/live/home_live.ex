@@ -23,8 +23,8 @@ defmodule AlgoraWeb.HomeLive do
 
     stats = [
       %{label: "Full-time SWEs Hired", value: "30+"},
+      %{label: "1st Year Retention", value: "100%"},
       %{label: "Happy Customers", value: "100+"},
-      %{label: "Rewarded Contributors", value: format_number(platform_stats.total_contributors)},
       %{label: "Countries", value: format_number(platform_stats.total_countries)},
       %{label: "Paid Out", value: format_money(platform_stats.total_paid_out)},
       %{label: "Completed Bounties", value: format_number(platform_stats.completed_bounties_count)}
@@ -70,18 +70,15 @@ defmodule AlgoraWeb.HomeLive do
       <% end %>
 
       <main class="bg-black relative overflow-hidden">
-        <section class="relative isolate pt-28 pb-8 sm:pb-16">
+        <section class="relative isolate pt-20 pb-8 sm:pb-12">
           <div class="mx-auto max-w-4xl px-6 lg:px-8 text-center">
             <h1 class="pt-12 sm:pt-20 font-display text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-semibold tracking-tight text-foreground">
               Open source <br />
-              <span class="text-emerald-400">hiring platform</span>
+              <span class="text-emerald-400">tech recruiting</span>
             </h1>
             <p class="mt-4 sm:mt-6 text-sm sm:text-3xl font-medium text-foreground mx-auto">
-              Algora connects companies with
-              <span class="sm:hidden inline">OSS</span><span class="hidden sm:inline">open source</span>
-              engineers <br />for full-time jobs and paid
-              <span class="sm:hidden inline">OSS</span><span class="hidden sm:inline">open source</span>
-              contributions.
+              Connecting the most prolific open source <br />
+              maintainers & contributors with their next jobs.
             </p>
             <div class="mt-12 flex items-center justify-center gap-4 sm:gap-6">
               <.button
@@ -91,13 +88,12 @@ defmodule AlgoraWeb.HomeLive do
                 Hire with Algora
               </.button>
               <.button
-                href="https://www.youtube.com/watch?v=Jne9mVas9i0"
-                target="_blank"
+                href={AlgoraWeb.Constants.get(:calendar_url)}
                 rel="noopener"
                 class="h-12 sm:h-14 rounded-md px-6 sm:px-12 text-base sm:text-lg"
                 variant="secondary"
               >
-                Watch demo
+                Talk to us
               </.button>
             </div>
           </div>
@@ -123,40 +119,42 @@ defmodule AlgoraWeb.HomeLive do
         <section class="relative isolate py-16 sm:pb-40">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <!-- Special 7th hire - centered on its own row -->
-            <%= for example <- @company_people_examples do %>
-              <%= if Map.get(example, :special) do %>
-                <div class="flex justify-center mb-12">
-                  <div class="relative flex items-center gap-3 p-6 bg-gradient-to-br from-emerald-900/30 to-emerald-800/20 rounded-xl border-2 border-emerald-400/30 shadow-xl shadow-emerald-400/10 max-w-md w-full">
-                    <img
-                      src={example.person_avatar}
-                      alt={example.person_name}
-                      class="size-12 rounded-full ring-2 ring-emerald-400/50"
-                    />
-                    <.icon name="tabler-arrow-right" class="size-4 text-emerald-400 shrink-0" />
-                    <img
-                      src={example.company_avatar}
-                      alt={example.company_name}
-                      class="size-12 rounded-full ring-2 ring-emerald-400/50"
-                    />
-                    <div class="flex-1">
-                      <div class="text-sm font-medium whitespace-nowrap text-emerald-100">
-                        {example.person_name}
-                        <.icon name="tabler-arrow-right" class="size-3 text-emerald-400" /> {example.company_name}
+            <div class="flex flex-col md:flex-row md:justify-center gap-8 max-w-6xl mx-auto">
+              <%= for example <- @company_people_examples do %>
+                <%= if Map.get(example, :special) do %>
+                  <div class="flex-1 flex mb-12 max-w-md">
+                    <div class="relative flex items-center gap-3 p-6 bg-gradient-to-br from-emerald-900/30 to-emerald-800/20 rounded-xl border-2 border-emerald-400/30 shadow-xl shadow-emerald-400/10 w-full">
+                      <img
+                        src={example.person_avatar}
+                        alt={example.person_name}
+                        class="size-12 rounded-full ring-2 ring-emerald-400/50"
+                      />
+                      <.icon name="tabler-arrow-right" class="size-4 text-emerald-400 shrink-0" />
+                      <img
+                        src={example.company_avatar}
+                        alt={example.company_name}
+                        class="size-12 rounded-full ring-2 ring-emerald-400/50"
+                      />
+                      <div class="flex-1">
+                        <div class="text-sm font-medium whitespace-nowrap text-emerald-100">
+                          {example.person_name}
+                          <.icon name="tabler-arrow-right" class="size-3 text-emerald-400" /> {example.company_name}
+                        </div>
+                        <div class="text-xs text-emerald-200/80 mt-1">{example.person_title}</div>
+                        <div class="text-xs text-emerald-300/70 mt-1">{example.hire_date}</div>
                       </div>
-                      <div class="text-xs text-emerald-200/80 mt-1">{example.person_title}</div>
-                      <div class="text-xs text-emerald-300/70 mt-1">{example.hire_date}</div>
+                      <.badge
+                        variant="secondary"
+                        class="absolute -top-2 -left-2 text-xs px-3 py-1 text-black bg-gradient-to-r from-emerald-400 to-emerald-500 font-semibold shadow-lg"
+                      >
+                        <.icon name="tabler-star-filled" class="size-4 text-black mr-1 -ml-0.5" />
+                        New hire!
+                      </.badge>
                     </div>
-                    <.badge
-                      variant="secondary"
-                      class="absolute -top-2 -left-2 text-xs px-3 py-1 text-black bg-gradient-to-r from-emerald-400 to-emerald-500 font-semibold shadow-lg"
-                    >
-                      <.icon name="tabler-star-filled" class="size-4 text-black mr-1 -ml-0.5" />
-                      Latest hire!
-                    </.badge>
                   </div>
-                </div>
+                <% end %>
               <% end %>
-            <% end %>
+            </div>
             
     <!-- Regular hire cards grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
@@ -206,7 +204,7 @@ defmodule AlgoraWeb.HomeLive do
               Trusted by <br class="md:hidden" /> open source YC founders
             </h2>
 
-            <div class="pt-4 sm:pt-8 flex flex-col md:flex-row gap-8 px-4">
+            <div class="pt-4 sm:pt-8 grid grid-cols-1 md:grid-cols-2 gap-8 px-4">
               <div class="flex-1 mx-auto max-w-xl flex flex-col justify-between border ring-1 ring-border transition-all bg-card group rounded-xl text-card-foreground shadow p-6">
                 <figure class="relative flex flex-col h-full">
                   <blockquote class="text-base xl:text-lg font-medium text-foreground/90 flex-grow">
@@ -214,7 +212,8 @@ defmodule AlgoraWeb.HomeLive do
                       "Algora helped us meet Nick, who after being contracted a few months, joined the Trigger founding team full-time.
                     </p>
                     <p class="pt-2 xl:pt-4">
-                      It was the easiest hire and turned out to be very very good."
+                      It was the <span class="text-success">easiest hire</span>
+                      and turned out to be <span class="text-success">very very good</span>."
                     </p>
                   </blockquote>
                   <figcaption class="mt-4 xl:mt-8 flex items-center gap-3 xl:gap-4">
@@ -243,11 +242,17 @@ defmodule AlgoraWeb.HomeLive do
                 <figure class="relative flex flex-col h-full">
                   <blockquote class="text-base xl:text-lg font-medium text-foreground/90 flex-grow">
                     <p>
-                      "Algora helped us meet Gergő and I couldn't be happier with the results. He's been working full-time with us for over a year now and is a key contributor to our product.
+                      "Algora helped us meet Gergő and I
+                      <span class="text-success">couldn't be happier</span>
+                      with the results. He's been working full-time with us for
+                      <span class="text-success">over a year</span>
+                      now and is a key contributor to our product.
                     </p>
 
                     <p class="pt-2 xl:pt-4">
-                      I think you realized this by now, but you have such a powerful sourcing/hiring engine in your hands!"
+                      I think you realized this by now, but you have such a
+                      <span class="text-success">powerful sourcing/hiring engine</span>
+                      in your hands!"
                     </p>
                   </blockquote>
                   <figcaption class="mt-4 xl:mt-8 flex items-center gap-3 xl:gap-4">
@@ -271,9 +276,76 @@ defmodule AlgoraWeb.HomeLive do
                   </figcaption>
                 </figure>
               </div>
-            </div>
-            <div class="mx-auto mt-8 max-w-5xl gap-12 text-sm leading-6 sm:mt-16">
-              <.yc_logo_cloud />
+
+              <div class="flex-1 mx-auto max-w-xl flex flex-col justify-between border ring-1 ring-border transition-all bg-card group rounded-xl text-card-foreground shadow p-6">
+                <figure class="relative flex flex-col h-full">
+                  <blockquote class="text-base xl:text-lg font-medium text-foreground/90 flex-grow">
+                    <p>
+                      We used Algora extensively at Ziverge to reward over
+                      <span class="text-success font-display">$143,000</span>
+                      in <span class="text-success">open source bounties</span>.
+                    </p>
+                    <p class="pt-2 xl:pt-4">
+                      We introduced a whole
+                      new generation of contributors to our ecosystem
+                      and <span class="text-success">hired multiple engineers</span>.
+                    </p>
+                  </blockquote>
+                  <figcaption class="mt-4 xl:mt-8 flex items-center gap-3 xl:gap-4">
+                    <img
+                      src={~p"/images/people/john-de-goes-2.jpg"}
+                      alt="John A De Goes"
+                      class="size-12 xl:size-16 rounded-full object-cover bg-gray-800"
+                      loading="lazy"
+                    />
+                    <div>
+                      <div class="text-sm xl:text-base font-semibold text-foreground">
+                        John A De Goes
+                      </div>
+                      <div class="text-xs xl:text-sm text-foreground/90 font-medium">
+                        Founder & CEO
+                      </div>
+                      <div class="text-xs xl:text-sm text-foreground/90 font-medium">
+                        Ziverge
+                      </div>
+                    </div>
+                  </figcaption>
+                </figure>
+              </div>
+
+              <div class="flex-1 mx-auto max-w-xl flex flex-col justify-between border ring-1 ring-border transition-all bg-card group rounded-xl text-card-foreground shadow p-6">
+                <figure class="relative flex flex-col h-full">
+                  <blockquote class="text-base xl:text-lg font-medium text-foreground/90 flex-grow">
+                    <p>
+                      "We met Tom through Algora from his contributions to our open source repository. We were so impressed with his work that we <span class="text-success">hired him full-time</span>.
+                    </p>
+                    <p class="pt-2 xl:pt-4">
+                      He's been an <span class="text-success">incredible addition</span>
+                      to the team and we're <span class="text-success">super happy</span>
+                      with the results."
+                    </p>
+                  </blockquote>
+                  <figcaption class="mt-4 xl:mt-8 flex items-center gap-3 xl:gap-4">
+                    <img
+                      src="https://avatars.githubusercontent.com/u/2353608?v=4"
+                      alt="Marcus Eagan"
+                      class="size-12 xl:size-16 rounded-full object-cover bg-gray-800"
+                      loading="lazy"
+                    />
+                    <div>
+                      <div class="text-sm xl:text-base font-semibold text-foreground">
+                        Marcus Eagan
+                      </div>
+                      <div class="text-xs xl:text-sm text-foreground/90 font-medium">
+                        Founder & CEO
+                      </div>
+                      <div class="text-xs xl:text-sm text-foreground/90 font-medium">
+                        TraceMachina
+                      </div>
+                    </div>
+                  </figcaption>
+                </figure>
+              </div>
             </div>
           </div>
         </section>
@@ -1105,7 +1177,15 @@ defmodule AlgoraWeb.HomeLive do
 
   defp get_company_people_examples do
     [
-      # Special 7th hire - prominently featured
+      %{
+        company_name: "Activepieces (YC S22)",
+        company_avatar: "https://avatars.githubusercontent.com/u/99494700?s=48&v=4",
+        person_name: "David",
+        person_avatar: "https://avatars.githubusercontent.com/u/51977119?v=4",
+        person_title: "Software Engineer",
+        hire_date: "July 2025",
+        special: true
+      },
       %{
         company_name: "TraceMachina",
         company_avatar: "https://avatars.githubusercontent.com/u/144973251?s=200&v=4",
@@ -1123,7 +1203,7 @@ defmodule AlgoraWeb.HomeLive do
         person_title: "Lead Engineer"
       },
       %{
-        company_name: "Firecrawl",
+        company_name: "Firecrawl (YC S22)",
         company_avatar: "https://github.com/mendableai.png",
         person_name: "Gergő",
         person_avatar: "https://github.com/mogery.png",
@@ -1144,7 +1224,7 @@ defmodule AlgoraWeb.HomeLive do
         person_title: "Developer Advocate"
       },
       %{
-        company_name: "Trigger.dev",
+        company_name: "Trigger.dev (YC W23)",
         company_avatar: "https://github.com/triggerdotdev.png",
         person_name: "Nick",
         person_avatar: "https://github.com/nicktrn.png",
@@ -1204,7 +1284,7 @@ defmodule AlgoraWeb.HomeLive do
 
   defp assign_events(socket) do
     transactions = Payments.list_featured_transactions()
-    bounties = Bounties.list_bounties(status: :open, limit: 10)
+    bounties = Bounties.list_bounties(status: :open, limit: 10, amount_gt: Money.new(:USD, 200))
     jobs_by_user = []
 
     events =

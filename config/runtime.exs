@@ -55,7 +55,7 @@ if config_env() == :prod do
   config :algora, Algora.Repo,
     # ssl: true,
     url: database_url,
-    pool_size: String.to_integer(System.get_env("POOL_SIZE") || "20"),
+    pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
     socket_options: maybe_ipv6,
     migration_primary_key: [type: :string],
     migration_timestamps: [type: :utc_datetime_usec],

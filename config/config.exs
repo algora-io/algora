@@ -41,7 +41,8 @@ config :algora, AlgoraWeb.Endpoint,
 
 config :algora, Oban,
   notifier: Oban.Notifiers.PG,
-  repo: Algora.Repo,
+  repo: Algora.ObanRepo,
+  get_dynamic_repo: {Algora.Repo, :oban_repo, []},
   queues: [
     # --- #
     event_consumers: 1,

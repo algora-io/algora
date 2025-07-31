@@ -12,6 +12,14 @@ config :algora, Algora.Repo,
   migration_primary_key: [type: :string],
   migration_timestamps: [type: :utc_datetime_usec]
 
+# Configure dedicated Oban database repository for testing
+config :algora, Algora.ObanRepo,
+  url: System.get_env("TEST_DATABASE_URL"),
+  pool: Ecto.Adapters.SQL.Sandbox,
+  pool_size: System.schedulers_online() * 2,
+  migration_primary_key: [type: :string],
+  migration_timestamps: [type: :utc_datetime_usec]
+
 # We don't run a server during test. If one is required,
 # you can enable the server option below.
 config :algora, AlgoraWeb.Endpoint,

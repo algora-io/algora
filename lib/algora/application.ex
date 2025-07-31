@@ -14,6 +14,7 @@ defmodule Algora.Application do
       {NodeJS.Supervisor, [path: LiveSvelte.SSR.NodeJS.server_path(), pool_size: 4]},
       AlgoraWeb.Telemetry,
       Algora.Repo,
+      Algora.ObanRepo,
       {Oban, Application.fetch_env!(:algora, Oban)},
       {DNSCluster, query: Application.get_env(:algora, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Algora.PubSub},

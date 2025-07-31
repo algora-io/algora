@@ -3,6 +3,14 @@ defmodule Algora.Repo do
     otp_app: :algora,
     adapter: Ecto.Adapters.Postgres
 
+  def oban_repo do
+    if in_transaction?() do
+      __MODULE__
+    else
+      Algora.ObanRepo
+    end
+  end
+
   alias Algora.Activities.Activity
   alias Algora.Activities.Notifier
 

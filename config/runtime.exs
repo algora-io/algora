@@ -61,6 +61,16 @@ if config_env() == :prod do
     migration_timestamps: [type: :utc_datetime_usec],
     queue_target: 5000
 
+  # Configure dedicated Oban database repository
+  config :algora, Algora.ObanRepo,
+    # ssl: true,
+    url: database_url,
+    pool_size: String.to_integer(System.get_env("OBAN_POOL_SIZE") || "10"),
+    socket_options: maybe_ipv6,
+    migration_primary_key: [type: :string],
+    migration_timestamps: [type: :utc_datetime_usec],
+    queue_target: 5000
+
   config :ex_aws,
     json_codec: Jason,
     access_key_id: System.fetch_env!("AWS_ACCESS_KEY_ID"),

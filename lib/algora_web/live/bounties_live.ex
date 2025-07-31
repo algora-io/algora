@@ -514,7 +514,7 @@ defmodule AlgoraWeb.BountiesLive do
               <div class="lg:col-span-7">
                 <h3 class="text-xl sm:text-2xl xl:text-3xl font-display font-bold leading-[1.2] sm:leading-[2rem] xl:leading-[3rem]">
                   We used Algora extensively at Ziverge to reward over
-                  <span class="text-success">$127,000</span>
+                  <span class="text-success">$143,000</span>
                   in bounties and introduce a whole
                   <span class="text-success">new generation of contributors</span>
                   to the ZIO and Golem ecosystems.

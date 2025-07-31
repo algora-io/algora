@@ -133,9 +133,14 @@ defmodule AlgoraWeb.Org.JobsLive do
                         <%= if @current_user_role in [:admin, :mod] do %>
                           <.link
                             navigate={~p"/#{@current_org.handle}/jobs/#{job.id}"}
-                            class="text-lg sm:text-2xl font-semibold underline"
+                            class="text-lg sm:text-2xl font-semibold"
                           >
-                            {job.title}
+                            <span class="underline">{job.title}</span>
+                            <%= if @current_user.is_admin do %>
+                              <span class="text-xs font-muted-foreground">
+                                {job.location} - {job.compensation}
+                              </span>
+                            <% end %>
                           </.link>
                         <% else %>
                           <div class="text-lg font-semibold">

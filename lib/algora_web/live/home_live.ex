@@ -119,40 +119,42 @@ defmodule AlgoraWeb.HomeLive do
         <section class="relative isolate py-16 sm:pb-40">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <!-- Special 7th hire - centered on its own row -->
-            <%= for example <- @company_people_examples do %>
-              <%= if Map.get(example, :special) do %>
-                <div class="flex justify-center mb-12">
-                  <div class="relative flex items-center gap-3 p-6 bg-gradient-to-br from-emerald-900/30 to-emerald-800/20 rounded-xl border-2 border-emerald-400/30 shadow-xl shadow-emerald-400/10 max-w-md w-full">
-                    <img
-                      src={example.person_avatar}
-                      alt={example.person_name}
-                      class="size-12 rounded-full ring-2 ring-emerald-400/50"
-                    />
-                    <.icon name="tabler-arrow-right" class="size-4 text-emerald-400 shrink-0" />
-                    <img
-                      src={example.company_avatar}
-                      alt={example.company_name}
-                      class="size-12 rounded-full ring-2 ring-emerald-400/50"
-                    />
-                    <div class="flex-1">
-                      <div class="text-sm font-medium whitespace-nowrap text-emerald-100">
-                        {example.person_name}
-                        <.icon name="tabler-arrow-right" class="size-3 text-emerald-400" /> {example.company_name}
+            <div class="flex flex-col md:flex-row md:justify-center gap-8 max-w-6xl mx-auto">
+              <%= for example <- @company_people_examples do %>
+                <%= if Map.get(example, :special) do %>
+                  <div class="flex-1 flex mb-12 max-w-md">
+                    <div class="relative flex items-center gap-3 p-6 bg-gradient-to-br from-emerald-900/30 to-emerald-800/20 rounded-xl border-2 border-emerald-400/30 shadow-xl shadow-emerald-400/10 w-full">
+                      <img
+                        src={example.person_avatar}
+                        alt={example.person_name}
+                        class="size-12 rounded-full ring-2 ring-emerald-400/50"
+                      />
+                      <.icon name="tabler-arrow-right" class="size-4 text-emerald-400 shrink-0" />
+                      <img
+                        src={example.company_avatar}
+                        alt={example.company_name}
+                        class="size-12 rounded-full ring-2 ring-emerald-400/50"
+                      />
+                      <div class="flex-1">
+                        <div class="text-sm font-medium whitespace-nowrap text-emerald-100">
+                          {example.person_name}
+                          <.icon name="tabler-arrow-right" class="size-3 text-emerald-400" /> {example.company_name}
+                        </div>
+                        <div class="text-xs text-emerald-200/80 mt-1">{example.person_title}</div>
+                        <div class="text-xs text-emerald-300/70 mt-1">{example.hire_date}</div>
                       </div>
-                      <div class="text-xs text-emerald-200/80 mt-1">{example.person_title}</div>
-                      <div class="text-xs text-emerald-300/70 mt-1">{example.hire_date}</div>
+                      <.badge
+                        variant="secondary"
+                        class="absolute -top-2 -left-2 text-xs px-3 py-1 text-black bg-gradient-to-r from-emerald-400 to-emerald-500 font-semibold shadow-lg"
+                      >
+                        <.icon name="tabler-star-filled" class="size-4 text-black mr-1 -ml-0.5" />
+                        New hire!
+                      </.badge>
                     </div>
-                    <.badge
-                      variant="secondary"
-                      class="absolute -top-2 -left-2 text-xs px-3 py-1 text-black bg-gradient-to-r from-emerald-400 to-emerald-500 font-semibold shadow-lg"
-                    >
-                      <.icon name="tabler-star-filled" class="size-4 text-black mr-1 -ml-0.5" />
-                      Latest hire!
-                    </.badge>
                   </div>
-                </div>
+                <% end %>
               <% end %>
-            <% end %>
+            </div>
             
     <!-- Regular hire cards grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
@@ -1175,7 +1177,15 @@ defmodule AlgoraWeb.HomeLive do
 
   defp get_company_people_examples do
     [
-      # Special 7th hire - prominently featured
+      %{
+        company_name: "Activepieces (YC S22)",
+        company_avatar: "https://avatars.githubusercontent.com/u/99494700?s=48&v=4",
+        person_name: "David",
+        person_avatar: "https://avatars.githubusercontent.com/u/51977119?v=4",
+        person_title: "Software Engineer",
+        hire_date: "July 2025",
+        special: true
+      },
       %{
         company_name: "TraceMachina",
         company_avatar: "https://avatars.githubusercontent.com/u/144973251?s=200&v=4",
@@ -1193,7 +1203,7 @@ defmodule AlgoraWeb.HomeLive do
         person_title: "Lead Engineer"
       },
       %{
-        company_name: "Firecrawl",
+        company_name: "Firecrawl (YC S22)",
         company_avatar: "https://github.com/mendableai.png",
         person_name: "Gergő",
         person_avatar: "https://github.com/mogery.png",
@@ -1214,7 +1224,7 @@ defmodule AlgoraWeb.HomeLive do
         person_title: "Developer Advocate"
       },
       %{
-        company_name: "Trigger.dev",
+        company_name: "Trigger.dev (YC W23)",
         company_avatar: "https://github.com/triggerdotdev.png",
         person_name: "Nick",
         person_avatar: "https://github.com/nicktrn.png",

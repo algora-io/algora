@@ -644,9 +644,7 @@ defmodule Algora.Workspace do
   def list_user_contributions(ids, opts \\ []) do
     tech_stack = opts[:tech_stack] || []
 
-    tech_stack = if "Haskell" in tech_stack, do: ["Haskell"], else: tech_stack
-
-    strict_tech_stack = "Haskell" in tech_stack || opts[:strict_tech_stack]
+    strict_tech_stack = opts[:strict_tech_stack]
 
     query =
       from uc in UserContribution,

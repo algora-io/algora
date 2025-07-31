@@ -57,6 +57,14 @@ defmodule Algora.Cloud do
     call(AlgoraCloud, :token, [])
   end
 
+  def filter_featured_txs(transactions) do
+    if :code.which(AlgoraCloud) == :non_existing do
+      transactions
+    else
+      apply(AlgoraCloud, :filter_featured_txs, [transactions])
+    end
+  end
+
   defp call(module, function, args) do
     if :code.which(module) == :non_existing do
       # TODO: call algora API

@@ -439,7 +439,9 @@ defmodule Algora.Payments do
 
     query = from q in query, limit: ^opts[:limit]
 
-    Repo.all(query)
+    query
+    |> Repo.all()
+    |> Algora.Cloud.filter_featured_txs()
   end
 
   def list_received_transactions(user_id, opts \\ []) do
@@ -469,7 +471,9 @@ defmodule Algora.Payments do
 
     query = from q in query, limit: ^opts[:limit]
 
-    Repo.all(query)
+    query
+    |> Repo.all()
+    |> Algora.Cloud.filter_featured_txs()
   end
 
   @spec enqueue_pending_transfers(user_id :: String.t()) :: {:ok, nil} | {:error, term()}
@@ -879,6 +883,7 @@ defmodule Algora.Payments do
     transactions =
       tx_query
       |> Repo.all()
+      |> Algora.Cloud.filter_featured_txs()
       |> Enum.reduce(%{}, fn tx, acc ->
         # Group transactions by bounty_id when repository is null and bounty_id exists
         if tx.bounty_id && !tx.ticket.repository do

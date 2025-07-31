@@ -53,6 +53,7 @@ defmodule Algora.Accounts.User do
     field :is_admin, :boolean, default: false
     field :contract_signed, :boolean, default: false
     field :last_active_at, :utc_datetime_usec
+    field :last_job_match_email_at, :utc_datetime_usec
 
     field :seeking_bounties, :boolean, default: false
     field :seeking_contracts, :boolean, default: false
@@ -138,6 +139,7 @@ defmodule Algora.Accounts.User do
     has_one :heatmap, Algora.Workspace.UserHeatmap, foreign_key: :user_id
 
     has_many :media, UserMedia
+    has_many :job_matches, Algora.Matches.JobMatch, foreign_key: :user_id
 
     timestamps()
   end

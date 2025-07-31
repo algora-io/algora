@@ -172,6 +172,7 @@ defmodule Algora.Matches do
     list_job_matches(
       user_id: user_id,
       status: [:approved, :highlighted],
+      order_by: [asc: :candidate_approved_at, asc: :candidate_bookmarked_at, desc: :candidate_discarded_at],
       preload: [job_posting: :user]
     )
   end

@@ -150,6 +150,14 @@ defmodule AlgoraWeb.HomeLive do
                         <.icon name="tabler-star-filled" class="size-4 text-black mr-1 -ml-0.5" />
                         New hire!
                       </.badge>
+
+                      <%= if String.contains?(example.company_name, "YC") do %>
+                        <img
+                          src={~p"/images/logos/yc.svg"}
+                          alt="Y Combinator"
+                          class="absolute -top-2 -right-2 size-6 opacity-90"
+                        />
+                      <% end %>
                     </div>
                   </div>
                 <% end %>
@@ -179,12 +187,29 @@ defmodule AlgoraWeb.HomeLive do
                       </div>
                       <div class="text-xs text-muted-foreground mt-1">{example.person_title}</div>
                     </div>
-                    <.badge
-                      variant="secondary"
-                      class="absolute -top-2 -left-2 text-xs px-2 py-1 text-emerald-400 bg-emerald-950"
-                    >
-                      Full-time hire!
-                    </.badge>
+                    <%= if String.contains?(example.company_name, "Permit.io") or String.contains?(example.company_name, "Prefix.dev") or String.contains?(example.company_name, "Twenty") do %>
+                      <.badge
+                        variant="secondary"
+                        class="absolute -top-2 -left-2 text-xs px-2 py-1 text-emerald-400 bg-emerald-950"
+                      >
+                        Contract hire!
+                      </.badge>
+                    <% else %>
+                      <.badge
+                        variant="secondary"
+                        class="absolute -top-2 -left-2 text-xs px-2 py-1 text-emerald-400 bg-emerald-950"
+                      >
+                        Full-time hire!
+                      </.badge>
+                    <% end %>
+
+                    <%= if String.contains?(example.company_name, "YC") do %>
+                      <img
+                        src={~p"/images/logos/yc.svg"}
+                        alt="Y Combinator"
+                        class="absolute -top-2 -right-2 size-6 opacity-90"
+                      />
+                    <% end %>
                   </div>
                 <% end %>
               <% end %>
@@ -194,14 +219,8 @@ defmodule AlgoraWeb.HomeLive do
 
         <section class="relative isolate pb-16 sm:pb-40">
           <div class="mx-auto max-w-7xl px-6 lg:px-8 pt-24 xl:pt-0">
-            <img
-              src={~p"/images/logos/yc.svg"}
-              class="h-16 sm:h-24 mx-auto"
-              alt="Y Combinator Logo"
-              loading="lazy"
-            />
             <h2 class="mt-4 sm:mt-8 font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-semibold tracking-tight text-foreground text-center mb-4 !leading-[1.25]">
-              Trusted by <br class="md:hidden" /> open source YC founders
+              Trusted by <br class="md:hidden" /> open source founders
             </h2>
 
             <div class="pt-4 sm:pt-8 grid grid-cols-1 md:grid-cols-2 gap-8 px-4">
@@ -1178,24 +1197,6 @@ defmodule AlgoraWeb.HomeLive do
   defp get_company_people_examples do
     [
       %{
-        company_name: "Activepieces (YC S22)",
-        company_avatar: "https://avatars.githubusercontent.com/u/99494700?s=48&v=4",
-        person_name: "David",
-        person_avatar: "https://avatars.githubusercontent.com/u/51977119?v=4",
-        person_title: "Software Engineer",
-        hire_date: "July 2025",
-        special: true
-      },
-      %{
-        company_name: "TraceMachina",
-        company_avatar: "https://avatars.githubusercontent.com/u/144973251?s=200&v=4",
-        person_name: "Tom",
-        person_avatar: "https://avatars.githubusercontent.com/u/38532?v=4",
-        person_title: "Staff Engineer",
-        hire_date: "June 2025",
-        special: true
-      },
-      %{
         company_name: "Golem Cloud",
         company_avatar: "https://github.com/golemcloud.png",
         person_name: "Maxim",
@@ -1220,7 +1221,7 @@ defmodule AlgoraWeb.HomeLive do
         company_name: "Hanko",
         company_avatar: "https://avatars.githubusercontent.com/u/20222142?v=4",
         person_name: "Ashutosh",
-        person_avatar: "https://avatars.githubusercontent.com/u/62984427?v=4",
+        person_avatar: "https://algora-console.fly.storage.tigris.dev/avatars/Ashutosh-Bhadauriya.jpeg",
         person_title: "Developer Advocate"
       },
       %{
@@ -1237,6 +1238,67 @@ defmodule AlgoraWeb.HomeLive do
         person_name: "Kiryl",
         person_avatar: "https://algora.io/asset/storage/v1/object/public/images/user/clg4rtl2n0002jv0fg30lto6l",
         person_title: "Founding Engineer"
+      },
+      %{
+        company_name: "Forge Code",
+        company_avatar: "https://avatars.githubusercontent.com/u/197551910?s=200&v=4",
+        person_name: "Sandipsinh",
+        person_avatar: "https://algora-console.fly.storage.tigris.dev/avatars/ssddOnTop.jpeg",
+        person_title: "Software Engineer"
+      },
+      %{
+        company_name: "Twenty (YC S22)",
+        company_avatar: "https://github.com/twentyhq.png",
+        person_name: "Neo",
+        person_avatar: "https://github.com/neo773.png",
+        person_title: "Software Engineer"
+      },
+      %{
+        company_name: "Tailcall",
+        company_avatar:
+          "https://algora.io/asset/storage/v1/object/public/images/org/cli0b0kdt0000mh0fngt4r4bk-1741007407053",
+        person_name: "Panagiotis",
+        person_avatar: "https://github.com/karatakis.png",
+        person_title: "Software Engineer"
+      },
+      %{
+        company_name: "TraceMachina",
+        company_avatar: "https://avatars.githubusercontent.com/u/144973251?s=200&v=4",
+        person_name: "Tom",
+        person_avatar: "https://avatars.githubusercontent.com/u/38532?v=4",
+        person_title: "Staff Engineer",
+        hire_date: "June 2025",
+        special: true
+      },
+      %{
+        company_name: "Activepieces (YC S22)",
+        company_avatar: "https://avatars.githubusercontent.com/u/99494700?s=48&v=4",
+        person_name: "David",
+        person_avatar: "https://avatars.githubusercontent.com/u/51977119?v=4",
+        person_title: "Software Engineer",
+        hire_date: "July 2025",
+        special: true
+      },
+      %{
+        company_name: "Permit.io",
+        company_avatar: "https://github.com/permitio.png",
+        person_name: "David",
+        person_avatar: "https://github.com/daveads.png",
+        person_title: "Software Engineer"
+      },
+      %{
+        company_name: "Shuttle (YC S20)",
+        company_avatar: "https://app.algora.io/asset/storage/v1/object/public/images/org/shuttle.png",
+        person_name: "Jon",
+        person_avatar: "https://github.com/jonaro00.png",
+        person_title: "Software Engineer"
+      },
+      %{
+        company_name: "Prefix.dev",
+        company_avatar: "https://github.com/prefix-dev.png",
+        person_name: "Denizhan",
+        person_avatar: "https://algora-console.fly.storage.tigris.dev/avatars/zelosleone.jpeg",
+        person_title: "Software Engineer"
       }
     ]
   end

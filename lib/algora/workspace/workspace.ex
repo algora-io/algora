@@ -98,7 +98,8 @@ defmodule Algora.Workspace do
         where: t.number == ^number,
         where: r.name == ^repo,
         where: u.provider_login == ^owner,
-        preload: [repository: {r, user: u}]
+        preload: [repository: {r, user: u}],
+        limit: 1
       )
     )
   end
@@ -643,9 +644,7 @@ defmodule Algora.Workspace do
   def list_user_contributions(ids, opts \\ []) do
     tech_stack = opts[:tech_stack] || []
 
-    tech_stack = if "Haskell" in tech_stack, do: ["Haskell"], else: tech_stack
-
-    strict_tech_stack = "Haskell" in tech_stack || opts[:strict_tech_stack]
+    strict_tech_stack = opts[:strict_tech_stack]
 
     query =
       from uc in UserContribution,

@@ -227,7 +227,7 @@ defmodule AlgoraWeb.Components.Footer do
 
             <div class="flex flex-col gap-2">
               <.link
-                class="flex w-max items-center gap-2 rounded-full border border-gray-700 py-2 pl-2 pr-3.5 text-xs text-muted-foreground hover:text-foreground transition-colors hover:border-gray-600"
+                class="flex w-max items-center gap-2 rounded-full border border-gray-500 py-2 pl-2 pr-3.5 text-xs text-foreground/90 hover:text-foreground transition-colors hover:border-gray-400"
                 href={"tel:" <> Constants.get(:tel)}
               >
                 <.icon name="tabler-phone-filled" class="size-4" /> Call us

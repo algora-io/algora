@@ -68,6 +68,7 @@ defmodule AlgoraWeb.Components.TechBadge do
   defp icon_class("emacs"), do: "bg-white invert saturate-0"
   defp icon_class("flask"), do: "bg-white invert saturate-0"
   defp icon_class("prisma"), do: "bg-white invert saturate-0"
+  defp icon_class("vercel"), do: "bg-white invert saturate-0"
   defp icon_class(_tech), do: "bg-transparent"
 
   defp normalize(tech) do
@@ -231,7 +232,8 @@ defmodule AlgoraWeb.Components.TechBadge do
       "Prisma",
       "TailwindCSS",
       "tRPC",
-      "Clickhouse"
+      "Clickhouse",
+      "Vercel"
     ]
   end
 end

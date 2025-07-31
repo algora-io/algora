@@ -71,7 +71,7 @@ defmodule AlgoraWeb.OGImageController do
     end
   end
 
-  def generate(conn, %{"path" => path} = params, search_params \\ nil) do
+  def generate(conn, %{"path" => path} = params, search_params \\ "") do
     object_path = Path.join(["og"] ++ path ++ ["og.png"])
     url = Path.join(Algora.S3.bucket_url(), object_path)
 

@@ -169,12 +169,19 @@ defmodule Algora.Matches do
   end
 
   def list_user_approved_matches(user_id) do
-    list_job_matches(
-      user_id: user_id,
-      status: [:approved, :highlighted],
-      order_by: [asc: :candidate_approved_at, asc: :candidate_bookmarked_at, desc: :candidate_discarded_at],
-      preload: [job_posting: :user]
+    JobMatch
+    |> filter_by_user_id(user_id)
+    |> filter_by_status([:approved, :highlighted])
+    |> join(:inner, [m], j in assoc(m, :job_posting), as: :j)
+    |> order_by([m],
+      asc: m.candidate_approved_at,
+      asc: m.candidate_bookmarked_at,
+      desc: m.candidate_discarded_at,
+      asc: fragment("CASE WHEN ? = 'highlighted' THEN 0 WHEN ? = 'approved' THEN 1 ELSE 2 END", m.status, m.status),
+      desc: m.updated_at
     )
+    |> preload(job_posting: :user)
+    |> Repo.all()
   end
 
   # Private helper functions

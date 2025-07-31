@@ -8,9 +8,12 @@ defmodule Algora.Matches.JobMatch do
     field :status, Ecto.Enum, values: [:pending, :discarded, :approved, :highlighted], default: :pending
     field :score, :decimal
     field :notes, :string
-    field :approved_at, :utc_datetime_usec
-    field :bookmarked_at, :utc_datetime_usec
-    field :discarded_at, :utc_datetime_usec
+    field :company_approved_at, :utc_datetime_usec
+    field :company_bookmarked_at, :utc_datetime_usec
+    field :company_discarded_at, :utc_datetime_usec
+    field :candidate_approved_at, :utc_datetime_usec
+    field :candidate_bookmarked_at, :utc_datetime_usec
+    field :candidate_discarded_at, :utc_datetime_usec
 
     belongs_to :user, Algora.Accounts.User
     belongs_to :job_posting, Algora.Jobs.JobPosting
@@ -20,7 +23,7 @@ defmodule Algora.Matches.JobMatch do
 
   def changeset(job_match, attrs) do
     job_match
-    |> cast(attrs, [:user_id, :job_posting_id, :status, :score, :notes, :approved_at, :bookmarked_at, :discarded_at])
+    |> cast(attrs, [:user_id, :job_posting_id, :status, :score, :notes, :company_approved_at, :company_bookmarked_at, :company_discarded_at, :candidate_approved_at, :candidate_bookmarked_at, :candidate_discarded_at])
     |> validate_required([:user_id, :job_posting_id])
     |> validate_inclusion(:status, [:pending, :discarded, :approved, :highlighted])
     |> foreign_key_constraint(:user_id)

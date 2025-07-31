@@ -27,6 +27,12 @@ defmodule Algora.Matches do
     |> Repo.get!(id)
   end
 
+  def get_job_match_by_id(id) do
+    JobMatch
+    |> preload([:user, :job_posting])
+    |> Repo.get(id)
+  end
+
   def get_job_match(user_id, job_posting_id) do
     JobMatch
     |> where([m], m.user_id == ^user_id and m.job_posting_id == ^job_posting_id)
@@ -162,6 +168,14 @@ defmodule Algora.Matches do
     JobMatch.changeset(job_match, attrs)
   end
 
+  def list_user_approved_matches(user_id) do
+    list_job_matches(
+      user_id: user_id,
+      status: [:approved, :highlighted],
+      preload: [job_posting: :user]
+    )
+  end
+
   # Private helper functions
   defp filter_by_job_posting_id(query, nil), do: query
 
@@ -182,6 +196,10 @@ defmodule Algora.Matches do
   end
 
   defp filter_by_status(query, nil), do: query
+
+  defp filter_by_status(query, status) when is_list(status) do
+    where(query, [m], m.status in ^status)
+  end
 
   defp filter_by_status(query, status) do
     where(query, [m], m.status == ^status)

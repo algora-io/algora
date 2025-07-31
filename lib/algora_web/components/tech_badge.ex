@@ -73,6 +73,9 @@ defmodule AlgoraWeb.Components.TechBadge do
 
   defp normalize(tech) do
     case String.downcase(tech) do
+      "golang" ->
+        "go"
+
       "plpgsql" ->
         "postgresql"
 

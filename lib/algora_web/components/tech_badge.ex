@@ -32,6 +32,8 @@ defmodule AlgoraWeb.Components.TechBadge do
   defp icon_url("firecracker"), do: "/images/logos/firecracker.png"
   defp icon_url("ray"), do: "/images/logos/ray.png"
   defp icon_url("vllm"), do: "/images/logos/vllm.png"
+  defp icon_url("mlir"), do: "/images/logos/mlir.png"
+
   defp icon_url("huggingface"), do: "/images/logos/huggingface.png"
   defp icon_url("youtube"), do: "/images/logos/youtube.png"
   defp icon_url("tiktok"), do: "/images/logos/tiktok.png"
@@ -239,7 +241,8 @@ defmodule AlgoraWeb.Components.TechBadge do
       "TailwindCSS",
       "tRPC",
       "Clickhouse",
-      "Vercel"
+      "Vercel",
+      "MLIR"
     ]
   end
 end

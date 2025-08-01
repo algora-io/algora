@@ -137,6 +137,7 @@ defmodule AlgoraWeb.Router do
   scope "/api", AlgoraWeb.API do
     pipe_through :api
     post "/store_session", StoreSessionController, :create
+    get "/profile/:user_handle", ProfileController, :show
 
     # Legacy tRPC endpoints
     scope "/trpc" do

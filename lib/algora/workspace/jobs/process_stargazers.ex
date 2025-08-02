@@ -1,7 +1,7 @@
 defmodule Algora.Workspace.Jobs.ProcessStargazers do
   @moduledoc false
   use Oban.Worker,
-    queue: :sync_contribution,
+    queue: :internal_par,
     max_attempts: 3
 
   import Ecto.Query

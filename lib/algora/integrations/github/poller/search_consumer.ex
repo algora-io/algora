@@ -1,6 +1,6 @@
 defmodule Algora.Github.Poller.SearchConsumer do
   @moduledoc false
-  use Oban.Worker, queue: :search_consumers
+  use Oban.Worker, queue: :background
 
   alias Algora.Accounts
   alias Algora.Bounties

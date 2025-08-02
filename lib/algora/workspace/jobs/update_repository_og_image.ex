@@ -1,6 +1,6 @@
 defmodule Algora.Workspace.Jobs.UpdateRepositoryOgImage do
   @moduledoc false
-  use Oban.Worker, queue: :github_og_image
+  use Oban.Worker, queue: :internal
 
   alias Algora.Repo
   alias Algora.Workspace.Repository

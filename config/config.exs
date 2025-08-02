@@ -44,26 +44,10 @@ config :algora, Oban,
   repo: Algora.ObanRepo,
   get_dynamic_repo: {Algora.Repo, :oban_repo, []},
   queues: [
-    # --- #
-    event_consumers: 1,
-    comment_consumers: 1,
-    search_consumers: 1,
-    delivery_consumers: 1,
-    notify_bounty: 1,
-    notify_tip_intent: 1,
-    notify_claim: 1,
-    transfers: 1,
-    activity_notifier: 1,
-    activity_mailer: 1,
-    campaign_emails: 1,
-    fetch_top_contributions: 1,
-    job_invitations: 1,
-    # --- #
-    github_og_image: 1,
-    notify_transfer: 1,
-    prompt_payout_connect: 1,
-    activity_discord: 1,
-    sync_contribution: 5
+    default: 1,
+    background: 1,
+    internal: 1,
+    internal_par: 5
   ]
 
 # Configures the mailer

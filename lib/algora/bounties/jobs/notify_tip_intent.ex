@@ -1,6 +1,6 @@
 defmodule Algora.Bounties.Jobs.NotifyTipIntent do
   @moduledoc false
-  use Oban.Worker, queue: :notify_tip_intent
+  use Oban.Worker, queue: :default
 
   alias Algora.Github
 

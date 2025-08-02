@@ -1,7 +1,7 @@
 defmodule Algora.Activities.SendEmail do
   @moduledoc false
   use Oban.Worker,
-    queue: :activity_mailer,
+    queue: :background,
     max_attempts: 1,
     tags: ["email", "activities"]
 

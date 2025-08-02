@@ -1,6 +1,6 @@
 defmodule Algora.Bounties.Jobs.NotifyClaim do
   @moduledoc false
-  use Oban.Worker, queue: :notify_claim
+  use Oban.Worker, queue: :default
 
   import Ecto.Query
 

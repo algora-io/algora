@@ -1,7 +1,7 @@
 defmodule Algora.Activities.Notifier do
   @moduledoc false
   use Oban.Worker,
-    queue: :activity_notifier,
+    queue: :background,
     max_attempts: 1
 
   alias Algora.Activities

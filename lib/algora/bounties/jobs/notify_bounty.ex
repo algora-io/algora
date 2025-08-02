@@ -1,7 +1,7 @@
 defmodule Algora.Bounties.Jobs.NotifyBounty do
   @moduledoc false
   use Oban.Worker,
-    queue: :notify_bounty,
+    queue: :default,
     max_attempts: 1
 
   alias Algora.Bounties

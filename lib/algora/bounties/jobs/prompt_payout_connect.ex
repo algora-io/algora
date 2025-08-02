@@ -1,6 +1,6 @@
 defmodule Algora.Bounties.Jobs.PromptPayoutConnect do
   @moduledoc false
-  use Oban.Worker, queue: :prompt_payout_connect
+  use Oban.Worker, queue: :default
 
   import Ecto.Query
 

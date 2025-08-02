@@ -1,7 +1,7 @@
 defmodule Algora.Workspace.Jobs.ImportContributor do
   @moduledoc false
   use Oban.Worker,
-    queue: :fetch_top_contributions,
+    queue: :internal,
     max_attempts: 3
 
   alias Algora.Github

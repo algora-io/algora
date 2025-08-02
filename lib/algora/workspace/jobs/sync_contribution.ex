@@ -1,7 +1,7 @@
 defmodule Algora.Workspace.Jobs.SyncContribution do
   @moduledoc false
   use Oban.Worker,
-    queue: :sync_contribution,
+    queue: :internal_par,
     max_attempts: 2
 
   alias Algora.Github

@@ -1,6 +1,6 @@
 defmodule Algora.Github.Poller.DeliveryConsumer do
   @moduledoc false
-  use Oban.Worker, queue: :delivery_consumers
+  use Oban.Worker, queue: :background
 
   import Ecto.Query
 

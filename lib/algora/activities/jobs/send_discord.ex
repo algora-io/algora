@@ -1,7 +1,7 @@
 defmodule Algora.Activities.SendDiscord do
   @moduledoc false
   use Oban.Worker,
-    queue: :activity_discord,
+    queue: :background,
     tags: ["discord", "activities"]
 
   require Logger

@@ -1,6 +1,6 @@
 defmodule Algora.Bounties.Jobs.NotifyTransfer do
   @moduledoc false
-  use Oban.Worker, queue: :notify_transfer
+  use Oban.Worker, queue: :default
 
   import Ecto.Query
 

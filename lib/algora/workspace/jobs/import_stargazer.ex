@@ -1,7 +1,7 @@
 defmodule Algora.Workspace.Jobs.ImportStargazer do
   @moduledoc false
   use Oban.Worker,
-    queue: :fetch_top_contributions,
+    queue: :internal,
     max_attempts: 3
 
   alias Algora.Github

@@ -858,7 +858,7 @@ defmodule Algora.Workspace do
         end
       end)
 
-    if Enum.any?(results, fn result -> result == :ok end), do: :ok, else: {:error, :failed}
+    if Enum.any?(results, fn result -> result != :ok end), do: {:error, :failed}, else: :ok
   end
 
   defp add_contribution(%{

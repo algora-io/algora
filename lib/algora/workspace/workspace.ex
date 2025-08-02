@@ -787,22 +787,27 @@ defmodule Algora.Workspace do
   end
 
   def fetch_top_contributions(token, provider_logins) when is_list(provider_logins) do
-    with {:ok, contributions} <- Algora.Cloud.top_contributions(provider_logins),
-         {:ok, users} <- ensure_users(token, provider_logins),
-         :ok <- add_contributions(token, users, contributions) do
-      {:ok, contributions}
-    else
-      {:error, reason} ->
-        Logger.error("Failed to fetch contributions for #{inspect(provider_logins)}: #{inspect(reason)}")
-        {:error, reason}
-    end
-  end
+    users_with_contributions = get_users_with_contributions(provider_logins)
+    users_with_contributions_logins = Enum.map(users_with_contributions, & &1.provider_login)
 
-  def fetch_top_contributions_async(token, provider_logins) when is_list(provider_logins) do
-    with {:ok, contributions} <- Algora.Cloud.top_contributions(provider_logins),
+    users_without_contributions = provider_logins -- users_with_contributions_logins
+
+    cloud_result =
+      if Enum.empty?(users_without_contributions) do
+        {:ok, []}
+      else
+        Algora.Cloud.top_contributions(users_without_contributions)
+      end
+
+    with {:ok, cloud_contributions} <- cloud_result,
          {:ok, users} <- ensure_users(token, provider_logins),
-         :ok <- add_contributions_async(token, users, contributions) do
-      {:ok, users}
+         :ok <- add_contributions(token, users, cloud_contributions) do
+      # Always mark users as synced after fetching from Cloud API
+      mark_users_as_synced(users_without_contributions, users)
+
+      existing_contributions = get_existing_contributions(users_with_contributions_logins)
+      all_contributions = existing_contributions ++ cloud_contributions
+      {:ok, all_contributions}
     else
       {:error, reason} ->
         Logger.error("Failed to fetch contributions for #{inspect(provider_logins)}: #{inspect(reason)}")
@@ -858,7 +863,7 @@ defmodule Algora.Workspace do
         end
       end)
 
-    if Enum.any?(results, fn result -> result != :ok end), do: {:error, :failed}, else: :ok
+    if results == [] or Enum.any?(results, fn result -> result == :ok end), do: :ok, else: {:error, :failed}
   end
 
   defp add_contribution(%{
@@ -884,6 +889,74 @@ defmodule Algora.Workspace do
         {:error, reason}, _ -> {:halt, {:error, reason}}
       end)
     end)
+  end
+
+  @spec get_users_with_contributions(list(String.t())) :: list(User.t())
+  defp get_users_with_contributions(provider_logins) do
+    # Get users who either have contributions OR have been marked as synced
+    users_with_contributions =
+      Repo.all(
+        from u in User,
+          join: uc in UserContribution,
+          on: uc.user_id == u.id,
+          where: u.provider == "github",
+          where: u.provider_login in ^provider_logins,
+          distinct: u.id,
+          select: u
+      )
+
+    users_marked_synced =
+      Repo.all(
+        from u in User,
+          where: u.provider == "github",
+          where: u.provider_login in ^provider_logins,
+          where: u.repo_contributions_synced == true,
+          select: u
+      )
+
+    # Combine and deduplicate by id
+    Enum.uniq_by(users_with_contributions ++ users_marked_synced, & &1.id)
+  end
+
+  @spec get_existing_contributions(list(String.t())) :: list(map())
+  defp get_existing_contributions(provider_logins) do
+    Repo.all(
+      from uc in UserContribution,
+        join: u in assoc(uc, :user),
+        join: r in assoc(uc, :repository),
+        join: repo_owner in assoc(r, :user),
+        where: u.provider == "github",
+        where: u.provider_login in ^provider_logins,
+        select: %{
+          provider_login: u.provider_login,
+          repo_name: fragment("? || '/' || ?", repo_owner.provider_login, r.name),
+          contribution_count: uc.contribution_count
+        }
+    )
+  end
+
+  @spec mark_users_as_synced(list(String.t()), list(User.t())) :: :ok
+  defp mark_users_as_synced(users_without_contributions, users) do
+    if not Enum.empty?(users_without_contributions) do
+      Logger.info("Marking users as repo_contributions_synced: #{inspect(users_without_contributions)}")
+
+      # Update all users that were queried from Cloud API to mark them as synced
+      users_map = Enum.group_by(users, & &1.provider_login)
+
+      Enum.each(users_without_contributions, fn provider_login ->
+        case users_map[provider_login] do
+          [user] ->
+            user
+            |> Ecto.Changeset.change(%{repo_contributions_synced: true})
+            |> Repo.update()
+
+          _ ->
+            Logger.warning("User not found for marking as synced: #{provider_login}")
+        end
+      end)
+    end
+
+    :ok
   end
 
   def remove_existing_amount_labels(token, owner, repo, number) do

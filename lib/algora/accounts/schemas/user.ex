@@ -117,6 +117,7 @@ defmodule Algora.Accounts.User do
 
     field :email_recipients, {:array, :map}, default: []
     field :language_contributions_synced, :boolean, default: false
+    field :repo_contributions_synced, :boolean, default: false
 
     has_many :identities, Identity
     has_many :memberships, Member, foreign_key: :user_id

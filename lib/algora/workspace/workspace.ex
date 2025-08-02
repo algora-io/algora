@@ -815,6 +815,32 @@ defmodule Algora.Workspace do
     end
   end
 
+  def fetch_top_contributions_async(token, provider_logins) when is_list(provider_logins) do
+    users_with_contributions = get_users_with_contributions(provider_logins)
+    users_with_contributions_logins = Enum.map(users_with_contributions, & &1.provider_login)
+
+    users_without_contributions = provider_logins -- users_with_contributions_logins
+
+    cloud_result =
+      if Enum.empty?(users_without_contributions) do
+        {:ok, []}
+      else
+        Algora.Cloud.top_contributions(users_without_contributions)
+      end
+
+    with {:ok, cloud_contributions} <- cloud_result,
+         {:ok, users} <- ensure_users(token, provider_logins),
+         :ok <- add_contributions_async(token, users, cloud_contributions) do
+      # Always mark users as synced after fetching from Cloud API
+      mark_users_as_synced(users_without_contributions, users)
+      {:ok, users}
+    else
+      {:error, reason} ->
+        Logger.error("Failed to fetch contributions for #{inspect(provider_logins)}: #{inspect(reason)}")
+        {:error, reason}
+    end
+  end
+
   defp add_contributions_async(_token, users, contributions) do
     users_map = Enum.group_by(users, & &1.provider_login)
 
@@ -836,7 +862,7 @@ defmodule Algora.Workspace do
         end
       end)
 
-    if Enum.any?(results, &match?({:ok, _}, &1)) do
+    if results == [] or Enum.any?(results, &match?({:ok, _}, &1)) do
       :ok
     else
       Logger.error("Failed to add contributions: #{inspect(results)}")

@@ -22,7 +22,8 @@ defmodule Algora.Workspace.Jobs.ImportStargazer do
               user_id: user.id,
               repository_id: repo_id
             }
-          end)
+          end),
+          on_conflict: :nothing
         )
 
       :ok
@@ -42,7 +43,8 @@ defmodule Algora.Workspace.Jobs.ImportStargazer do
               user_id: user.id,
               repository_id: repo_id
             }
-          end)
+          end),
+          on_conflict: :nothing
         )
 
       :ok

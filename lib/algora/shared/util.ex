@@ -268,4 +268,11 @@ defmodule Algora.Util do
     |> Enum.random()
     |> DateTime.from_unix!()
   end
+
+  def compact_org_name(org_name) do
+    # Remove YC batch strings like "YC S24", "YC W23", etc.
+    org_name
+    |> String.replace(~r/\s*\(?YC\s+[a-z]\d{2}\)?\s*/i, "")
+    |> String.trim()
+  end
 end

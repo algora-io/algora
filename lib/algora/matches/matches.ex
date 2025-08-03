@@ -1,11 +1,14 @@
 defmodule Algora.Matches do
   @moduledoc false
 
+  import Ecto.Changeset
   import Ecto.Query, warn: false
 
   alias Algora.Jobs.JobPosting
   alias Algora.Matches.JobMatch
   alias Algora.Repo
+
+  require Logger
 
   def list_job_matches(opts \\ []) do
     order_by_clause = opts[:order_by] || [asc: :updated_at]
@@ -44,6 +47,20 @@ defmodule Algora.Matches do
     %JobMatch{}
     |> JobMatch.changeset(attrs)
     |> Repo.insert()
+  end
+
+  def upsert_job_match(attrs) do
+    case create_job_match(attrs) do
+      {:ok, match} ->
+        Admin.enqueue_job_match_emails(1, user_id: attrs.user_id)
+        {:ok, match}
+
+      {:error, _changeset} ->
+        JobMatch
+        |> Repo.get_by(user_id: attrs.user_id, job_posting_id: attrs.job_posting_id)
+        |> change(%{status: attrs.status})
+        |> Repo.update()
+    end
   end
 
   def fetch_job_matches(job_posting_id) do

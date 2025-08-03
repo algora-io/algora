@@ -152,31 +152,10 @@ defmodule Algora.Accounts do
     |> apply_criteria(criteria)
     |> order_by([earnings: e], desc_nulls_last: e.total_earned)
     |> order_by([u], desc: u.id)
-    |> select([u, earnings: e, transactions: t, projects: p], %{
-      type: u.type,
-      id: u.id,
-      handle: u.handle,
-      name: u.name,
-      provider_login: u.provider_login,
-      provider_meta: u.provider_meta,
-      linkedin_url: u.linkedin_url,
-      linkedin_meta: u.linkedin_meta,
-      employment_info: u.employment_info,
-      location_iso_lvl4: u.location_iso_lvl4,
-      avatar_url: u.avatar_url,
-      bio: u.bio,
-      system_bio: u.system_bio,
-      system_tags: u.system_tags,
-      min_compensation: u.min_compensation,
-      location: u.location,
-      country: u.country,
-      tech_stack: u.tech_stack,
+    |> select_merge([u, earnings: e, transactions: t, projects: p], %{
       total_earned: Algora.SQL.money_or_zero(e.total_earned),
       transactions_count: coalesce(t.transactions_count, 0),
-      contributed_projects_count: coalesce(p.projects_count, 0),
-      hourly_rate_min: u.hourly_rate_min,
-      hourly_rate_max: u.hourly_rate_max,
-      hours_per_week: u.hours_per_week
+      contributed_projects_count: coalesce(p.projects_count, 0)
     })
     |> Repo.all()
     |> Enum.map(&User.after_load/1)

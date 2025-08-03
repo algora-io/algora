@@ -41,13 +41,12 @@ config :algora, AlgoraWeb.Endpoint,
 
 config :algora, Oban,
   notifier: Oban.Notifiers.PG,
-  repo: Algora.ObanRepo,
-  get_dynamic_repo: {Algora.Repo, :oban_repo, []},
+  repo: Algora.Repo,
   queues: [
-    default: 1,
-    background: 1,
-    internal: 1,
-    internal_par: 5
+    default: [limit: 1, dispatch_cooldown: 5],
+    background: [limit: 1, dispatch_cooldown: 50],
+    internal: [limit: 1, dispatch_cooldown: 100],
+    internal_par: [limit: 1, dispatch_cooldown: 500]
   ]
 
 # Configures the mailer

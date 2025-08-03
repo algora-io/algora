@@ -33,15 +33,6 @@ config :algora, Algora.Repo,
   migration_primary_key: [type: :string],
   migration_timestamps: [type: :utc_datetime_usec]
 
-# Configure dedicated Oban database repository
-config :algora, Algora.ObanRepo,
-  url: System.get_env("DATABASE_URL"),
-  stacktrace: true,
-  show_sensitive_data_on_connection_error: true,
-  pool_size: 10,
-  migration_primary_key: [type: :string],
-  migration_timestamps: [type: :utc_datetime_usec]
-
 config :ex_aws,
   json_codec: Jason,
   access_key_id: System.get_env("AWS_ACCESS_KEY_ID"),

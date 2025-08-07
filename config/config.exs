@@ -44,9 +44,9 @@ config :algora, Oban,
   repo: Algora.Repo,
   queues: [
     default: [limit: 1, dispatch_cooldown: 5],
-    background: [limit: 1, dispatch_cooldown: 50],
+    background: [limit: 5, dispatch_cooldown: 50],
     internal: [limit: 1, dispatch_cooldown: 100],
-    internal_par: [limit: 1, dispatch_cooldown: 500]
+    internal_par: [limit: 5, dispatch_cooldown: 100]
   ]
 
 # Configures the mailer

@@ -1271,6 +1271,15 @@ defmodule AlgoraWeb.HomeLive do
         special: true
       },
       %{
+        company_name: "TraceMachina",
+        company_avatar: "https://avatars.githubusercontent.com/u/144973251?s=200&v=4",
+        person_name: "Aman",
+        person_avatar: "https://avatars.githubusercontent.com/u/53134669?v=4",
+        person_title: "Software Engineer",
+        hire_date: "July 2025",
+        special: true
+      },
+      %{
         company_name: "Activepieces (YC S22)",
         company_avatar: "https://avatars.githubusercontent.com/u/99494700?s=48&v=4",
         person_name: "David",

@@ -206,7 +206,7 @@ defmodule Algora.Workspace do
   def ensure_user_by_provider_id(token, provider_id) do
     case Repo.get_by(User, provider: "github", provider_id: to_string(provider_id)) do
       %User{} = user -> {:ok, user}
-      nil -> create_user_from_github(token, provider_id)
+      nil -> create_user_from_github_by_id(token, provider_id)
     end
   end
 
@@ -246,6 +246,14 @@ defmodule Algora.Workspace do
 
   def create_user_from_github(token, owner) do
     with {:ok, user_data} <- Github.get_user_by_username(token, owner) do
+      user_data
+      |> User.github_changeset()
+      |> Repo.insert()
+    end
+  end
+
+  def create_user_from_github_by_id(token, id) do
+    with {:ok, user_data} <- Github.get_user(token, id) do
       user_data
       |> User.github_changeset()
       |> Repo.insert()

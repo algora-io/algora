@@ -52,7 +52,7 @@ defmodule Algora.Matches do
   def upsert_job_match(attrs) do
     case create_job_match(attrs) do
       {:ok, match} ->
-        Admin.enqueue_job_match_emails(1, user_id: attrs.user_id)
+        # Admin.enqueue_job_match_emails(1, user_id: attrs.user_id)
         {:ok, match}
 
       {:error, _changeset} ->

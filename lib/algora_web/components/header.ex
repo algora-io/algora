@@ -5,12 +5,12 @@ defmodule AlgoraWeb.Components.Header do
 
   import AlgoraWeb.CoreComponents
 
-  defp nav_links do
-    [
-      %{name: "Bounties", path: ~p"/bounties"},
-      %{name: "Docs", path: ~p"/docs"}
-    ]
-  end
+  # defp nav_links do
+  #   [
+  #     %{name: "Bounties", path: ~p"/bounties"},
+  #     %{name: "Docs", path: ~p"/docs"}
+  #   ]
+  # end
 
   attr :class, :string, default: nil
   attr :hide_banner, :boolean, default: false

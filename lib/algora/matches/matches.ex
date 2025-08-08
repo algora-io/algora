@@ -147,7 +147,7 @@ defmodule Algora.Matches do
         }
       end)
 
-    Repo.transact(fn ->
+    Repo.tx(fn ->
       # Delete existing matches for this job posting
       Repo.delete_all(
         from(m in JobMatch,

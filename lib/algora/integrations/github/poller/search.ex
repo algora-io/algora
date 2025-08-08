@@ -109,7 +109,7 @@ defmodule Algora.Github.Poller.Search do
   defp process_batch([], state), do: {:ok, state.cursor}
 
   defp process_batch(tickets, state) do
-    Repo.transact(fn ->
+    Repo.tx(fn ->
       with :ok <- process_tickets(tickets, state) do
         timestamps =
           tickets

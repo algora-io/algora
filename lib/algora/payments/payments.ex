@@ -478,7 +478,7 @@ defmodule Algora.Payments do
 
   @spec enqueue_pending_transfers(user_id :: String.t()) :: {:ok, nil} | {:error, term()}
   def enqueue_pending_transfers(user_id) do
-    Repo.transact(fn ->
+    Repo.tx(fn ->
       with {:ok, _account} <- fetch_active_account(user_id),
            credits = list_payable_credits(user_id),
            :ok <-
@@ -590,7 +590,7 @@ defmodule Algora.Payments do
         %Stripe.Charge{id: charge_id, captured: false, payment_intent: payment_intent_id},
         group_id
       ) do
-    Repo.transact(fn ->
+    Repo.tx(fn ->
       Repo.update_all(from(t in Transaction, where: t.group_id == ^group_id, where: t.type == :charge),
         set: [
           status: :requires_capture,
@@ -611,7 +611,7 @@ defmodule Algora.Payments do
         %Stripe.Charge{id: charge_id, captured: true, payment_intent: payment_intent_id},
         group_id
       ) do
-    Repo.transact(fn ->
+    Repo.tx(fn ->
       Repo.update_all(from(t in Transaction, where: t.group_id == ^group_id, where: t.type == :charge),
         set: [
           status: :succeeded,
@@ -642,7 +642,7 @@ defmodule Algora.Payments do
         %Stripe.Charge{id: charge_id, captured: true, payment_intent: payment_intent_id},
         group_id
       ) do
-    Repo.transact(fn ->
+    Repo.tx(fn ->
       {_, txs} =
         Repo.update_all(from(t in Transaction, where: t.group_id == ^group_id, select: t),
           set: [
@@ -771,7 +771,7 @@ defmodule Algora.Payments do
         amount,
         recipient
       ) do
-    Repo.transact(fn ->
+    Repo.tx(fn ->
       tx = Repo.get_by(Transaction, group_id: group_id, type: :charge, status: :succeeded)
 
       user = Repo.get_by(User, id: tx.user_id)

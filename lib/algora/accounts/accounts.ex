@@ -320,7 +320,7 @@ defmodule Algora.Accounts do
     github_user = Repo.get_by(User, provider: "github", provider_id: to_string(info["id"]))
     email_user = Repo.get_by(User, email: primary_email)
 
-    Repo.transact(fn ->
+    Repo.tx(fn ->
       Repo.delete_all(from(i in Identity, where: i.provider == "github" and i.provider_id == ^to_string(info["id"])))
 
       with true <- github_user && github_user.id != user.id,

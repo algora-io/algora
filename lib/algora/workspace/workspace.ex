@@ -499,7 +499,7 @@ defmodule Algora.Workspace do
       [] ->
         with {:ok, contributors} <-
                Github.list_repository_contributors(token, repository.user.provider_login, repository.name) do
-          Repo.transact(fn ->
+          Repo.tx(fn ->
             Enum.reduce_while(contributors, {:ok, []}, fn contributor, {:ok, acc} ->
               case create_contributor_from_github(repository, contributor) do
                 {:ok, created} -> {:cont, {:ok, [created | acc]}}
@@ -915,7 +915,7 @@ defmodule Algora.Workspace do
   end
 
   def ensure_users(token, provider_logins) do
-    Repo.transact(fn ->
+    Repo.tx(fn ->
       provider_logins
       |> Enum.map(&ensure_user(token, &1))
       |> Enum.reduce_while({:ok, []}, fn

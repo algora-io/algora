@@ -103,7 +103,7 @@ defmodule Algora.Github.Poller.Deliveries do
   defp process_batch([], state), do: {:ok, state.cursor}
 
   defp process_batch(deliveries, state) do
-    Repo.transact(fn ->
+    Repo.tx(fn ->
       with :ok <- process_deliveries(deliveries, state) do
         update_last_polled(state.cursor, List.first(deliveries))
       end

@@ -299,7 +299,7 @@ for user <- [aly, big_head, jian_yang, john] do
   credit_id = Nanoid.generate()
   amount = Money.new!(Enum.random(1..10) * 10_000, :USD)
 
-  Repo.transact(fn ->
+  Repo.tx(fn ->
     insert!(:transaction, %{
       id: debit_id,
       linked_transaction_id: credit_id,
@@ -462,7 +462,7 @@ for {repo_name, issues} <- repos do
             net_paid = Money.mult!(bounty.amount, Decimal.mult(share, pct_paid))
 
             # Create transaction pairs for paid claims
-            Repo.transact(fn ->
+            Repo.tx(fn ->
               insert!(:transaction, %{
                 id: debit_id,
                 linked_transaction_id: credit_id,

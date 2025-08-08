@@ -137,7 +137,7 @@ defmodule Algora.Jobs do
 
     job_posting = Repo.preload(job_posting, :user)
 
-    Repo.transact(fn ->
+    Repo.tx(fn ->
       with {:ok, _charge} <-
              %Transaction{}
              |> change(%{

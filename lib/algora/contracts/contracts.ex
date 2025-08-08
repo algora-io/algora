@@ -363,7 +363,7 @@ defmodule Algora.Contracts do
       amount: transfer_amount
     }
 
-    Repo.transact(fn ->
+    Repo.tx(fn ->
       with {:ok, charge} <- maybe_initialize_charge(charge_params),
            {:ok, debit} <- initialize_debit(debit_params),
            {:ok, credit} <- initialize_credit(credit_params),

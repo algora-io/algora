@@ -57,7 +57,7 @@ defmodule Algora.Organizations do
         org -> org.handle
       end
 
-    Repo.transact(fn ->
+    Repo.tx(fn ->
       {:ok, user} =
         case Repo.get_by(User, email: params.user.email) do
           nil ->
@@ -352,7 +352,7 @@ defmodule Algora.Organizations do
          {:ok, owner} <- Workspace.ensure_user(token, repo_owner),
          {:ok, _contributors} <- Workspace.ensure_contributors(token, repo),
          {:ok, tech_stack} <- Workspace.ensure_repo_tech_stack(token, repo) do
-      Repo.transact(fn _ ->
+      Repo.tx(fn _ ->
         with {:ok, org} <-
                Repo.insert(%User{
                  type: :organization,

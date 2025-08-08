@@ -10,7 +10,7 @@ defmodule Algora.RepoTest do
       original_email = user.email
 
       {:ok, result} =
-        Repo.transact(fn _repo ->
+        Repo.tx(fn _repo ->
           {:ok, updated_user} = user |> Ecto.Changeset.change(%{email: "success@example.com"}) |> Repo.update()
           {:ok, updated_user}
         end)
@@ -25,7 +25,7 @@ defmodule Algora.RepoTest do
       original_email = user.email
 
       {:ok, result} =
-        Repo.transact(fn _repo ->
+        Repo.tx(fn _repo ->
           {:ok, _updated_user} = user |> Ecto.Changeset.change(%{email: "ok@example.com"}) |> Repo.update()
           :ok
         end)
@@ -41,7 +41,7 @@ defmodule Algora.RepoTest do
 
       # Test plain error atom
       {:error, result} =
-        Repo.transact(fn _repo ->
+        Repo.tx(fn _repo ->
           {:ok, _updated_user} = user |> Ecto.Changeset.change(%{email: "error@example.com"}) |> Repo.update()
           :error
         end)
@@ -51,7 +51,7 @@ defmodule Algora.RepoTest do
 
       # Test error tuple
       {:error, result} =
-        Repo.transact(fn _repo ->
+        Repo.tx(fn _repo ->
           {:ok, _updated_user} = user |> Ecto.Changeset.change(%{email: "error_tuple@example.com"}) |> Repo.update()
           {:error, "reason"}
         end)
@@ -61,7 +61,7 @@ defmodule Algora.RepoTest do
 
       # Test unexpected return value
       {:error, result} =
-        Repo.transact(fn _repo ->
+        Repo.tx(fn _repo ->
           {:ok, _updated_user} = user |> Ecto.Changeset.change(%{email: "unexpected@example.com"}) |> Repo.update()
           "unexpected"
         end)
@@ -75,7 +75,7 @@ defmodule Algora.RepoTest do
       original_email = user.email
 
       assert_raise RuntimeError, "boom", fn ->
-        Repo.transact(fn _repo ->
+        Repo.tx(fn _repo ->
           {:ok, _updated_user} = user |> Ecto.Changeset.change(%{email: "raised@example.com"}) |> Repo.update()
           raise "boom"
         end)
@@ -89,11 +89,11 @@ defmodule Algora.RepoTest do
       original_email = user.email
 
       {:ok, result} =
-        Repo.transact(fn _repo ->
+        Repo.tx(fn _repo ->
           {:ok, user1} = user |> Ecto.Changeset.change(%{email: "outer@example.com"}) |> Repo.update()
 
           {:ok, user2} =
-            Repo.transact(fn _repo ->
+            Repo.tx(fn _repo ->
               user1 |> Ecto.Changeset.change(%{email: "inner@example.com"}) |> Repo.update()
             end)
 
@@ -110,10 +110,10 @@ defmodule Algora.RepoTest do
       original_email = user.email
 
       {:error, result} =
-        Repo.transact(fn _repo ->
+        Repo.tx(fn _repo ->
           {:ok, user1} = user |> Ecto.Changeset.change(%{email: "outer@example.com"}) |> Repo.update()
 
-          Repo.transact(fn _repo ->
+          Repo.tx(fn _repo ->
             {:ok, _user2} = user1 |> Ecto.Changeset.change(%{email: "inner@example.com"}) |> Repo.update()
             {:error, :inner_failed}
           end)
@@ -130,11 +130,11 @@ defmodule Algora.RepoTest do
       original_email = user.email
 
       {:error, result} =
-        Repo.transact(fn _repo ->
+        Repo.tx(fn _repo ->
           {:ok, user1} = user |> Ecto.Changeset.change(%{email: "outer@example.com"}) |> Repo.update()
 
           {:ok, _user2} =
-            Repo.transact(fn _repo ->
+            Repo.tx(fn _repo ->
               user1 |> Ecto.Changeset.change(%{email: "inner@example.com"}) |> Repo.update()
             end)
 

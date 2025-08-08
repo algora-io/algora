@@ -53,8 +53,8 @@ defmodule Algora.Repo do
     fetch_one(query, opts)
   end
 
-  @spec transact(fun(), Keyword.t()) :: term()
-  def transact(fun, opts \\ []) do
+  @spec tx(fun(), Keyword.t()) :: term()
+  def tx(fun, opts \\ []) do
     transaction(
       fn repo ->
         result =

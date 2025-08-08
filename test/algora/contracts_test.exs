@@ -311,7 +311,7 @@ defmodule Algora.ContractsTest do
   #     assert Decimal.equal?(fee_data.current_fee, Decimal.new("0.19"))
   #     assert fee_data.progress == Decimal.new("0.00")
 
-  #     Repo.transact(fn ->
+  #     Repo.tx(fn ->
   #       debit_id = Nanoid.generate()
   #       credit_id = Nanoid.generate()
 

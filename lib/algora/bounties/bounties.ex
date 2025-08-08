@@ -135,7 +135,7 @@ defmodule Algora.Bounties do
     command_id = opts[:command_id]
     shared_with = opts[:shared_with] || []
 
-    Repo.transact(fn ->
+    Repo.tx(fn ->
       with {:ok, %{installation_id: installation_id, token: token}} <-
              Workspace.resolve_installation_and_token(opts[:installation_id], repo_owner, creator),
            {:ok, ticket} <- Workspace.ensure_ticket(token, repo_owner, repo_name, number),
@@ -213,7 +213,7 @@ defmodule Algora.Bounties do
   def create_bounty(%{creator: creator, owner: owner, amount: amount, title: title, description: description}, opts) do
     shared_with = opts[:shared_with] || []
 
-    Repo.transact(fn ->
+    Repo.tx(fn ->
       with {:ok, ticket} <-
              %Ticket{type: :issue}
              |> Ticket.changeset(%{title: title, description: description})
@@ -564,7 +564,7 @@ defmodule Algora.Bounties do
         },
         opts \\ []
       ) do
-    Repo.transact(fn ->
+    Repo.tx(fn ->
       with {:ok, %{installation_id: installation_id, token: token}} <-
              Workspace.resolve_installation_and_token(opts[:installation_id], source_repo_owner, user),
            {:ok, target} <- Workspace.ensure_ticket(token, target_repo_owner, target_repo_name, target_number),
@@ -733,7 +733,7 @@ defmodule Algora.Bounties do
         ) ::
           {:ok, String.t()} | {:error, atom()}
   def create_tip(%{creator: creator, owner: owner, recipient: recipient, amount: amount}, opts \\ []) do
-    Repo.transact(fn ->
+    Repo.tx(fn ->
       case do_create_tip(%{creator: creator, owner: owner, recipient: recipient, amount: amount}, opts) do
         {:ok, tip} ->
           create_payment_session(
@@ -957,7 +957,7 @@ defmodule Algora.Bounties do
 
     bounty_id = if bounty = opts[:bounty], do: bounty.id
 
-    Repo.transact(fn ->
+    Repo.tx(fn ->
       with {:ok, _charge} <-
              initialize_charge(%{
                id: Nanoid.generate(),
@@ -1019,7 +1019,7 @@ defmodule Algora.Bounties do
 
     bounty_id = if bounty = opts[:bounty], do: bounty.id
 
-    Repo.transact(fn ->
+    Repo.tx(fn ->
       with {:ok, _charge} <-
              initialize_charge(%{
                id: Nanoid.generate(),
@@ -1588,7 +1588,7 @@ defmodule Algora.Bounties do
 
   @spec delete_bounty(Bounty.t()) :: {:ok, Bounty.t()} | {:error, Ecto.Changeset.t()}
   def delete_bounty(%Bounty{} = bounty) do
-    Repo.transact(fn ->
+    Repo.tx(fn ->
       with {:ok, updated_bounty} <-
              bounty
              |> Bounty.changeset(%{status: :cancelled})

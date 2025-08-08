@@ -3,6 +3,11 @@ defmodule Algora.MoneyUtils do
   def fmt_precise(money), do: Money.to_string(money, no_fraction_if_integer: false)
   def fmt_precise!(money), do: Money.to_string!(money, no_fraction_if_integer: false)
 
+  def fmt_compact(money) do
+    # TODO: handle other currencies
+    "$" <> Algora.Util.format_number_compact(money.amount)
+  end
+
   @spec split_evenly(Money.t(), non_neg_integer()) :: [Money.t()]
   def split_evenly(_money, 0), do: []
 

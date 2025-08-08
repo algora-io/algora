@@ -84,8 +84,8 @@ defmodule AlgoraWeb.Components.UI.Button do
     size: %{
       "default" => "h-9 px-4 py-2 text-sm",
       "sm" => "h-8 rounded-md px-3 text-xs",
-      "lg" => "h-10 rounded-md px-8 text-base",
-      "xl" => "h-12 rounded-md px-10 text-lg",
+      "lg" => "h-10 rounded-md px-4 lg:px-8 text-sm lg:text-base",
+      "xl" => "h-12 rounded-md px-5 lg:px-10 text-base lg:text-lg",
       "icon" => "h-9 w-9"
     }
   }

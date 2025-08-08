@@ -111,6 +111,7 @@ defmodule Algora.Accounts.User do
     field :system_bio, :string
     field :system_bio_meta, :map, default: %{}
     field :system_tags, {:array, :string}, default: []
+    field :readme, :string
 
     field :location_meta, :map
     field :location_iso_lvl4, :string

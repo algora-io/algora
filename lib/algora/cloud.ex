@@ -45,6 +45,14 @@ defmodule Algora.Cloud do
     call(AlgoraCloud.Talent.Jobs.SendJobMatchEmail, :send, [attrs])
   end
 
+  def notify_candidate_like(attrs) do
+    call(AlgoraCloud.Talent.Jobs.SendCandidateLikeEmail, :send, [attrs])
+  end
+
+  def notify_company_like(attrs) do
+    call(AlgoraCloud.Talent.Jobs.SendCompanyLikeEmail, :send, [attrs])
+  end
+
   def start do
     call(AlgoraCloud, :start, [])
   end

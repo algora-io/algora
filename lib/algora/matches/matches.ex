@@ -180,9 +180,33 @@ defmodule Algora.Matches do
   end
 
   def update_job_match(%JobMatch{} = job_match, attrs) do
-    job_match
-    |> JobMatch.changeset(attrs)
-    |> Repo.update()
+    changeset = JobMatch.changeset(job_match, attrs)
+
+    case Repo.update(changeset) do
+      {:ok, updated_job_match} ->
+        # Check if approval timestamps were just set and enqueue emails
+        enqueue_like_emails_if_needed(job_match, updated_job_match)
+        {:ok, updated_job_match}
+
+      error ->
+        error
+    end
+  end
+
+  defp enqueue_like_emails_if_needed(old_match, new_match) do
+    # Check if company_approved_at was just set (wasn't set before, but is now)
+    if is_nil(old_match.company_approved_at) &&
+         is_nil(old_match.candidate_approved_at) &&
+         not is_nil(new_match.company_approved_at) do
+      Algora.Cloud.notify_company_like(new_match.id)
+    end
+
+    # Check if candidate_approved_at was just set (wasn't set before, but is now)
+    if is_nil(old_match.candidate_approved_at) &&
+         is_nil(old_match.company_approved_at) &&
+         not is_nil(new_match.candidate_approved_at) do
+      Algora.Cloud.notify_candidate_like(new_match.id)
+    end
   end
 
   def update_job_match_status(match_id, status) do

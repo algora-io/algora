@@ -41,6 +41,10 @@ defmodule Algora.Cloud do
     call(AlgoraCloud.JobLive, :offer, [assigns])
   end
 
+  def notify_match(attrs) do
+    call(AlgoraCloud.Talent.Jobs.SendJobMatchEmail, :send, [attrs])
+  end
+
   def start do
     call(AlgoraCloud, :start, [])
   end

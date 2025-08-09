@@ -52,16 +52,31 @@ defmodule Algora.Matches do
   def upsert_job_match(attrs) do
     case create_job_match(attrs) do
       {:ok, match} ->
-        # Admin.enqueue_job_match_emails(1, user_id: attrs.user_id)
+        if confirmed?(match) do
+          Algora.Cloud.notify_match(attrs)
+        end
+
         {:ok, match}
 
       {:error, _changeset} ->
-        JobMatch
-        |> Repo.get_by(user_id: attrs.user_id, job_posting_id: attrs.job_posting_id)
-        |> change(%{status: attrs.status})
-        |> Repo.update()
+        match = Repo.get_by(JobMatch, user_id: attrs.user_id, job_posting_id: attrs.job_posting_id)
+
+        case match |> change(%{status: attrs.status}) |> Repo.update() do
+          {:ok, updated_match} = result ->
+            if not confirmed?(match) and confirmed?(updated_match) do
+              Algora.Cloud.notify_match(attrs)
+            end
+
+            result
+
+          error ->
+            error
+        end
     end
   end
+
+  defp confirmed?(%{status: status}) when status in [:approved, :highlighted], do: true
+  defp confirmed?(_match), do: false
 
   def fetch_job_matches(job_posting_id) do
     job = Repo.get!(JobPosting, job_posting_id)

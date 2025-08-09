@@ -120,6 +120,29 @@ defmodule Algora.Accounts.User do
     field :language_contributions_synced, :boolean, default: false
     field :repo_contributions_synced, :boolean, default: false
 
+    # Work arrangement preferences
+    field :open_to_remote, :boolean, default: false
+    field :open_to_hybrid, :boolean, default: false
+    field :open_to_onsite, :boolean, default: false
+    
+    # Relocation preferences
+    field :open_to_relocate_sf, :boolean, default: false
+    field :open_to_relocate_ny, :boolean, default: false
+    field :open_to_relocate_country, :boolean, default: false
+    field :open_to_relocate_world, :boolean, default: false
+    
+    # Commitment preferences
+    field :open_to_fulltime, :boolean, default: false
+    field :open_to_contract, :boolean, default: false
+    
+    # Track preferences
+    field :open_to_ic, :boolean, default: false
+    field :open_to_manager, :boolean, default: false
+    
+    # Work authorization
+    field :work_auth_us, :boolean, default: false
+    field :work_auth_eu, :boolean, default: false
+
     has_many :identities, Identity
     has_many :memberships, Member, foreign_key: :user_id
     has_many :members, Member, foreign_key: :org_id
@@ -435,7 +458,20 @@ defmodule Algora.Accounts.User do
       :friends_github_handles,
       :opt_out_algora,
       :email_recipients,
-      :employment_info
+      :employment_info,
+      :open_to_remote,
+      :open_to_hybrid,
+      :open_to_onsite,
+      :open_to_relocate_sf,
+      :open_to_relocate_ny,
+      :open_to_relocate_country,
+      :open_to_relocate_world,
+      :open_to_fulltime,
+      :open_to_contract,
+      :open_to_ic,
+      :open_to_manager,
+      :work_auth_us,
+      :work_auth_eu
     ])
     |> validate_url(:linkedin_url)
     |> validate_url(:twitter_url)

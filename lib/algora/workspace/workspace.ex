@@ -683,6 +683,7 @@ defmodule Algora.Workspace do
         select: %UserContribution{
           contribution_count: uc.contribution_count,
           user: map(u, [:id, :provider_login]),
+          status: uc.status,
           repository: %{
             id: r.id,
             name: r.name,

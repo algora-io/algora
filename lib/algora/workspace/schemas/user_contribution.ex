@@ -11,6 +11,7 @@ defmodule Algora.Workspace.UserContribution do
   typed_schema "user_contributions" do
     field :contribution_count, :integer, null: false, default: 0
     field :last_fetched_at, :utc_datetime_usec, null: false
+    field :status, Ecto.Enum, values: [:initial, :highlighted, :hidden], default: :initial
 
     belongs_to :user, User, null: false
     belongs_to :repository, Repository, null: false
@@ -23,8 +24,9 @@ defmodule Algora.Workspace.UserContribution do
   """
   def changeset(%UserContribution{} = contribution, attrs) do
     contribution
-    |> cast(attrs, [:user_id, :repository_id, :contribution_count, :last_fetched_at])
+    |> cast(attrs, [:user_id, :repository_id, :contribution_count, :last_fetched_at, :status])
     |> validate_required([:user_id, :repository_id, :contribution_count, :last_fetched_at])
+    |> validate_inclusion(:status, [:initial, :highlighted, :hidden])
     |> generate_id()
     |> foreign_key_constraint(:user_id)
     |> foreign_key_constraint(:repository_id)

@@ -14,6 +14,7 @@ defmodule Algora.Matches.JobMatch do
     field :candidate_approved_at, :utc_datetime_usec
     field :candidate_bookmarked_at, :utc_datetime_usec
     field :candidate_discarded_at, :utc_datetime_usec
+    field :custom_sort_order, :integer
 
     belongs_to :user, Algora.Accounts.User
     belongs_to :job_posting, Algora.Jobs.JobPosting
@@ -23,7 +24,20 @@ defmodule Algora.Matches.JobMatch do
 
   def changeset(job_match, attrs) do
     job_match
-    |> cast(attrs, [:user_id, :job_posting_id, :status, :score, :notes, :company_approved_at, :company_bookmarked_at, :company_discarded_at, :candidate_approved_at, :candidate_bookmarked_at, :candidate_discarded_at])
+    |> cast(attrs, [
+      :user_id,
+      :job_posting_id,
+      :status,
+      :score,
+      :notes,
+      :company_approved_at,
+      :company_bookmarked_at,
+      :company_discarded_at,
+      :candidate_approved_at,
+      :candidate_bookmarked_at,
+      :candidate_discarded_at,
+      :custom_sort_order
+    ])
     |> validate_required([:user_id, :job_posting_id])
     |> validate_inclusion(:status, [:pending, :discarded, :approved, :highlighted])
     |> foreign_key_constraint(:user_id)

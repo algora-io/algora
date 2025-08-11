@@ -21,6 +21,7 @@ defmodule Algora.Jobs.JobPosting do
     # e.g. ["LATAM", "NA"]
     field :regions, {:array, :string}, default: []
     field :compensation, :string
+    field :max_compensation, Money.Ecto.Composite.Type
     field :seniority, :string
     field :system_tags, {:array, :string}, default: []
     field :primary_tech, :string
@@ -29,6 +30,8 @@ defmodule Algora.Jobs.JobPosting do
 
     field :location_meta, :map
     field :location_iso_lvl4, :string
+    field :location_types, {:array, Ecto.Enum}, values: [:remote, :hybrid, :onsite]
+    field :locations, {:array, :string}
 
     belongs_to :user, User, null: false
     has_many :interviews, Algora.Interviews.JobInterview, foreign_key: :job_posting_id
@@ -60,7 +63,10 @@ defmodule Algora.Jobs.JobPosting do
       :location_iso_lvl4,
       :primary_tech,
       :primary_tag,
-      :full_description
+      :full_description,
+      :location_types,
+      :locations,
+      :max_compensation
     ])
     |> generate_id()
     |> validate_required([:url, :company_name, :company_url, :email])

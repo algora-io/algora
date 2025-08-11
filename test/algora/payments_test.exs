@@ -122,7 +122,7 @@ defmodule Algora.PaymentsTest do
 
       assert Money.equal?(transfer_tx.net_amount, Money.new(1, :USD))
       assert transfer_tx.status == :succeeded
-      assert transfer_tx.succeeded_at != nil
+      assert transfer_tx.succeeded_at
       assert transfer_tx.group_id == credit_tx.group_id
       assert transfer_tx.user_id == credit_tx.user_id
       assert transfer_tx.provider_id == transfer.id
@@ -154,7 +154,7 @@ defmodule Algora.PaymentsTest do
 
       assert Money.equal?(transfer_tx.net_amount, Money.new(1, :USD))
       assert transfer_tx.status == :succeeded
-      assert transfer_tx.succeeded_at != nil
+      assert transfer_tx.succeeded_at
       assert transfer_tx.group_id == credit_tx.group_id
       assert transfer_tx.user_id == credit_tx.user_id
       assert transfer_tx.provider_id == transfer.id
@@ -261,7 +261,7 @@ defmodule Algora.PaymentsTest do
 
       assert Money.equal?(transfer_tx1.net_amount, Money.new(1, :USD))
       assert transfer_tx1.status == :succeeded
-      assert transfer_tx1.succeeded_at != nil
+      assert transfer_tx1.succeeded_at
       assert transfer_tx1.group_id == credit_tx.group_id
       assert transfer_tx1.user_id == credit_tx.user_id
       assert transfer_tx1.provider_id == transfer1.id
@@ -272,7 +272,7 @@ defmodule Algora.PaymentsTest do
 
       assert Money.equal?(transfer_tx2.net_amount, Money.new(1, :USD))
       assert transfer_tx2.status == :succeeded
-      assert transfer_tx2.succeeded_at != nil
+      assert transfer_tx2.succeeded_at
       assert transfer_tx2.group_id == credit_tx.group_id
       assert transfer_tx2.user_id == credit_tx.user_id
       assert transfer_tx2.provider_id == transfer2.id

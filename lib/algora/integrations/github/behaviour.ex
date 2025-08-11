@@ -36,5 +36,6 @@ defmodule Algora.Github.Behaviour do
   @callback create_label(token(), String.t(), String.t(), map()) :: {:ok, map()} | {:error, String.t()}
   @callback get_label(token(), String.t(), String.t(), String.t()) :: {:ok, map()} | {:error, String.t()}
   @callback remove_label(token(), String.t(), String.t(), String.t()) :: {:ok, map()} | {:error, String.t()}
-  @callback remove_label_from_issue(token(), String.t(), String.t(), integer(), String.t()) :: {:ok, map()} | {:error, String.t()}
+  @callback remove_label_from_issue(token(), String.t(), String.t(), integer(), String.t()) ::
+              {:ok, map()} | {:error, String.t()}
 end

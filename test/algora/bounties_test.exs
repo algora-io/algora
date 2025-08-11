@@ -461,7 +461,7 @@ defmodule Algora.BountiesTest do
         number: ticket.number
       }
 
-      response = Algora.Bounties.get_response_body(bounties, ticket_ref, [], [])
+      response = Bounties.get_response_body(bounties, ticket_ref, [], [])
 
       expected_response = """
       ## 💎 $1,000 bounty [• Bounty Owner](http://localhost:4002/bounty_owner)
@@ -568,7 +568,7 @@ defmodule Algora.BountiesTest do
         )
       ]
 
-      response = Algora.Bounties.get_response_body(bounties, ticket_ref, attempts, claims)
+      response = Bounties.get_response_body(bounties, ticket_ref, attempts, claims)
 
       expected_response = """
       ## 💎 $1,000 bounty [• Bounty Owner](http://localhost:4002/bounty_owner)
@@ -628,7 +628,7 @@ defmodule Algora.BountiesTest do
         number: ticket.number
       }
 
-      response = Algora.Bounties.get_response_body(bounties, ticket_ref, [], [])
+      response = Bounties.get_response_body(bounties, ticket_ref, [], [])
 
       expected_response = """
       ## 💎 $1,000 bounty [• Bounty Owner](http://localhost:4002/bounty_owner)

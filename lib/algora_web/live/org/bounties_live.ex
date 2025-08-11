@@ -398,8 +398,8 @@ defmodule AlgoraWeb.Org.BountiesLive do
                  bounty.ticket.repository.user.provider_login,
                  bounty.ticket.repository.name,
                  bounty.ticket.number,
-                 "💎 Bounty"),
-               
+                 "💎 Bounty"
+               ),
              {:ok, _} <- Workspace.delete_command_response(cr.id),
              {:ok, _bounty} <- Bounties.delete_bounty(bounty) do
           {:noreply,

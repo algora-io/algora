@@ -5,6 +5,8 @@ defmodule AlgoraWeb.Router do
   import AlgoraWeb.RedirectPlug
   import AlgoraWeb.UserAuth, only: [fetch_current_user: 2]
 
+  alias AlgoraWeb.User.Nav
+
   require Algora.Cloud
 
   pipeline :browser do
@@ -73,7 +75,7 @@ defmodule AlgoraWeb.Router do
 
     live_session :authenticated,
       layout: {AlgoraWeb.Layouts, :user},
-      on_mount: [{AlgoraWeb.UserAuth, :ensure_authenticated}, AlgoraWeb.User.Nav] do
+      on_mount: [{AlgoraWeb.UserAuth, :ensure_authenticated}, Nav] do
       live "/home", User.DashboardLive, :index
       live "/user/transactions", User.TransactionsLive, :index
       live "/user/settings", User.SettingsLive, :edit
@@ -86,7 +88,7 @@ defmodule AlgoraWeb.Router do
 
     live_session :public,
       layout: {AlgoraWeb.Layouts, :user},
-      on_mount: [{AlgoraWeb.UserAuth, :current_user}, AlgoraWeb.User.Nav] do
+      on_mount: [{AlgoraWeb.UserAuth, :current_user}, Nav] do
       live "/bounties", BountiesLive, :index
       live "/bounties/:tech", BountiesLive, :index
       live "/leaderboard", LeaderboardLive, :index
@@ -175,7 +177,7 @@ defmodule AlgoraWeb.Router do
     scope "/:user_handle" do
       live_session :user,
         layout: {AlgoraWeb.Layouts, :user},
-        on_mount: [{AlgoraWeb.UserAuth, :current_user}, {AlgoraWeb.User.Nav, :viewer}] do
+        on_mount: [{AlgoraWeb.UserAuth, :current_user}, {Nav, :viewer}] do
         live "/profile", User.ProfileLive, :index
       end
     end

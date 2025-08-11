@@ -17,7 +17,7 @@ defmodule Algora.Activities do
 
   @schema_from_table %{
     identity_activities: Identity,
-    user_activities: Algora.Accounts.User,
+    user_activities: User,
     attempt_activities: Algora.Bounties.Attempt,
     bonus_activities: Algora.Bounties.Bonus,
     bounty_activities: Bounty,
@@ -163,12 +163,12 @@ defmodule Algora.Activities do
   def insert(target, activity) do
     target
     |> Activity.build_activity(activity)
-    |> Algora.Repo.insert()
+    |> Repo.insert()
   end
 
   def all_with_assoc(query) do
     activities = Repo.all(query)
-    source = Dataloader.Ecto.new(Algora.Repo)
+    source = Dataloader.Ecto.new(Repo)
     dataloader = Dataloader.add_source(Dataloader.new(), :db, source)
 
     loader =
@@ -214,7 +214,7 @@ defmodule Algora.Activities do
           updated_at: a.updated_at
         }
 
-    struct(Activity, Algora.Repo.one(query))
+    struct(Activity, Repo.one(query))
   end
 
   def get_with_preloaded_assoc(table, id) do
@@ -234,7 +234,7 @@ defmodule Algora.Activities do
         from a in schema, where: a.id == ^assoc_id
       end
 
-    Algora.Repo.one(query)
+    Repo.one(query)
   end
 
   def assoc_url(table, id) do
@@ -264,12 +264,12 @@ defmodule Algora.Activities do
     :ok = Phoenix.PubSub.broadcast(Algora.PubSub, "activity:table:#{activity.assoc_name}", activity)
 
     users_query =
-      from u in Algora.Accounts.User,
+      from u in User,
         where: u.id in ^user_ids,
         select: u
 
     users_query
-    |> Algora.Repo.all()
+    |> Repo.all()
     |> Enum.reduce([], fn user, not_online ->
       # TODO setup notification preferences
       :ok = Phoenix.PubSub.broadcast(Algora.PubSub, "activity:users:#{user.id}", activity)
@@ -309,7 +309,7 @@ defmodule Algora.Activities do
     discord_job =
       if discord_payload = DiscordViews.render(activity) do
         [
-          Algora.Activities.SendDiscord.changeset(%{
+          SendDiscord.changeset(%{
             url: Algora.config([:discord, :webhook_url]),
             payload: discord_payload
           })

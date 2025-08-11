@@ -162,5 +162,6 @@ defmodule Algora.Github do
   def remove_label(token, owner, repo, label), do: client().remove_label(token, owner, repo, label)
 
   @impl true
-  def remove_label_from_issue(token, owner, repo, number, label), do: client().remove_label_from_issue(token, owner, repo, number, label)
+  def remove_label_from_issue(token, owner, repo, number, label),
+    do: client().remove_label_from_issue(token, owner, repo, number, label)
 end

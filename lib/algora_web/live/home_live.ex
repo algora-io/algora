@@ -965,7 +965,6 @@ defmodule AlgoraWeb.HomeLive do
     """
   end
 
-
   def event_card(assigns) do
     ~H"""
     <.link

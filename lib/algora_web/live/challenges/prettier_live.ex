@@ -577,7 +577,8 @@ defmodule AlgoraWeb.Challenges.PrettierLive do
                               <path d="M12 11.204v-2.926c0 -1.258 -.895 -2.278 -2 -2.278s-2 1.02 -2 2.278v4.722m4 -4.722c0 -1.258 .895 -2.278 2 -2.278s2 1.02 2 2.278v4.722">
                               </path>
                             </svg>
-                          </a><a rel="noopener" href="https://biomejs.dev"><svg
+                          </a>
+                          <a rel="noopener" href="https://biomejs.dev"><svg
                             xmlns="http://www.w3.org/2000/svg"
                             width="24"
                             height="24"

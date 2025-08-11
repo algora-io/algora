@@ -105,6 +105,7 @@ defmodule AlgoraWeb.Data.HomeCache do
 
   defp compute_platform_stats do
     import Ecto.Query
+
     alias Algora.Accounts.User
     alias Algora.Payments.Transaction
     alias Algora.Repo

@@ -12,5 +12,5 @@ defmodule Algora.Workspace.Jobs.FetchTopContributions do
     Algora.Workspace.fetch_top_contributions_async(Github.TokenPool.get_token(), provider_logins)
   end
 
-  def timeout(_), do: :timer.seconds(30)
+  def timeout(_), do: to_timeout(second: 30)
 end

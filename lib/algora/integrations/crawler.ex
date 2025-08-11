@@ -8,7 +8,7 @@ defmodule Algora.Crawler do
   @headers [{"User-Agent", @user_agent}]
   @max_redirects 5
   @max_retries 3
-  @retry_delay :timer.seconds(1)
+  @retry_delay to_timeout(second: 1)
   @blacklist_filename "domain_blacklist.txt"
 
   def blacklisted?(domain) do

@@ -82,10 +82,10 @@ defmodule AlgoraWeb.Org.DashboardLive do
       contributions =
         matches
         |> Enum.map(& &1.user.id)
-        |> Algora.Workspace.list_user_contributions()
+        |> Workspace.list_user_contributions()
         |> Enum.group_by(& &1.user.id)
 
-      admins_last_active = Algora.Accounts.admins_last_active()
+      admins_last_active = Accounts.admins_last_active()
 
       developers =
         contributors
@@ -1024,7 +1024,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
           select_merge: %{
             user: cu,
             source: s,
-            target: %Ticket{t | bounties: [%Bounty{b | ticket: %{t | repository: %{r | user: ru}}}]}
+            target: %{t | bounties: [%{b | ticket: %{t | repository: %{r | user: ru}}}]}
           }
       )
 
@@ -1437,7 +1437,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
     </tr>
     """
   end
-
 
   defp contract_for_user(_contracts, _user) do
     nil
@@ -2026,6 +2025,4 @@ defmodule AlgoraWeb.Org.DashboardLive do
       _ -> "Your"
     end
   end
-
-
 end

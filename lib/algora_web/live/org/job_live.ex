@@ -1687,7 +1687,7 @@ defmodule AlgoraWeb.Org.JobLive do
     """
   end
 
-  def price, do: Algora.Settings.get_subscription_price()
+  def price, do: Settings.get_subscription_price()
 
   defp get_avg_daily_commits(heatmap_data) do
     total_contributions = get_in(heatmap_data, ["totalContributions"]) || 0

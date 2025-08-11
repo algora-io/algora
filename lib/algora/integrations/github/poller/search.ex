@@ -16,7 +16,7 @@ defmodule Algora.Github.Poller.Search do
   require Logger
 
   @per_page 10
-  @poll_interval :timer.seconds(3)
+  @poll_interval to_timeout(second: 3)
 
   # Client API
   def start_link(opts) do

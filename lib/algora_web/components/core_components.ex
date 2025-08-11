@@ -29,6 +29,7 @@ defmodule AlgoraWeb.CoreComponents do
   alias AlgoraWeb.Components.UI.Tabs
   alias AlgoraWeb.Components.UI.ToggleGroup
   alias AlgoraWeb.Components.UI.Tooltip
+  alias Phoenix.HTML.Form
   alias Phoenix.HTML.FormField
   alias Phoenix.LiveView.JS
 
@@ -746,7 +747,7 @@ defmodule AlgoraWeb.CoreComponents do
 
   def input(%{type: "checkbox", value: value} = assigns) do
     assigns =
-      assign_new(assigns, :checked, fn -> Phoenix.HTML.Form.normalize_value("checkbox", value) end)
+      assign_new(assigns, :checked, fn -> Form.normalize_value("checkbox", value) end)
 
     ~H"""
     <div>
@@ -769,7 +770,7 @@ defmodule AlgoraWeb.CoreComponents do
 
   def input(%{type: "radio", value: value} = assigns) do
     assigns =
-      assign_new(assigns, :checked, fn -> Phoenix.HTML.Form.normalize_value("radio", value) end)
+      assign_new(assigns, :checked, fn -> Form.normalize_value("radio", value) end)
 
     ~H"""
     <div>
@@ -868,11 +869,11 @@ defmodule AlgoraWeb.CoreComponents do
   end
 
   def normalize_value(type, value) when is_list(value) do
-    Phoenix.HTML.Form.normalize_value(type, Enum.join(value, ", "))
+    Form.normalize_value(type, Enum.join(value, ", "))
   end
 
   def normalize_value(type, value) do
-    Phoenix.HTML.Form.normalize_value(type, value)
+    Form.normalize_value(type, value)
   end
 
   @doc """

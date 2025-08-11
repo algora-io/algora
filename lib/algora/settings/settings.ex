@@ -329,7 +329,7 @@ defmodule Algora.Settings do
   end
 
   def update_campaign_timestamp do
-    timestamp = DateTime.utc_now() |> format_timestamp()
+    timestamp = format_timestamp(DateTime.utc_now())
     set_campaign_timestamp(timestamp)
   end
 

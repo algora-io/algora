@@ -369,7 +369,7 @@ defmodule AlgoraWeb.ContractLive do
       {:ok, data} ->
         with tx when not is_nil(tx) <- Enum.find(socket.assigns.transactions, &(&1.id == socket.assigns.tx_id)),
              {:ok, charge} <- Algora.PSP.Charge.retrieve(tx.provider_charge_id),
-             {:ok, _} <- Algora.Payments.process_release(charge, tx.group_id, data.amount, socket.assigns.contractor) do
+             {:ok, _} <- Payments.process_release(charge, tx.group_id, data.amount, socket.assigns.contractor) do
           {:noreply,
            socket
            |> assign(:show_release_modal, false)

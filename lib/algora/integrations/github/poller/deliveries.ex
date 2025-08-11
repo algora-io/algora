@@ -11,7 +11,7 @@ defmodule Algora.Github.Poller.Deliveries do
   require Logger
 
   @per_page 100
-  @poll_interval :timer.seconds(10)
+  @poll_interval to_timeout(second: 10)
 
   # Client API
   def start_link(opts) do

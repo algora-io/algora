@@ -572,7 +572,7 @@ defmodule AlgoraWeb.SwiftBountiesLive do
             {:noreply,
              socket
              |> put_flash(:info, "Bounty created")
-             |> redirect(to: AlgoraWeb.UserAuth.generate_login_path(user.email))}
+             |> redirect(to: UserAuth.generate_login_path(user.email))}
 
           {:error, :already_exists} ->
             {:noreply, put_flash(socket, :warning, "You already have a bounty for this ticket")}
@@ -610,7 +610,7 @@ defmodule AlgoraWeb.SwiftBountiesLive do
                  amount: get_field(changeset, :amount)
                }) do
           user |> change(last_context: user.handle) |> Repo.update()
-          {:noreply, redirect(socket, to: AlgoraWeb.UserAuth.generate_login_path(user.email, checkout_url))}
+          {:noreply, redirect(socket, to: UserAuth.generate_login_path(user.email, checkout_url))}
         else
           {:error, reason} ->
             Logger.error("Failed to create tip: #{inspect(reason)}")

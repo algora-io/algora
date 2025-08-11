@@ -212,7 +212,7 @@ defmodule AlgoraWeb.Webhooks.StripeControllerTest do
 
       updated_tx = Repo.get(Transaction, transaction.id)
       assert updated_tx.status == :succeeded
-      assert updated_tx.succeeded_at != nil
+      assert updated_tx.succeeded_at
 
       assert_enqueued(worker: Bounties.Jobs.NotifyTransfer, args: %{transfer_id: transaction.id})
     end

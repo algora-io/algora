@@ -7,7 +7,7 @@ defmodule Algora.Stargazer do
 
   require Logger
 
-  @poll_interval :timer.minutes(10)
+  @poll_interval to_timeout(minute: 10)
 
   def start_link(cmd) do
     GenServer.start_link(__MODULE__, cmd, name: __MODULE__)

@@ -6,6 +6,8 @@ defmodule Algora.Repo.Migrations.AddStatusToUserContributions do
       add :status, :string, null: false, default: "initial"
     end
 
-    create constraint(:user_contributions, :valid_status, check: "status IN ('initial', 'highlighted', 'hidden')")
+    create constraint(:user_contributions, :valid_status,
+             check: "status IN ('initial', 'highlighted', 'hidden')"
+           )
   end
 end

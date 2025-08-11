@@ -862,7 +862,7 @@ defmodule Algora.Accounts do
   end
 
   def admins_last_active do
-    Algora.Repo.one(
+    Repo.one(
       from u in User,
         where: u.is_admin == true,
         order_by: [desc: u.last_active_at],

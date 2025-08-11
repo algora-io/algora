@@ -124,21 +124,21 @@ defmodule Algora.Accounts.User do
     field :open_to_remote, :boolean, default: false
     field :open_to_hybrid, :boolean, default: false
     field :open_to_onsite, :boolean, default: false
-    
+
     # Relocation preferences
     field :open_to_relocate_sf, :boolean, default: false
     field :open_to_relocate_ny, :boolean, default: false
     field :open_to_relocate_country, :boolean, default: false
     field :open_to_relocate_world, :boolean, default: false
-    
+
     # Commitment preferences
     field :open_to_fulltime, :boolean, default: false
     field :open_to_contract, :boolean, default: false
-    
+
     # Track preferences
     field :open_to_ic, :boolean, default: false
     field :open_to_manager, :boolean, default: false
-    
+
     # Work authorization
     field :work_auth_us, :boolean, default: false
     field :work_auth_eu, :boolean, default: false
@@ -408,7 +408,7 @@ defmodule Algora.Accounts.User do
       bio: meta["bio"],
       location: meta["location"],
       avatar_url: meta["avatar_url"],
-      website_url: Algora.Util.normalize_url(meta["blog"]),
+      website_url: Util.normalize_url(meta["blog"]),
       github_url: meta["html_url"],
       domain: get_domain(meta)
     }

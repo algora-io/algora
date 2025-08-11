@@ -206,7 +206,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
 
       bounty = Repo.one(Bounty)
       original_visibility = bounty.visibility
-      assert original_visibility != nil
+      assert original_visibility
 
       process_scenario!(ctx, [
         %{
@@ -531,7 +531,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
 
       Repo.update!(
         Ecto.Changeset.change(first_tip,
-          inserted_at: DateTime.add(first_tip.inserted_at, -(:timer.hours(1) + 1), :millisecond)
+          inserted_at: DateTime.add(first_tip.inserted_at, -(to_timeout(hour: 1) + 1), :millisecond)
         )
       )
 

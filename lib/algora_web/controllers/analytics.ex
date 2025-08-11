@@ -44,7 +44,7 @@ defmodule AlgoraWeb.Analytics do
     url = "https://ipinfo.io/#{ip}?token=#{System.get_env("IPINFO_TOKEN")}"
 
     task = Task.async(fn -> :get |> Finch.build(url) |> Finch.request(Algora.Finch) end)
-    res = Task.yield(task, :timer.seconds(3)) || Task.shutdown(task)
+    res = Task.yield(task, to_timeout(second: 3)) || Task.shutdown(task)
 
     with {:ok, {:ok, %Finch.Response{status: 200, body: body}}} <- res,
          {:ok, decoded} <- Jason.decode(body),

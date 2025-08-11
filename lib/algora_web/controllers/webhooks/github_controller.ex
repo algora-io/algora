@@ -256,7 +256,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
             names =
               claims
               |> Enum.map(fn c -> "@#{c.user.provider_login}" end)
-              |> Algora.Util.format_name_list()
+              |> Util.format_name_list()
 
             Github.create_issue_comment(
               token,
@@ -427,7 +427,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
             true
 
           tip ->
-            DateTime.diff(DateTime.utc_now(), tip.inserted_at, :millisecond) > :timer.hours(1)
+            DateTime.diff(DateTime.utc_now(), tip.inserted_at, :millisecond) > to_timeout(hour: 1)
         end
       end
 

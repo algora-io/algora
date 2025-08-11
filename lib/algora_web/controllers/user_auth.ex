@@ -16,7 +16,7 @@ defmodule AlgoraWeb.UserAuth do
     case session do
       %{"user_id" => user_id} ->
         case socket.assigns[:current_user] do
-          %Accounts.User{} = _user ->
+          %User{} = _user ->
             {:cont, socket}
 
           nil ->
@@ -74,7 +74,7 @@ defmodule AlgoraWeb.UserAuth do
         new_socket = Phoenix.Component.assign_new(socket, :current_user, fn -> Accounts.get_user!(user_id) end)
 
         case new_socket.assigns[:current_user] do
-          %Accounts.User{} = user ->
+          %User{} = user ->
             {:ok, user}
 
           nil ->
@@ -362,7 +362,7 @@ defmodule AlgoraWeb.UserAuth do
   end
 
   def verify_totp(rate_limit_key, secret, code) do
-    case Algora.RateLimit.hit("verify_totp:#{rate_limit_key}", :timer.minutes(1), 5) do
+    case Algora.RateLimit.hit("verify_totp:#{rate_limit_key}", to_timeout(minute: 1), 5) do
       {:allow, _} ->
         if valid_totp?(secret, code) do
           :ok

@@ -270,9 +270,14 @@ defmodule Algora.Util do
   end
 
   def compact_org_name(org_name) do
-    # Remove YC batch strings like "YC S24", "YC W23", etc.
     org_name
+    # Remove YC batch strings like "YC S24", "YC W23", etc.
     |> String.replace(~r/\s*\(?YC\s+[a-z]\d{2}\)?\s*/i, "")
+    # Remove common company suffixes
+    |> String.replace(
+      ~r/,?\s+(PBC\.?|Public Benefit Corporation|Corporation|Corp\.?|,?\s*Inc\.?|Labs|Technologies|Industries|Research)\s*$/i,
+      ""
+    )
     |> String.trim()
   end
 end

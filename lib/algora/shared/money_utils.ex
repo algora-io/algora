@@ -4,8 +4,10 @@ defmodule Algora.MoneyUtils do
   def fmt_precise!(money), do: Money.to_string!(money, no_fraction_if_integer: false)
 
   def fmt_compact(money) do
-    # TODO: handle other currencies
-    "$" <> Algora.Util.format_number_compact(money.amount)
+    money
+    |> Money.to_string!(no_fraction_if_integer: true)
+    |> String.replace(",000,000", "M")
+    |> String.replace(",000", "k")
   end
 
   @spec split_evenly(Money.t(), non_neg_integer()) :: [Money.t()]

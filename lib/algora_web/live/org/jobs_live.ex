@@ -132,7 +132,7 @@ defmodule AlgoraWeb.Org.JobsLive do
                       <div class="flex items-center gap-2">
                         <%= if @current_user_role in [:admin, :mod] do %>
                           <.link
-                            navigate={~p"/#{@current_org.handle}/jobs/#{job.id}"}
+                            navigate={~p"/#{@current_org.handle}/job/#{job.id}"}
                             class="text-lg sm:text-2xl font-semibold"
                           >
                             <span class="underline">{job.title}</span>

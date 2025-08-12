@@ -129,7 +129,13 @@ defmodule AlgoraWeb.Components.TechBadge do
       "transformers" ->
         "huggingface"
 
+      "spark" ->
+        "apachespark"
+
       "kafka" ->
+        "apachekafka"
+
+      "apache kafka" ->
         "apachekafka"
 
       "vim script" ->
@@ -224,6 +230,7 @@ defmodule AlgoraWeb.Components.TechBadge do
       "TikTok",
       "Django",
       "ApacheKafka",
+      "ApacheSpark",
       "ObjectiveC",
       "Envoy",
       "RabbitMQ",

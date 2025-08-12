@@ -16,6 +16,7 @@ defmodule Algora.Matches do
     JobMatch
     |> filter_by_job_posting_id(opts[:job_posting_id])
     |> filter_by_user_id(opts[:user_id])
+    |> filter_by_org_id(opts[:org_id])
     |> filter_by_status(opts[:status])
     |> join(:inner, [m], j in assoc(m, :job_posting), as: :j)
     |> filter_by_org_id(opts[:org_id])
@@ -233,8 +234,8 @@ defmodule Algora.Matches do
       asc: m.candidate_approved_at,
       asc: m.candidate_bookmarked_at,
       desc: m.candidate_discarded_at,
-      asc: fragment("CASE WHEN ? = 'highlighted' THEN 0 WHEN ? = 'approved' THEN 1 ELSE 2 END", m.status, m.status),
-      desc: m.updated_at
+      # asc: fragment("CASE WHEN ? = 'highlighted' THEN 0 WHEN ? = 'approved' THEN 1 ELSE 2 END", m.status, m.status),
+      desc: m.inserted_at
     )
     |> preload(job_posting: :user)
     |> Repo.all()

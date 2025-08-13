@@ -280,4 +280,8 @@ defmodule Algora.Util do
     )
     |> String.trim()
   end
+
+  def remove_non_ascii(string) do
+    String.replace(string, ~r/[^a-zA-Z]/, "")
+  end
 end

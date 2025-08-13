@@ -3,6 +3,7 @@ defmodule Algora.Jobs.JobPosting do
   use Algora.Schema
 
   alias Algora.Accounts.User
+  alias Money.Ecto.Composite.Type
 
   typed_schema "job_postings" do
     field :title, :string
@@ -21,8 +22,8 @@ defmodule Algora.Jobs.JobPosting do
     # e.g. ["LATAM", "NA"]
     field :regions, {:array, :string}, default: []
     field :compensation, :string
-    field :min_compensation, Money.Ecto.Composite.Type
-    field :max_compensation, Money.Ecto.Composite.Type
+    field :min_compensation, Type
+    field :max_compensation, Type
     field :seniority, :string
     field :system_tags, {:array, :string}, default: []
     field :primary_tech, :string
@@ -32,7 +33,7 @@ defmodule Algora.Jobs.JobPosting do
     field :location_meta, :map
     field :location_iso_lvl4, :string
     field :location_types, {:array, Ecto.Enum}, values: [:remote, :hybrid, :onsite]
-    field :locations, {:array, :string}
+    field :locations, {:array, :string}, default: []
 
     belongs_to :user, User, null: false
     has_many :interviews, Algora.Interviews.JobInterview, foreign_key: :job_posting_id

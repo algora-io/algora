@@ -42,9 +42,7 @@ defmodule Algora.Cloud do
   end
 
   def notify_match(attrs) do
-    dbg("skipping auto notification")
-    {:ok, attrs}
-    # call(AlgoraCloud.Talent.Jobs.SendJobMatchEmail, :send, [attrs])
+    call(AlgoraCloud.Talent.Jobs.SendJobMatchEmail, :send, [attrs])
   end
 
   def notify_candidate_like(attrs) do

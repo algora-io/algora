@@ -21,6 +21,7 @@ defmodule Algora.Jobs.JobPosting do
     # e.g. ["LATAM", "NA"]
     field :regions, {:array, :string}, default: []
     field :compensation, :string
+    field :min_compensation, Money.Ecto.Composite.Type
     field :max_compensation, Money.Ecto.Composite.Type
     field :seniority, :string
     field :system_tags, {:array, :string}, default: []
@@ -66,6 +67,7 @@ defmodule Algora.Jobs.JobPosting do
       :full_description,
       :location_types,
       :locations,
+      :min_compensation,
       :max_compensation
     ])
     |> generate_id()

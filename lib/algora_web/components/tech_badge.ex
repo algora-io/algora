@@ -205,6 +205,7 @@ defmodule AlgoraWeb.Components.TechBadge do
       "HTML",
       "CSS",
       "PostgreSQL",
+      "MySQL",
       "Redis",
       "Figma",
       "Prometheus",

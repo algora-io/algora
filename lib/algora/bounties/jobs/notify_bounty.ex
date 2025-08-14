@@ -25,37 +25,41 @@ defmodule Algora.Bounties.Jobs.NotifyBounty do
           "command_source" => command_source
         }
       }) do
-    ticket_ref = %{
-      owner: ticket_ref["owner"],
-      repo: ticket_ref["repo"],
-      number: ticket_ref["number"]
-    }
-
-    body = """
-    💎 **#{owner_login}** is offering a **#{amount}** bounty for this issue. View and reward the bounty at `#{AlgoraWeb.Endpoint.host()}/#{ticket_ref.owner}/#{ticket_ref.repo}/issues/#{ticket_ref.number}`
-
-    👉 Got a pull request resolving this? Claim the bounty by commenting `/claim ##{ticket_ref.number}` in your PR and joining `#{AlgoraWeb.Endpoint.host()}`
-    """
-
-    if Github.pat_enabled() do
-      with {:ok, comment} <-
-             Github.create_issue_comment(Github.pat(), ticket_ref.owner, ticket_ref.repo, ticket_ref.number, body),
-           {:ok, ticket} <-
-             Workspace.ensure_ticket(Github.pat(), ticket_ref.owner, ticket_ref.repo, ticket_ref.number) do
-        Workspace.create_command_response(%{
-          comment: comment,
-          command_source: command_source,
-          command_id: command_id,
-          ticket_id: ticket.id
-        })
-      end
+    if owner_login in Algora.Settings.get_blocked_users() do
+      :discard
     else
-      Logger.info("""
-      Github.create_issue_comment(Github.pat(), "#{ticket_ref.owner}", "#{ticket_ref.repo}", #{ticket_ref.number},
-             \"\"\"
-             #{body}
-             \"\"\")
-      """)
+      ticket_ref = %{
+        owner: ticket_ref["owner"],
+        repo: ticket_ref["repo"],
+        number: ticket_ref["number"]
+      }
+
+      body = """
+      💎 **#{owner_login}** is offering a **#{amount}** bounty for this issue. View and reward the bounty at `#{AlgoraWeb.Endpoint.host()}/#{ticket_ref.owner}/#{ticket_ref.repo}/issues/#{ticket_ref.number}`
+
+      👉 Got a pull request resolving this? Claim the bounty by commenting `/claim ##{ticket_ref.number}` in your PR and joining `#{AlgoraWeb.Endpoint.host()}`
+      """
+
+      if Github.pat_enabled() do
+        with {:ok, comment} <-
+               Github.create_issue_comment(Github.pat(), ticket_ref.owner, ticket_ref.repo, ticket_ref.number, body),
+             {:ok, ticket} <-
+               Workspace.ensure_ticket(Github.pat(), ticket_ref.owner, ticket_ref.repo, ticket_ref.number) do
+          Workspace.create_command_response(%{
+            comment: comment,
+            command_source: command_source,
+            command_id: command_id,
+            ticket_id: ticket.id
+          })
+        end
+      else
+        Logger.info("""
+        Github.create_issue_comment(Github.pat(), "#{ticket_ref.owner}", "#{ticket_ref.repo}", #{ticket_ref.number},
+               \"\"\"
+               #{body}
+               \"\"\")
+        """)
+      end
     end
   end
 

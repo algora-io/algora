@@ -796,6 +796,65 @@ const Hooks = {
       updateStrength();
     },
   },
+  CandidatesScroll: {
+    mounted() {
+      this.handleEvent("scroll_to_candidate", ({ index }) => {
+        const candidateElement = document.querySelector(`#candidate-${index}`);
+        if (candidateElement) {
+          candidateElement.scrollIntoView({
+            behavior: "instant",
+            block: "start",
+            inline: "nearest"
+          });
+        }
+      });
+
+      // Observe candidate elements to update current index based on scroll position
+      this.setupScrollObserver();
+    },
+
+    setupScrollObserver() {
+      if (this.observer) {
+        this.observer.disconnect();
+      }
+
+      this.observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
+              const candidateId = entry.target.id;
+              const index = candidateId.split('-')[1];
+              if (index !== undefined) {
+                // Update the sidebar selection without triggering a scroll
+                this.pushEvent("update_current_index_silent", { index: parseInt(index) });
+              }
+            }
+          });
+        },
+        {
+          root: null,
+          rootMargin: "-20% 0px -20% 0px",
+          threshold: [0.5]
+        }
+      );
+
+      // Observe all candidate elements
+      document.querySelectorAll('[id^="candidate-"]').forEach((el) => {
+        this.observer.observe(el);
+      });
+    },
+
+    updated() {
+      // Re-setup observer when candidates are updated
+      this.setupScrollObserver();
+    },
+
+    destroyed() {
+      if (this.observer) {
+        this.observer.disconnect();
+      }
+    },
+  },
 } satisfies Record<string, Partial<ViewHook> & Record<string, unknown>>;
 
 // Accessible focus handling

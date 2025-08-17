@@ -110,8 +110,8 @@ module.exports = {
       },
       keyframes: {
         wiggle: {
-          "0%, 100%": { transform: "rotate(-12deg)" },
-          "50%": { transform: "rotate(12deg)" },
+          "0%, 100%": { transform: "rotate(-7deg)" },
+          "50%": { transform: "rotate(7deg)" },
         },
         "accordion-down": {
           from: { height: 0 },

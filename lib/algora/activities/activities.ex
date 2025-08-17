@@ -371,8 +371,8 @@ defmodule Algora.Activities do
       SendEmail.changeset(%{
         title: "#{message}",
         body: message,
-        name: "Action required",
-        email: "info@algora.io"
+        name: "Algora alert",
+        email: "zafer@algora.io"
       })
 
     discord_job =
@@ -380,7 +380,7 @@ defmodule Algora.Activities do
         url: Algora.Settings.get("discord_webhook_url")["critical"] || Algora.config([:discord, :webhook_url]),
         payload: %{
           embeds: [
-            %{color: color(severity), title: "Action required", description: message, timestamp: DateTime.utc_now()}
+            %{color: color(severity), title: "Alert", description: message, timestamp: DateTime.utc_now()}
           ]
         }
       })

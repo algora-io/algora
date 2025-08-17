@@ -295,6 +295,17 @@ defmodule Algora.Accounts.User do
     end
   end
 
+  def user_registration_changeset(params) do
+    %User{}
+    |> cast(params, [:handle, :email])
+    |> generate_id()
+    |> validate_required([:email, :handle])
+    |> validate_handle()
+    |> validate_unique_email()
+    |> unique_constraint(:email)
+    |> unique_constraint(:handle)
+  end
+
   def org_registration_changeset(org, params) do
     org
     |> cast(params, [

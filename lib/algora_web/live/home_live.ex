@@ -714,7 +714,6 @@ defmodule AlgoraWeb.HomeLive do
          |> put_flash(:info, "Thank you for your submission! We'll be in touch soon.")}
 
       %{valid?: false} = changeset ->
-        dbg(changeset)
         {:noreply, assign(socket, :challenge_form, to_form(changeset))}
     end
   end

@@ -284,4 +284,10 @@ defmodule Algora.Util do
   def remove_non_ascii(string) do
     String.replace(string, ~r/[^a-zA-Z]/, "")
   end
+
+  def to_local_string(datetime) do
+    datetime
+    |> DateTime.shift_zone!("Europe/Athens", Tzdata.TimeZoneDatabase)
+    |> Calendar.strftime("%Y-%m-%d %H:%M:%S EEST")
+  end
 end

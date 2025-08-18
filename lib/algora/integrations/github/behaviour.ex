@@ -38,4 +38,6 @@ defmodule Algora.Github.Behaviour do
   @callback remove_label(token(), String.t(), String.t(), String.t()) :: {:ok, map()} | {:error, String.t()}
   @callback remove_label_from_issue(token(), String.t(), String.t(), integer(), String.t()) ::
               {:ok, map()} | {:error, String.t()}
+  @callback list_user_followers(token(), String.t(), keyword()) :: {:ok, [map()]} | {:error, String.t()}
+  @callback list_user_following(token(), String.t(), keyword()) :: {:ok, [map()]} | {:error, String.t()}
 end

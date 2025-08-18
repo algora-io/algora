@@ -2,6 +2,7 @@ defmodule Algora.Accounts.User do
   @moduledoc false
   use Algora.Schema
 
+  alias Algora.Accounts.Follow
   alias Algora.Accounts.Identity
   alias Algora.Accounts.User
   alias Algora.Accounts.UserMedia
@@ -37,6 +38,8 @@ defmodule Algora.Accounts.User do
     field :country, :string
     field :timezone, :string
     field :stargazers_count, :integer, default: 0
+    field :followers_count, :integer, default: 0
+    field :following_count, :integer, default: 0
     field :domain, :string
     field :tech_stack, {:array, :string}, default: []
     field :discovery_tech_stack, {:array, :string}, default: []
@@ -169,6 +172,11 @@ defmodule Algora.Accounts.User do
 
     has_many :media, UserMedia
     has_many :job_matches, Algora.Matches.JobMatch, foreign_key: :user_id
+
+    has_many :following_relationships, Follow, foreign_key: :follower_id
+    has_many :following, through: [:following_relationships, :followed]
+    has_many :follower_relationships, Follow, foreign_key: :followed_id
+    has_many :followers, through: [:follower_relationships, :follower]
 
     timestamps()
   end

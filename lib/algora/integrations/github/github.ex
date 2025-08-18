@@ -164,4 +164,10 @@ defmodule Algora.Github do
   @impl true
   def remove_label_from_issue(token, owner, repo, number, label),
     do: client().remove_label_from_issue(token, owner, repo, number, label)
+
+  @impl true
+  def list_user_followers(token, username, opts \\ []), do: client().list_user_followers(token, username, opts)
+
+  @impl true
+  def list_user_following(token, username, opts \\ []), do: client().list_user_following(token, username, opts)
 end

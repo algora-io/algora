@@ -329,4 +329,14 @@ defmodule Algora.Github.Client do
         res
     end
   end
+
+  @impl true
+  def list_user_followers(access_token, username, opts \\ []) do
+    fetch(access_token, "/users/#{username}/followers#{build_query(opts)}")
+  end
+
+  @impl true
+  def list_user_following(access_token, username, opts \\ []) do
+    fetch(access_token, "/users/#{username}/following#{build_query(opts)}")
+  end
 end

@@ -143,6 +143,9 @@ defmodule Algora.Accounts.User do
     field :work_auth_us, :boolean, default: false
     field :work_auth_eu, :boolean, default: false
 
+    # Poaching targets - stores repos and companies to poach from
+    field :poaching_targets, :string
+
     has_many :identities, Identity
     has_many :memberships, Member, foreign_key: :user_id
     has_many :members, Member, foreign_key: :org_id
@@ -491,7 +494,7 @@ defmodule Algora.Accounts.User do
   end
 
   def hiring_changeset(%User{} = user, params) do
-    cast(user, params, [:preferences, :executive_name, :executive_role, :billing_name, :billing_address, :hiring_keywords])
+    cast(user, params, [:preferences, :executive_name, :executive_role, :billing_name, :billing_address, :hiring_keywords, :poaching_targets])
   end
 
   defp validate_url(changeset, field) do

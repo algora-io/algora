@@ -198,15 +198,37 @@ defmodule Algora.Workspace do
 
   def ensure_user(token, owner) do
     case Repo.get_by(User, provider: "github", provider_login: owner) do
-      %User{} = user -> {:ok, user}
-      nil -> create_user_from_github(token, owner)
+      %User{} = user ->
+        if is_nil(user.provider_meta["followers"]) do
+          with {:ok, user_data} <- Github.get_user_by_username(token, owner) do
+            user
+            |> User.github_changeset(user_data)
+            |> Repo.update()
+          end
+        else
+          {:ok, user}
+        end
+
+      nil ->
+        create_user_from_github(token, owner)
     end
   end
 
   def ensure_user_by_provider_id(token, provider_id) do
     case Repo.get_by(User, provider: "github", provider_id: to_string(provider_id)) do
-      %User{} = user -> {:ok, user}
-      nil -> create_user_from_github_by_id(token, provider_id)
+      %User{} = user ->
+        if is_nil(user.provider_meta["followers"]) do
+          with {:ok, user_data} <- Github.get_user(token, provider_id) do
+            user
+            |> User.github_changeset(user_data)
+            |> Repo.update()
+          end
+        else
+          {:ok, user}
+        end
+
+      nil ->
+        create_user_from_github_by_id(token, provider_id)
     end
   end
 

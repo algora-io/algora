@@ -40,15 +40,16 @@ defmodule Algora.Github.Poller.SearchConsumer do
            provider_login: to_string(comment["author"]["login"])
          ) do
       {:ok, user} ->
-        strategy =
-          case Repo.get_by(CommandResponse,
-                 provider: "github",
-                 provider_command_id: to_string(comment["databaseId"]),
-                 command_source: :comment
-               ) do
-            nil -> :increase
-            _ -> :set
-          end
+        strategy = :set
+        # strategy =
+        #   case Repo.get_by(CommandResponse,
+        #          provider: "github",
+        #          provider_command_id: to_string(comment["databaseId"]),
+        #          command_source: :comment
+        #        ) do
+        #     nil -> :increase
+        #     _ -> :set
+        #   end
 
         Algora.Activities.alert("Creating global bounty for #{inspect(args[:amount])}: #{inspect(ticket_ref)}", :info)
 

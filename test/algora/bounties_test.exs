@@ -264,17 +264,14 @@ defmodule Algora.BountiesTest do
 
       assert bounty.visibility == :community
 
-      # Simulate adding to bounty amount (like GitHub webhook would do)
+      # Simulate updating bounty amount (like GitHub webhook would do)
       {:ok, updated_bounty} =
-        Bounties.create_bounty(
-          %{
-            ticket_ref: ticket_ref,
-            owner: owner,
-            creator: creator,
-            amount: ~M[50]usd
-          },
-          strategy: :increase
-        )
+        Bounties.create_bounty(%{
+          ticket_ref: ticket_ref,
+          owner: owner,
+          creator: creator,
+          amount: ~M[50]usd
+        })
 
       assert updated_bounty.visibility == :community
     end

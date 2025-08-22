@@ -130,23 +130,17 @@ defmodule AlgoraWeb.Org.JobsLive do
                   <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                       <div class="flex items-center gap-2">
-                        <%= if @current_user_role in [:admin, :mod] do %>
-                          <.link
-                            navigate={~p"/#{@current_org.handle}/job/#{job.id}"}
-                            class="text-lg sm:text-2xl font-semibold"
-                          >
-                            <span class="underline">{job.title}</span>
-                            <%= if @current_user.is_admin do %>
-                              <span class="text-xs font-muted-foreground">
-                                {job.location} - {job.compensation}
-                              </span>
-                            <% end %>
-                          </.link>
-                        <% else %>
-                          <div class="text-lg font-semibold">
-                            {job.title}
-                          </div>
-                        <% end %>
+                        <.link
+                          navigate={~p"/#{@current_org.handle}/job/#{job.id}"}
+                          class="text-lg font-semibold"
+                        >
+                          <span class="underline">{job.title}</span>
+                          <%= if @current_user && @current_user.is_admin do %>
+                            <span class="text-xs font-muted-foreground">
+                              {job.location} - {job.compensation}
+                            </span>
+                          <% end %>
+                        </.link>
                         <%= if job.id in ["b4sFSeJvb2rteUEX", "M9yTwVXFjvQM2WJf"] do %>
                           <.badge variant="success">Contract to Hire</.badge>
                         <% end %>

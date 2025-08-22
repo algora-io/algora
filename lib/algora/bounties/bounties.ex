@@ -59,6 +59,11 @@ defmodule Algora.Bounties do
         }) ::
           {:ok, Bounty.t()} | {:error, atom()}
   defp do_create_bounty(%{creator: creator, owner: owner, amount: amount, ticket: ticket} = params) do
+    if owner.provider_login in Algora.Settings.get_blocked_users() or
+         creator.provider_login in Algora.Settings.get_blocked_users() do
+      raise "blocked"
+    end
+
     changeset =
       Bounty.changeset(%Bounty{}, %{
         amount: amount,
@@ -756,6 +761,11 @@ defmodule Algora.Bounties do
         ) ::
           {:ok, Tip.t()} | {:error, atom()}
   def do_create_tip(%{creator: creator, owner: owner, recipient: recipient, amount: amount}, opts \\ []) do
+    if owner.provider_login in Algora.Settings.get_blocked_users() or
+         creator.provider_login in Algora.Settings.get_blocked_users() do
+      raise "blocked"
+    end
+
     ticket_res =
       if ticket_ref = opts[:ticket_ref] do
         with {:ok, %{token: token}} <-
@@ -930,6 +940,10 @@ defmodule Algora.Bounties do
         ) ::
           {:ok, String.t()} | {:error, atom()}
   def create_payment_session(%{owner: owner, amount: amount, description: description}, opts \\ []) do
+    if owner.provider_login in Algora.Settings.get_blocked_users() do
+      raise "blocked"
+    end
+
     tx_group_id = Nanoid.generate()
 
     line_items =

@@ -328,15 +328,16 @@ defmodule AlgoraWeb.Webhooks.GithubController do
 
     ticket_number = get_github_ticket(webhook)["number"]
 
-    strategy =
-      case Repo.get_by(CommandResponse,
-             provider: "github",
-             provider_command_id: to_string(command_id),
-             command_source: command_source
-           ) do
-        nil -> :increase
-        _ -> :set
-      end
+    strategy = :set
+    # strategy =
+    #   case Repo.get_by(CommandResponse,
+    #          provider: "github",
+    #          provider_command_id: to_string(command_id),
+    #          command_source: command_source
+    #        ) do
+    #     nil -> :increase
+    #     _ -> :set
+    #   end
 
     # TODO: community bounties?
     with {:ok, role} <- authorize_user(webhook),

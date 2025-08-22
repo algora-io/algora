@@ -421,7 +421,7 @@ defmodule Algora.Accounts.User do
 
   def get_domain(_meta), do: nil
 
-  def github_changeset(meta) do
+  def github_changeset(user \\ %User{}, meta) do
     params = %{
       provider_id: to_string(meta["id"]),
       provider_login: meta["login"],
@@ -432,13 +432,17 @@ defmodule Algora.Accounts.User do
       avatar_url: meta["avatar_url"],
       website_url: Util.normalize_url(meta["blog"]),
       github_url: meta["html_url"],
-      domain: get_domain(meta)
+      domain: get_domain(meta),
+      provider: "github",
+      provider_meta: meta
     }
 
-    %User{provider: "github", provider_meta: meta}
+    user
     |> cast(
       params,
       [
+        :provider,
+        :provider_meta,
         :provider_id,
         :provider_login,
         :type,
@@ -502,7 +506,15 @@ defmodule Algora.Accounts.User do
   end
 
   def hiring_changeset(%User{} = user, params) do
-    cast(user, params, [:preferences, :executive_name, :executive_role, :billing_name, :billing_address, :hiring_keywords, :poaching_targets])
+    cast(user, params, [
+      :preferences,
+      :executive_name,
+      :executive_role,
+      :billing_name,
+      :billing_address,
+      :hiring_keywords,
+      :poaching_targets
+    ])
   end
 
   defp validate_url(changeset, field) do

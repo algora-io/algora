@@ -126,6 +126,9 @@ defmodule AlgoraWeb.Components.TechBadge do
       "nix" ->
         "nixos"
 
+      "tensorrt" ->
+        "nvidia"
+
       "cuda" ->
         "nvidia"
 
@@ -237,6 +240,7 @@ defmodule AlgoraWeb.Components.TechBadge do
       "Ray",
       "vLLM",
       "sglang",
+      "TensorRT",
       "Hugging face",
       "Huggingface",
       "Twitter",

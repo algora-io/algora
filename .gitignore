@@ -62,3 +62,4 @@ npm-debug.log
 /lib/algora_cloud*
 /test/algora_cloud*
 CLAUDE.md
+/.playwright-mcp

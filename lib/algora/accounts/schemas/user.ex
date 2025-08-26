@@ -59,6 +59,7 @@ defmodule Algora.Accounts.User do
     field :last_job_match_email_at, :utc_datetime_usec
     field :last_dm_date, :utc_datetime_usec
     field :candidate_notes, :string
+    field :dm_thread_url, :string
 
     field :seeking_bounties, :boolean, default: false
     field :seeking_contracts, :boolean, default: false
@@ -527,7 +528,8 @@ defmodule Algora.Accounts.User do
     cast(user, params, [
       :last_job_match_email_at,
       :last_dm_date,
-      :candidate_notes
+      :candidate_notes,
+      :dm_thread_url
     ])
   end
 

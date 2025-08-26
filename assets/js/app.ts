@@ -929,6 +929,11 @@ let Focus = {
     }
     return false;
   },
+  AutoFocus: {
+    mounted() {
+      this.el.focus();
+    },
+  },
 };
 
 let csrfToken = document

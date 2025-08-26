@@ -42,6 +42,9 @@ defmodule AlgoraWeb.Components.TechBadge do
   defp icon_url("gemini"), do: "https://avatars.githubusercontent.com/u/161781182?s=200&v=4"
   defp icon_url("grok"), do: "https://avatars.githubusercontent.com/u/130314967?s=200&v=4"
   defp icon_url("clickhouse"), do: "https://avatars.githubusercontent.com/u/54801242?s=200&v=4"
+  defp icon_url("deepspeed"), do: "https://avatars.githubusercontent.com/u/74068820?s=200&v=4"
+  defp icon_url("llmfoundry"), do: "https://avatars.githubusercontent.com/u/75143706?s=200&v=4"
+  defp icon_url("sglang"), do: "https://avatars.githubusercontent.com/u/147780389?s=200&v=4"
 
   defp icon_url(tech), do: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/#{icon_path(tech)}"
 
@@ -129,6 +132,9 @@ defmodule AlgoraWeb.Components.TechBadge do
       "transformers" ->
         "huggingface"
 
+      "hugging face" ->
+        "huggingface"
+
       "spark" ->
         "apachespark"
 
@@ -146,6 +152,9 @@ defmodule AlgoraWeb.Components.TechBadge do
 
       "tailwind" ->
         "tailwindcss"
+
+      "llm foundry" ->
+        "llmfoundry"
 
       t ->
         t
@@ -172,6 +181,7 @@ defmodule AlgoraWeb.Components.TechBadge do
       "C",
       "Dart",
       "C#",
+      "F#",
       "Kotlin",
       "Swift",
       "Elixir",
@@ -222,8 +232,12 @@ defmodule AlgoraWeb.Components.TechBadge do
       "NixOS",
       "Nvidia",
       "Firecracker",
+      "Deepspeed",
+      "LLM Foundry",
       "Ray",
       "vLLM",
+      "sglang",
+      "Hugging face",
       "Huggingface",
       "Twitter",
       "YouTube",
@@ -250,7 +264,8 @@ defmodule AlgoraWeb.Components.TechBadge do
       "tRPC",
       "Clickhouse",
       "Vercel",
-      "MLIR"
+      "MLIR",
+      "Julia"
     ]
   end
 end

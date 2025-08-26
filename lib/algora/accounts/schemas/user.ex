@@ -57,6 +57,8 @@ defmodule Algora.Accounts.User do
     field :contract_signed, :boolean, default: false
     field :last_active_at, :utc_datetime_usec
     field :last_job_match_email_at, :utc_datetime_usec
+    field :last_dm_date, :utc_datetime_usec
+    field :candidate_notes, :string
 
     field :seeking_bounties, :boolean, default: false
     field :seeking_contracts, :boolean, default: false
@@ -98,6 +100,7 @@ defmodule Algora.Accounts.User do
     field :slack_url, :string
     field :linkedin_url, :string
     field :linkedin_meta, :map, default: %{}
+    field :google_scholar_url, :string
     field :employment_info, :map, default: %{}
 
     field :og_title, :string
@@ -471,6 +474,7 @@ defmodule Algora.Accounts.User do
       :willing_to_relocate,
       :us_work_authorization,
       :linkedin_url,
+      :google_scholar_url,
       :twitter_url,
       :youtube_url,
       :website_url,
@@ -478,6 +482,7 @@ defmodule Algora.Accounts.User do
       :preferences,
       :internal_email,
       :internal_notes,
+      :candidate_notes,
       :refer_to_company,
       :company_domain,
       :friends_recommendations,
@@ -500,6 +505,7 @@ defmodule Algora.Accounts.User do
       :work_auth_eu
     ])
     |> validate_url(:linkedin_url)
+    |> validate_url(:google_scholar_url)
     |> validate_url(:twitter_url)
     |> validate_url(:youtube_url)
     |> validate_url(:website_url)
@@ -514,6 +520,14 @@ defmodule Algora.Accounts.User do
       :billing_address,
       :hiring_keywords,
       :poaching_targets
+    ])
+  end
+
+  def admin_pipeline_changeset(%User{} = user, params) do
+    cast(user, params, [
+      :last_job_match_email_at,
+      :last_dm_date,
+      :candidate_notes
     ])
   end
 

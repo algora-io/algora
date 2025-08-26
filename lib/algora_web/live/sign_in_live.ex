@@ -4,6 +4,8 @@ defmodule AlgoraWeb.SignInLive do
 
   alias Algora.Accounts
   alias Algora.Accounts.User
+  alias Algora.Organizations
+  alias Algora.Repo
   alias AlgoraWeb.Components.Logos
   alias AlgoraWeb.LocalStore
 
@@ -263,27 +265,19 @@ defmodule AlgoraWeb.SignInLive do
   def handle_event("send_login_code", %{"user" => %{"email" => email}}, socket) do
     {secret, code} = AlgoraWeb.UserAuth.generate_totp()
 
-    case Accounts.get_user_by_email(email) do
-      %User{} = user ->
-        changeset = User.login_changeset(%User{}, %{})
+    changeset = User.login_changeset(%User{}, %{})
 
-        case Accounts.deliver_totp_login_email(user, code) do
-          {:ok, _id} ->
-            {:noreply,
-             socket
-             |> LocalStore.assign_cached(:secret, secret)
-             |> LocalStore.assign_cached(:email, email)
-             |> assign(:user, user)
-             |> assign_form(changeset)}
+    case Accounts.deliver_totp_signup_email(email, code) do
+      {:ok, _id} ->
+        {:noreply,
+         socket
+         |> LocalStore.assign_cached(:secret, secret)
+         |> LocalStore.assign_cached(:email, email)
+         |> assign_form(changeset)}
 
-          {:error, reason} ->
-            Logger.error("Failed to send login code to #{email}: #{inspect(reason)}")
-            {:noreply, put_flash(socket, :error, "We had trouble sending mail to #{email}. Please try again")}
-        end
-
-      nil ->
-        throttle()
-        {:noreply, put_flash(socket, :error, "Email address not found.")}
+      {:error, reason} ->
+        Logger.error("Failed to send login code to #{email}: #{inspect(reason)}")
+        {:noreply, put_flash(socket, :error, "We had trouble sending mail to #{email}. Please try again")}
     end
   end
 
@@ -291,11 +285,32 @@ defmodule AlgoraWeb.SignInLive do
   def handle_event("send_login_code", %{"user" => %{"login_code" => code}}, socket) do
     case AlgoraWeb.UserAuth.verify_totp(socket.assigns.ip_address, socket.assigns.secret, String.trim(code)) do
       :ok ->
-        Accounts.ensure_org_context(socket.assigns.user)
+        handle =
+          socket.assigns.email
+          |> Organizations.generate_handle_from_email()
+          |> Organizations.ensure_unique_handle()
+
+        user =
+          case Repo.get_by(User, email: socket.assigns.email) do
+            nil ->
+              {:ok, user} =
+                %{handle: handle, email: socket.assigns.email}
+                |> User.user_registration_changeset()
+                |> Repo.insert(returning: true)
+
+              Accounts.auto_join_orgs(user)
+
+              Accounts.ensure_org_context(user)
+
+              user
+
+            user ->
+              user
+          end
 
         {:noreply,
          redirect(socket,
-           to: AlgoraWeb.UserAuth.generate_login_path(socket.assigns.user.email, socket.assigns[:return_to])
+           to: AlgoraWeb.UserAuth.generate_login_path(user.email, socket.assigns[:return_to])
          )}
 
       {:error, :rate_limit_exceeded} ->

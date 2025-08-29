@@ -5,7 +5,7 @@ defmodule Algora.Matches.JobMatch do
   import Ecto.Changeset
 
   typed_schema "job_matches" do
-    field :status, Ecto.Enum, values: [:pending, :discarded, :approved, :highlighted], default: :pending
+    field :status, Ecto.Enum, values: [:pending, :discarded, :automatched, :approved, :highlighted], default: :pending
     field :score, :decimal
     field :notes, :string
     field :company_approved_at, :utc_datetime_usec
@@ -41,7 +41,7 @@ defmodule Algora.Matches.JobMatch do
       :anonymize
     ])
     |> validate_required([:user_id, :job_posting_id])
-    |> validate_inclusion(:status, [:pending, :discarded, :approved, :highlighted])
+    |> validate_inclusion(:status, [:pending, :discarded, :automatched, :approved, :highlighted])
     |> foreign_key_constraint(:user_id)
     |> foreign_key_constraint(:job_posting_id)
     |> unique_constraint([:user_id, :job_posting_id])

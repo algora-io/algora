@@ -228,7 +228,7 @@ defmodule Algora.Matches do
   def list_user_approved_matches(user_id) do
     JobMatch
     |> filter_by_user_id(user_id)
-    |> filter_by_status([:approved, :highlighted])
+    |> filter_by_status([:automatched, :approved, :highlighted])
     |> join(:inner, [m], j in assoc(m, :job_posting), as: :j)
     |> order_by([m],
       asc: m.candidate_approved_at,

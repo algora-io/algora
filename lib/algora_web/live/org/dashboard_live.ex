@@ -243,7 +243,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                                 class="group/issue inline-flex flex-col"
                                 href={Bounty.url(bounty)}
                               >
-                                <div class="flex items-center gap-4">
+                                <div :if={Bounty.path(bounty)} class="flex items-center gap-4">
                                   <div class="truncate">
                                     <p class="truncate text-sm font-medium text-gray-300 group-hover/issue:text-gray-200 group-hover/issue:underline">
                                       {Bounty.path(bounty)}
@@ -350,31 +350,42 @@ defmodule AlgoraWeb.Org.DashboardLive do
           </div>
         </.section>
 
-        <.section
-          :if={@contributors != []}
-          title={"#{header_prefix(@previewed_user)} Contributors"}
-          subtitle="Share bounties, tips or contract opportunities with your top contributors"
-        >
-          <div class="relative w-full overflow-auto max-h-[250px] scrollbar-thin">
-            <table class="w-full caption-bottom text-sm">
-              <tbody>
-                <%= for %Contributor{user: user} <- @contributors do %>
-                  <.developer_card
-                    user={user}
-                    contract_for_user={contract_for_user(@contracts, user)}
-                    contract_type={
-                      if(Enum.find(@matches, &(&1.user.id == user.id)),
-                        do: "marketplace",
-                        else: "bring_your_own"
-                      )
-                    }
-                    current_org={@current_org}
-                  />
-                <% end %>
-              </tbody>
-            </table>
-          </div>
-        </.section>
+        <%= if @previewed_user.id == "xT2oJ8z7wTHWgs8g" do %>
+          <.section title={"#{header_prefix(@previewed_user)} Candidates"}>
+            <.link href={"/#{@previewed_user.handle}/candidates"}>
+              <img
+                src={"/og/#{@previewed_user.handle}/candidates"}
+                class="aspect-[1200/630] w-full object-cover border border-border rounded-xl"
+              />
+            </.link>
+          </.section>
+        <% else %>
+          <.section
+            :if={@contributors != []}
+            title={"#{header_prefix(@previewed_user)} Contributors"}
+            subtitle="Share bounties, tips or contract opportunities with your top contributors"
+          >
+            <div class="relative w-full overflow-auto max-h-[250px] scrollbar-thin">
+              <table class="w-full caption-bottom text-sm">
+                <tbody>
+                  <%= for %Contributor{user: user} <- @contributors do %>
+                    <.developer_card
+                      user={user}
+                      contract_for_user={contract_for_user(@contracts, user)}
+                      contract_type={
+                        if(Enum.find(@matches, &(&1.user.id == user.id)),
+                          do: "marketplace",
+                          else: "bring_your_own"
+                        )
+                      }
+                      current_org={@current_org}
+                    />
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          </.section>
+        <% end %>
 
         <div
           :if={length(@achievements) > 1}

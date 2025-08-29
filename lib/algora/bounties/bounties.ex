@@ -1327,9 +1327,9 @@ defmodule Algora.Bounties do
 
     from(b in Bounty)
     |> join(:inner, [b], bb in subquery(base_bounties), on: b.id == bb.id)
-    |> join(:inner, [b], t in assoc(b, :ticket), as: :t)
+    |> join(:left, [b], t in assoc(b, :ticket), as: :t)
     |> join(:inner, [b], o in assoc(b, :owner), as: :o)
-    |> join(:inner, [t: t], r in assoc(t, :repository), as: :r)
+    |> join(:left, [t: t], r in assoc(t, :repository), as: :r)
     |> join(:left, [r: r], ro in assoc(r, :user), as: :ro)
     |> where([b], not is_nil(b.amount))
     |> where([b], b.status != :cancelled)

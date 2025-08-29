@@ -318,6 +318,9 @@ defmodule AlgoraWeb.BountyLive do
   def render(assigns) do
     ~H"""
     <div class={classes(["xl:flex p-4", if(!@current_user, do: "pb-16 xl:pb-24")])}>
+      <div :if={@current_user && @current_user.is_admin}>
+        Autopay disabled: {@bounty.autopay_disabled}
+      </div>
       <.scroll_area class="xl:h-[calc(100svh-96px)] flex-1 pr-6">
         <div class="space-y-4">
           <.card>
@@ -330,24 +333,38 @@ defmodule AlgoraWeb.BountyLive do
                       {Util.initials(User.handle(@host))}
                     </.avatar_fallback>
                   </.avatar>
-                  <div>
-                    <.link
-                      href={@ticket.url}
-                      target="_blank"
-                      rel="noopener"
-                      class="block text-xl sm:text-3xl font-semibold text-foreground/90 hover:underline"
-                    >
-                      {@ticket.title}
-                    </.link>
-                    <.link
-                      href={@ticket.url}
-                      target="_blank"
-                      rel="noopener"
-                      class="block text-base font-display sm:text-xl font-medium text-muted-foreground hover:underline"
-                    >
-                      {@host.provider_login}<span :if={@ticket.repository}>/{@ticket.repository.name}#{@ticket.number}</span>
-                    </.link>
-                  </div>
+                  <%= if @ticket.url do %>
+                    <div>
+                      <.link
+                        href={@ticket.url}
+                        target="_blank"
+                        rel="noopener"
+                        class="block text-xl sm:text-3xl font-semibold text-foreground/90 hover:underline"
+                      >
+                        {@ticket.title}
+                      </.link>
+                      <.link
+                        href={@ticket.url}
+                        target="_blank"
+                        rel="noopener"
+                        class="block text-base font-display sm:text-xl font-medium text-muted-foreground hover:underline"
+                      >
+                        {@host.provider_login}<span :if={@ticket.repository}>/{@ticket.repository.name}#{@ticket.number}</span>
+                      </.link>
+                    </div>
+                  <% else %>
+                    <div>
+                      <div class="block text-xl sm:text-3xl font-semibold text-foreground/90 hover:underline">
+                        {@ticket.title}
+                      </div>
+                      <div
+                        href={@ticket.url}
+                        class="block text-base font-display sm:text-xl font-medium text-muted-foreground hover:underline"
+                      >
+                        {@host.name}
+                      </div>
+                    </div>
+                  <% end %>
                 </div>
                 <div class="flex flex-col gap-4">
                   <div class="font-display tabular-nums text-5xl text-success-400 font-bold">

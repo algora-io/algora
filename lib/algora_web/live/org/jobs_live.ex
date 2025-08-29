@@ -92,7 +92,7 @@ defmodule AlgoraWeb.Org.JobsLive do
         </div>
 
         <%= if not Enum.empty?(@media) do %>
-          <div class="max-w-xl mx-auto mt-8 flex flex-row justify-center gap-4">
+          <div class="max-w-4xl mx-auto mt-8 flex flex-row justify-center gap-4">
             <%= for media <- @media |> Enum.take(3) do %>
               <div class="w-1/3 aspect-video rounded-lg overflow-hidden">
                 <%= if Algora.Accounts.youtube_url?(media.url) do %>
@@ -102,7 +102,7 @@ defmodule AlgoraWeb.Org.JobsLive do
                   />
                   <.modal_video_dialog />
                 <% else %>
-                  <img src={media.url} class="w-full h-full object-cover object-cover" />
+                  <img src={media.url} class="w-full h-full object-cover" />
                 <% end %>
               </div>
             <% end %>

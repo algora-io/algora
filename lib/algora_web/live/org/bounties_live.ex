@@ -9,6 +9,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
   alias Algora.Bounties
   alias Algora.Bounties.Bounty
   alias Algora.Github
+  alias Algora.Markdown
   alias Algora.Payments
   alias Algora.Repo
   alias Algora.Types.USD
@@ -120,7 +121,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
                             class="group/issue inline-flex flex-col"
                             href={Bounty.url(bounty)}
                           >
-                            <div class="flex items-center gap-4">
+                            <div :if={Bounty.path(bounty)} class="flex items-center gap-4">
                               <div class="truncate">
                                 <p class="truncate text-sm font-medium text-gray-300 group-hover/issue:text-gray-200 group-hover/issue:underline">
                                   {Bounty.path(bounty)}
@@ -130,6 +131,25 @@ defmodule AlgoraWeb.Org.BountiesLive do
                             <p class="line-clamp-2 break-words text-base font-medium leading-tight text-gray-100 group-hover/issue:text-white group-hover/issue:underline">
                               {bounty.ticket.title}
                             </p>
+                            <div :if={is_nil(Bounty.path(bounty)) and bounty.ticket.description}>
+                              <.markdown
+                                id={"bounty-description-#{bounty.id}"}
+                                class="line-clamp-3 transition-all duration-200 [&>p]:m-0"
+                                phx-hook="ExpandableText"
+                                data-expand-id={"expand-#{bounty.id}"}
+                                data-class="line-clamp-3"
+                                value={Phoenix.HTML.raw(Markdown.render(bounty.ticket.description))}
+                              />
+                              <button
+                                id={"expand-#{bounty.id}"}
+                                type="button"
+                                class="text-xs text-foreground font-bold hidden"
+                                data-content-id={"bounty-description-#{bounty.id}"}
+                                phx-hook="ExpandableTextButton"
+                              >
+                                ...read more
+                              </button>
+                            </div>
                           </.link>
                           <p class="flex items-center gap-1.5 text-xs text-gray-400">
                             {Algora.Util.time_ago(bounty.inserted_at)}
@@ -182,7 +202,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
                     <% end %>
                   </td>
                   <td class="[&:has([role=checkbox])]:pr-0 p-4 align-middle">
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center justify-end gap-2">
                       <.button
                         phx-click="edit-bounty-amount"
                         phx-value-id={bounty.id}

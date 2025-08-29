@@ -70,8 +70,16 @@ defmodule Algora.Bounties.Bounty do
     "https://github.com/#{login}/#{name}/issues/#{number}"
   end
 
+  def url(%{id: id, owner: owner, repository: %{name: nil}}) do
+    "/#{owner.handle}/bounties/#{id}"
+  end
+
   def url(%{ticket: %{url: url}}) do
     url
+  end
+
+  def path(%{repository: %{name: nil}}) do
+    nil
   end
 
   def path(%{repository: %{name: name}, ticket: %{number: number}}) do

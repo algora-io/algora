@@ -160,7 +160,10 @@ defmodule AlgoraWeb.Org.HomeLive do
                           {bounty.ticket.title}
                         </.link>
 
-                        <div class="flex shrink-0 items-center gap-1 whitespace-nowrap text-sm text-muted-foreground">
+                        <div
+                          :if={Bounty.path(bounty)}
+                          class="flex shrink-0 items-center gap-1 whitespace-nowrap text-sm text-muted-foreground"
+                        >
                           <.icon name="tabler-chevron-right" class="h-4 w-4" />
                           <.link href={Bounty.url(bounty)} class="hover:underline">
                             {Bounty.path(bounty)}
@@ -196,7 +199,7 @@ defmodule AlgoraWeb.Org.HomeLive do
                           {Money.to_string!(transaction.net_amount)}
                         </div>
 
-                        <.link
+                        <.maybe_link
                           href={
                             if ticket.repository,
                               do:
@@ -206,7 +209,7 @@ defmodule AlgoraWeb.Org.HomeLive do
                           class="max-w-[400px] truncate text-sm text-foreground hover:underline"
                         >
                           {ticket.title}
-                        </.link>
+                        </.maybe_link>
 
                         <div
                           :if={ticket.repository || ticket.url}

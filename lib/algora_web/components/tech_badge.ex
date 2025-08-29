@@ -38,6 +38,7 @@ defmodule AlgoraWeb.Components.TechBadge do
   defp icon_url("youtube"), do: "/images/logos/youtube.png"
   defp icon_url("tiktok"), do: "/images/logos/tiktok.png"
   defp icon_url("openai"), do: "https://avatars.githubusercontent.com/u/14957082?s=200&v=4"
+  defp icon_url("anthropic"), do: "https://avatars.githubusercontent.com/u/76263028?s=200&v=4"
   defp icon_url("claude"), do: "https://avatars.githubusercontent.com/u/76263028?s=200&v=4"
   defp icon_url("gemini"), do: "https://avatars.githubusercontent.com/u/161781182?s=200&v=4"
   defp icon_url("grok"), do: "https://avatars.githubusercontent.com/u/130314967?s=200&v=4"
@@ -258,6 +259,7 @@ defmodule AlgoraWeb.Components.TechBadge do
       "Emacs",
       "Flask",
       "OpenAI",
+      "Anthropic",
       "Claude",
       "Gemini",
       "Grok",

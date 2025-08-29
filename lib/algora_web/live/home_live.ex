@@ -624,7 +624,7 @@ defmodule AlgoraWeb.HomeLive do
                       <div class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-400/10 border border-emerald-400/20 rounded-lg">
                         <.icon name="tabler-rocket" class="size-4 text-emerald-400" />
                         <span class="text-sm font-medium text-emerald-400">
-                          New HN launch coming in August
+                          New HN launch coming in September
                         </span>
                       </div>
                     </div>

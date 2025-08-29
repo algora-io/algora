@@ -2,10 +2,27 @@ defmodule AlgoraWeb.Challenges.PrimeintellectLive do
   @moduledoc false
   use AlgoraWeb, :live_view
 
+  alias Algora.Bounties
+  alias Algora.Bounties.Bounty
+  alias Algora.Organizations
   alias AlgoraWeb.Components.Header
 
   @impl true
   def mount(_params, _session, socket) do
+    primeintellect_org = Organizations.get_org_by_handle!("primeintellect-ai")
+
+    bounties =
+      Bounties.list_bounties(
+        owner_id: primeintellect_org.id,
+        status: :open,
+        limit: 100
+      )
+
+    total_bounty_amount =
+      bounties
+      |> Enum.map(& &1.amount)
+      |> Enum.reduce(Money.zero(:USD), &Money.add!/2)
+
     {:ok,
      socket
      |> assign(:page_title, "PrimeIntellect RL Environment Challenge")
@@ -13,7 +30,11 @@ defmodule AlgoraWeb.Challenges.PrimeintellectLive do
        :page_description,
        "Build RL environments for training AGI models and earn up to $1,000 per environment!"
      )
-     |> assign(:page_image, "#{AlgoraWeb.Endpoint.url()}/images/challenges/primeintellect/og.png")}
+     |> assign(:page_image, "#{AlgoraWeb.Endpoint.url()}/images/challenges/primeintellect/og.png")
+     |> assign(:bounties, bounties)
+     |> assign(:bounties_count, length(bounties))
+     |> assign(:total_bounty_amount, total_bounty_amount)
+     |> assign(:primeintellect_org, primeintellect_org)}
   end
 
   @impl true
@@ -150,171 +171,31 @@ defmodule AlgoraWeb.Challenges.PrimeintellectLive do
                   Available Environment Bounties
                 </h2>
                 <p class="text-center mt-4 text-base font-medium text-gray-200 mb-8">
-                  60 active bounties available totaling $18,900 in rewards. Select a bounty to start building. Each environment should integrate with our RL training infrastructure.
+                  {@bounties_count} active bounties available totaling {Money.to_string!(
+                    @total_bounty_amount
+                  )} in rewards. Select a bounty to start building. Each environment should integrate with our RL training infrastructure.
                 </p>
                 <div class="mx-auto grid gap-6 px-6 sm:grid-cols-2 lg:grid-cols-3 lg:px-8">
-                  <a
-                    href="https://github.com/PrimeIntellect-ai/genesys/issues/814"
-                    target="_blank"
-                    rel="noopener"
-                    class="group relative overflow-hidden rounded-lg border border-border bg-card p-6 transition-all hover:border-emerald-500/50 hover:no-underline block"
-                  >
-                    <div class="flex items-center gap-4 mb-4">
-                      <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center">
-                        <.icon name="tabler-world-www" class="w-6 h-6 text-white" />
+                  <%= for {bounty, index} <- Enum.with_index(@bounties) do %>
+                    <a
+                      href={Bounty.url(bounty)}
+                      target="_blank"
+                      rel="noopener"
+                      class="group relative overflow-hidden rounded-lg border border-border bg-card p-6 transition-all hover:border-emerald-500/50 hover:no-underline block"
+                    >
+                      <p class="text-sm text-muted-foreground line-clamp-3">
+                        {bounty.ticket.title}
+                      </p>
+                      <div class="mt-4 flex items-center gap-2">
+                        <span class="font-display rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-500 ring-emerald-500/50 ring-1">
+                          {Money.to_string!(bounty.amount)}
+                        </span>
+                        <span class="font-display rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-500 ring-emerald-500/50 ring-1">
+                          Active
+                        </span>
                       </div>
-                      <div>
-                        <h3 class="text-lg font-semibold text-foreground">webarena</h3>
-                        <p class="text-sm text-muted-foreground">Web interaction</p>
-                      </div>
-                    </div>
-                    <p class="text-sm text-muted-foreground">
-                      Create a WebArena RL environment for training models to navigate and interact with web interfaces. DOM manipulation, form filling, and multi-step task completion evaluation.
-                    </p>
-                    <div class="mt-4 flex items-center gap-2">
-                      <span class="font-display rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-500 ring-emerald-500/50 ring-1">
-                        $400
-                      </span>
-                      <span class="font-display rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-500 ring-emerald-500/50 ring-1">
-                        Active
-                      </span>
-                    </div>
-                  </a>
-                  <a
-                    href="https://github.com/PrimeIntellect-ai/genesys/issues/797"
-                    target="_blank"
-                    rel="noopener"
-                    class="group relative overflow-hidden rounded-lg border border-border bg-card p-6 transition-all hover:border-emerald-500/50 hover:no-underline block"
-                  >
-                    <div class="flex items-center gap-4 mb-4">
-                      <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center">
-                        <.icon name="tabler-code" class="w-6 h-6 text-white" />
-                      </div>
-                      <div>
-                        <h3 class="text-lg font-semibold text-foreground">humaneval-plus</h3>
-                        <p class="text-sm text-muted-foreground">Code generation</p>
-                      </div>
-                    </div>
-                    <p class="text-sm text-muted-foreground">
-                      Build enhanced HumanEval environment with additional test cases, multi-language support, and comprehensive code quality scoring for RL training.
-                    </p>
-                    <div class="mt-4 flex items-center gap-2">
-                      <span class="font-display rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-500 ring-emerald-500/50 ring-1">
-                        $350
-                      </span>
-                      <span class="font-display rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-500 ring-emerald-500/50 ring-1">
-                        Active
-                      </span>
-                    </div>
-                  </a>
-                  <a
-                    href="https://github.com/PrimeIntellect-ai/genesys/issues/80"
-                    target="_blank"
-                    rel="noopener"
-                    class="group relative overflow-hidden rounded-lg border border-border bg-card p-6 transition-all hover:border-emerald-500/50 hover:no-underline block"
-                  >
-                    <div class="flex items-center gap-4 mb-4">
-                      <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center">
-                        <.icon name="tabler-math" class="w-6 h-6 text-white" />
-                      </div>
-                      <div>
-                        <h3 class="text-lg font-semibold text-foreground">mathbench</h3>
-                        <p class="text-sm text-muted-foreground">Mathematical reasoning</p>
-                      </div>
-                    </div>
-                    <p class="text-sm text-muted-foreground">
-                      Mathematical reasoning environment based on MATH dataset for competition-level problems with step-by-step verification and symbolic reasoning support.
-                    </p>
-                    <div class="mt-4 flex items-center gap-2">
-                      <span class="font-display rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-500 ring-emerald-500/50 ring-1">
-                        $380
-                      </span>
-                      <span class="font-display rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-500 ring-emerald-500/50 ring-1">
-                        Active
-                      </span>
-                    </div>
-                  </a>
-                  <a
-                    href="https://github.com/PrimeIntellect-ai/genesys/issues/737"
-                    target="_blank"
-                    rel="noopener"
-                    class="group relative overflow-hidden rounded-lg border border-border bg-card p-6 transition-all hover:border-emerald-500/50 hover:no-underline block"
-                  >
-                    <div class="flex items-center gap-4 mb-4">
-                      <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">
-                        <.icon name="tabler-school" class="w-6 h-6 text-white" />
-                      </div>
-                      <div>
-                        <h3 class="text-lg font-semibold text-foreground">gsm8k</h3>
-                        <p class="text-sm text-muted-foreground">Grade school math</p>
-                      </div>
-                    </div>
-                    <p class="text-sm text-muted-foreground">
-                      GSM8K environment for multi-step word problems with natural language to mathematical expression parsing and reasoning verification.
-                    </p>
-                    <div class="mt-4 flex items-center gap-2">
-                      <span class="font-display rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-500 ring-emerald-500/50 ring-1">
-                        $280
-                      </span>
-                      <span class="font-display rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-500 ring-emerald-500/50 ring-1">
-                        Active
-                      </span>
-                    </div>
-                  </a>
-                  <a
-                    href="https://github.com/PrimeIntellect-ai/genesys/issues/741"
-                    target="_blank"
-                    rel="noopener"
-                    class="group relative overflow-hidden rounded-lg border border-border bg-card p-6 transition-all hover:border-emerald-500/50 hover:no-underline block"
-                  >
-                    <div class="flex items-center gap-4 mb-4">
-                      <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-indigo-400 to-indigo-600 flex items-center justify-center">
-                        <.icon name="tabler-brain" class="w-6 h-6 text-white" />
-                      </div>
-                      <div>
-                        <h3 class="text-lg font-semibold text-foreground">hellaswag</h3>
-                        <p class="text-sm text-muted-foreground">Commonsense reasoning</p>
-                      </div>
-                    </div>
-                    <p class="text-sm text-muted-foreground">
-                      Commonsense reasoning environment for evaluating situational understanding with multi-choice scenario completion and real-world context.
-                    </p>
-                    <div class="mt-4 flex items-center gap-2">
-                      <span class="font-display rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-500 ring-emerald-500/50 ring-1">
-                        $250
-                      </span>
-                      <span class="font-display rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-500 ring-emerald-500/50 ring-1">
-                        Active
-                      </span>
-                    </div>
-                  </a>
-                  <a
-                    href="https://github.com/PrimeIntellect-ai/genesys/issues/796"
-                    target="_blank"
-                    rel="noopener"
-                    class="group relative overflow-hidden rounded-lg border border-border bg-card p-6 transition-all hover:border-emerald-500/50 hover:no-underline block"
-                  >
-                    <div class="flex items-center gap-4 mb-4">
-                      <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-red-400 to-red-600 flex items-center justify-center">
-                        <.icon name="tabler-shield-check" class="w-6 h-6 text-white" />
-                      </div>
-                      <div>
-                        <h3 class="text-lg font-semibold text-foreground">truthfulqa</h3>
-                        <p class="text-sm text-muted-foreground">Truthfulness detection</p>
-                      </div>
-                    </div>
-                    <p class="text-sm text-muted-foreground">
-                      Environment for detecting and avoiding misinformation with truth/falsehood detection tasks and factual accuracy verification mechanisms.
-                    </p>
-                    <div class="mt-4 flex items-center gap-2">
-                      <span class="font-display rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-500 ring-emerald-500/50 ring-1">
-                        $320
-                      </span>
-                      <span class="font-display rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-500 ring-emerald-500/50 ring-1">
-                        Active
-                      </span>
-                    </div>
-                  </a>
+                    </a>
+                  <% end %>
                 </div>
                 <div class="text-center mt-8">
                   <p class="text-base font-medium text-gray-200">

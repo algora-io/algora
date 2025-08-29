@@ -25,7 +25,8 @@ config :algora,
     {"/:org/contract/:id", "/:org/contracts/:id"},
     {"/org/*path", "/*path"},
     {"/@/:handle", "/:handle/profile"},
-    {"/challenges/limbo", "/challenges/turso"}
+    {"/challenges/limbo", "/challenges/turso"},
+    {"/challenges/primeintellect-ai", "/challenges/primeintellect"}
   ]
 
 # Configures the endpoint

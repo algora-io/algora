@@ -64,6 +64,7 @@ defmodule Algora.Accounts.User do
     field :seeking_bounties, :boolean, default: false
     field :seeking_contracts, :boolean, default: false
     field :seeking_jobs, :boolean, default: false
+    field :open_to_new_role, :boolean, default: true
     field :hiring, :boolean, default: false
     field :hiring_subscription, Ecto.Enum, values: [:inactive, :trial, :active], default: :inactive
     field :hiring_keywords, :string
@@ -526,6 +527,7 @@ defmodule Algora.Accounts.User do
 
   def admin_pipeline_changeset(%User{} = user, params) do
     cast(user, params, [
+      :open_to_new_role,
       :last_job_match_email_at,
       :last_dm_date,
       :candidate_notes,

@@ -29,6 +29,7 @@ defmodule Algora.Jobs.JobPosting do
     field :primary_tech, :string
     field :primary_tag, :string
     field :full_description, :string
+    field :team, :string
 
     field :location_meta, :map
     field :location_iso_lvl4, :string
@@ -66,6 +67,7 @@ defmodule Algora.Jobs.JobPosting do
       :primary_tech,
       :primary_tag,
       :full_description,
+      :team,
       :location_types,
       :locations,
       :min_compensation,

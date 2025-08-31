@@ -10,6 +10,7 @@ kill_signal = 'SIGTERM'
 [build]
 
 [deploy]
+  strategy = "bluegreen"
   release_command = '/app/bin/migrate'
 
 [env]
@@ -24,7 +25,16 @@ kill_signal = 'SIGTERM'
   min_machines_running = 1
   processes = ['app']
 
-  [http_service.concurrency]
-    type = 'connections'
-    hard_limit = 1000
-    soft_limit = 100
+[http_service.concurrency]
+  type = 'connections'
+  hard_limit = 1000
+  soft_limit = 100
+
+[[http_service.checks]]
+  grace_period = "10s"
+  interval = "15s"
+  timeout = "2s"
+  method = "GET"
+  path = "/health"
+  [http_service.checks.headers]
+    X-Forwarded-Proto = "https"

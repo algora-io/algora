@@ -533,7 +533,8 @@ defmodule Algora.Accounts.User do
       :candidate_notes,
       :dm_thread_url,
       :linkedin_url,
-      :employment_info
+      :employment_info,
+      :internal_email
     ])
   end
 

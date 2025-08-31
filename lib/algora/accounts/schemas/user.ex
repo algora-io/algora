@@ -531,7 +531,9 @@ defmodule Algora.Accounts.User do
       :last_job_match_email_at,
       :last_dm_date,
       :candidate_notes,
-      :dm_thread_url
+      :dm_thread_url,
+      :linkedin_url,
+      :employment_info
     ])
   end
 

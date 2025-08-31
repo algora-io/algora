@@ -20,6 +20,7 @@ defmodule Algora.Jobs do
   def list_jobs(opts \\ []) do
     query =
       JobPosting
+      |> maybe_filter_by_ids(opts[:ids])
       |> maybe_filter_by_status(opts)
       |> maybe_filter_by_user(opts)
       |> join(:inner, [j], u in User, on: u.id == j.user_id)
@@ -93,11 +94,18 @@ defmodule Algora.Jobs do
     where(query, [j, u], u.handle == ^handle)
   end
 
+  defp maybe_filter_by_ids(query, nil), do: query
+
+  defp maybe_filter_by_ids(query, ids) do
+    where(query, [j], j.id in ^ids)
+  end
+
   defp maybe_filter_by_status(query, opts) do
     cond do
       opts[:status] == :all -> where(query, [j], j.status in [:active, :processing])
       opts[:user_id] -> where(query, [j], j.status in [:active, :processing])
       opts[:handle] -> where(query, [j, u], j.status in [:active, :processing])
+      opts[:ids] -> where(query, [j, u], j.status in [:active, :processing])
       true -> where(query, [j], j.status in [:active])
     end
   end

@@ -46,7 +46,8 @@ defmodule AlgoraWeb.Components.TechBadge do
   defp icon_url("deepspeed"), do: "https://avatars.githubusercontent.com/u/74068820?s=200&v=4"
   defp icon_url("llmfoundry"), do: "https://avatars.githubusercontent.com/u/75143706?s=200&v=4"
   defp icon_url("sglang"), do: "https://avatars.githubusercontent.com/u/147780389?s=200&v=4"
-
+  defp icon_url("electron"), do: "https://avatars.githubusercontent.com/u/13409222?s=200&v=4"
+  defp icon_url("oci"), do: "https://avatars.githubusercontent.com/u/12563465?s=200&v=4"
   defp icon_url(tech), do: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/#{icon_path(tech)}"
 
   defp icon_path("aws"), do: "amazonwebservices/amazonwebservices-plain-wordmark.svg"
@@ -271,7 +272,9 @@ defmodule AlgoraWeb.Components.TechBadge do
       "Clickhouse",
       "Vercel",
       "MLIR",
-      "Julia"
+      "Julia",
+      "Electron",
+      "OCI"
     ]
   end
 end

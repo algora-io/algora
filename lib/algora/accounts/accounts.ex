@@ -850,7 +850,7 @@ defmodule Algora.Accounts do
     end
   end
 
-  defp extract_content_type(headers) do
+  def extract_content_type(headers) do
     case List.keyfind(headers, "content-type", 0) do
       {_, content_type} -> content_type
       nil -> "application/octet-stream"

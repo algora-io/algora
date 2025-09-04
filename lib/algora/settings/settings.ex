@@ -333,6 +333,17 @@ defmodule Algora.Settings do
     set_campaign_timestamp(timestamp)
   end
 
+  def get_org_members(org_handle) when is_binary(org_handle) do
+    case get("org_members:#{org_handle}") do
+      %{"members" => members} when is_list(members) -> members
+      _ -> []
+    end
+  end
+
+  def set_org_members(org_handle, members) when is_binary(org_handle) and is_list(members) do
+    set("org_members:#{org_handle}", %{"members" => members})
+  end
+
   defp format_timestamp(datetime) do
     datetime
     |> DateTime.to_string()

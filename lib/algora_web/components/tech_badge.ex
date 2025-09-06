@@ -48,6 +48,8 @@ defmodule AlgoraWeb.Components.TechBadge do
   defp icon_url("sglang"), do: "https://avatars.githubusercontent.com/u/147780389?s=200&v=4"
   defp icon_url("electron"), do: "https://avatars.githubusercontent.com/u/13409222?s=200&v=4"
   defp icon_url("oci"), do: "https://avatars.githubusercontent.com/u/12563465?s=200&v=4"
+  defp icon_url("drizzle orm"), do: "https://avatars.githubusercontent.com/u/108468352?s=48&v=4"
+  defp icon_url("zod"), do: "https://raw.githubusercontent.com/colinhacks/zod/main/logo.svg"
   defp icon_url(tech), do: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/#{icon_path(tech)}"
 
   defp icon_path("aws"), do: "amazonwebservices/amazonwebservices-plain-wordmark.svg"
@@ -76,6 +78,7 @@ defmodule AlgoraWeb.Components.TechBadge do
   defp icon_class("flask"), do: "bg-white invert saturate-0"
   defp icon_class("prisma"), do: "bg-white invert saturate-0"
   defp icon_class("vercel"), do: "bg-white invert saturate-0"
+  defp icon_class("expo"), do: "bg-white invert saturate-0"
   defp icon_class(_tech), do: "bg-transparent"
 
   defp normalize(tech) do
@@ -210,6 +213,7 @@ defmodule AlgoraWeb.Components.TechBadge do
       "Azure",
       "AWS",
       "GCP",
+      "Cloudflare",
       "React",
       "Svelte",
       "Vue.js",
@@ -274,7 +278,11 @@ defmodule AlgoraWeb.Components.TechBadge do
       "MLIR",
       "Julia",
       "Electron",
-      "OCI"
+      "OCI",
+      "Supabase",
+      "Drizzle ORM",
+      "Zod",
+      "Expo"
     ]
   end
 end

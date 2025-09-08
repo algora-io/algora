@@ -3,11 +3,24 @@ defmodule Algora.MoneyUtils do
   def fmt_precise(money), do: Money.to_string(money, no_fraction_if_integer: false)
   def fmt_precise!(money), do: Money.to_string!(money, no_fraction_if_integer: false)
 
+  def fmt_compact(nil), do: nil
+
   def fmt_compact(money) do
-    money
-    |> Money.to_string!(no_fraction_if_integer: true)
-    |> String.replace(",000,000", "M")
-    |> String.replace(",000", "k")
+    amount = Algora.Util.format_number_compact(money.amount)
+
+    case money.currency do
+      :USD ->
+        "$" <> amount
+
+      :EUR ->
+        "€" <> amount
+
+      :GBP ->
+        "£" <> amount
+
+      _ ->
+        to_string(money.currency) <> " " <> amount
+    end
   end
 
   @spec split_evenly(Money.t(), non_neg_integer()) :: [Money.t()]

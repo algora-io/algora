@@ -35,6 +35,7 @@ defmodule Algora.Jobs.JobPosting do
     field :location_iso_lvl4, :string
     field :location_types, {:array, Ecto.Enum}, values: [:remote, :hybrid, :onsite]
     field :locations, {:array, :string}, default: []
+    field :states, {:array, :string}, default: []
 
     belongs_to :user, User, null: false
     has_many :interviews, Algora.Interviews.JobInterview, foreign_key: :job_posting_id
@@ -71,7 +72,8 @@ defmodule Algora.Jobs.JobPosting do
       :location_types,
       :locations,
       :min_compensation,
-      :max_compensation
+      :max_compensation,
+      :states
     ])
     |> generate_id()
     |> validate_required([:url, :company_name, :company_url, :email])

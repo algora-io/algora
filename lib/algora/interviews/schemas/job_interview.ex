@@ -4,8 +4,11 @@ defmodule Algora.Interviews.JobInterview do
 
   import Ecto.Changeset
 
+  @interview_statuses [:initial, :ongoing, :passed, :failed, :withdrawn]
+
   typed_schema "job_interviews" do
-    field :status, Ecto.Enum, values: [:scheduled, :completed, :cancelled, :no_show]
+    field :status, Ecto.Enum, values: @interview_statuses
+
     field :notes, :string
     field :scheduled_at, :utc_datetime_usec
     field :completed_at, :utc_datetime_usec
@@ -20,7 +23,7 @@ defmodule Algora.Interviews.JobInterview do
     job_interview
     |> cast(attrs, [:user_id, :job_posting_id, :status, :notes, :scheduled_at, :completed_at])
     |> validate_required([:user_id, :job_posting_id, :status])
-    |> validate_inclusion(:status, [:scheduled, :completed, :cancelled, :no_show])
+    |> validate_inclusion(:status, @interview_statuses)
     |> foreign_key_constraint(:user_id)
     |> foreign_key_constraint(:job_posting_id)
     |> generate_id()

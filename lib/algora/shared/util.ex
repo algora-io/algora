@@ -288,6 +288,6 @@ defmodule Algora.Util do
   def to_local_string(datetime) do
     datetime
     |> DateTime.shift_zone!("Europe/Athens", Tzdata.TimeZoneDatabase)
-    |> Calendar.strftime("%Y-%m-%d %H:%M:%S EEST")
+    |> Calendar.strftime("%Y-%m-%d %H:%M:%S")
   end
 end

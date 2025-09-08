@@ -142,9 +142,7 @@ defmodule Algora.Organizations do
           Map.merge(
             %{
               display_name: org_name,
-              bio:
-                get_in(metadata, [:bio]) || get_in(metadata, [:og_description]) ||
-                  get_in(metadata, [:og_title]),
+              bio: get_in(metadata, [:bio]) || get_in(metadata, [:og_description]) || get_in(metadata, [:og_title]),
               avatar_url: get_in(metadata, [:avatar_url]) || get_in(metadata, [:favicon_url]),
               handle: org_handle,
               domain: domain,

@@ -42,7 +42,7 @@ defmodule AlgoraWeb.Components.UI.Badge do
   @variants %{
     variant: %{
       "default" => "bg-accent/10 text-accent-foreground border-accent-foreground/20",
-      "secondary" => "bg-secondary/10 text-secondary border-secondary/20",
+      "secondary" => "bg-secondary/80 text-secondary-foreground border-secondary-foreground/20",
       "destructive" => "bg-destructive/10 text-destructive border-destructive/20",
       "success" => "bg-success/10 text-success border-success/20",
       "warning" => "bg-warning/10 text-warning border-warning/20",

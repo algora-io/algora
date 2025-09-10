@@ -128,6 +128,7 @@ defmodule Algora.Accounts.User do
     field :language_contributions_synced, :boolean, default: false
     field :repo_contributions_synced, :boolean, default: false
     field :linkedin_url_attempted, :boolean, default: false
+    field :linkedin_meta_attempted, :boolean, default: false
 
     # Work arrangement preferences
     field :open_to_remote, :boolean, default: false

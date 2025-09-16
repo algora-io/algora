@@ -350,7 +350,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
           </div>
         </.section>
 
-        <%= if @previewed_user.id in ["xT2oJ8z7wTHWgs8g", "tZwZcLNtAQhmBbqX"] or @previewed_user.contract_signed do %>
+        <%= if @previewed_user.id in ["xT2oJ8z7wTHWgs8g"] or @previewed_user.contract_signed or (not is_nil(@previewed_user.stage) and @previewed_user.stage != :none) do %>
           <.section title={"#{header_prefix(@previewed_user)} Candidates"}>
             <.link href={"/#{@previewed_user.handle}/candidates"}>
               <img

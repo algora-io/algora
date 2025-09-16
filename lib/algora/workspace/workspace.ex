@@ -844,10 +844,7 @@ defmodule Algora.Workspace do
          :ok <- add_contributions(token, users, cloud_contributions) do
       # Always mark users as synced after fetching from Cloud API
       mark_users_as_synced(users_without_contributions, users)
-
-      existing_contributions = get_existing_contributions(users_with_contributions_logins)
-      all_contributions = existing_contributions ++ cloud_contributions
-      {:ok, all_contributions}
+      {:ok, users}
     else
       {:error, reason} ->
         Logger.error("Failed to fetch contributions for #{inspect(provider_logins)}: #{inspect(reason)}")
@@ -885,7 +882,7 @@ defmodule Algora.Workspace do
     users_map = Enum.group_by(users, & &1.provider_login)
 
     results =
-      Enum.map(contributions, fn contribution ->
+      Enum.flat_map(contributions, fn contribution ->
         case users_map[contribution.provider_login] do
           [user] ->
             %{
@@ -895,10 +892,10 @@ defmodule Algora.Workspace do
             }
             |> Jobs.SyncContribution.new()
             |> Oban.insert()
+            |> then(&[&1])
 
           _ ->
-            Logger.error("User not found for #{contribution.provider_login}")
-            {:error, :user_not_found}
+            []
         end
       end)
 
@@ -947,13 +944,16 @@ defmodule Algora.Workspace do
   end
 
   def ensure_users(token, provider_logins) do
-    Repo.tx(fn ->
-      provider_logins
-      |> Enum.map(&ensure_user(token, &1))
-      |> Enum.reduce_while({:ok, []}, fn
-        {:ok, user}, {:ok, users} -> {:cont, {:ok, [user | users]}}
-        {:error, reason}, _ -> {:halt, {:error, reason}}
-      end)
+    provider_logins
+    |> Enum.map(&ensure_user(token, &1))
+    |> Enum.reduce_while({:ok, []}, fn
+      {:ok, user}, {:ok, users} ->
+        {:cont, {:ok, [user | users]}}
+
+      {:error, reason}, acc ->
+        Logger.error("Something went wrong fetching user #{IO.inspect(reason)}")
+        {:cont, acc}
+        # {:halt, {:error, reason}}
     end)
   end
 

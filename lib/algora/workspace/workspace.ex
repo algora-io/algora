@@ -984,22 +984,6 @@ defmodule Algora.Workspace do
     Enum.uniq_by(users_with_contributions ++ users_marked_synced, & &1.id)
   end
 
-  @spec get_existing_contributions(list(String.t())) :: list(map())
-  defp get_existing_contributions(provider_logins) do
-    Repo.all(
-      from uc in UserContribution,
-        join: u in assoc(uc, :user),
-        join: r in assoc(uc, :repository),
-        join: repo_owner in assoc(r, :user),
-        where: u.provider == "github",
-        where: u.provider_login in ^provider_logins,
-        select: %{
-          provider_login: u.provider_login,
-          repo_name: fragment("? || '/' || ?", repo_owner.provider_login, r.name),
-          contribution_count: uc.contribution_count
-        }
-    )
-  end
 
   @spec mark_users_as_synced(list(String.t()), list(User.t())) :: :ok
   defp mark_users_as_synced(users_without_contributions, users) do

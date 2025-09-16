@@ -17,7 +17,6 @@ defmodule AlgoraWeb.Webhooks.GithubController do
   alias Algora.Repo
   alias Algora.Util
   alias Algora.Workspace
-  alias Algora.Workspace.CommandResponse
   alias Algora.Workspace.Installation
 
   require Logger

@@ -4,9 +4,7 @@ defmodule Algora.Github.Poller.SearchConsumer do
 
   alias Algora.Accounts
   alias Algora.Bounties
-  alias Algora.Repo
   alias Algora.Util
-  alias Algora.Workspace.CommandResponse
 
   require Logger
 

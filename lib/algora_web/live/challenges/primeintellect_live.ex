@@ -176,7 +176,7 @@ defmodule AlgoraWeb.Challenges.PrimeintellectLive do
                   )} in rewards. Select a bounty to start building. Each environment should integrate with our RL training infrastructure.
                 </p>
                 <div class="mx-auto grid gap-6 px-6 sm:grid-cols-2 lg:grid-cols-3 lg:px-8">
-                  <%= for {bounty, index} <- Enum.with_index(@bounties) do %>
+                  <%= for {bounty, _index} <- Enum.with_index(@bounties) do %>
                     <a
                       href={Bounty.url(bounty)}
                       target="_blank"

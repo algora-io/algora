@@ -202,4 +202,14 @@ defmodule Algora.Support.GithubMock do
   def remove_label_from_issue(_access_token, _owner, _repo, _number, _label) do
     {:ok, %{"id" => random_id()}}
   end
+
+  @impl true
+  def list_user_followers(_access_token, _username, _opts \\ []) do
+    {:ok, []}
+  end
+
+  @impl true
+  def list_user_following(_access_token, _username, _opts \\ []) do
+    {:ok, []}
+  end
 end

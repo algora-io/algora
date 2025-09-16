@@ -21,7 +21,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
   alias Algora.Repo
   alias Algora.Workspace
   alias Algora.Workspace.Contributor
-  alias Algora.Workspace.Ticket
   alias AlgoraWeb.Components.Logos
   alias AlgoraWeb.Constants
   alias AlgoraWeb.Forms.BountyForm

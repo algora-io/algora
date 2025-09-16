@@ -40,6 +40,10 @@ defmodule Algora.Github.Client do
     end
   end
 
+  defp maybe_handle_error(%{"message" => "Repository access blocked"} = body) do
+    {:error, body}
+  end
+
   defp maybe_handle_error(%{"message" => message, "status" => status} = body) do
     case Integer.parse(status) do
       {code, _} when code >= 400 -> {:error, "#{code} #{message}"}

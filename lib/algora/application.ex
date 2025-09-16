@@ -28,7 +28,7 @@ defmodule Algora.Application do
       AlgoraWeb.Endpoint,
       Algora.Stargazer,
       TwMerge.Cache
-    ]
+    ] ++ Algora.Cloud.start()
 
     children =
       case Application.get_env(:algora, :cloudflare_tunnel) do
@@ -36,8 +36,6 @@ defmodule Algora.Application do
         "" -> children
         tunnel -> children ++ [{Algora.Tunnel, tunnel}]
       end
-
-    Algora.Cloud.start()
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options

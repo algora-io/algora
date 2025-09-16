@@ -783,17 +783,17 @@ const Hooks = {
           }, 0);
         }
 
-        updateStrength();
+        // updateStrength();
       };
 
       input.addEventListener("input", handleInput);
-      input.addEventListener("keyup", updateStrength);
+      // input.addEventListener("keyup", updateStrength);
 
       // Initial formatting and update
       if (input.value) {
         input.value = formatWithCommas(input.value);
       }
-      updateStrength();
+      // updateStrength();
     },
   },
   CandidatesScroll: {
@@ -804,7 +804,7 @@ const Hooks = {
           candidateElement.scrollIntoView({
             behavior: "instant",
             block: "start",
-            inline: "nearest"
+            inline: "nearest",
           });
         }
       });
@@ -823,10 +823,12 @@ const Hooks = {
           entries.forEach((entry) => {
             if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
               const candidateId = entry.target.id;
-              const index = candidateId.split('-')[1];
+              const index = candidateId.split("-")[1];
               if (index !== undefined) {
                 // Update the sidebar selection without triggering a scroll
-                this.pushEvent("update_current_index_silent", { index: parseInt(index) });
+                this.pushEvent("update_current_index_silent", {
+                  index: parseInt(index),
+                });
               }
             }
           });
@@ -834,7 +836,7 @@ const Hooks = {
         {
           root: null,
           rootMargin: "-20% 0px -20% 0px",
-          threshold: [0.5]
+          threshold: [0.5],
         }
       );
 

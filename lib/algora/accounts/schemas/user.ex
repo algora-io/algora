@@ -156,6 +156,14 @@ defmodule Algora.Accounts.User do
     # Poaching targets - stores repos and companies to poach from
     field :poaching_targets, :string
 
+    # Customer stage tracking
+    field :stage, Ecto.Enum,
+      values: [:inbound, :opening, :onboarding, :campaigning, :interviewing, :none],
+      default: :none
+
+    # Import tracking - identifies the source that imported this user
+    field :import_source, :string
+
     has_many :identities, Identity
     has_many :memberships, Member, foreign_key: :user_id
     has_many :members, Member, foreign_key: :org_id
@@ -536,7 +544,8 @@ defmodule Algora.Accounts.User do
       :dm_thread_url,
       :linkedin_url,
       :employment_info,
-      :internal_email
+      :internal_email,
+      :stage
     ])
   end
 

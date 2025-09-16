@@ -113,6 +113,12 @@ defmodule AlgoraWeb.Components.TechBadge do
       "nest.js" ->
         "nestjs"
 
+      "node" ->
+        "nodejs"
+
+      "swiftui" ->
+        "swift"
+
       "shell" ->
         "bash"
 
@@ -282,7 +288,8 @@ defmodule AlgoraWeb.Components.TechBadge do
       "Supabase",
       "Drizzle ORM",
       "Zod",
-      "Expo"
+      "Expo",
+      "Unity"
     ]
   end
 end

@@ -43,11 +43,40 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   def handle_event("submit", %{"form" => params}, socket) do
     case %Form{} |> Form.changeset(params) |> Ecto.Changeset.apply_action(:save) do
       {:ok, data} ->
+        # Create alert for immediate notification
         Algora.Activities.alert(Jason.encode!(data), :critical)
+
+        # Create admin task for welcoming the user
+        create_welcome_task(data)
+
         {:noreply, put_flash(socket, :info, "Thanks for submitting your JD! We'll follow up soon")}
 
       {:error, changeset} ->
         {:noreply, assign(socket, form: to_form(changeset))}
+    end
+  end
+
+  defp create_welcome_task(data) do
+    task_attrs = %{
+      type: "user_welcome",
+      payload: %{
+        email: data.email,
+        job_description: data.job_description,
+        candidate_description: data.candidate_description,
+        comp_range: data.comp_range,
+        submitted_at: DateTime.utc_now(),
+        source: "jd_submission"
+      },
+      seq: 0,
+      origin_id: Nanoid.generate()
+    }
+
+    case Algora.Cloud.create_admin_task(task_attrs) do
+      {:ok, _task} ->
+        Logger.info("Created welcome task for #{data.email}")
+
+      {:error, changeset} ->
+        Logger.error("Failed to create welcome task: #{inspect(changeset)}")
     end
   end
 

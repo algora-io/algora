@@ -53,6 +53,10 @@ defmodule Algora.Cloud do
     call(AlgoraCloud.Talent.Jobs.SendCompanyLikeEmail, :send, [attrs])
   end
 
+  def create_admin_task(attrs) do
+    call(AlgoraCloud.AdminTasks, :create_admin_task, [attrs])
+  end
+
   def start do
     call(AlgoraCloud, :start, [])
   end

@@ -285,6 +285,8 @@ defmodule Algora.Util do
     String.replace(string, ~r/[^a-zA-Z]/, "")
   end
 
+  def to_local_string(nil), do: nil
+
   def to_local_string(datetime) do
     datetime
     |> DateTime.shift_zone!("Europe/Athens", Tzdata.TimeZoneDatabase)

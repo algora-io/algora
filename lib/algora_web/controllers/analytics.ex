@@ -2,8 +2,8 @@ defmodule AlgoraWeb.Analytics do
   @moduledoc false
   import Plug.Conn
 
-  @dev_country_code "us"
-  @default_country_code "us"
+  @dev_country_code "US"
+  @default_country_code "US"
   @country_code_key "current_country"
 
   def on_mount(:current_country, _params, session, socket) do
@@ -29,7 +29,8 @@ defmodule AlgoraWeb.Analytics do
       nil ->
         conn
         |> get_client_ip()
-        |> get_country_code()
+        |> get_country_code(@default_country_code)
+        |> String.downcase()
 
       country_code ->
         country_code
@@ -38,20 +39,20 @@ defmodule AlgoraWeb.Analytics do
 
   defp get_client_ip(conn), do: conn.remote_ip |> :inet.ntoa() |> to_string()
 
-  defp get_country_code("127.0.0.1"), do: @dev_country_code
+  def get_country_code("127.0.0.1"), do: @dev_country_code
 
-  defp get_country_code(ip) do
-    url = "https://ipinfo.io/#{ip}?token=#{System.get_env("IPINFO_TOKEN")}"
+  def get_country_code(ip, default \\ nil) do
+    url = "https://api.ipinfo.io/lite/#{ip}?token=#{System.get_env("IPINFO_TOKEN")}"
 
     task = Task.async(fn -> :get |> Finch.build(url) |> Finch.request(Algora.Finch) end)
     res = Task.yield(task, to_timeout(second: 3)) || Task.shutdown(task)
 
     with {:ok, {:ok, %Finch.Response{status: 200, body: body}}} <- res,
          {:ok, decoded} <- Jason.decode(body),
-         country when is_binary(country) <- Map.get(decoded, "country") do
-      String.downcase(country)
+         country when is_binary(country) <- Map.get(decoded, "country_code") do
+      country
     else
-      _ -> @default_country_code
+      _ -> default
     end
   end
 end

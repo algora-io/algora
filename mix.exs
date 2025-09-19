@@ -32,7 +32,8 @@ defmodule Algora.MixProject do
   def application do
     [
       mod: {Algora.Application, []},
-      extra_applications: [:logger, :runtime_tools]
+      extra_applications: [:logger, :runtime_tools],
+      included_applications: [:ua_inspector]
     ]
   end
 

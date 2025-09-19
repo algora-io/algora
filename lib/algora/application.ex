@@ -28,7 +28,8 @@ defmodule Algora.Application do
         # Start to serve requests, typically the last entry
         AlgoraWeb.Endpoint,
         Algora.Stargazer,
-        TwMerge.Cache
+        TwMerge.Cache,
+        UAInspector.Supervisor
       ] ++ Algora.Cloud.start()
 
     children =

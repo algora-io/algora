@@ -104,6 +104,7 @@ defmodule Algora.MixProject do
       {:openai_ex, "~> 0.9.12"},
       {:hound, "~> 1.1"},
       {:html2markdown, "~> 0.3.0"},
+      {:ua_inspector, "~> 3.0"},
       # ex_aws
       {:ex_aws, "~> 2.1"},
       {:ex_aws_s3, "~> 2.0"},

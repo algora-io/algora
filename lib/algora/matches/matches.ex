@@ -19,7 +19,6 @@ defmodule Algora.Matches do
     |> filter_by_org_id(opts[:org_id])
     |> filter_by_status(opts[:status])
     |> join(:inner, [m], j in assoc(m, :job_posting), as: :j)
-    |> filter_by_org_id(opts[:org_id])
     |> order_by(^order_by_clause)
     |> maybe_preload(opts[:preload])
     |> Repo.all()
@@ -257,7 +256,9 @@ defmodule Algora.Matches do
   defp filter_by_org_id(query, nil), do: query
 
   defp filter_by_org_id(query, org_id) do
-    where(query, [m, j], j.user_id == ^org_id)
+    query
+    |> where([m, j], j.user_id == ^org_id)
+    |> where([m, j], is_nil(m.company_discarded_at))
   end
 
   defp filter_by_status(query, nil), do: query

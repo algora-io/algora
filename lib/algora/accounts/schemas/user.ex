@@ -492,6 +492,7 @@ defmodule Algora.Accounts.User do
       :website_url,
       :location,
       :preferences,
+      :display_name,
       :internal_email,
       :internal_notes,
       :candidate_notes,

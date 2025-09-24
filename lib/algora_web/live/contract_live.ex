@@ -140,11 +140,6 @@ defmodule AlgoraWeb.ContractLive do
     messages = thread.id |> Chat.list_messages() |> Repo.preload(:sender)
     participants = thread.id |> Chat.list_participants() |> Repo.preload(:user)
 
-    if connected?(socket) do
-      Chat.subscribe(thread.id)
-      Payments.subscribe()
-    end
-
     share_url =
       if socket.assigns.ticket_ref do
         url(
@@ -154,28 +149,46 @@ defmodule AlgoraWeb.ContractLive do
         url(~p"/#{socket.assigns.bounty.owner.handle}/bounties/#{socket.assigns.bounty.id}")
       end
 
-    {:ok,
-     socket
-     |> assign(:can_create_bounty, Member.can_create_bounty?(socket.assigns.current_user_role))
-     |> assign(:share_url, share_url)
-     |> assign(:page_title, bounty.ticket.title)
-     |> assign(:ticket, bounty.ticket)
-     |> assign(:total_paid, total_paid)
-     |> assign(:ticket_body_html, ticket_body_html)
-     |> assign(:show_reward_modal, false)
-     |> assign(:show_authorize_modal, false)
-     |> assign(:show_release_modal, false)
-     |> assign(:selected_context, nil)
-     |> assign(:tx_id, nil)
-     |> assign(:line_items, [])
-     |> assign(:thread, thread)
-     |> assign(:messages, messages)
-     |> assign(:participants, participants)
-     |> assign(:reward_form, to_form(reward_changeset))
-     |> assign(:release_form, to_form(release_changeset))
-     |> assign_contractor(bounty.shared_with)
-     |> assign_transactions()
-     |> assign_line_items(reward_changeset)}
+    socket =
+      socket
+      |> assign(:can_create_bounty, Member.can_create_bounty?(socket.assigns.current_user_role))
+      |> assign(:share_url, share_url)
+      |> assign(:page_title, bounty.ticket.title)
+      |> assign(:ticket, bounty.ticket)
+      |> assign(:total_paid, total_paid)
+      |> assign(:ticket_body_html, ticket_body_html)
+      |> assign(:show_reward_modal, false)
+      |> assign(:show_authorize_modal, false)
+      |> assign(:show_release_modal, false)
+      |> assign(:selected_context, nil)
+      |> assign(:tx_id, nil)
+      |> assign(:line_items, [])
+      |> assign(:thread, thread)
+      |> assign(:messages, messages)
+      |> assign(:participants, participants)
+      |> assign(:reward_form, to_form(reward_changeset))
+      |> assign(:release_form, to_form(release_changeset))
+      |> assign_contractor(bounty.shared_with)
+      |> assign_transactions()
+      |> assign_line_items(reward_changeset)
+
+    current_user = socket.assigns[:current_user]
+
+    if not is_nil(socket.assigns.contractor) and
+         (is_nil(current_user) or
+            (socket.assigns.contractor.id != socket.assigns.current_user.id and socket.assigns.current_user_role == :none)) do
+      {:ok,
+       redirect(socket,
+         to: ~p"/auth/login?return_to=#{~p"/#{socket.assigns.current_org.handle}/contracts/#{socket.assigns.bounty.id}"}"
+       )}
+    else
+      if connected?(socket) do
+        Chat.subscribe(thread.id)
+        Payments.subscribe()
+      end
+
+      {:ok, socket}
+    end
   end
 
   @impl true

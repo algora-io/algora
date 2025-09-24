@@ -349,7 +349,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
           </div>
         </.section>
 
-        <%= if @previewed_user.id in ["xT2oJ8z7wTHWgs8g"] or @previewed_user.contract_signed or (not is_nil(@previewed_user.stage) and @previewed_user.stage != :none) do %>
+        <%= if @previewed_user.id in ["xT2oJ8z7wTHWgs8g", "ETU6LA5QADkB2Dig"] or @previewed_user.contract_signed or (not is_nil(@previewed_user.stage) and @previewed_user.stage != :none) do %>
           <.section title={"#{header_prefix(@previewed_user)} Candidates"}>
             <.link href={"/#{@previewed_user.handle}/candidates"}>
               <img
@@ -1291,9 +1291,9 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
           <div class="flex flex-col items-start sm:items-end gap-3">
             <div class="hidden sm:block sm:text-right">
-              <div class="whitespace-nowrap text-sm text-muted-foreground">Total contract value</div>
+              <div class="whitespace-nowrap text-sm text-muted-foreground">Amount</div>
               <div class="font-display text-lg font-semibold text-foreground">
-                {Money.to_string!(@contract.amount)} / wk
+                {Money.to_string!(@contract.amount)}
               </div>
             </div>
             <.button

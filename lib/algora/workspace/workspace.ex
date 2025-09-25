@@ -951,7 +951,7 @@ defmodule Algora.Workspace do
         {:cont, {:ok, [user | users]}}
 
       {:error, reason}, acc ->
-        Logger.error("Something went wrong fetching user #{IO.inspect(reason)}")
+        Logger.error("Something went wrong fetching user #{inspect(reason)}")
         {:cont, acc}
         # {:halt, {:error, reason}}
     end)
@@ -983,7 +983,6 @@ defmodule Algora.Workspace do
     # Combine and deduplicate by id
     Enum.uniq_by(users_with_contributions ++ users_marked_synced, & &1.id)
   end
-
 
   @spec mark_users_as_synced(list(String.t()), list(User.t())) :: :ok
   defp mark_users_as_synced(users_without_contributions, users) do

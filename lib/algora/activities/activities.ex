@@ -372,7 +372,7 @@ defmodule Algora.Activities do
         title: "#{message}",
         body: message,
         name: "Algora alert",
-        email: "zafer@algora.io"
+        email: "info@algora.io"
       })
 
     discord_job =

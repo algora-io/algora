@@ -5,6 +5,7 @@ defmodule AlgoraWeb.Router do
   import AlgoraWeb.RedirectPlug
   import AlgoraWeb.UserAuth, only: [fetch_current_user: 2]
 
+  alias AlgoraWeb.Org.RepoNav
   alias AlgoraWeb.User.Nav
 
   require Algora.Cloud
@@ -37,8 +38,6 @@ defmodule AlgoraWeb.Router do
   for {from, to} <- @redirects do
     redirect(from, to, :temporary)
   end
-
-  Algora.Cloud.use_if_available(AlgoraCloud.Router)
 
   scope "/" do
     forward "/asset", AlgoraWeb.Plugs.RewriteAssetsPlug, upstream: :assets_url
@@ -216,13 +215,19 @@ defmodule AlgoraWeb.Router do
         live "/transactions", Org.TransactionsLive, :index
       end
     end
+  end
+
+  Algora.Cloud.use_if_available(AlgoraCloud.Router)
+
+  scope "/", AlgoraWeb do
+    pipe_through [:browser]
 
     scope "/:repo_owner/:repo_name" do
       get "/", RepoController, :index
 
       live_session :repo,
         layout: {AlgoraWeb.Layouts, :user},
-        on_mount: [{AlgoraWeb.UserAuth, :current_user}, AlgoraWeb.Org.RepoNav] do
+        on_mount: [{AlgoraWeb.UserAuth, :current_user}, RepoNav] do
         live "/issues/:number", BountyLive
         live "/pull/:number", BountyLive
       end

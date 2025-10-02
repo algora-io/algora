@@ -75,6 +75,14 @@ defmodule AlgoraWeb.OGImageController do
     object_path = Path.join(["og"] ++ path ++ ["og.png"])
     url = Path.join(Algora.S3.bucket_url(), object_path)
 
+    search_params =
+      params
+      |> Map.delete("path")
+      |> case do
+        empty when map_size(empty) == 0 -> search_params
+        query_params -> "?" <> URI.encode_query(query_params)
+      end
+
     case :get |> Finch.build(url) |> Finch.request(Algora.Finch) do
       {:ok, %Finch.Response{status: status, body: body, headers: headers}} when status in 200..299 ->
         if should_regenerate?(params, headers) do

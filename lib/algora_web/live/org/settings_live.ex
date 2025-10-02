@@ -140,6 +140,20 @@ defmodule AlgoraWeb.Org.SettingsLive do
         </.card_content>
       </.card>
 
+      <.card :if={@current_org.contract_signed}>
+        <.card_header>
+          <.card_title>Candidate preferences</.card_title>
+        </.card_header>
+        <.card_content>
+          <.simple_form for={@form} phx-change="validate" phx-submit="save">
+            <div class="flex flex-col gap-6">
+              <.input field={@form[:preferences]} label="Preferences" type="textarea" rows={10} />
+              <.button class="ml-auto">Save</.button>
+            </div>
+          </.simple_form>
+        </.card_content>
+      </.card>
+
       <.card>
         <.card_header>
           <.card_title>Bot Templates</.card_title>

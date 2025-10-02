@@ -276,4 +276,15 @@ defmodule Algora.Matches do
   defp maybe_preload(query, preload_list) do
     preload(query, ^preload_list)
   end
+
+  @doc """
+  Check if a match is considered "new" (within the last 7 days and not yet approved/bookmarked by company).
+  """
+  def is_match_new?(match) do
+    one_week_ago = DateTime.add(DateTime.utc_now(), -7, :day)
+
+    is_nil(match.company_approved_at) &&
+      is_nil(match.company_bookmarked_at) &&
+      DateTime.after?(match.inserted_at, one_week_ago)
+  end
 end

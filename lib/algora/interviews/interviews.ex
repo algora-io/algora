@@ -8,6 +8,8 @@ defmodule Algora.Interviews do
   alias Algora.Interviews.JobInterview
   alias Algora.Repo
 
+  require Logger
+
   @doc """
   Returns the list of job interviews.
 
@@ -70,9 +72,26 @@ defmodule Algora.Interviews do
 
   """
   def create_job_interview(attrs \\ %{}) do
-    %JobInterview{}
-    |> JobInterview.changeset(attrs)
-    |> Repo.insert()
+    case %JobInterview{}
+         |> JobInterview.changeset(attrs)
+         |> Repo.insert() do
+      {:ok, interview} ->
+        # Schedule reminder emails if the interview has a scheduled time
+        # if Map.get(attrs, :scheduled_at) || Map.get(attrs, "scheduled_at") do
+        #   case AlgoraCloud.Talent.Jobs.SendInterviewReminderEmail.schedule_reminders(interview.id) do
+        #     {:ok, results} ->
+        #       Logger.info("Scheduled interview reminders for interview #{interview.id}: #{inspect(results)}")
+
+        #     {:error, reason} ->
+        #       Logger.warning("Failed to schedule interview reminders for interview #{interview.id}: #{inspect(reason)}")
+        #   end
+        # end
+
+        {:ok, interview}
+
+      {:error, changeset} ->
+        {:error, changeset}
+    end
   end
 
   @doc """
@@ -156,6 +175,38 @@ defmodule Algora.Interviews do
           attrs
       end
 
-    create_job_interview(attrs)
+    case create_job_interview(attrs) do
+      {:ok, interview} ->
+        # Additional scheduling logic is handled in create_job_interview
+        {:ok, interview}
+
+      {:error, changeset} ->
+        {:error, changeset}
+    end
+  end
+
+  @doc """
+  Upserts a job interview for a user and job posting.
+  If an interview already exists, returns the existing one.
+  If not, creates a new one with initial status.
+
+  ## Examples
+
+      iex> upsert_job_interview(user_id, job_posting_id)
+      {:ok, %JobInterview{}}
+
+  """
+  def upsert_job_interview(user_id, job_posting_id) do
+    case Repo.get_by(JobInterview, user_id: user_id, job_posting_id: job_posting_id) do
+      nil ->
+        create_job_interview(%{
+          user_id: user_id,
+          job_posting_id: job_posting_id,
+          status: :initial
+        })
+
+      existing_interview ->
+        {:ok, existing_interview}
+    end
   end
 end

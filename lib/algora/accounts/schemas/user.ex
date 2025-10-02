@@ -123,6 +123,7 @@ defmodule Algora.Accounts.User do
 
     field :location_meta, :map
     field :location_iso_lvl4, :string
+    field :grad_year, :integer
 
     field :email_recipients, {:array, :map}, default: []
     field :language_contributions_synced, :boolean, default: false
@@ -374,7 +375,8 @@ defmodule Algora.Accounts.User do
       :seeking_bounties,
       :seeking_jobs,
       :hourly_rate_min,
-      :hours_per_week
+      :hours_per_week,
+      :preferences
     ])
     |> validate_required([:handle])
     |> validate_handle()

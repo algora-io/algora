@@ -287,4 +287,15 @@ defmodule Algora.Matches do
       is_nil(match.company_bookmarked_at) &&
       DateTime.after?(match.inserted_at, one_week_ago)
   end
+
+  def get_latest_match_with_notes(user_id) do
+    Repo.one(
+      from(m in JobMatch,
+        where: m.user_id == ^user_id,
+        where: not is_nil(m.notes) and m.notes != "",
+        order_by: [desc: m.updated_at],
+        limit: 1
+      )
+    )
+  end
 end

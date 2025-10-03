@@ -19,17 +19,20 @@ defmodule Algora.Interviews.JobInterview do
 
     belongs_to :user, Algora.Accounts.User
     belongs_to :job_posting, Algora.Jobs.JobPosting
+    belongs_to :org, Algora.Accounts.User
 
     timestamps()
   end
 
   def changeset(job_interview, attrs) do
     job_interview
-    |> cast(attrs, [:user_id, :job_posting_id, :status, :notes, :scheduled_at, :completed_at, :company_feedback, :candidate_feedback, :company_feedback_token, :candidate_feedback_token])
-    |> validate_required([:user_id, :job_posting_id, :status])
+    |> cast(attrs, [:user_id, :job_posting_id, :org_id, :status, :notes, :scheduled_at, :completed_at, :company_feedback, :candidate_feedback, :company_feedback_token, :candidate_feedback_token])
+    |> validate_required([:user_id, :job_posting_id, :org_id, :status])
     |> validate_inclusion(:status, @interview_statuses)
     |> foreign_key_constraint(:user_id)
     |> foreign_key_constraint(:job_posting_id)
+    |> foreign_key_constraint(:org_id)
+    |> unique_constraint([:user_id, :org_id])
     |> unique_constraint(:company_feedback_token)
     |> unique_constraint(:candidate_feedback_token)
     |> generate_id()

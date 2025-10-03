@@ -76,17 +76,6 @@ defmodule Algora.Interviews do
          |> JobInterview.changeset(attrs)
          |> Repo.insert() do
       {:ok, interview} ->
-        # Schedule reminder emails if the interview has a scheduled time
-        # if Map.get(attrs, :scheduled_at) || Map.get(attrs, "scheduled_at") do
-        #   case AlgoraCloud.Talent.Jobs.SendInterviewReminderEmail.schedule_reminders(interview.id) do
-        #     {:ok, results} ->
-        #       Logger.info("Scheduled interview reminders for interview #{interview.id}: #{inspect(results)}")
-
-        #     {:error, reason} ->
-        #       Logger.warning("Failed to schedule interview reminders for interview #{interview.id}: #{inspect(reason)}")
-        #   end
-        # end
-
         {:ok, interview}
 
       {:error, changeset} ->
@@ -139,74 +128,5 @@ defmodule Algora.Interviews do
   """
   def change_job_interview(%JobInterview{} = job_interview, attrs \\ %{}) do
     JobInterview.changeset(job_interview, attrs)
-  end
-
-  @doc """
-  Creates a job interview with the given status.
-
-  ## Examples
-
-      iex> create_interview_with_status(user_id, job_posting_id, :scheduled)
-      {:ok, %JobInterview{}}
-
-      iex> create_interview_with_status(user_id, job_posting_id, :completed, "Great candidate!")
-      {:ok, %JobInterview{}}
-
-  """
-  def create_interview_with_status(user_id, job_posting_id, status, notes \\ nil) do
-    attrs = %{
-      user_id: user_id,
-      job_posting_id: job_posting_id,
-      status: status,
-      notes: notes
-    }
-
-    attrs =
-      case status do
-        :scheduled ->
-          Map.put(attrs, :scheduled_at, DateTime.utc_now())
-
-        :completed ->
-          attrs
-          |> Map.put(:scheduled_at, DateTime.utc_now())
-          |> Map.put(:completed_at, DateTime.utc_now())
-
-        _ ->
-          attrs
-      end
-
-    case create_job_interview(attrs) do
-      {:ok, interview} ->
-        # Additional scheduling logic is handled in create_job_interview
-        {:ok, interview}
-
-      {:error, changeset} ->
-        {:error, changeset}
-    end
-  end
-
-  @doc """
-  Upserts a job interview for a user and job posting.
-  If an interview already exists, returns the existing one.
-  If not, creates a new one with initial status.
-
-  ## Examples
-
-      iex> upsert_job_interview(user_id, job_posting_id)
-      {:ok, %JobInterview{}}
-
-  """
-  def upsert_job_interview(user_id, job_posting_id) do
-    case Repo.get_by(JobInterview, user_id: user_id, job_posting_id: job_posting_id) do
-      nil ->
-        create_job_interview(%{
-          user_id: user_id,
-          job_posting_id: job_posting_id,
-          status: :initial
-        })
-
-      existing_interview ->
-        {:ok, existing_interview}
-    end
   end
 end

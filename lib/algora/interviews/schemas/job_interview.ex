@@ -12,6 +12,10 @@ defmodule Algora.Interviews.JobInterview do
     field :notes, :string
     field :scheduled_at, :utc_datetime_usec
     field :completed_at, :utc_datetime_usec
+    field :company_feedback, :string
+    field :candidate_feedback, :string
+    field :company_feedback_token, :string
+    field :candidate_feedback_token, :string
 
     belongs_to :user, Algora.Accounts.User
     belongs_to :job_posting, Algora.Jobs.JobPosting
@@ -21,11 +25,24 @@ defmodule Algora.Interviews.JobInterview do
 
   def changeset(job_interview, attrs) do
     job_interview
-    |> cast(attrs, [:user_id, :job_posting_id, :status, :notes, :scheduled_at, :completed_at])
+    |> cast(attrs, [:user_id, :job_posting_id, :status, :notes, :scheduled_at, :completed_at, :company_feedback, :candidate_feedback, :company_feedback_token, :candidate_feedback_token])
     |> validate_required([:user_id, :job_posting_id, :status])
     |> validate_inclusion(:status, @interview_statuses)
     |> foreign_key_constraint(:user_id)
     |> foreign_key_constraint(:job_posting_id)
+    |> unique_constraint(:company_feedback_token)
+    |> unique_constraint(:candidate_feedback_token)
     |> generate_id()
+    |> maybe_generate_feedback_tokens()
+  end
+
+  defp maybe_generate_feedback_tokens(changeset) do
+    if get_field(changeset, :id) && !get_field(changeset, :company_feedback_token) do
+      changeset
+      |> put_change(:company_feedback_token, Nanoid.generate(8))
+      |> put_change(:candidate_feedback_token, Nanoid.generate(8))
+    else
+      changeset
+    end
   end
 end

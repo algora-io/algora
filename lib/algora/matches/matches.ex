@@ -281,11 +281,15 @@ defmodule Algora.Matches do
   Check if a match is considered "new" (within the last 7 days and not yet approved/bookmarked by company).
   """
   def is_match_new?(match) do
-    one_week_ago = DateTime.add(DateTime.utc_now(), -7, :day)
-
     is_nil(match.company_approved_at) &&
       is_nil(match.company_bookmarked_at) &&
-      DateTime.after?(match.inserted_at, one_week_ago)
+      is_match_recent?(match)
+  end
+
+  def is_match_recent?(match) do
+    one_week_ago = DateTime.add(DateTime.utc_now(), -7, :day)
+
+    DateTime.after?(match.inserted_at, one_week_ago)
   end
 
   def get_latest_match_with_notes(user_id) do

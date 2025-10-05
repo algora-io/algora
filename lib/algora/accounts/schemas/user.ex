@@ -68,6 +68,8 @@ defmodule Algora.Accounts.User do
     field :hiring, :boolean, default: false
     field :hiring_subscription, Ecto.Enum, values: [:inactive, :trial, :active], default: :inactive
     field :hiring_keywords, :string
+    field :candidates_require_login, :boolean, default: true
+    field :candidates_require_confirmation, :boolean, default: true
 
     field :hourly_rate_min, Money
     field :hourly_rate_max, Money

@@ -132,6 +132,7 @@ defmodule Algora.Accounts.User do
     field :repo_contributions_synced, :boolean, default: false
     field :linkedin_url_attempted, :boolean, default: false
     field :linkedin_meta_attempted, :boolean, default: false
+    field :readme_attempted, :boolean, default: false
 
     # Work arrangement preferences
     field :open_to_remote, :boolean, default: false
@@ -155,6 +156,9 @@ defmodule Algora.Accounts.User do
     # Work authorization
     field :work_auth_us, :boolean, default: false
     field :work_auth_eu, :boolean, default: false
+
+    # Resume
+    field :resume_url, :string
 
     # Poaching targets - stores repos and companies to poach from
     field :poaching_targets, :string

@@ -42,7 +42,9 @@ defmodule Algora.Cloud do
   end
 
   def notify_match(attrs) do
-    call(AlgoraCloud.Talent.Jobs.SendJobMatchEmail, :send, [attrs])
+    # call(AlgoraCloud.Talent.Jobs.SendJobMatchEmail, :send, [attrs])
+    match = Algora.Repo.get_by(Algora.Matches.JobMatch, user_id: attrs.user_id, job_posting_id: attrs.job_posting_id)
+    call(AlgoraCloud.EmailScheduler, :schedule_email, [:job_drip, match.id])
   end
 
   def notify_candidate_like(attrs) do

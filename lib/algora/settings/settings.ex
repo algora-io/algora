@@ -344,6 +344,17 @@ defmodule Algora.Settings do
     set("org_members:#{org_handle}", %{"members" => members})
   end
 
+  def get_pipeline_candidates(org_handle) when is_binary(org_handle) do
+    case get("pipeline_candidates:#{org_handle}") do
+      %{"ids" => ids} when is_list(ids) -> ids
+      _ -> nil
+    end
+  end
+
+  def set_pipeline_candidates(org_handle, ids) when is_binary(org_handle) and is_list(ids) do
+    set("pipeline_candidates:#{org_handle}", %{"ids" => ids})
+  end
+
   defp format_timestamp(datetime) do
     datetime
     |> DateTime.to_string()

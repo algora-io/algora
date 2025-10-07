@@ -122,18 +122,21 @@ defmodule AlgoraWeb.HomeLive do
             <div class="flex flex-col md:flex-row md:justify-center gap-8 max-w-6xl mx-auto">
               <%= for example <- @company_people_examples do %>
                 <%= if Map.get(example, :special) do %>
-                  <div class="flex-1 flex mb-12 max-w-md">
-                    <div class="relative flex items-center gap-3 p-6 bg-gradient-to-br from-emerald-900/30 to-emerald-800/20 rounded-xl border-2 border-emerald-400/30 shadow-xl shadow-emerald-400/10 w-full">
+                  <div class="relative flex-1 flex mb-12 max-w-md">
+                    <div class="truncate flex items-center gap-2 sm:gap-3 p-4 sm:py-6 bg-gradient-to-br from-emerald-900/30 to-emerald-800/20 rounded-xl border-2 border-emerald-400/30 shadow-xl shadow-emerald-400/10 w-full">
                       <img
                         src={example.person_avatar}
                         alt={example.person_name}
-                        class="size-12 rounded-full ring-2 ring-emerald-400/50"
+                        class="size-8 sm:size-12 rounded-full ring-2 ring-emerald-400/50"
                       />
-                      <.icon name="tabler-arrow-right" class="size-4 text-emerald-400 shrink-0" />
+                      <.icon
+                        name="tabler-arrow-right"
+                        class="size-3 sm:size-4 text-emerald-400 shrink-0"
+                      />
                       <img
                         src={example.company_avatar}
                         alt={example.company_name}
-                        class="size-12 rounded-full ring-2 ring-emerald-400/50"
+                        class="size-8 sm:size-12 rounded-full ring-2 ring-emerald-400/50"
                       />
                       <div class="flex-1">
                         <div class="text-sm font-medium whitespace-nowrap text-emerald-100">
@@ -141,24 +144,26 @@ defmodule AlgoraWeb.HomeLive do
                           <.icon name="tabler-arrow-right" class="size-3 text-emerald-400" /> {example.company_name}
                         </div>
                         <div class="text-xs text-emerald-200/80 mt-1">{example.person_title}</div>
-                        <div class="text-xs text-emerald-300/70 mt-1">{example.hire_date}</div>
+                        <div :if={example[:hire_date]} class="text-xs text-emerald-300/70 mt-1">
+                          {example.hire_date}
+                        </div>
                       </div>
-                      <.badge
-                        variant="secondary"
-                        class="absolute -top-2 -left-2 text-xs px-3 py-1 text-black bg-gradient-to-r from-emerald-400 to-emerald-500 font-semibold shadow-lg"
-                      >
-                        <.icon name="tabler-star-filled" class="size-4 text-black mr-1 -ml-0.5" />
-                        New hire!
-                      </.badge>
-
-                      <%= if String.contains?(example.company_name, "YC") do %>
-                        <img
-                          src={~p"/images/logos/yc.svg"}
-                          alt="Y Combinator"
-                          class="absolute -top-2 -right-2 size-6 opacity-90"
-                        />
-                      <% end %>
                     </div>
+                    <.badge
+                      variant="secondary"
+                      class="absolute -top-2 -left-2 text-xs px-2 sm:px-3 py-0.5 sm:py-1 text-black bg-gradient-to-r from-emerald-400 to-emerald-500 font-semibold shadow-lg"
+                    >
+                      <.icon name="tabler-star-filled" class="size-4 text-black mr-1 -ml-0.5" />
+                      New hire!
+                    </.badge>
+
+                    <%= if String.contains?(example.company_name, "YC") do %>
+                      <img
+                        src={~p"/images/logos/yc.svg"}
+                        alt="Y Combinator"
+                        class="absolute -top-2 -right-2 size-6 opacity-90"
+                      />
+                    <% end %>
                   </div>
                 <% end %>
               <% end %>
@@ -168,13 +173,16 @@ defmodule AlgoraWeb.HomeLive do
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
               <%= for example <- @company_people_examples do %>
                 <%= unless Map.get(example, :special) do %>
-                  <div class="relative flex items-center gap-3 p-6 bg-card rounded-xl border shrink-0">
+                  <div class="relative flex items-center gap-2 sm:gap-3 p-4 sm:py-6 bg-card rounded-xl border shrink-0">
                     <img
                       src={example.person_avatar}
                       alt={example.person_name}
                       class="size-8 sm:size-12 rounded-full"
                     />
-                    <.icon name="tabler-arrow-right" class="size-4 text-muted-foreground shrink-0" />
+                    <.icon
+                      name="tabler-arrow-right"
+                      class="size-3 sm:size-4 text-muted-foreground shrink-0"
+                    />
                     <img
                       src={example.company_avatar}
                       alt={example.company_name}
@@ -1065,7 +1073,6 @@ defmodule AlgoraWeb.HomeLive do
         person_name: "Tom",
         person_avatar: "https://avatars.githubusercontent.com/u/38532?v=4",
         person_title: "Staff Engineer",
-        hire_date: "June 2025",
         special: true
       },
       %{
@@ -1074,7 +1081,6 @@ defmodule AlgoraWeb.HomeLive do
         person_name: "Aman",
         person_avatar: "https://avatars.githubusercontent.com/u/53134669?v=4",
         person_title: "Software Engineer",
-        hire_date: "July 2025",
         special: true
       },
       %{
@@ -1083,7 +1089,6 @@ defmodule AlgoraWeb.HomeLive do
         person_name: "David",
         person_avatar: "https://avatars.githubusercontent.com/u/51977119?v=4",
         person_title: "Software Engineer",
-        hire_date: "July 2025",
         special: true
       },
       %{

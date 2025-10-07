@@ -294,7 +294,7 @@ defmodule AlgoraWeb.HomeLive do
                         Nicolas Camara
                       </div>
                       <div class="text-xs xl:text-sm text-foreground/90 font-medium">
-                        Co-founder & CEO
+                        Co-founder & CTO
                       </div>
                       <div class="text-xs xl:text-sm text-foreground/90 font-medium">
                         Firecrawl <span class="text-orange-400">(YC S22)</span>
@@ -629,12 +629,6 @@ defmodule AlgoraWeb.HomeLive do
                       <p class="text-muted-foreground mb-4">
                         Today, companies simply share their job description and receive qualified candidates within hours. We've transformed from a coding marketplace into the most efficient hiring platform for technical talent globally.
                       </p>
-                      <div class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-400/10 border border-emerald-400/20 rounded-lg">
-                        <.icon name="tabler-rocket" class="size-4 text-emerald-400" />
-                        <span class="text-sm font-medium text-emerald-400">
-                          New HN launch coming in September
-                        </span>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -1072,7 +1066,7 @@ defmodule AlgoraWeb.HomeLive do
         company_avatar: "https://avatars.githubusercontent.com/u/144973251?s=200&v=4",
         person_name: "Tom",
         person_avatar: "https://avatars.githubusercontent.com/u/38532?v=4",
-        person_title: "Staff Engineer",
+        person_title: "Staff Software Engineer",
         special: true
       },
       %{

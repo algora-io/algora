@@ -26,8 +26,8 @@ defmodule Algora.Jobs do
       |> join(:inner, [j], u in User, on: u.id == j.user_id)
       |> maybe_filter_by_handle(opts[:handle])
       |> maybe_filter_by_tech_stack(opts[:tech_stack])
-      |> join(:left, [j], i in JobInterview, on: i.job_posting_id == j.id)
-      |> join(:left, [j], m in JobMatch, on: m.job_posting_id == j.id)
+      |> join(:left, [j], i in JobInterview, on: i.job_posting_id == j.id and i.status not in [:initial])
+      |> join(:left, [j], m in JobMatch, on: m.job_posting_id == j.id and m.status not in [:pending, :discarded])
       |> group_by([j, u, i, m], [u.contract_signed, j.id, j.inserted_at])
       |> order_by([j, u, i, m],
         desc: u.contract_signed,

@@ -26,7 +26,7 @@ defmodule Algora.Markdown do
       sanitize: MDEx.default_sanitize_options(),
       # TODO: sanitize and syntax_highlight_theme are currently incompatible
       # since sanitization strips out the syntax highlighting classes
-      syntax_highlight_theme: "github_dark"
+      syntax_highlight_theme: "neovim_dark"
     ]
   ]
 

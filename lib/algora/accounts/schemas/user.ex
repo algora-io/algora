@@ -171,6 +171,11 @@ defmodule Algora.Accounts.User do
     # Import tracking - identifies the source that imported this user
     field :import_source, :string
 
+    # Company funding information (for organizations)
+    field :latest_funding_round, :string
+    field :amount_raised, Money
+    field :company_valuation, Money
+
     has_many :identities, Identity
     has_many :memberships, Member, foreign_key: :user_id
     has_many :members, Member, foreign_key: :org_id

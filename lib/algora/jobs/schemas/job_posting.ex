@@ -37,6 +37,14 @@ defmodule Algora.Jobs.JobPosting do
     field :locations, {:array, :string}, default: []
     field :states, {:array, :string}, default: []
 
+    # Equity compensation details
+    # Percentage-based equity (e.g., 0.25 for 0.25%)
+    field :min_equity_pct, :decimal
+    field :max_equity_pct, :decimal
+    # Money-based equity (actual dollar value)
+    field :min_equity, Type
+    field :max_equity, Type
+
     belongs_to :user, User, null: false
     has_many :interviews, Algora.Interviews.JobInterview, foreign_key: :job_posting_id
     has_many :matches, Algora.Matches.JobMatch, foreign_key: :job_posting_id
@@ -73,7 +81,11 @@ defmodule Algora.Jobs.JobPosting do
       :locations,
       :min_compensation,
       :max_compensation,
-      :states
+      :states,
+      :min_equity_pct,
+      :max_equity_pct,
+      :min_equity,
+      :max_equity
     ])
     |> generate_id()
     |> validate_required([:url, :company_name, :company_url, :email])

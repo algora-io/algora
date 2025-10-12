@@ -78,15 +78,18 @@ defmodule Algora.Jobs do
     |> Repo.insert()
   end
 
-  defp maybe_filter_by_user(query, user_id: user_id, handles: handles) when is_nil(user_id) and is_nil(handles) do
-    where(query, [j, u], j.status in [:active])
-  end
+  defp maybe_filter_by_user(query, opts) do
+    cond do
+      opts[:user_id] ->
+        where(query, [j], j.user_id == ^opts[:user_id] and j.status in [:active, :processing])
 
-  defp maybe_filter_by_user(query, user_id: user_id) do
-    where(query, [j], j.user_id == ^user_id and j.status in [:active, :processing])
-  end
+      is_nil(opts[:user_id]) and is_nil(opts[:handles]) and is_nil(opts[:handle]) ->
+        where(query, [j, u], j.status in [:active])
 
-  defp maybe_filter_by_user(query, _), do: query
+      true ->
+        query
+    end
+  end
 
   defp maybe_filter_by_handle(query, nil), do: query
 

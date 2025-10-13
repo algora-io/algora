@@ -136,131 +136,161 @@ defmodule AlgoraWeb.Org.HomeLive do
           <div class="flex items-center justify-between">
             <h2 class="text-lg font-semibold">Open Bounties</h2>
             <.link
+              :if={@open_bounties |> length() > 0}
               href={~p"/#{@org.handle}/bounties?status=open"}
               class="text-sm text-muted-foreground hover:underline"
             >
               View all
             </.link>
           </div>
-          <div class="relative -ml-4 w-full overflow-auto scrollbar-thin">
-            <table class="w-full caption-bottom text-sm">
-              <tbody>
-                <%= for bounty <- @open_bounties do %>
-                  <tr class="h-10 border-b transition-colors hover:bg-muted/10">
-                    <td class="p-4 py-0 align-middle">
-                      <div class="flex items-center gap-4">
-                        <div class="font-display shrink-0 whitespace-nowrap text-base font-semibold text-success">
-                          {Money.to_string!(bounty.amount)}
-                        </div>
+          <%= if Enum.empty?(@open_bounties) do %>
+            <div class="flex flex-col items-center justify-center py-12 text-center">
+              <.icon name="tabler-diamond" class="mb-3 h-12 w-12 text-muted-foreground/50" />
+              <h3 class="mb-1 text-sm font-medium text-foreground">No open bounties</h3>
+              <p class="text-sm text-muted-foreground">There are no open bounties at the moment</p>
+            </div>
+          <% else %>
+            <div class="relative -ml-4 w-full overflow-auto scrollbar-thin">
+              <table class="w-full caption-bottom text-sm">
+                <tbody>
+                  <%= for bounty <- @open_bounties do %>
+                    <tr class="h-10 border-b transition-colors hover:bg-muted/10">
+                      <td class="p-4 py-0 align-middle">
+                        <div class="flex items-center gap-4">
+                          <div class="font-display shrink-0 whitespace-nowrap text-base font-semibold text-success">
+                            {Money.to_string!(bounty.amount)}
+                          </div>
 
-                        <.link
-                          href={Bounty.url(bounty)}
-                          class="max-w-[400px] truncate text-sm text-foreground hover:underline"
-                        >
-                          {bounty.ticket.title}
-                        </.link>
-
-                        <div
-                          :if={Bounty.path(bounty)}
-                          class="flex shrink-0 items-center gap-1 whitespace-nowrap text-sm text-muted-foreground"
-                        >
-                          <.icon name="tabler-chevron-right" class="h-4 w-4" />
-                          <.link href={Bounty.url(bounty)} class="hover:underline">
-                            {Bounty.path(bounty)}
+                          <.link
+                            href={Bounty.url(bounty)}
+                            class="max-w-[400px] truncate text-sm text-foreground hover:underline"
+                          >
+                            {bounty.ticket.title}
                           </.link>
+
+                          <div
+                            :if={Bounty.path(bounty)}
+                            class="flex shrink-0 items-center gap-1 whitespace-nowrap text-sm text-muted-foreground"
+                          >
+                            <.icon name="tabler-chevron-right" class="h-4 w-4" />
+                            <.link href={Bounty.url(bounty)} class="hover:underline">
+                              {Bounty.path(bounty)}
+                            </.link>
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                  </tr>
-                <% end %>
-              </tbody>
-            </table>
-          </div>
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          <% end %>
         </div>
         <!-- Completed Bounties -->
         <div class="space-y-4 rounded-xl border bg-card p-6">
           <div class="flex items-center justify-between">
             <h2 class="text-lg font-semibold">Completed Bounties</h2>
             <.link
+              :if={@transactions |> length() > 0}
               href={~p"/#{@org.handle}/bounties?status=completed"}
               class="text-sm text-muted-foreground hover:underline"
             >
               View all
             </.link>
           </div>
-          <div class="relative -ml-4 w-full overflow-auto scrollbar-thin">
-            <table class="w-full caption-bottom text-sm">
-              <tbody>
-                <%= for %{transaction: transaction, ticket: ticket} <- @transactions do %>
-                  <tr class="h-10 border-b transition-colors hover:bg-muted/10">
-                    <td class="p-4 py-0 align-middle">
-                      <div class="flex items-center gap-4">
-                        <div class="font-display shrink-0 whitespace-nowrap text-base font-semibold text-success">
-                          {Money.to_string!(transaction.net_amount)}
-                        </div>
+          <%= if Enum.empty?(@transactions) do %>
+            <div class="flex flex-col items-center justify-center py-12 text-center">
+              <.icon name="tabler-gift" class="mb-3 h-12 w-12 text-muted-foreground/50" />
+              <h3 class="mb-1 text-sm font-medium text-foreground">No completed bounties</h3>
+              <p class="text-sm text-muted-foreground">
+                Completed bounties will appear here
+              </p>
+            </div>
+          <% else %>
+            <div class="relative -ml-4 w-full overflow-auto scrollbar-thin">
+              <table class="w-full caption-bottom text-sm">
+                <tbody>
+                  <%= for %{transaction: transaction, ticket: ticket} <- @transactions do %>
+                    <tr class="h-10 border-b transition-colors hover:bg-muted/10">
+                      <td class="p-4 py-0 align-middle">
+                        <div class="flex items-center gap-4">
+                          <div class="font-display shrink-0 whitespace-nowrap text-base font-semibold text-success">
+                            {Money.to_string!(transaction.net_amount)}
+                          </div>
 
-                        <.maybe_link
-                          href={
-                            if ticket.repository,
-                              do:
-                                "https://github.com/#{ticket.repository.user.provider_login}/#{ticket.repository.name}/issues/#{ticket.number}",
-                              else: ticket.url
-                          }
-                          class="max-w-[400px] truncate text-sm text-foreground hover:underline"
-                        >
-                          {ticket.title}
-                        </.maybe_link>
-
-                        <div
-                          :if={ticket.repository || ticket.url}
-                          class="flex shrink-0 items-center gap-1 whitespace-nowrap text-sm text-muted-foreground"
-                        >
-                          <.icon name="tabler-chevron-right" class="h-4 w-4" />
-                          <.link
+                          <.maybe_link
                             href={
                               if ticket.repository,
                                 do:
                                   "https://github.com/#{ticket.repository.user.provider_login}/#{ticket.repository.name}/issues/#{ticket.number}",
                                 else: ticket.url
                             }
-                            class="hover:underline"
+                            class="max-w-[400px] truncate text-sm text-foreground hover:underline"
                           >
-                            {Bounty.path(%{ticket: ticket})}
-                          </.link>
+                            {ticket.title}
+                          </.maybe_link>
+
+                          <div
+                            :if={ticket.repository || ticket.url}
+                            class="flex shrink-0 items-center gap-1 whitespace-nowrap text-sm text-muted-foreground"
+                          >
+                            <.icon name="tabler-chevron-right" class="h-4 w-4" />
+                            <.link
+                              href={
+                                if ticket.repository,
+                                  do:
+                                    "https://github.com/#{ticket.repository.user.provider_login}/#{ticket.repository.name}/issues/#{ticket.number}",
+                                  else: ticket.url
+                              }
+                              class="hover:underline"
+                            >
+                              {Bounty.path(%{ticket: ticket})}
+                            </.link>
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                  </tr>
-                <% end %>
-              </tbody>
-            </table>
-          </div>
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          <% end %>
         </div>
       </div>
 
       <div class="space-y-4">
         <h2 class="text-lg font-semibold">Top Earners</h2>
         <div class="rounded-xl border bg-card">
-          <%= for {earner, idx} <- Enum.with_index(@top_earners) do %>
-            <div class="flex items-center gap-4 border-b p-4 last:border-0">
-              <div class="w-8 flex-shrink-0 text-center font-mono text-muted-foreground">
-                #{idx + 1}
-              </div>
-              <.link navigate={User.url(earner)} class="flex flex-1 items-center gap-3">
-                <.avatar class="h-8 w-8">
-                  <.avatar_image src={earner.avatar_url} alt={earner.name} />
-                </.avatar>
-                <div>
-                  <div class="font-medium">
-                    {earner.name} {Algora.Misc.CountryEmojis.get(earner.country)}
-                  </div>
-                  <div class="text-sm text-muted-foreground">@{User.handle(earner)}</div>
-                </div>
-              </.link>
-              <div class="font-display flex-shrink-0 font-medium text-success">
-                {Money.to_string!(earner.total_earned)}
-              </div>
+          <%= if Enum.empty?(@top_earners) do %>
+            <div class="flex flex-col items-center justify-center py-12 text-center">
+              <.icon name="tabler-trophy" class="mb-3 h-12 w-12 text-muted-foreground/50" />
+              <h3 class="mb-1 text-sm font-medium text-foreground">No earners yet</h3>
+              <p class="text-sm text-muted-foreground">
+                Top earners will appear here once bounties are completed
+              </p>
             </div>
+          <% else %>
+            <%= for {earner, idx} <- Enum.with_index(@top_earners) do %>
+              <div class="flex items-center gap-4 border-b p-4 last:border-0">
+                <div class="w-8 flex-shrink-0 text-center font-mono text-muted-foreground">
+                  #{idx + 1}
+                </div>
+                <.link navigate={User.url(earner)} class="flex flex-1 items-center gap-3">
+                  <.avatar class="h-8 w-8">
+                    <.avatar_image src={earner.avatar_url} alt={earner.name} />
+                  </.avatar>
+                  <div>
+                    <div class="font-medium">
+                      {earner.name} {Algora.Misc.CountryEmojis.get(earner.country)}
+                    </div>
+                    <div class="text-sm text-muted-foreground">@{User.handle(earner)}</div>
+                  </div>
+                </.link>
+                <div class="font-display flex-shrink-0 font-medium text-success">
+                  {Money.to_string!(earner.total_earned)}
+                </div>
+              </div>
+            <% end %>
           <% end %>
         </div>
       </div>

@@ -60,6 +60,7 @@ defmodule Algora.Accounts.User do
     field :last_dm_date, :utc_datetime_usec
     field :candidate_notes, :string
     field :dm_thread_url, :string
+    field :contribution_scores, :map, default: %{}
 
     field :seeking_bounties, :boolean, default: false
     field :seeking_contracts, :boolean, default: false

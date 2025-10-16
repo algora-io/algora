@@ -355,6 +355,24 @@ defmodule Algora.Settings do
     set("pipeline_candidates:#{org_handle}", %{"ids" => ids})
   end
 
+  @doc """
+  Gets portfolio company IDs for a given host handle.
+  Returns a list of organization IDs or an empty list if not set.
+  """
+  def get_portfolio_companies(host_handle) when is_binary(host_handle) do
+    case get("portfolio_companies:#{host_handle}") do
+      %{"org_ids" => org_ids} when is_list(org_ids) -> org_ids
+      _ -> []
+    end
+  end
+
+  @doc """
+  Sets portfolio company IDs for a given host handle.
+  """
+  def set_portfolio_companies(host_handle, org_ids) when is_binary(host_handle) and is_list(org_ids) do
+    set("portfolio_companies:#{host_handle}", %{"org_ids" => org_ids})
+  end
+
   defp format_timestamp(datetime) do
     datetime
     |> DateTime.to_string()

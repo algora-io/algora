@@ -289,7 +289,8 @@ defmodule AlgoraWeb.Components.TechBadge do
       "Drizzle ORM",
       "Zod",
       "Expo",
-      "Unity"
+      "Unity",
+      "Powershell"
     ]
   end
 end

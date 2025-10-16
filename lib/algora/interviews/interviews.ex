@@ -129,4 +129,18 @@ defmodule Algora.Interviews do
   def change_job_interview(%JobInterview{} = job_interview, attrs \\ %{}) do
     JobInterview.changeset(job_interview, attrs)
   end
+
+  @doc """
+  Counts total interviews for given organization IDs.
+  """
+  def count_interviews_for_orgs(org_ids) when is_list(org_ids) do
+    Repo.aggregate(from(ji in JobInterview, where: ji.org_id in ^org_ids and ji.status != :initial), :count, :id)
+  end
+
+  @doc """
+  Counts total hires (passed interviews) for given organization IDs.
+  """
+  def count_hires_for_orgs(org_ids) when is_list(org_ids) do
+    Repo.aggregate(from(ji in JobInterview, where: ji.org_id in ^org_ids and ji.status == :passed), :count, :id)
+  end
 end

@@ -114,180 +114,180 @@ defmodule AlgoraWeb.Org.BountiesLive do
             <table class="w-full caption-bottom text-sm">
               <tbody class="[&_tr:last-child]:border-0">
                 <%= for %{bounty: bounty, claim_groups: claim_groups} <- @bounty_rows do %>
-                <tr
-                  class="bg-white/[2%] from-white/[2%] via-white/[2%] to-white/[2%] border-b border-white/15 bg-gradient-to-br transition-colors data-[state=selected]:bg-gray-100 hover:bg-gray-100/50 dark:data-[state=selected]:bg-gray-800 dark:hover:bg-white/[2%]"
-                  data-state="false"
-                >
-                  <td class="[&:has([role=checkbox])]:pr-0 p-4 align-middle">
-                    <div class="min-w-[250px]">
-                      <div class="group relative flex h-full flex-col">
-                        <div class="relative h-full pl-2">
-                          <div class="flex items-start justify-between">
-                            <div class="cursor-pointer font-mono text-2xl">
-                              <div class="font-extrabold text-emerald-300 hover:text-emerald-200">
-                                {Money.to_string!(bounty.amount)}
-                              </div>
-                            </div>
-                          </div>
-                          <.link
-                            rel="noopener"
-                            class="group/issue inline-flex flex-col"
-                            href={Bounty.url(bounty)}
-                          >
-                            <div :if={Bounty.path(bounty)} class="flex items-center gap-4">
-                              <div class="truncate">
-                                <p class="truncate text-sm font-medium text-gray-300 group-hover/issue:text-gray-200 group-hover/issue:underline">
-                                  {Bounty.path(bounty)}
-                                </p>
-                              </div>
-                            </div>
-                            <p class="line-clamp-2 break-words text-base font-medium leading-tight text-gray-100 group-hover/issue:text-white group-hover/issue:underline">
-                              {bounty.ticket.title}
-                            </p>
-                            <div :if={is_nil(Bounty.path(bounty)) and bounty.ticket.description}>
-                              <.markdown
-                                id={"bounty-description-#{bounty.id}"}
-                                class="line-clamp-3 transition-all duration-200 [&>p]:m-0"
-                                phx-hook="ExpandableText"
-                                data-expand-id={"expand-#{bounty.id}"}
-                                data-class="line-clamp-3"
-                                value={Phoenix.HTML.raw(Markdown.render(bounty.ticket.description))}
-                              />
-                              <button
-                                id={"expand-#{bounty.id}"}
-                                type="button"
-                                class="text-xs text-foreground font-bold hidden"
-                                data-content-id={"bounty-description-#{bounty.id}"}
-                                phx-hook="ExpandableTextButton"
-                              >
-                                ...read more
-                              </button>
-                            </div>
-                          </.link>
-                          <p class="flex items-center gap-1.5 text-xs text-gray-400">
-                            {Algora.Util.time_ago(bounty.inserted_at)}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td class="[&:has([role=checkbox])]:pr-0 p-4 align-middle">
-                    <%= if map_size(claim_groups) > 0 do %>
-                      <div class="group flex cursor-pointer flex-col items-center gap-1">
-                        <div class="flex cursor-pointer justify-center -space-x-3">
-                          <%= for {_group_id, claims} <- claim_groups do %>
-                            <div class="relative h-10 w-10 flex-shrink-0 rounded-full ring-4 ring-gray-800 group-hover:brightness-110">
-                              <img
-                                alt={User.handle(hd(claims).user)}
-                                loading="lazy"
-                                decoding="async"
-                                class="rounded-full"
-                                src={hd(claims).user.avatar_url}
-                                style="position: absolute; height: 100%; width: 100%; inset: 0px; color: transparent;"
-                              />
-                            </div>
-                          <% end %>
-                        </div>
-                        <div class="flex items-center gap-0.5">
-                          <div class="whitespace-nowrap text-sm font-medium text-gray-300 group-hover:text-gray-100">
-                            {map_size(claim_groups)} {ngettext(
-                              "claim",
-                              "claims",
-                              map_size(claim_groups)
-                            )}
-                          </div>
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            class="-mr-4 h-4 w-4 rotate-90 text-gray-400 group-hover:text-gray-300"
-                          >
-                            <path d="M9 6l6 6l-6 6"></path>
-                          </svg>
-                        </div>
-                      </div>
-                    <% end %>
-                  </td>
-                  <td class="[&:has([role=checkbox])]:pr-0 p-4 align-middle">
-                    <div class="flex items-center justify-end gap-2">
-                      <.button
-                        phx-click="edit-bounty-amount"
-                        phx-value-id={bounty.id}
-                        variant="secondary"
-                        size="sm"
-                      >
-                        Edit Amount
-                      </.button>
-                      <.button
-                        phx-click="delete-bounty"
-                        phx-value-id={bounty.id}
-                        variant="destructive"
-                        size="sm"
-                      >
-                        Delete
-                      </.button>
-                    </div>
-                  </td>
-                </tr>
-                <%= for {_group_id, claims} <- claim_groups do %>
                   <tr
-                    class="border-b border-white/15 bg-gray-950/50 transition-colors data-[state=selected]:bg-gray-100 hover:bg-gray-100/50 dark:data-[state=selected]:bg-gray-800 dark:hover:bg-gray-950/50"
+                    class="bg-white/[2%] from-white/[2%] via-white/[2%] to-white/[2%] border-b border-white/15 bg-gradient-to-br transition-colors data-[state=selected]:bg-gray-100 hover:bg-gray-100/50 dark:data-[state=selected]:bg-gray-800 dark:hover:bg-white/[2%]"
                     data-state="false"
                   >
-                    <td class="[&:has([role=checkbox])]:pr-0 p-4 align-middle w-full">
+                    <td class="[&:has([role=checkbox])]:pr-0 p-4 align-middle">
                       <div class="min-w-[250px]">
-                        <div class="flex items-center gap-3">
-                          <div class="flex -space-x-3">
-                            <%= for claim <- claims do %>
-                              <div class="relative h-10 w-10 flex-shrink-0 rounded-full ring-4 ring-background">
-                                <img
-                                  alt={User.handle(claim.user)}
-                                  loading="lazy"
-                                  decoding="async"
-                                  class="rounded-full"
-                                  src={claim.user.avatar_url}
-                                  style="position: absolute; height: 100%; width: 100%; inset: 0px; color: transparent;"
-                                />
+                        <div class="group relative flex h-full flex-col">
+                          <div class="relative h-full pl-2">
+                            <div class="flex items-start justify-between">
+                              <div class="cursor-pointer font-mono text-2xl">
+                                <div class="font-extrabold text-emerald-300 hover:text-emerald-200">
+                                  {Money.to_string!(bounty.amount)}
+                                </div>
                               </div>
-                            <% end %>
-                          </div>
-                          <div>
-                            <div class="text-sm font-medium text-gray-200">
-                              {claims
-                              |> Enum.map(fn c -> User.handle(c.user) end)
-                              |> Algora.Util.format_name_list()}
                             </div>
-                            <div class="text-xs text-gray-400">
-                              {Algora.Util.time_ago(hd(claims).inserted_at)}
-                            </div>
+                            <.link
+                              rel="noopener"
+                              class="group/issue inline-flex flex-col"
+                              href={Bounty.url(bounty)}
+                            >
+                              <div :if={Bounty.path(bounty)} class="flex items-center gap-4">
+                                <div class="truncate">
+                                  <p class="truncate text-sm font-medium text-gray-300 group-hover/issue:text-gray-200 group-hover/issue:underline">
+                                    {Bounty.path(bounty)}
+                                  </p>
+                                </div>
+                              </div>
+                              <p class="line-clamp-2 break-words text-base font-medium leading-tight text-gray-100 group-hover/issue:text-white group-hover/issue:underline">
+                                {bounty.ticket.title}
+                              </p>
+                              <div :if={is_nil(Bounty.path(bounty)) and bounty.ticket.description}>
+                                <.markdown
+                                  id={"bounty-description-#{bounty.id}"}
+                                  class="line-clamp-3 transition-all duration-200 [&>p]:m-0"
+                                  phx-hook="ExpandableText"
+                                  data-expand-id={"expand-#{bounty.id}"}
+                                  data-class="line-clamp-3"
+                                  value={Phoenix.HTML.raw(Markdown.render(bounty.ticket.description))}
+                                />
+                                <button
+                                  id={"expand-#{bounty.id}"}
+                                  type="button"
+                                  class="text-xs text-foreground font-bold hidden"
+                                  data-content-id={"bounty-description-#{bounty.id}"}
+                                  phx-hook="ExpandableTextButton"
+                                >
+                                  ...read more
+                                </button>
+                              </div>
+                            </.link>
+                            <p class="flex items-center gap-1.5 text-xs text-gray-400">
+                              {Algora.Util.time_ago(bounty.inserted_at)}
+                            </p>
                           </div>
                         </div>
                       </div>
                     </td>
                     <td class="[&:has([role=checkbox])]:pr-0 p-4 align-middle">
-                      <div class="min-w-[180px]">
-                        <div class="flex items-center justify-end gap-4">
-                          <.button
-                            :if={hd(claims).source}
-                            href={hd(claims).source.url}
-                            variant="secondary"
-                          >
-                            View
-                          </.button>
-                          <.button href={~p"/claims/#{hd(claims).group_id}"}>
-                            Reward
-                          </.button>
+                      <%= if map_size(claim_groups) > 0 do %>
+                        <div class="group flex cursor-pointer flex-col items-center gap-1">
+                          <div class="flex cursor-pointer justify-center -space-x-3">
+                            <%= for {_group_id, claims} <- claim_groups do %>
+                              <div class="relative h-10 w-10 flex-shrink-0 rounded-full ring-4 ring-gray-800 group-hover:brightness-110">
+                                <img
+                                  alt={User.handle(hd(claims).user)}
+                                  loading="lazy"
+                                  decoding="async"
+                                  class="rounded-full"
+                                  src={hd(claims).user.avatar_url}
+                                  style="position: absolute; height: 100%; width: 100%; inset: 0px; color: transparent;"
+                                />
+                              </div>
+                            <% end %>
+                          </div>
+                          <div class="flex items-center gap-0.5">
+                            <div class="whitespace-nowrap text-sm font-medium text-gray-300 group-hover:text-gray-100">
+                              {map_size(claim_groups)} {ngettext(
+                                "claim",
+                                "claims",
+                                map_size(claim_groups)
+                              )}
+                            </div>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="24"
+                              height="24"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              class="-mr-4 h-4 w-4 rotate-90 text-gray-400 group-hover:text-gray-300"
+                            >
+                              <path d="M9 6l6 6l-6 6"></path>
+                            </svg>
+                          </div>
                         </div>
+                      <% end %>
+                    </td>
+                    <td class="[&:has([role=checkbox])]:pr-0 p-4 align-middle">
+                      <div class="flex items-center justify-end gap-2">
+                        <.button
+                          phx-click="edit-bounty-amount"
+                          phx-value-id={bounty.id}
+                          variant="secondary"
+                          size="sm"
+                        >
+                          Edit Amount
+                        </.button>
+                        <.button
+                          phx-click="delete-bounty"
+                          phx-value-id={bounty.id}
+                          variant="destructive"
+                          size="sm"
+                        >
+                          Delete
+                        </.button>
                       </div>
                     </td>
                   </tr>
-                <% end %>
+                  <%= for {_group_id, claims} <- claim_groups do %>
+                    <tr
+                      class="border-b border-white/15 bg-gray-950/50 transition-colors data-[state=selected]:bg-gray-100 hover:bg-gray-100/50 dark:data-[state=selected]:bg-gray-800 dark:hover:bg-gray-950/50"
+                      data-state="false"
+                    >
+                      <td class="[&:has([role=checkbox])]:pr-0 p-4 align-middle w-full">
+                        <div class="min-w-[250px]">
+                          <div class="flex items-center gap-3">
+                            <div class="flex -space-x-3">
+                              <%= for claim <- claims do %>
+                                <div class="relative h-10 w-10 flex-shrink-0 rounded-full ring-4 ring-background">
+                                  <img
+                                    alt={User.handle(claim.user)}
+                                    loading="lazy"
+                                    decoding="async"
+                                    class="rounded-full"
+                                    src={claim.user.avatar_url}
+                                    style="position: absolute; height: 100%; width: 100%; inset: 0px; color: transparent;"
+                                  />
+                                </div>
+                              <% end %>
+                            </div>
+                            <div>
+                              <div class="text-sm font-medium text-gray-200">
+                                {claims
+                                |> Enum.map(fn c -> User.handle(c.user) end)
+                                |> Algora.Util.format_name_list()}
+                              </div>
+                              <div class="text-xs text-gray-400">
+                                {Algora.Util.time_ago(hd(claims).inserted_at)}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="[&:has([role=checkbox])]:pr-0 p-4 align-middle">
+                        <div class="min-w-[180px]">
+                          <div class="flex items-center justify-end gap-4">
+                            <.button
+                              :if={hd(claims).source}
+                              href={hd(claims).source.url}
+                              variant="secondary"
+                            >
+                              View
+                            </.button>
+                            <.button href={~p"/claims/#{hd(claims).group_id}"}>
+                              Reward
+                            </.button>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  <% end %>
                 <% end %>
               </tbody>
             </table>

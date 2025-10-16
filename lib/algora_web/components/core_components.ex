@@ -820,13 +820,16 @@ defmodule AlgoraWeb.CoreComponents do
       <textarea
         id={@id || @name}
         name={@name}
-        class={[
-          "min-h-[6rem] py-[7px] px-[11px] block w-full rounded-lg border-input bg-background",
-          "text-foreground focus:border-ring focus:outline-none focus:ring-4 focus:ring-ring/5 sm:text-sm sm:leading-6",
-          "border-input focus:border-ring focus:ring-ring/5",
-          @errors != [] && "border-destructive focus:border-destructive focus:ring-destructive/10",
-          @class
-        ]}
+        class={
+          classes([
+            "min-h-[6rem] py-[7px] px-[11px] block w-full rounded-lg border-input bg-background",
+            "text-foreground focus:border-ring focus:outline-none focus:ring-4 focus:ring-ring/5 sm:text-sm sm:leading-6",
+            "border-input focus:border-ring focus:ring-ring/5",
+            @errors != [] &&
+              "border-destructive placeholder-destructive-foreground/50 focus:border-destructive focus:ring-destructive/10",
+            @class
+          ])
+        }
         {@rest}
       ><%= Phoenix.HTML.Form.normalize_value("textarea", @value) %></textarea>
       <.error :for={msg <- @errors}>{msg}</.error>

@@ -567,7 +567,7 @@ defmodule AlgoraWeb.CoreComponents do
       phx-click={JS.push("lv:clear-flash", value: %{key: @kind}) |> hide("##{@id}")}
       role="alert"
       class={[
-        "fixed bottom-4 left-1/2 -translate-x-1/2 z-[1000] hidden w-80 rounded-lg p-3 shadow-md ring-1 sm:w-96",
+        "fixed bottom-4 left-1/2 -translate-x-1/2 z-[1000] hidden w-80 rounded-lg p-3 shadow-md ring-1 sm:w-auto",
         @kind == :info &&
           "bg-emerald-950 fill-success-foreground text-success-foreground ring ring-success/70",
         @kind == :warning &&

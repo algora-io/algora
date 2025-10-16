@@ -118,6 +118,7 @@ defmodule AlgoraWeb.OGImageController do
   end
 
   defp should_regenerate?(params, _headers) when is_map_key(params, "refresh"), do: true
+  defp should_regenerate?(params, _headers) when is_map_key(params, "cached"), do: false
 
   defp should_regenerate?(%{"path" => path}, headers) do
     case List.keyfind(headers, "last-modified", 0) do

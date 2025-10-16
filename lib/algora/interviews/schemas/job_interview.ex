@@ -18,6 +18,11 @@ defmodule Algora.Interviews.JobInterview do
     field :candidate_feedback, :string
     field :company_feedback_token, :string
     field :candidate_feedback_token, :string
+    field :willing_to_relocate, :boolean
+    field :work_auth_us, :boolean
+    field :resume_url, :string
+    field :earliest_start_date, :date
+    field :favorite_thing, :string
 
     belongs_to :user, User
     belongs_to :job_posting, Algora.Jobs.JobPosting
@@ -39,7 +44,12 @@ defmodule Algora.Interviews.JobInterview do
       :company_feedback,
       :candidate_feedback,
       :company_feedback_token,
-      :candidate_feedback_token
+      :candidate_feedback_token,
+      :willing_to_relocate,
+      :work_auth_us,
+      :resume_url,
+      :earliest_start_date,
+      :favorite_thing
     ])
     |> validate_required([:user_id, :job_posting_id, :org_id, :status])
     |> validate_inclusion(:status, @interview_statuses)

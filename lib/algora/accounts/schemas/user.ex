@@ -161,6 +161,12 @@ defmodule Algora.Accounts.User do
     # Resume
     field :resume_url, :string
 
+    # Phone number
+    field :phone_number, :string
+
+    # Earliest start date
+    field :earliest_start_date, :date
+
     # Poaching targets - stores repos and companies to poach from
     field :poaching_targets, :string
 
@@ -529,13 +535,17 @@ defmodule Algora.Accounts.User do
       :open_to_ic,
       :open_to_manager,
       :work_auth_us,
-      :work_auth_eu
+      :work_auth_eu,
+      :phone_number,
+      :resume_url,
+      :earliest_start_date
     ])
     |> validate_url(:linkedin_url)
     |> validate_url(:google_scholar_url)
     |> validate_url(:twitter_url)
     |> validate_url(:youtube_url)
     |> validate_url(:website_url)
+    |> validate_url(:resume_url)
   end
 
   def hiring_changeset(%User{} = user, params) do

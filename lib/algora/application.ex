@@ -20,6 +20,8 @@ defmodule Algora.Application do
         {Phoenix.PubSub, name: Algora.PubSub},
         # Start the Finch HTTP client for sending emails
         {Finch, name: Algora.Finch},
+        # Start ChromicPDF for contract PDF generation
+        ChromicPDF,
         Algora.Github.TokenPool,
         Algora.Github.Poller.RootSupervisor,
         Algora.ScreenshotQueue,

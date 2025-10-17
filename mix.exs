@@ -107,6 +107,7 @@ defmodule Algora.MixProject do
       {:hound, "~> 1.1"},
       {:html2markdown, "~> 0.3.0"},
       {:ua_inspector, "~> 3.0"},
+      {:chromic_pdf, "~> 1.17"},
       # ex_aws
       {:ex_aws, "~> 2.1"},
       {:ex_aws_s3, "~> 2.0"},

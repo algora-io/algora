@@ -368,6 +368,7 @@ defmodule Algora.PSP.ConnectCountries do
         "LV",
         "MC",
         "MD",
+        "ME",
         "MK",
         "MT",
         "NL",
@@ -384,7 +385,8 @@ defmodule Algora.PSP.ConnectCountries do
         "SK",
         "SM",
         "TN",
-        "TR"
+        "TR",
+        "XK"
       ]
     }
   end

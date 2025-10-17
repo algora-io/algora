@@ -21,7 +21,7 @@ defmodule Algora.Application do
         # Start the Finch HTTP client for sending emails
         {Finch, name: Algora.Finch},
         # Start ChromicPDF for contract PDF generation
-        ChromicPDF,
+        {ChromicPDF, Application.get_all_env(:chromic_pdf)},
         Algora.Github.TokenPool,
         Algora.Github.Poller.RootSupervisor,
         Algora.ScreenshotQueue,

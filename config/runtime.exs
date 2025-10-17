@@ -168,4 +168,7 @@ if config_env() == :prod do
     ingest_url: System.get_env("INGEST_URL"),
     ingest_static_url: System.get_env("INGEST_STATIC_URL"),
     ingest_token: System.get_env("INGEST_TOKEN")
+
+  config :chromic_pdf,
+    chrome_executable: "/app/puppeteer/chrome/linux-134.0.6998.35/chrome-linux64/chrome"
 end

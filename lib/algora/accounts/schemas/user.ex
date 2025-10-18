@@ -116,8 +116,12 @@ defmodule Algora.Accounts.User do
 
     field :billing_name, :string
     field :billing_address, :string
+    field :jurisdiction, :string
+    field :entity_type, :string
     field :executive_name, :string
     field :executive_role, :string
+    field :executive_email, :string
+    field :recruiting_contract_id, :string
 
     field :system_bio, :string
     field :system_bio_meta, :map, default: %{}
@@ -553,8 +557,11 @@ defmodule Algora.Accounts.User do
       :preferences,
       :executive_name,
       :executive_role,
+      :executive_email,
       :billing_name,
       :billing_address,
+      :jurisdiction,
+      :entity_type,
       :hiring_keywords,
       :poaching_targets
     ])

@@ -88,8 +88,7 @@ defmodule Algora.Jobs.JobPosting do
       :max_equity
     ])
     |> generate_id()
-    |> validate_required([:url, :company_name, :company_url, :email])
-    |> User.validate_email()
+    |> validate_required([:url])
     |> foreign_key_constraint(:user)
   end
 end

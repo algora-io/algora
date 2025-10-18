@@ -293,14 +293,16 @@ defmodule Algora.Util do
     |> Calendar.strftime("%Y-%m-%d %H:%M:%S")
   end
 
-  def slugify(text) when is_binary(text) do
+  def slugify(text, replace \\ "-")
+
+  def slugify(text, replace) when is_binary(text) do
     text
     |> String.downcase()
     |> String.trim()
     |> String.normalize(:nfd)
     |> String.replace(~r/[^a-z0-9\s-]/u, "  ")
-    |> String.replace(~r/[\s-]+/, "-", global: true)
+    |> String.replace(~r/[\s-]+/, replace, global: true)
   end
 
-  def slugify(_), do: ""
+  def slugify(_, _), do: ""
 end

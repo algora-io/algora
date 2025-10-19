@@ -18,6 +18,7 @@ defmodule Algora.Matches do
     |> filter_by_user_id(opts[:user_id])
     |> filter_by_org_id(opts[:org_id])
     |> filter_by_status(opts[:status])
+    |> filter_by_is_draft(opts[:include_drafts])
     |> join(:inner, [m], j in assoc(m, :job_posting), as: :j)
     |> order_by(^order_by_clause)
     |> maybe_preload(opts[:preload])
@@ -269,6 +270,12 @@ defmodule Algora.Matches do
 
   defp filter_by_status(query, status) do
     where(query, [m], m.status == ^status)
+  end
+
+  defp filter_by_is_draft(query, true), do: query
+
+  defp filter_by_is_draft(query, _) do
+    where(query, [m], m.is_draft == false)
   end
 
   defp maybe_preload(query, nil), do: query

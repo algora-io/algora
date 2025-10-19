@@ -175,8 +175,15 @@ defmodule Algora.Organizations do
             |> Repo.insert()
 
           existing_org ->
+            params =
+              if existing_org.handle do
+                Map.delete(params, :handle)
+              else
+                params
+              end
+
             existing_org
-            |> Org.changeset(Map.delete(params, :handle))
+            |> Org.changeset(params)
             |> Repo.update()
         end
 

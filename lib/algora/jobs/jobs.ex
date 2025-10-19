@@ -22,8 +22,8 @@ defmodule Algora.Jobs do
       JobPosting
       |> maybe_filter_by_ids(opts[:ids])
       |> maybe_filter_by_status(opts)
-      |> maybe_filter_by_user(opts)
       |> join(:inner, [j], u in User, on: u.id == j.user_id)
+      |> maybe_filter_by_user(opts)
       |> maybe_filter_by_handle(opts[:handle])
       |> maybe_filter_by_tech_stack(opts[:tech_stack])
       |> join(:left, [j], i in JobInterview, on: i.job_posting_id == j.id and i.status not in [:initial])
@@ -83,6 +83,9 @@ defmodule Algora.Jobs do
       opts[:user_id] ->
         where(query, [j], j.user_id == ^opts[:user_id] and j.status in [:active, :processing])
 
+      opts[:handles] && opts[:handles] != [] ->
+        where(query, [j, u], u.handle in ^opts[:handles] and j.status in [:active, :processing])
+
       is_nil(opts[:user_id]) and is_nil(opts[:handles]) and is_nil(opts[:handle]) ->
         where(query, [j, u], j.status in [:active])
 
@@ -107,6 +110,7 @@ defmodule Algora.Jobs do
     cond do
       opts[:status] == :all -> where(query, [j], j.status in [:active, :processing])
       opts[:user_id] -> where(query, [j], j.status in [:active, :processing])
+      opts[:handles] && opts[:handles] != [] -> where(query, [j, u], j.status in [:active, :processing])
       opts[:handle] -> where(query, [j, u], j.status in [:active, :processing])
       opts[:ids] -> where(query, [j, u], j.status in [:active, :processing])
       true -> where(query, [j], j.status in [:active])

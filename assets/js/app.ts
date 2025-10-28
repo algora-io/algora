@@ -857,6 +857,52 @@ const Hooks = {
     //   }
     // },
   },
+  LoadFromHash: {
+    mounted() {
+      const hash = window.location.hash.substring(1);
+      if (hash) {
+        try {
+          const data = JSON.parse(decodeURIComponent(atob(hash)));
+          this.pushEvent("hash_load_success", data);
+        } catch (error) {
+          this.pushEvent("hash_load_failure", { error: error.message });
+        }
+      }
+
+      this.handleEvent("close-window", ({ delay }) => {
+        setTimeout(() => {
+          window.close();
+        }, delay || 0);
+      });
+    },
+  },
+  LazyLoadImage: {
+    mounted() {
+      const container = this.el;
+      const img = container.querySelector("img");
+
+      if (!img) return;
+
+      const dataSrc = img.getAttribute("data-src");
+      if (!dataSrc) return;
+
+      // Find the parent link element to listen for hover
+      const trigger = container.closest(".group");
+      if (!trigger) return;
+
+      let hasLoaded = false;
+
+      const loadImage = () => {
+        console.log("loading image", dataSrc);
+        if (hasLoaded) return;
+        hasLoaded = true;
+        img.src = dataSrc;
+        img.classList.remove("invisible");
+      };
+
+      trigger.addEventListener("mouseenter", loadImage);
+    },
+  },
 } satisfies Record<string, Partial<ViewHook> & Record<string, unknown>>;
 
 // Accessible focus handling

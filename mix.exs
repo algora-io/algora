@@ -103,7 +103,7 @@ defmodule Algora.MixProject do
       {:csv, "~> 3.2"},
       {:instructor, "~> 0.1.0"},
       {:openai_ex, "~> 0.9.16"},
-      {:langchain, "~> 0.3.0"},
+      {:langchain, "~> 0.4.0"},
       {:hound, "~> 1.1"},
       {:html2markdown, "~> 0.3.0"},
       {:ua_inspector, "~> 3.0"},

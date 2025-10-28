@@ -22,6 +22,8 @@ defmodule Algora.Application do
         {Finch, name: Algora.Finch},
         # Start ChromicPDF for contract PDF generation
         {ChromicPDF, Application.get_all_env(:chromic_pdf)},
+        # Task supervisor for background jobs
+        {Task.Supervisor, name: Algora.TaskSupervisor},
         Algora.Github.TokenPool,
         Algora.Github.Poller.RootSupervisor,
         Algora.ScreenshotQueue,

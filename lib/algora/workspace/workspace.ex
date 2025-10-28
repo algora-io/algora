@@ -826,8 +826,14 @@ defmodule Algora.Workspace do
     end
   end
 
-  def fetch_top_contributions(token, provider_logins) when is_list(provider_logins) do
-    users_with_contributions = get_users_with_contributions(provider_logins)
+  def fetch_top_contributions(token, provider_logins, opts \\ []) when is_list(provider_logins) do
+    users_with_contributions =
+      if opts[:refresh] do
+        []
+      else
+        get_users_with_contributions(provider_logins)
+      end
+
     users_with_contributions_logins = Enum.map(users_with_contributions, & &1.provider_login)
 
     users_without_contributions = provider_logins -- users_with_contributions_logins

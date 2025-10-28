@@ -23,6 +23,7 @@ defmodule Algora.Matches.JobMatch do
     field :dripped_at, :utc_datetime_usec
     field :locked, :boolean, default: false
     field :is_draft, :boolean, default: false
+    field :eval, :map
 
     belongs_to :user, Algora.Accounts.User
     belongs_to :job_posting, Algora.Jobs.JobPosting
@@ -49,7 +50,8 @@ defmodule Algora.Matches.JobMatch do
       :company_notes,
       :dripped_at,
       :locked,
-      :is_draft
+      :is_draft,
+      :eval
     ])
     |> validate_required([:user_id, :job_posting_id])
     |> validate_inclusion(:status, [:pending, :discarded, :automatched, :dripped, :approved, :highlighted])

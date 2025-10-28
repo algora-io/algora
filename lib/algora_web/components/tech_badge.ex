@@ -50,6 +50,8 @@ defmodule AlgoraWeb.Components.TechBadge do
   defp icon_url("oci"), do: "https://avatars.githubusercontent.com/u/12563465?s=200&v=4"
   defp icon_url("drizzle orm"), do: "https://avatars.githubusercontent.com/u/108468352?s=48&v=4"
   defp icon_url("zod"), do: "https://raw.githubusercontent.com/colinhacks/zod/main/logo.svg"
+  defp icon_url("livekit"), do: "https://avatars.githubusercontent.com/u/69438833?s=200&v=4"
+  defp icon_url("webrtc"), do: "https://avatars.githubusercontent.com/u/10526312?s=200&v=4"
   defp icon_url(tech), do: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/#{icon_path(tech)}"
 
   defp icon_path("aws"), do: "amazonwebservices/amazonwebservices-plain-wordmark.svg"
@@ -290,7 +292,9 @@ defmodule AlgoraWeb.Components.TechBadge do
       "Zod",
       "Expo",
       "Unity",
-      "Powershell"
+      "Powershell",
+      "LiveKit",
+      "WebRTC"
     ]
   end
 end

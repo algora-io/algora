@@ -5,8 +5,10 @@ defmodule AlgoraWeb.Org.JobsLive do
   import AlgoraWeb.Components.ModalVideo
 
   alias Algora.Accounts
+  alias Algora.Activities
   alias Algora.Jobs
   alias Algora.Markdown
+  alias Algora.Matches
 
   require Logger
 
@@ -17,7 +19,7 @@ defmodule AlgoraWeb.Org.JobsLive do
 
     {:ok,
      socket
-     |> assign(:page_title, "Jobs")
+     |> assign(:page_title, socket.assigns.current_org.name)
      |> assign(:jobs, jobs)
      |> assign(:media, media)
      |> assign_user_applications()}
@@ -35,7 +37,7 @@ defmodule AlgoraWeb.Org.JobsLive do
       } />
       <div class={
         classes([
-          "mx-auto max-w-7xl px-4 md:px-6 lg:px-8",
+          "mx-auto max-w-6xl px-4 md:px-6 lg:px-8",
           if(!@current_user, do: "py-8", else: "py-4 md:py-6 lg:py-8")
         ])
       }>
@@ -78,7 +80,7 @@ defmodule AlgoraWeb.Org.JobsLive do
             Engineering at {@current_org.name}
           </h2>
           <p class="pt-1 font-medium text-base text-muted-foreground">
-            Open software engineering positions at {@current_org.name}
+            Open engineering positions at {@current_org.name}
           </p>
           <div class="pt-2 flex gap-2 items-center justify-center">
             <%= for {platform, icon} <- social_icons(),
@@ -92,7 +94,7 @@ defmodule AlgoraWeb.Org.JobsLive do
         </div>
 
         <%= if not Enum.empty?(@media) do %>
-          <div class="max-w-4xl mx-auto mt-8 flex flex-row justify-center gap-4">
+          <div class="max-w-6xl mx-auto mt-8 flex flex-row justify-center gap-4">
             <%= for media <- @media |> Enum.take(3) do %>
               <div class="w-1/3 aspect-video rounded-lg overflow-hidden">
                 <%= if Algora.Accounts.youtube_url?(media.url) do %>
@@ -131,15 +133,13 @@ defmodule AlgoraWeb.Org.JobsLive do
                     <div>
                       <div class="flex items-center gap-2">
                         <.link
-                          navigate={~p"/#{@current_org.handle}/job/#{job.id}"}
+                          navigate={"/#{@current_org.handle}/job/#{job.id}"}
                           class="text-lg font-semibold"
                         >
                           <span class="underline">{job.title}</span>
-                          <%= if @current_user && @current_user.is_admin do %>
-                            <span class="text-xs font-muted-foreground">
-                              {job.location} - {job.compensation}
-                            </span>
-                          <% end %>
+                          <span class="text-xs font-muted-foreground">
+                            {job.location}<span :if={job.compensation}> - {job.compensation}</span>
+                          </span>
                         </.link>
                         <%= if job.id in ["b4sFSeJvb2rteUEX", "M9yTwVXFjvQM2WJf"] do %>
                           <.badge variant="success">Contract to Hire</.badge>
@@ -174,15 +174,9 @@ defmodule AlgoraWeb.Org.JobsLive do
                         <% end %>
                       </div>
                     </div>
-                    <%= if MapSet.member?(@user_applications, job.id) do %>
-                      <.button disabled class="opacity-50" size="lg">
-                        <.icon name="tabler-check" class="h-6 w-6 mr-2 -ml-1" /> Applied
-                      </.button>
-                    <% else %>
-                      <.button phx-click="apply_job" phx-value-job-id={job.id} size="lg">
-                        <.icon name="github" class="h-6 w-6 mr-2" /> Apply with GitHub
-                      </.button>
-                    <% end %>
+                    <.button phx-click="apply_job" phx-value-job-id={job.id}>
+                      I'm interested
+                    </.button>
                   </div>
                 <% end %>
               </div>
@@ -206,26 +200,65 @@ defmodule AlgoraWeb.Org.JobsLive do
 
   @impl true
   def handle_event("apply_job", %{"job-id" => job_id}, socket) do
-    if socket.assigns[:current_user] do
-      if Accounts.has_fresh_token?(socket.assigns.current_user) do
-        case Jobs.create_application(job_id, socket.assigns.current_user) do
-          {:ok, _application} ->
-            {:noreply, assign_user_applications(socket)}
+    current_user = socket.assigns[:current_user]
+    org = socket.assigns.current_org
 
-          {:error, _changeset} ->
-            {:noreply, put_flash(socket, :error, "Failed to submit application. Please try again.")}
-        end
-      else
-        {:noreply,
-         redirect(socket,
-           external: Algora.Github.authorize_url(%{return_to: "/#{socket.assigns.current_org.handle}/jobs"})
-         )}
+    if current_user do
+      # Try to get job match
+      job_match = Matches.get_job_match(current_user.id, job_id)
+
+      case job_match do
+        nil ->
+          # No match exists, create one
+          match_attrs = %{
+            user_id: current_user.id,
+            job_posting_id: job_id,
+            status: :automatched,
+            is_draft: true,
+            candidate_approved_at: DateTime.utc_now()
+          }
+
+          case Matches.create_job_match(match_attrs) do
+            {:ok, _created_match} ->
+              {:ok, job} = Jobs.get_job_posting(job_id)
+              company_name = job.company_name || org.name
+              user_name = current_user.name
+              Activities.alert("⏱️ #{user_name} is interested in chatting with #{company_name}", :critical)
+
+              {:noreply, push_navigate(socket, to: "/#{org.handle}/job/#{job_id}/apply")}
+
+            {:error, _changeset} ->
+              {:noreply,
+               socket
+               |> put_flash(:error, "Failed to create match")
+               |> push_navigate(to: "/#{org.handle}/job/#{job_id}/apply")}
+          end
+
+        match ->
+          # Match exists, update it before redirecting
+          {:ok, job} = Jobs.get_job_posting(job_id)
+
+          case Matches.update_job_match(match, %{
+                 candidate_approved_at: DateTime.utc_now(),
+                 candidate_discarded_at: nil
+               }) do
+            {:ok, _updated_match} ->
+              company_name = job.company_name || org.name
+              user_name = current_user.name
+              Activities.alert("⏱️ #{user_name} is interested in chatting with #{company_name}", :critical)
+
+              {:noreply, push_navigate(socket, to: "/#{org.handle}/job/#{job_id}/apply")}
+
+            {:error, _changeset} ->
+              {:noreply,
+               socket
+               |> put_flash(:error, "Failed to update match")
+               |> push_navigate(to: "/#{org.handle}/job/#{job_id}/apply")}
+          end
       end
     else
-      {:noreply,
-       redirect(socket,
-         external: Algora.Github.authorize_url(%{return_to: "/#{socket.assigns.current_org.handle}/jobs"})
-       )}
+      # Not logged in, just redirect
+      {:noreply, push_navigate(socket, to: "/#{org.handle}/job/#{job_id}/apply")}
     end
   end
 

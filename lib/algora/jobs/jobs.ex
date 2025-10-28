@@ -80,6 +80,9 @@ defmodule Algora.Jobs do
 
   defp maybe_filter_by_user(query, opts) do
     cond do
+      opts[:user_ids] ->
+        where(query, [j], j.user_id in ^opts[:user_ids] and j.status in [:active, :processing])
+
       opts[:user_id] ->
         where(query, [j], j.user_id == ^opts[:user_id] and j.status in [:active, :processing])
 
@@ -109,6 +112,7 @@ defmodule Algora.Jobs do
   defp maybe_filter_by_status(query, opts) do
     cond do
       opts[:status] == :all -> where(query, [j], j.status in [:active, :processing])
+      opts[:user_ids] -> where(query, [j], j.status in [:active, :processing])
       opts[:user_id] -> where(query, [j], j.status in [:active, :processing])
       opts[:handles] && opts[:handles] != [] -> where(query, [j, u], j.status in [:active, :processing])
       opts[:handle] -> where(query, [j, u], j.status in [:active, :processing])

@@ -187,6 +187,11 @@ defmodule Algora.Accounts.User do
     field :amount_raised, Money
     field :company_valuation, Money
 
+    # Ashby integration fields
+    field :ashby_api_key, :string
+    field :ashby_source_id, :string
+    field :ashby_user_id, :string
+
     has_many :identities, Identity
     has_many :memberships, Member, foreign_key: :user_id
     has_many :members, Member, foreign_key: :org_id
@@ -398,7 +403,10 @@ defmodule Algora.Accounts.User do
       :seeking_jobs,
       :hourly_rate_min,
       :hours_per_week,
-      :preferences
+      :preferences,
+      :ashby_api_key,
+      :ashby_source_id,
+      :ashby_user_id
     ])
     |> validate_required([:handle])
     |> validate_handle()
@@ -563,7 +571,10 @@ defmodule Algora.Accounts.User do
       :jurisdiction,
       :entity_type,
       :hiring_keywords,
-      :poaching_targets
+      :poaching_targets,
+      :ashby_api_key,
+      :ashby_source_id,
+      :ashby_user_id
     ])
   end
 

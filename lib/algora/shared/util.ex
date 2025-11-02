@@ -1,5 +1,32 @@
 defmodule Algora.Util do
   @moduledoc false
+  def to_csv(data, output_path) do
+    rows = Enum.to_list(data)
+
+    # Collect all unique keys across all entries
+    all_keys =
+      rows
+      |> Enum.flat_map(&Map.keys/1)
+      |> Enum.uniq()
+      |> Enum.sort()
+
+    # Normalize each row to have all fields
+    normalized_rows =
+      Enum.map(rows, fn row ->
+        Enum.map(all_keys, fn key ->
+          case Map.get(row, key) do
+            list when is_list(list) -> Enum.join(list, ", ")
+            value -> value
+          end
+        end)
+      end)
+
+    [all_keys | normalized_rows]
+    |> CSV.encode()
+    |> Enum.join("")
+    |> then(&File.write!(output_path, &1))
+  end
+
   def random_string do
     binary = <<
       System.system_time(:nanosecond)::64,
@@ -149,6 +176,7 @@ defmodule Algora.Util do
   def format_name_list([x1, x2]), do: "#{x1} and #{x2}"
   def format_name_list([x1, x2, x3]), do: "#{x1}, #{x2} and #{x3}"
   def format_name_list([x1, x2 | xs]), do: "#{x1}, #{x2} and #{length(xs)} others"
+  def format_name_list(_), do: nil
 
   def initials(str, length \\ 2)
   def initials(nil, _length), do: ""
@@ -194,6 +222,74 @@ defmodule Algora.Util do
     |> String.trim_leading("https://")
     |> String.trim_leading("http://")
     |> String.trim_leading("www.")
+  end
+
+  @doc """
+  Extracts the root domain from a hostname, removing subdomains.
+
+  Examples:
+      iex> extract_root_domain("www.example.com")
+      "example.com"
+
+      iex> extract_root_domain("app.dexory.com")
+      "dexory.com"
+
+      iex> extract_root_domain("example.com")
+      "example.com"
+  """
+  def extract_root_domain(nil), do: nil
+
+  def extract_root_domain(host) when is_binary(host) do
+    host
+    |> String.trim()
+    |> String.downcase()
+    |> then(fn h ->
+      # Split by dots
+      parts = String.split(h, ".")
+
+      # If we have more than 2 parts, take the last 2 (domain + TLD)
+      # For most cases, this works (www.example.com -> example.com)
+      # For edge cases like .co.uk, we'd need a public suffix list
+      case length(parts) do
+        n when n > 2 ->
+          # Take last 2 parts
+          parts
+          |> Enum.take(-2)
+          |> Enum.join(".")
+
+        _ ->
+          # Already a root domain or invalid
+          h
+      end
+    end)
+  end
+
+  @doc """
+  Extracts the root domain from a URL, removing scheme, path, and subdomains.
+
+  Examples:
+      iex> url_to_root_domain("https://duckduckgo.com/careers")
+      "duckduckgo.com"
+
+      iex> url_to_root_domain("http://bsky.social/about/join")
+      "bsky.social"
+
+      iex> url_to_root_domain("jobs.ongoody.com/")
+      "ongoody.com"
+
+      iex> url_to_root_domain("https://foxglove.dev/")
+      "foxglove.dev"
+  """
+  def url_to_root_domain(nil), do: nil
+
+  def url_to_root_domain(url) when is_binary(url) do
+    # Add scheme if missing for proper URI parsing
+    url_with_scheme = if String.contains?(url, "://"), do: url, else: "https://#{url}"
+
+    url_with_scheme
+    |> URI.parse()
+    |> then(fn uri -> uri.host end)
+    |> extract_root_domain()
   end
 
   def get_gravatar_url(email, opts \\ []) do

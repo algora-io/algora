@@ -154,6 +154,25 @@ defmodule AlgoraWeb.Org.SettingsLive do
         </.card_content>
       </.card>
 
+      <.card :if={@current_user.is_admin}>
+        <.card_header>
+          <.card_title>Ashby Integration</.card_title>
+          <.card_description>
+            Configure Ashby API integration for this organization (Admin only)
+          </.card_description>
+        </.card_header>
+        <.card_content>
+          <.simple_form for={@form} phx-change="validate" phx-submit="save">
+            <div class="flex flex-col gap-6">
+              <.input field={@form[:ashby_api_key]} label="Ashby API Key" type="text" />
+              <.input field={@form[:ashby_source_id]} label="Ashby Source ID" type="text" />
+              <.input field={@form[:ashby_user_id]} label="Ashby User ID" type="text" />
+              <.button class="ml-auto">Save</.button>
+            </div>
+          </.simple_form>
+        </.card_content>
+      </.card>
+
       <.card>
         <.card_header>
           <.card_title>Bot Templates</.card_title>

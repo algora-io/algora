@@ -62,6 +62,8 @@ defmodule Algora.MixProject do
       {:swoosh, "~> 1.5"},
       {:finch, "~> 0.13"},
       {:httpoison, "~> 2.2"},
+      {:req, "~> 0.5"},
+      {:multipart, "~> 0.4"},
       {:redirect, "~> 0.4.0"},
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"},
@@ -112,6 +114,8 @@ defmodule Algora.MixProject do
       {:ex_aws, "~> 2.1"},
       {:ex_aws_s3, "~> 2.0"},
       {:hackney, "~> 1.9"},
+      {:hnswlib, "~> 0.1"},
+      {:tsne, "~> 0.1"},
       # monitoring, logging
       {:appsignal_phoenix, "~> 2.7"},
       {:logfmt_ex, "~> 0.4"}

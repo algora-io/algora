@@ -45,10 +45,17 @@ defmodule AlgoraWeb.Router do
   scope "/" do
     forward "/asset", AlgoraWeb.Plugs.RewriteAssetsPlug, upstream: :assets_url
     forward "/storage", AlgoraWeb.Plugs.RewriteStoragePlug, upstream: :storage_url
-    forward "/ingest/static", AlgoraWeb.Plugs.RewriteIngestStaticPlug, upstream: :ingest_static_url
+
+    forward "/ingest/static", AlgoraWeb.Plugs.RewriteIngestStaticPlug,
+      upstream: :ingest_static_url
+
     forward "/ingest", AlgoraWeb.Plugs.RewriteIngestPlug, upstream: :ingest_url
-    forward "/observe/script.js", AlgoraWeb.Plugs.RewriteObserveJSPlug, upstream: "https://plausible.io/js/script.js"
-    forward "/observe/event", AlgoraWeb.Plugs.RewriteObserveEventPlug, upstream: "https://plausible.io/api/event"
+
+    forward "/observe/script.js", AlgoraWeb.Plugs.RewriteObserveJSPlug,
+      upstream: "https://plausible.io/js/script.js"
+
+    forward "/observe/event", AlgoraWeb.Plugs.RewriteObserveEventPlug,
+      upstream: "https://plausible.io/api/event"
 
     get "/health", AlgoraWeb.HealthController, :index
   end
@@ -116,6 +123,7 @@ defmodule AlgoraWeb.Router do
       live "/challenges/turso", Challenges.LimboLive
       live "/challenges/activepieces", Challenges.ActivepiecesLive
       live "/challenges/primeintellect", Challenges.PrimeintellectLive
+      live "/challenges/clickhouse", Challenges.ClickhouseLive
       live "/challenges/atopile", Challenges.AtopileLive
       live "/challenges/electric", Challenges.ElectricLive
       live "/challenges/prettier", Challenges.PrettierLive

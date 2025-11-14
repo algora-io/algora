@@ -15,7 +15,7 @@ defmodule AlgoraWeb.Challenges.ClickhouseLive do
      |> assign(:page_title, "ClickHouse Challenge")
      |> assign(
        :page_description,
-       "Contribute to ClickHouse to win an interview and cash prizes!"
+       "Contribute to ClickHouse to win interviews and bounties!"
      )
      |> assign(:page_image, "#{AlgoraWeb.Endpoint.url()}/images/challenges/clickhouse/og.png")
      |> assign(:jobs, jobs)
@@ -36,7 +36,7 @@ defmodule AlgoraWeb.Challenges.ClickhouseLive do
         <article>
           <div class="text-white">
             <div class="relative z-20">
-              <section class="mb-12 min-h-[calc(100svh-280px)] md:min-h-0">
+              <section class="mb-12 min-h-[calc(100svh-36px)] md:min-h-0">
                 <div class="relative z-20 mx-auto max-w-[100rem] px-6 lg:px-8">
                   <div class="max-w-5xl pt-24 2xl:pt-72">
                     <a
@@ -53,17 +53,17 @@ defmodule AlgoraWeb.Challenges.ClickhouseLive do
                         style="aspect-ratio: 1200/300;"
                       />
                     </a>
-                    <h1 class="mt-6 mb-2 text-[1.4rem] font-black tracking-tighter mix-blend-exclusion sm:text-5xl/[3rem] md:text-6xl/[4rem] lg:text-7xl/[5rem]">
+                    <h1 class="mt-6 mb-2 text-2xl font-black tracking-tighter mix-blend-exclusion sm:text-5xl/[3rem] md:text-6xl/[4rem] lg:text-7xl/[5rem]">
                       Contribute to
                       <span style="background: radial-gradient(53.44% 245.78% at 13.64% 46.56%, rgb(255, 215, 0) 0%, rgb(255, 204, 0) 100%) text; -webkit-text-fill-color: transparent;">
                         ClickHouse
                       </span>
-                      <br /> Win interviews & rewards
+                      <br /> Win interviews & bounties
                     </h1>
                     <p class="max-w-xl xl:max-w-2xl mt-4 text-base font-medium tracking-tight text-white/90 shadow-black [text-shadow:_0_1px_0_var(--tw-shadow-color)] md:mt-6 md:text-lg md:text-white/80">
                       ClickHouse is building the world's fastest real-time analytics database. From Postgres migrations to AI-powered query generation, we're pushing the boundaries of what's possible with databases.
                       <br /><br />
-                      Join us in this public take-home challenge where you can showcase your skills. Top 10 submissions get guaranteed interviews, and the top 3 winners receive cash prizes!
+                      Join us in this public take-home challenge where you can showcase your skills. Top 10 submissions get guaranteed interviews, and the top 3 winners receive bounties!
                     </p>
                   </div>
                 </div>
@@ -115,7 +115,7 @@ defmodule AlgoraWeb.Challenges.ClickhouseLive do
                           class="inline-flex items-center gap-2 text-sm text-[#ffcc00] hover:text-[#ffd700] transition-colors font-medium mt-auto"
                           href="https://github.com/PeerDB-io/peerdb"
                         >
-                          <.icon name="github" class="w-4 h-4" /> View Repository →
+                          <.icon name="github" class="w-4 h-4 shrink-0" /> View Repository →
                         </a>
                       </div>
                     </div>
@@ -148,7 +148,7 @@ defmodule AlgoraWeb.Challenges.ClickhouseLive do
                             class="inline-flex items-center gap-2 text-sm text-[#ffcc00] hover:text-[#ffd700] transition-colors font-medium mt-auto"
                             href="https://github.com/ClickHouse/ai-sdk-cpp"
                           >
-                            <.icon name="github" class="w-4 h-4" /> View Repository →
+                            <.icon name="github" class="w-4 h-4 shrink-0" /> View Repository →
                           </a>
                           <a
                             target="_blank"
@@ -156,7 +156,7 @@ defmodule AlgoraWeb.Challenges.ClickhouseLive do
                             class="inline-flex items-center gap-2 text-sm text-[#ffcc00] hover:text-[#ffd700] transition-colors font-medium mt-auto"
                             href="https://clickhouse.com/docs/interfaces/cli#ai-sql-generation"
                           >
-                            <.icon name="tabler-book" class="w-4 h-4" /> View Docs →
+                            <.icon name="tabler-book" class="w-4 h-4 shrink-0" /> View Docs →
                           </a>
                         </div>
                       </div>
@@ -189,7 +189,7 @@ defmodule AlgoraWeb.Challenges.ClickhouseLive do
                           class="inline-flex items-center gap-2 text-sm text-[#ffcc00] hover:text-[#ffd700] transition-colors font-medium mt-auto"
                           href="https://github.com/ethanniser/NextFaster"
                         >
-                          <.icon name="github" class="w-4 h-4" /> View Repository →
+                          <.icon name="github" class="w-4 h-4 shrink-0" /> View Repository →
                         </a>
                       </div>
                     </div>
@@ -299,7 +299,7 @@ defmodule AlgoraWeb.Challenges.ClickhouseLive do
                           </div>
                           <%= if job.location do %>
                             <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                              <.icon name="tabler-map-pin" class="w-4 h-4" />
+                              <.icon name="tabler-map-pin" class="w-4 h-4 shrink-0" />
                               <span>{job.location}</span>
                             </div>
                           <% end %>

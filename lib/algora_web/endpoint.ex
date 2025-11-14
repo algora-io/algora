@@ -78,7 +78,8 @@ defmodule AlgoraWeb.Endpoint do
 
   defp canonical_host(%{host: host} = conn, _opts) do
     case String.split(host, ".") do
-      [subdomain, "algora", "io"] when subdomain not in ["app", "console", "www", "sitemaps"] ->
+      [subdomain, "algora", "io"]
+      when subdomain not in ["app", "console", "www", "sitemaps", "sitemap", "m", "api", "home"] ->
         Algora.Activities.alert("👀 Someone is viewing https://#{subdomain}.algora.io", :critical)
         redirect_to_canonical_host(conn, Path.join(["/#{subdomain}/candidates"]))
 

@@ -53,6 +53,11 @@ defmodule AlgoraWeb.Components.TechBadge do
   defp icon_url("livekit"), do: "https://avatars.githubusercontent.com/u/69438833?s=200&v=4"
   defp icon_url("webrtc"), do: "https://avatars.githubusercontent.com/u/10526312?s=200&v=4"
   defp icon_url("snowflake"), do: "https://avatars.githubusercontent.com/u/6453780?s=200&v=4"
+  defp icon_url("langchain"), do: "https://avatars.githubusercontent.com/u/126733545?s=200&v=4"
+  defp icon_url("llamaindex"), do: "https://avatars.githubusercontent.com/u/130722866?s=200&v=4"
+  defp icon_url("pinecone"), do: "https://avatars.githubusercontent.com/u/54333248?s=200&v=4"
+  defp icon_url("lancedb"), do: "https://avatars.githubusercontent.com/u/108903835?s=200&v=4"
+  defp icon_url("datadog"), do: "https://avatars.githubusercontent.com/u/365230?s=200&v=4"
   defp icon_url(tech), do: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/#{icon_path(tech)}"
 
   defp icon_path("aws"), do: "amazonwebservices/amazonwebservices-plain-wordmark.svg"
@@ -60,6 +65,9 @@ defmodule AlgoraWeb.Components.TechBadge do
   defp icon_path("objectivec"), do: "objectivec/objectivec-plain.svg"
   defp icon_path("rails"), do: "rails/rails-plain.svg"
   defp icon_path("django"), do: "django/django-plain.svg"
+  defp icon_path("graphql"), do: "graphql/graphql-plain.svg"
+  defp icon_path("axios"), do: "axios/axios-plain.svg"
+  defp icon_path("jest"), do: "jest/jest-plain.svg"
   defp icon_path("html"), do: "html5/html5-original.svg"
   defp icon_path("css"), do: "css3/css3-original.svg"
   defp icon_path(tech), do: "#{tech}/#{tech}-original.svg"
@@ -175,6 +183,18 @@ defmodule AlgoraWeb.Components.TechBadge do
 
       "llm foundry" ->
         "llmfoundry"
+
+      "openai apis" ->
+        "openai"
+
+      "elk" ->
+        "elasticsearch"
+
+      "cypress" ->
+        "cypressio"
+
+      "vite" ->
+        "vitejs"
 
       t ->
         t
@@ -300,7 +320,22 @@ defmodule AlgoraWeb.Components.TechBadge do
       "LiveKit",
       "WebRTC",
       "SQL",
-      "Snowflake"
+      "Snowflake",
+      "LangChain",
+      "LlamaIndex",
+      "Pinecone",
+      "LanceDB",
+      "Elasticsearch",
+      "Datadog",
+      "GraphQL",
+      "Axios",
+      "Styledcomponents",
+      "SASS",
+      "Jest",
+      "Playwright",
+      "Cypress",
+      "Vite",
+      "Webpack"
     ]
   end
 end

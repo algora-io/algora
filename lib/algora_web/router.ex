@@ -46,16 +46,13 @@ defmodule AlgoraWeb.Router do
     forward "/asset", AlgoraWeb.Plugs.RewriteAssetsPlug, upstream: :assets_url
     forward "/storage", AlgoraWeb.Plugs.RewriteStoragePlug, upstream: :storage_url
 
-    forward "/ingest/static", AlgoraWeb.Plugs.RewriteIngestStaticPlug,
-      upstream: :ingest_static_url
+    forward "/ingest/static", AlgoraWeb.Plugs.RewriteIngestStaticPlug, upstream: :ingest_static_url
 
     forward "/ingest", AlgoraWeb.Plugs.RewriteIngestPlug, upstream: :ingest_url
 
-    forward "/observe/script.js", AlgoraWeb.Plugs.RewriteObserveJSPlug,
-      upstream: "https://plausible.io/js/script.js"
+    forward "/observe/script.js", AlgoraWeb.Plugs.RewriteObserveJSPlug, upstream: "https://plausible.io/js/script.js"
 
-    forward "/observe/event", AlgoraWeb.Plugs.RewriteObserveEventPlug,
-      upstream: "https://plausible.io/api/event"
+    forward "/observe/event", AlgoraWeb.Plugs.RewriteObserveEventPlug, upstream: "https://plausible.io/api/event"
 
     get "/health", AlgoraWeb.HealthController, :index
   end

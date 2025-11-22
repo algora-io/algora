@@ -157,6 +157,7 @@ defmodule AlgoraWeb.Org.TransactionsLive do
   defp calculate_balance(transactions) do
     transactions
     |> Enum.filter(&(&1.status == :succeeded))
+    |> Enum.filter(&(!&1.reversed_at))
     |> Enum.reduce(Money.new!(0, :USD), fn transaction, acc ->
       case transaction.type do
         type when type in [:charge, :deposit, :credit] ->
@@ -172,7 +173,9 @@ defmodule AlgoraWeb.Org.TransactionsLive do
   end
 
   defp calculate_volume(transactions) do
-    Enum.reduce(transactions, Money.new!(0, :USD), fn transaction, acc ->
+    transactions
+    |> Enum.filter(&(!&1.reversed_at))
+    |> Enum.reduce(Money.new!(0, :USD), fn transaction, acc ->
       case transaction.type do
         type when type in [:charge, :credit] -> Money.add!(acc, transaction.net_amount)
         _ -> acc
@@ -254,7 +257,12 @@ defmodule AlgoraWeb.Org.TransactionsLive do
                 </thead>
                 <tbody class="divide-y divide-border">
                   <%= for transaction <- @transactions do %>
-                    <tr class="hover:bg-muted/50">
+                    <tr class={
+                      classes([
+                        "hover:bg-muted/50",
+                        if(transaction.reversed_at, do: "opacity-25")
+                      ])
+                    }>
                       <td class="whitespace-nowrap px-6 py-4 text-sm">
                         {Util.timestamp(transaction.inserted_at, @current_org.timezone)}
                       </td>
@@ -485,6 +493,8 @@ defmodule AlgoraWeb.Org.TransactionsLive do
       t when t in [:debit, :withdrawal, :transfer] -> :minus
     end
   end
+
+  defp description(%{reversed_at: reversed_at}) when not is_nil(reversed_at), do: "Refunded"
 
   defp description(%{type: :charge, status: :requires_capture}), do: "Authorization"
 

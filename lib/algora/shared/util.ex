@@ -65,11 +65,14 @@ defmodule Algora.Util do
     n = trunc(number)
 
     case n do
+      n when n >= 1_000_000_000 ->
+        "#{(n / 1_000_000_000) |> Float.round(1) |> trim_trailing_zero()}B"
+
       n when n >= 1_000_000 ->
         "#{(n / 1_000_000) |> Float.round(1) |> trim_trailing_zero()}M"
 
       n when n >= 1_000 ->
-        "#{(n / 1_000) |> Float.round(1) |> trim_trailing_zero()}K"
+        "#{(n / 1_000) |> Float.round(1) |> trim_trailing_zero()}k"
 
       n ->
         to_string(n)

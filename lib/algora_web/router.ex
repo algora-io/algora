@@ -42,6 +42,9 @@ defmodule AlgoraWeb.Router do
   redirect("/create", "/anything", :permanent)
   redirect("/create/*path", "/anything/*path", :permanent)
 
+  redirect("/lovablelabs", "/lovable", :permanent)
+  redirect("/lovablelabs/*path", "/lovable/*path", :permanent)
+
   scope "/" do
     forward "/asset", AlgoraWeb.Plugs.RewriteAssetsPlug, upstream: :assets_url
     forward "/storage", AlgoraWeb.Plugs.RewriteStoragePlug, upstream: :storage_url

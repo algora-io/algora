@@ -58,6 +58,7 @@ defmodule AlgoraWeb.Components.TechBadge do
   defp icon_url("pinecone"), do: "https://avatars.githubusercontent.com/u/54333248?s=200&v=4"
   defp icon_url("lancedb"), do: "https://avatars.githubusercontent.com/u/108903835?s=200&v=4"
   defp icon_url("datadog"), do: "https://avatars.githubusercontent.com/u/365230?s=200&v=4"
+  defp icon_url("datafusion"), do: "https://datafusion.apache.org/blog/images/logo_original4x.png"
   defp icon_url(tech), do: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/#{icon_path(tech)}"
 
   defp icon_path("aws"), do: "amazonwebservices/amazonwebservices-plain-wordmark.svg"
@@ -335,7 +336,9 @@ defmodule AlgoraWeb.Components.TechBadge do
       "Playwright",
       "Cypress",
       "Vite",
-      "Webpack"
+      "Webpack",
+      "SQLite",
+      "DataFusion"
     ]
   end
 end

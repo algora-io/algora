@@ -15,6 +15,11 @@ defmodule Algora.Github.Poller.SearchConsumer do
     command = Util.base64_to_term!(encoded_command)
     ticket_ref = Util.base64_to_term!(encoded_ticket_ref)
 
+    if ticket_ref[:owner] in Algora.Settings.get_blocked_users() or
+         comment["author"]["login"] in Algora.Settings.get_blocked_users() do
+      raise "blocked"
+    end
+
     run_command(command, ticket_ref, comment)
   end
 

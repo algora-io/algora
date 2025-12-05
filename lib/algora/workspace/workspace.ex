@@ -315,7 +315,13 @@ defmodule Algora.Workspace do
   def upsert_installation(installation, user, org, provider_user) do
     case get_installation_by_provider_id("github", installation["id"]) do
       nil ->
-        create_installation(user, provider_user, org, installation)
+        case get_installation_by_provider_user_id("github", provider_user.id) do
+          nil ->
+            create_installation(user, provider_user, org, installation)
+
+          existing_installation ->
+            update_installation(existing_installation, user, provider_user, org, installation)
+        end
 
       existing_installation ->
         update_installation(existing_installation, user, provider_user, org, installation)
@@ -332,6 +338,11 @@ defmodule Algora.Workspace do
   def get_installation_by!(fields), do: Repo.get_by!(Installation, fields)
 
   @type provider_id :: String.t() | integer()
+  @type provider_user_id :: String.t() | integer()
+
+  @spec get_installation_by_provider_user_id(String.t(), provider_user_id()) :: Installation.t() | nil
+  def get_installation_by_provider_user_id(provider, provider_user_id),
+    do: get_installation_by(provider: provider, provider_user_id: to_string(provider_user_id))
 
   @spec get_installation_by_provider_id(String.t(), provider_id()) :: Installation.t() | nil
   def get_installation_by_provider_id(provider, provider_id),

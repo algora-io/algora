@@ -48,11 +48,13 @@ defmodule Algora.Cloud do
   end
 
   def notify_candidate_like(attrs) do
-    call(AlgoraCloud.Talent.Jobs.SendCandidateLikeEmail, :send, [attrs])
+    :ok
+    # call(AlgoraCloud.Talent.Jobs.SendCandidateLikeEmail, :send, [attrs])
   end
 
   def notify_company_like(match_id) do
-    call(AlgoraCloud.EmailScheduler, :schedule_email, [:company_like, match_id])
+    :ok
+    # call(AlgoraCloud.EmailScheduler, :schedule_email, [:company_like, match_id])
   end
 
   def create_admin_task(attrs) do

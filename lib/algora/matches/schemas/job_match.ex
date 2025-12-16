@@ -24,6 +24,10 @@ defmodule Algora.Matches.JobMatch do
     field :locked, :boolean, default: false
     field :is_draft, :boolean, default: false
     field :eval, :map
+    field :provider_candidate_id, :string
+    field :provider_application_id, :string
+    field :provider_candidate_meta, :map, default: %{}
+    field :provider_application_meta, :map, default: %{}
 
     belongs_to :user, Algora.Accounts.User
     belongs_to :job_posting, Algora.Jobs.JobPosting
@@ -51,7 +55,11 @@ defmodule Algora.Matches.JobMatch do
       :dripped_at,
       :locked,
       :is_draft,
-      :eval
+      :eval,
+      :provider_candidate_id,
+      :provider_application_id,
+      :provider_candidate_meta,
+      :provider_application_meta
     ])
     |> validate_required([:user_id, :job_posting_id])
     |> validate_inclusion(:status, [:pending, :discarded, :automatched, :dripped, :approved, :highlighted])

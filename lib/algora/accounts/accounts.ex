@@ -279,6 +279,35 @@ defmodule Algora.Accounts do
 
   def get_user_by!(fields), do: Repo.get_by!(User, fields)
 
+  @doc """
+  Gets a user by checking email across multiple fields.
+
+  Checks the following fields in this order:
+  - user.provider_meta["email"]
+  - user.internal_email
+  - user.email
+
+  Returns the first user found matching any of these email fields.
+
+  ## Examples
+
+      iex> list_users_by_any_email("user@example.com")
+      %User{}
+
+      iex> list_users_by_any_email("unknown@example.com")
+      nil
+
+  """
+  def list_users_by_any_email(email) when is_binary(email) do
+    Repo.all(
+      from u in User,
+        where:
+          fragment("?->>'email' = ?", u.provider_meta, ^email) or
+            u.internal_email == ^email or
+            u.email == ^email
+    )
+  end
+
   @spec fetch_user_by(clauses :: Keyword.t() | map()) ::
           {:ok, User.t()} | {:error, :not_found}
   def fetch_user_by(clauses) do
@@ -382,8 +411,24 @@ defmodule Algora.Accounts do
     )
 
     Repo.update_all(
-      from(m in Member, where: m.user_id == ^old_user_id),
+      from(m in Member,
+        where: m.user_id == ^old_user_id,
+        where: fragment("not exists (select 1 from members where user_id = ? and org_id = ?)", ^new_user_id, m.org_id)
+      ),
       set: [user_id: new_user_id]
+    )
+
+    Repo.update_all(
+      from(m in Member,
+        where: m.user_id == ^new_user_id,
+        where:
+          fragment(
+            "exists (select 1 from members where user_id = ? and org_id = ? and role = 'admin')",
+            ^old_user_id,
+            m.org_id
+          )
+      ),
+      set: [role: "admin"]
     )
 
     Repo.update_all(
@@ -410,8 +455,6 @@ defmodule Algora.Accounts do
       from(i in Installation, where: i.connected_user_id == ^old_user_id),
       set: [connected_user_id: new_user_id]
     )
-
-    :ok
   end
 
   def register_org(params) do

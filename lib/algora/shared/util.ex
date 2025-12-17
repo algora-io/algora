@@ -103,15 +103,50 @@ defmodule Algora.Util do
         unit = Gettext.ngettext(AlgoraWeb.Gettext, "hour", "hours", count)
         "#{count} #{unit} ago"
 
-      diff < 2_592_000 ->
+      diff < 604_800 ->
         count = div(diff, 86_400)
         unit = Gettext.ngettext(AlgoraWeb.Gettext, "day", "days", count)
+        "#{count} #{unit} ago"
+
+      diff < 2_592_000 ->
+        count = div(diff, 604_800)
+        unit = Gettext.ngettext(AlgoraWeb.Gettext, "week", "weeks", count)
         "#{count} #{unit} ago"
 
       true ->
         count = div(diff, 2_592_000)
         unit = Gettext.ngettext(AlgoraWeb.Gettext, "month", "months", count)
         "#{count} #{unit} ago"
+    end
+  end
+
+  def time_ago_compact(datetime) do
+    now = NaiveDateTime.utc_now()
+    diff = NaiveDateTime.diff(now, datetime, :second)
+
+    cond do
+      diff < 60 ->
+        "now"
+
+      diff < 3600 ->
+        count = div(diff, 60)
+        "#{count}m"
+
+      diff < 86_400 ->
+        count = div(diff, 3600)
+        "#{count}h"
+
+      diff < 604_800 ->
+        count = div(diff, 86_400)
+        "#{count}d"
+
+      diff < 2_592_000 ->
+        count = div(diff, 604_800)
+        "#{count}wk"
+
+      true ->
+        count = div(diff, 2_592_000)
+        "#{count}mo"
     end
   end
 

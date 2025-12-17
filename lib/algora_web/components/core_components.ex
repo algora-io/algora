@@ -1337,6 +1337,43 @@ defmodule AlgoraWeb.CoreComponents do
     """
   end
 
+  attr :id, :string, required: true
+  attr :value, :string, required: true
+
+  def copy_to_clipboard_button(assigns) do
+    ~H"""
+    <button
+      id={@id}
+      phx-hook="CopyToClipboard"
+      data-value={@value}
+      title={@value}
+      phx-click={
+        %JS{}
+        |> JS.hide(
+          to: "##{@id}-copy-icon",
+          transition: {"transition-opacity", "opacity-100", "opacity-0"}
+        )
+        |> JS.show(
+          to: "##{@id}-check-icon",
+          transition: {"transition-opacity", "opacity-0", "opacity-100"}
+        )
+      }
+      class="relative inline-flex p-0 rounded-lg border-secondary-foreground/20 bg-muted text-foreground/90 cursor-pointer transition-colors whitespace-nowrap items-center justify-center font-medium shadow text-sm focus-visible:outline-secondary-foreground focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none hover:border-secondary-foreground/40 hover:bg-secondary/80 hover:text-foreground border phx-submit-loading:opacity-75 h-6 w-6"
+    >
+      <.icon
+        id={@id <> "-copy-icon"}
+        name="tabler-copy"
+        class="absolute inset-0 m-auto h-3 w-3 flex items-center justify-center"
+      />
+      <.icon
+        id={@id <> "-check-icon"}
+        name="tabler-check"
+        class="absolute inset-0 m-auto hidden h-3 w-3 items-center justify-center"
+      />
+    </button>
+    """
+  end
+
   defdelegate tech_badge(assigns), to: AlgoraWeb.Components.TechBadge
 
   defdelegate accordion_item(assigns), to: Accordion

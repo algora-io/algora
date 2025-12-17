@@ -28,6 +28,8 @@ defmodule Algora.Matches.JobMatch do
     field :provider_application_id, :string
     field :provider_candidate_meta, :map, default: %{}
     field :provider_application_meta, :map, default: %{}
+    field :provider_feedback_meta, :map, default: %{}
+    field :provider_interviews_meta, :map, default: %{}
 
     belongs_to :user, Algora.Accounts.User
     belongs_to :job_posting, Algora.Jobs.JobPosting
@@ -59,7 +61,9 @@ defmodule Algora.Matches.JobMatch do
       :provider_candidate_id,
       :provider_application_id,
       :provider_candidate_meta,
-      :provider_application_meta
+      :provider_application_meta,
+      :provider_feedback_meta,
+      :provider_interviews_meta
     ])
     |> validate_required([:user_id, :job_posting_id])
     |> validate_inclusion(:status, [:pending, :discarded, :automatched, :dripped, :approved, :highlighted])

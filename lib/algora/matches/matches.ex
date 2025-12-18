@@ -25,6 +25,15 @@ defmodule Algora.Matches do
     |> Repo.all()
   end
 
+  def list_job_matches_with_assocs do
+    JobMatch
+    |> where([jm], not is_nil(jm.provider_application_id))
+    |> preload([:user, job_posting: :user])
+    |> order_by([jm], desc: jm.inserted_at)
+    |> limit(500)
+    |> Repo.all()
+  end
+
   def get_job_match!(id) do
     JobMatch
     |> preload([:user, :job_posting])

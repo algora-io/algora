@@ -85,6 +85,18 @@ defmodule Algora.Cloud do
     end
   end
 
+  def ats_event_ids do
+    if :code.which(AlgoraCloud) == :non_existing do
+      []
+    else
+      apply(AlgoraCloud, :ats_event_ids, [])
+    end
+  end
+
+  def label_ats_event(event) do
+    call(AlgoraCloud, :label_ats_event, [event])
+  end
+
   defp call(module, function, args) do
     if :code.which(module) == :non_existing do
       # TODO: call algora API

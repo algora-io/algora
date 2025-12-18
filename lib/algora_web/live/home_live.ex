@@ -8,6 +8,8 @@ defmodule AlgoraWeb.HomeLive do
   alias Algora.Accounts
   alias Algora.Bounties
   alias Algora.Jobs
+  alias Algora.Matches
+  alias Algora.Matches.JobMatch
   alias Algora.Payments
   alias AlgoraWeb.Components.Footer
   alias AlgoraWeb.Components.Header
@@ -966,6 +968,70 @@ defmodule AlgoraWeb.HomeLive do
     """
   end
 
+  defp event_item(%{type: :ats} = assigns) do
+    assigns = assign(assigns, :match, assigns.event.item.match)
+    assigns = assign(assigns, :data, assigns.event.item.event)
+
+    ~H"""
+    <div>
+      <div class="relative -ml-[2.75rem]">
+        <span
+          :if={!@last?}
+          class="absolute left-1 top-6 h-full w-0.5 block ml-[2.75rem] bg-muted-foreground/25"
+          aria-hidden="true"
+        >
+        </span>
+        <.link
+          rel="noopener"
+          target="_blank"
+          class="w-full group inline-flex"
+          href={"/#{@match.job_posting.user.handle}/home"}
+        >
+          <div class="w-full relative flex space-x-3">
+            <div class="w-full flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
+              <div class="w-full flex items-center gap-3">
+                <div class="flex -space-x-1 ring-8 ring-black">
+                  <span class="relative shrink-0 overflow-hidden flex h-9 w-9 sm:h-12 sm:w-12 items-center justify-center rounded-xl ring-4 bg-gray-950 ring-black">
+                    <img
+                      class="aspect-square h-full w-full"
+                      alt={@match.job_posting.user.name}
+                      src={@match.job_posting.user.avatar_url}
+                    />
+                  </span>
+                  <span class="relative shrink-0 overflow-hidden flex h-9 w-9 sm:h-12 sm:w-12 items-center justify-center rounded-xl ring-4 bg-gray-950 ring-black">
+                    <img
+                      class="aspect-square h-full w-full"
+                      alt={@match.user.name}
+                      src={@match.user.avatar_url}
+                    />
+                  </span>
+                </div>
+
+                <div class="w-full z-10 flex gap-3 items-start xl:items-end">
+                  <p class="text-xs transition-colors text-muted-foreground group-hover:text-foreground/90 sm:text-xl text-left">
+                    <span class="font-semibold text-foreground/80 group-hover:text-foreground transition-colors">
+                      {@match.job_posting.user.name}
+                    </span>
+                    {Algora.Cloud.label_ats_event(@data["title"]) || " <> "}
+                    <span class="font-semibold text-foreground/80 group-hover:text-foreground transition-colors">
+                      {@match.user.name}
+                    </span>
+                  </p>
+                  <div class="ml-auto xl:ml-0 xl:mb-[2px] whitespace-nowrap text-xs text-muted-foreground sm:text-sm">
+                    <time datetime={@event.timestamp}>
+                      {Algora.Util.time_ago(@event.timestamp)}
+                    </time>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </.link>
+      </div>
+    </div>
+    """
+  end
+
   def event_card(assigns) do
     ~H"""
     <.link
@@ -1154,6 +1220,17 @@ defmodule AlgoraWeb.HomeLive do
     transactions = Payments.list_featured_transactions()
     bounties = Bounties.list_bounties(status: :open, limit: 10, amount_gt: Money.new(:USD, 200))
     jobs_by_user = []
+    matches = Matches.list_job_matches_with_assocs()
+
+    ats_events =
+      Enum.flat_map(matches, fn match ->
+        match
+        |> JobMatch.get_application_history()
+        |> Enum.filter(fn event -> event["id"] in Algora.Cloud.ats_event_ids() end)
+        |> Enum.map(fn event ->
+          %{item: %{match: match, event: event}, type: :ats, timestamp: Algora.Util.to_date!(event["enteredStageAt"])}
+        end)
+      end)
 
     events =
       transactions
@@ -1168,6 +1245,7 @@ defmodule AlgoraWeb.HomeLive do
           %{item: bounty, type: :bounty, timestamp: bounty.inserted_at}
         end)
       )
+      |> Enum.concat(ats_events)
       |> Enum.sort_by(& &1.timestamp, {:desc, DateTime})
 
     assign(socket, :events, events)

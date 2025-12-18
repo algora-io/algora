@@ -72,4 +72,16 @@ defmodule Algora.Matches.JobMatch do
     |> unique_constraint([:user_id, :job_posting_id])
     |> generate_id()
   end
+
+  def get_application_history(match) do
+    get_in(match.provider_application_meta, ["applicationHistory"]) || []
+  end
+
+  def get_application_feedback(match) do
+    get_in(match.provider_feedback_meta, ["feedbacks"]) || []
+  end
+
+  def get_interview_schedules(match) do
+    get_in(match.provider_interviews_meta, ["schedules"]) || []
+  end
 end

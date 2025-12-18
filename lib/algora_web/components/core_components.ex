@@ -1339,6 +1339,7 @@ defmodule AlgoraWeb.CoreComponents do
 
   attr :id, :string, required: true
   attr :value, :string, required: true
+  attr :icon, :string, default: "tabler-copy"
 
   def copy_to_clipboard_button(assigns) do
     ~H"""
@@ -1362,7 +1363,7 @@ defmodule AlgoraWeb.CoreComponents do
     >
       <.icon
         id={@id <> "-copy-icon"}
-        name="tabler-copy"
+        name={@icon}
         class="absolute inset-0 m-auto h-3 w-3 flex items-center justify-center"
       />
       <.icon

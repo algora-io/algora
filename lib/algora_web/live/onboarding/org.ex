@@ -92,35 +92,16 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           <div class="flex-1 h-full flex flex-col bg-black border-l border-white/20 px-6 pl-8 pt-6 pb-3 -mt-5">
             <span class="text-xs text-muted-foreground font-medium">Trusted by</span>
             <div class="relative w-full">
-              <div class="mt-1 flex items-center gap-12 overflow-x-auto scrollbar-thin pb-4">
-                <img src="/images/wordmarks/keep.png" alt="Keep" class="h-10 saturate-0 shrink-0" />
-                <img
-                  src="/images/wordmarks/triggerdotdev.png"
-                  alt="Trigger.dev"
-                  class="h-6 saturate-0 shrink-0"
-                />
-                <img
-                  src="/images/wordmarks/traceloop.png"
-                  alt="Traceloop"
-                  class="h-6 saturate-0 shrink-0"
-                />
-                <img
-                  src="/images/wordmarks/million.png"
-                  alt="Million"
-                  class="h-6 saturate-0 shrink-0"
-                />
-                <img src="/images/wordmarks/moonrepo.svg" alt="moon" class="h-5 shrink-0" />
-                <img
-                  src="/images/wordmarks/dittofeed.png"
-                  alt="Dittofeed"
-                  class="h-6 brightness-0 invert shrink-0"
-                />
-                <img
-                  src={~p"/images/wordmarks/highlight.png"}
-                  alt="Highlight"
-                  class="h-6 saturate-0 shrink-0"
-                  loading="lazy"
-                />
+              <div class="mt-1 flex items-center gap-12 overflow-x-auto scrollbar-thin pb-0">
+                <img src="/images/wordmarks/coderabbit.svg" alt="CodeRabbit" class="h-8 shrink-0" />
+                <img src="/images/wordmarks/comfy.svg" alt="Comfy" class="h-6 shrink-0" />
+                <img src="/images/wordmarks/lovable.svg" alt="Lovable" class="h-6 shrink-0" />
+                <div class="flex items-center gap-1">
+                  <img src="/images/wordmarks/firecrawl.svg" alt="Firecrawl" class="h-10 shrink-0" />
+                  <img src="/images/wordmarks/firecrawl2.svg" alt="Firecrawl2" class="h-6 shrink-0" />
+                </div>
+                <img src="/images/wordmarks/golem.png" alt="Golem" class="h-8 shrink-0" />
+                <img src="/images/wordmarks/calcom.png" alt="Cal.com" class="h-6 shrink-0" />
               </div>
             </div>
           </div>

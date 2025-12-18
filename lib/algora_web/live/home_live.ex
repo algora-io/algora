@@ -26,10 +26,10 @@ defmodule AlgoraWeb.HomeLive do
     stats = [
       %{label: "Full-time SWEs Hired", value: "30+"},
       %{label: "1st Year Retention", value: "100%"},
-      %{label: "Happy Customers", value: "100+"},
-      %{label: "Countries", value: format_number(platform_stats.total_countries)},
-      %{label: "Paid Out", value: format_money(platform_stats.total_paid_out)},
-      %{label: "Completed Bounties", value: format_number(platform_stats.completed_bounties_count)}
+      %{label: "Happy Customers", value: "100+"}
+      # %{label: "Countries", value: format_number(platform_stats.total_countries)},
+      # %{label: "Paid Out", value: format_money(platform_stats.total_paid_out)},
+      # %{label: "Completed Bounties", value: format_number(platform_stats.completed_bounties_count)}
     ]
 
     # Get company and people avatars for the section
@@ -120,129 +120,126 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="relative isolate py-4 sm:py-12">
-          <div class="mx-auto max-w-7xl px-6 lg:px-8">
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 text-center">
-              <%= for stat <- @stats do %>
-                <div>
-                  <div class="text-2xl sm:text-3xl md:text-4xl font-bold font-display text-foreground">
-                    {stat.value}
-                  </div>
-                  <div class="text-sm sm:text-base text-muted-foreground mt-2">
-                    {stat.label}
-                  </div>
-                </div>
-              <% end %>
-            </div>
-          </div>
-        </section>
-
         <section class="relative isolate py-16 sm:pb-40">
-          <div class="mx-auto max-w-7xl px-6 lg:px-8">
-            <!-- Special 7th hire - centered on its own row -->
-            <div class="flex flex-col md:flex-row md:justify-center gap-8 max-w-6xl mx-auto">
-              <%= for example <- @company_people_examples do %>
-                <%= if Map.get(example, :special) do %>
-                  <div class="relative flex-1 flex mb-12 max-w-md">
-                    <div class="truncate flex items-center gap-2 sm:gap-3 p-4 sm:py-6 bg-gradient-to-br from-emerald-900/30 to-emerald-800/20 rounded-xl border-2 border-emerald-400/30 shadow-xl shadow-emerald-400/10 w-full">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-12 pl-12">
+            <div class="md:col-span-2 ml-auto max-w-7xl pl-12">
+              <div class="flex flex-col md:flex-row md:justify-center gap-8 max-w-6xl mx-auto">
+                <%= for example <- @company_people_examples do %>
+                  <%= if Map.get(example, :special) do %>
+                    <div class="relative flex-1 flex mb-12 max-w-md">
+                      <div class="truncate flex items-center gap-2 sm:gap-3 p-4 sm:py-6 bg-gradient-to-br from-emerald-900/30 to-emerald-800/20 rounded-xl border-2 border-emerald-400/30 shadow-xl shadow-emerald-400/10 w-full">
+                        <img
+                          src={example.person_avatar}
+                          alt={example.person_name}
+                          class="size-8 sm:size-12 rounded-full ring-2 ring-emerald-400/50"
+                        />
+                        <.icon
+                          name="tabler-arrow-right"
+                          class="size-3 sm:size-4 text-emerald-400 shrink-0"
+                        />
+                        <img
+                          src={example.company_avatar}
+                          alt={example.company_name}
+                          class="size-8 sm:size-12 rounded-full ring-2 ring-emerald-400/50"
+                        />
+                        <div class="flex-1">
+                          <div class="text-sm font-medium whitespace-nowrap text-emerald-100">
+                            {example.person_name}
+                            <.icon name="tabler-arrow-right" class="size-3 text-emerald-400" /> {example.company_name}
+                          </div>
+                          <div class="text-xs text-emerald-200/80 mt-1">{example.person_title}</div>
+                          <div :if={example[:hire_date]} class="text-xs text-emerald-300/70 mt-1">
+                            {example.hire_date}
+                          </div>
+                        </div>
+                      </div>
+                      <.badge
+                        variant="secondary"
+                        class="absolute -top-2 -left-2 text-xs px-2 sm:px-3 py-0.5 sm:py-1 text-black bg-gradient-to-r from-emerald-400 to-emerald-500 font-semibold shadow-lg"
+                      >
+                        <.icon name="tabler-star-filled" class="size-4 text-black mr-1 -ml-0.5" />
+                        New hire!
+                      </.badge>
+
+                      <%= if String.contains?(example.company_name, "YC") do %>
+                        <img
+                          src={~p"/images/logos/yc.svg"}
+                          alt="Y Combinator"
+                          class="absolute -top-2 -right-2 size-6 opacity-90"
+                        />
+                      <% end %>
+                    </div>
+                  <% end %>
+                <% end %>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+                <%= for example <- @company_people_examples do %>
+                  <%= unless Map.get(example, :special) do %>
+                    <div class="relative flex items-center gap-2 sm:gap-3 p-4 sm:py-6 bg-card rounded-xl border shrink-0">
                       <img
                         src={example.person_avatar}
                         alt={example.person_name}
-                        class="size-8 sm:size-12 rounded-full ring-2 ring-emerald-400/50"
+                        class="size-8 sm:size-12 rounded-full"
                       />
                       <.icon
                         name="tabler-arrow-right"
-                        class="size-3 sm:size-4 text-emerald-400 shrink-0"
+                        class="size-3 sm:size-4 text-muted-foreground shrink-0"
                       />
                       <img
                         src={example.company_avatar}
                         alt={example.company_name}
-                        class="size-8 sm:size-12 rounded-full ring-2 ring-emerald-400/50"
+                        class="size-8 sm:size-12 rounded-full"
                       />
                       <div class="flex-1">
-                        <div class="text-sm font-medium whitespace-nowrap text-emerald-100">
+                        <div class="text-sm font-medium whitespace-nowrap">
                           {example.person_name}
-                          <.icon name="tabler-arrow-right" class="size-3 text-emerald-400" /> {example.company_name}
+                          <.icon name="tabler-arrow-right" class="size-3 text-foreground" /> {Algora.Util.compact_org_name(
+                            example.company_name
+                          )}
+                          <%= if String.contains?(example.company_name, "YC") do %>
+                            <img
+                              src={~p"/images/logos/yc.svg"}
+                              alt="Y Combinator"
+                              class="size-4 opacity-90 inline-flex ml-1"
+                            />
+                          <% end %>
                         </div>
-                        <div class="text-xs text-emerald-200/80 mt-1">{example.person_title}</div>
-                        <div :if={example[:hire_date]} class="text-xs text-emerald-300/70 mt-1">
-                          {example.hire_date}
-                        </div>
+                        <div class="text-xs text-muted-foreground mt-1">{example.person_title}</div>
                       </div>
+                      <%= if String.contains?(example.company_name, "Permit.io") or String.contains?(example.company_name, "Prefix.dev") or String.contains?(example.company_name, "Twenty") or String.contains?(example.company_name, "Comfy") do %>
+                        <.badge
+                          variant="secondary"
+                          class="absolute -top-2 -left-2 text-xs px-2 py-1 text-emerald-400 bg-emerald-950"
+                        >
+                          Contract hire!
+                        </.badge>
+                      <% else %>
+                        <.badge
+                          variant="secondary"
+                          class="absolute -top-2 -left-2 text-xs px-2 py-1 text-emerald-400 bg-emerald-950"
+                        >
+                          Full-time hire!
+                        </.badge>
+                      <% end %>
                     </div>
-                    <.badge
-                      variant="secondary"
-                      class="absolute -top-2 -left-2 text-xs px-2 sm:px-3 py-0.5 sm:py-1 text-black bg-gradient-to-r from-emerald-400 to-emerald-500 font-semibold shadow-lg"
-                    >
-                      <.icon name="tabler-star-filled" class="size-4 text-black mr-1 -ml-0.5" />
-                      New hire!
-                    </.badge>
-
-                    <%= if String.contains?(example.company_name, "YC") do %>
-                      <img
-                        src={~p"/images/logos/yc.svg"}
-                        alt="Y Combinator"
-                        class="absolute -top-2 -right-2 size-6 opacity-90"
-                      />
-                    <% end %>
-                  </div>
+                  <% end %>
                 <% end %>
-              <% end %>
+              </div>
             </div>
-            
-    <!-- Regular hire cards grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-              <%= for example <- @company_people_examples do %>
-                <%= unless Map.get(example, :special) do %>
-                  <div class="relative flex items-center gap-2 sm:gap-3 p-4 sm:py-6 bg-card rounded-xl border shrink-0">
-                    <img
-                      src={example.person_avatar}
-                      alt={example.person_name}
-                      class="size-8 sm:size-12 rounded-full"
-                    />
-                    <.icon
-                      name="tabler-arrow-right"
-                      class="size-3 sm:size-4 text-muted-foreground shrink-0"
-                    />
-                    <img
-                      src={example.company_avatar}
-                      alt={example.company_name}
-                      class="size-8 sm:size-12 rounded-full"
-                    />
-                    <div class="flex-1">
-                      <div class="text-sm font-medium whitespace-nowrap">
-                        {example.person_name}
-                        <.icon name="tabler-arrow-right" class="size-3 text-foreground" /> {Algora.Util.compact_org_name(
-                          example.company_name
-                        )}
-                        <%= if String.contains?(example.company_name, "YC") do %>
-                          <img
-                            src={~p"/images/logos/yc.svg"}
-                            alt="Y Combinator"
-                            class="size-4 opacity-90 inline-flex ml-1"
-                          />
-                        <% end %>
-                      </div>
-                      <div class="text-xs text-muted-foreground mt-1">{example.person_title}</div>
+            <div class="mr-auto max-w-7xl px-6 pt-2 pl-12">
+              <div class="grid grid-cols-1 gap-16 text-center">
+                <%= for stat <- @stats do %>
+                  <div>
+                    <div class="text-2xl sm:text-3xl md:text-4xl font-bold font-display text-foreground">
+                      {stat.value}
                     </div>
-                    <%= if String.contains?(example.company_name, "Permit.io") or String.contains?(example.company_name, "Prefix.dev") or String.contains?(example.company_name, "Twenty") or String.contains?(example.company_name, "Comfy") do %>
-                      <.badge
-                        variant="secondary"
-                        class="absolute -top-2 -left-2 text-xs px-2 py-1 text-emerald-400 bg-emerald-950"
-                      >
-                        Contract hire!
-                      </.badge>
-                    <% else %>
-                      <.badge
-                        variant="secondary"
-                        class="absolute -top-2 -left-2 text-xs px-2 py-1 text-emerald-400 bg-emerald-950"
-                      >
-                        Full-time hire!
-                      </.badge>
-                    <% end %>
+                    <div class="text-sm sm:text-base text-muted-foreground mt-2">
+                      {stat.label}
+                    </div>
                   </div>
                 <% end %>
-              <% end %>
+              </div>
             </div>
           </div>
         </section>
@@ -1106,7 +1103,7 @@ defmodule AlgoraWeb.HomeLive do
       %{
         company_name: "Firecrawl (YC S22)",
         company_avatar: "https://github.com/mendableai.png",
-        person_name: "Gergő",
+        person_name: "Gergő Móricz",
         person_avatar: "https://github.com/mogery.png",
         person_title: "Software Engineer"
       },
@@ -1134,7 +1131,7 @@ defmodule AlgoraWeb.HomeLive do
       %{
         company_name: "Golem Cloud",
         company_avatar: "https://github.com/golemcloud.png",
-        person_name: "Maxim",
+        person_name: "Maxim S",
         person_avatar: "https://github.com/mschuwalow.png",
         person_title: "Lead Engineer"
       }

@@ -108,16 +108,36 @@ defmodule AlgoraWeb.HomeLive do
             <%!-- <h3 class="text-center text-sm font-medium text-muted-foreground mb-6">
               Trusted by
             </h3> --%>
-            <div class="flex items-center justify-center gap-12 overflow-x-auto scrollbar-thin pb-0 saturate-0">
-              <img src="/images/wordmarks/coderabbit.svg" alt="CodeRabbit" class="h-8 shrink-0" />
-              <img src="/images/wordmarks/comfy.svg" alt="Comfy" class="h-6 shrink-0" />
-              <img src="/images/wordmarks/lovable.svg" alt="Lovable" class="h-6 shrink-0" />
-              <div class="flex items-center">
+            <div class="flex items-center justify-center gap-12 overflow-x-auto scrollbar-thin pb-0">
+              <img
+                src="/images/wordmarks/coderabbit.svg"
+                alt="CodeRabbit"
+                class="h-8 shrink-0 saturate-0 hover:saturate-100 transition-all"
+              />
+              <img
+                src="/images/wordmarks/comfy.svg"
+                alt="Comfy"
+                class="h-6 shrink-0 saturate-0 hover:saturate-100 transition-all"
+              />
+              <img
+                src="/images/wordmarks/lovable.svg"
+                alt="Lovable"
+                class="h-6 shrink-0 saturate-0 hover:saturate-100 transition-all"
+              />
+              <div class="flex items-center saturate-0 hover:saturate-100 transition-all">
                 <img src="/images/wordmarks/firecrawl.svg" alt="Firecrawl" class="h-10 shrink-0" />
                 <img src="/images/wordmarks/firecrawl2.svg" alt="Firecrawl2" class="h-6 shrink-0" />
               </div>
-              <img src="/images/wordmarks/golem.png" alt="Golem" class="h-8 shrink-0" />
-              <img src="/images/wordmarks/calcom.png" alt="Cal.com" class="h-6 shrink-0" />
+              <img
+                src="/images/wordmarks/golem.png"
+                alt="Golem"
+                class="h-8 shrink-0 saturate-0 hover:saturate-100 transition-all"
+              />
+              <img
+                src="/images/wordmarks/calcom.png"
+                alt="Cal.com"
+                class="h-6 shrink-0 saturate-0 hover:saturate-100 transition-all"
+              />
             </div>
           </div>
         </section>

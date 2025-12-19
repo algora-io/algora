@@ -74,6 +74,179 @@ defmodule AlgoraWeb.HomeLive do
       <% end %>
 
       <main class="bg-black relative overflow-hidden">
+        <section class="relative isolate min-h-[calc(100vh)]">
+          <div class="h-full mx-auto max-w-[88rem] px-6 lg:px-8 flex flex-col items-center justify-center pt-32 pb-12">
+            <div class="h-full mx-auto lg:mx-0 flex lg:max-w-none items-center justify-center text-center w-full">
+              <div class="w-full flex flex-col lg:flex-row lg:justify-center gap-6">
+                <div class="w-full flex flex-col items-center lg:items-start text-center lg:text-left">
+                  <h1 class="font-display text-3xl sm:text-lg md:text-5xl xl:text-[3.25rem] font-semibold tracking-tight text-foreground">
+                    Meet your new <span class="text-emerald-400">hire today</span>
+                  </h1>
+                  <p class="mt-4 text-lg leading-8 text-muted-foreground max-w-2xl">
+                    Access a network of top 1% engineers, pre-vetted through their OSS contributions.
+                    <span class="font-semibold">Only pay when you hire.</span>
+                  </p>
+                  <div class="flex items-center justify-center gap-12 overflow-x-auto scrollbar-thin pb-0">
+                    <img
+                      src="/images/wordmarks/coderabbit.svg"
+                      alt="CodeRabbit"
+                      class="h-6 shrink-0 saturate-0 hover:saturate-100 transition-all"
+                    />
+                    <img
+                      src="/images/wordmarks/comfy.svg"
+                      alt="Comfy"
+                      class="h-5 shrink-0 saturate-0 hover:saturate-100 transition-all"
+                    />
+                    <img
+                      src="/images/wordmarks/lovable.svg"
+                      alt="Lovable"
+                      class="h-4 shrink-0 saturate-0 hover:saturate-100 transition-all"
+                    />
+                    <div class="flex items-center saturate-0 hover:saturate-100 transition-all">
+                      <img src="/images/wordmarks/firecrawl.svg" alt="Firecrawl" class="h-8 shrink-0" />
+                      <img
+                        src="/images/wordmarks/firecrawl2.svg"
+                        alt="Firecrawl2"
+                        class="h-5 shrink-0"
+                      />
+                    </div>
+                    <img
+                      src="/images/wordmarks/golem.png"
+                      alt="Golem"
+                      class="h-5 shrink-0 saturate-0 hover:saturate-100 transition-all"
+                    />
+                    <img
+                      src="/images/wordmarks/calcom.png"
+                      alt="Cal.com"
+                      class="h-4 shrink-0 saturate-0 hover:saturate-100 transition-all"
+                    />
+                  </div>
+                  <%!-- <ul class="mt-2 flex flex-col gap-2 text-sm">
+                    <li class="flex items-center text-left text-foreground/80">
+                      <.icon
+                        name="tabler-square-rounded-number-1"
+                        class="size-6 mr-2 shrink-0 text-foreground/80"
+                      />
+                      <span class="font-medium leading-7 whitespace-nowrap">
+                        Submit JD
+                      </span>
+                    </li>
+                    <li class="flex items-center text-left text-foreground/80">
+                      <.icon
+                        name="tabler-square-rounded-number-2"
+                        class="size-6 mr-2 shrink-0 text-foreground/80"
+                      />
+                      <span class="font-medium leading-7 whitespace-nowrap">
+                        Receive matches <span class="text-emerald-300">within hours</span>
+                      </span>
+                    </li>
+                    <li class="flex items-center text-left text-foreground/80">
+                      <.icon
+                        name="tabler-square-rounded-number-3"
+                        class="size-6 mr-2 shrink-0 text-foreground/80"
+                      />
+                      <span class="font-medium leading-7 whitespace-nowrap">
+                        Interview <span class="text-emerald-300">within days</span>
+                      </span>
+                    </li>
+                  </ul> --%>
+                  <img
+                    src="https://algora.io/og/coderabbit/candidates/9EL2CWmJxZ57eqGv"
+                    alt="Job candidates"
+                    class="-ml-2 mt-4 rounded-xl object-cover max-w-[48rem]"
+                    style="aspect-ratio: 1200/630;"
+                  />
+                  <%!-- <div class="pt-4 sm:max-w-[40rem] grid w-full grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-y-4 gap-x-4 mx-auto items-center justify-center sm:ml-0">
+                    <.link class="relative flex items-center justify-center" href={~p"/cal"}>
+                      <Wordmarks.calcom class="w-[80%] col-auto" alt="Cal.com" />
+                    </.link>
+                    <.link class="relative flex items-center justify-center" href={~p"/qdrant"}>
+                      <Wordmarks.qdrant class="w-[80%] col-auto" alt="Qdrant" />
+                    </.link>
+                    <.link class="relative flex items-center justify-center" href={~p"/zio"}>
+                      <img
+                        loading="eager"
+                        src={~p"/images/wordmarks/zio.png"}
+                        alt="ZIO"
+                        class="mt-1 sm:mt-3 w-[70%] col-auto brightness-0 invert"
+                      />
+                    </.link>
+                    <.link
+                      class="relative flex items-center justify-center"
+                      navigate={~p"/activepieces"}
+                    >
+                      <img
+                        loading="eager"
+                        src={~p"/images/wordmarks/activepieces.svg"}
+                        alt="Activepieces"
+                        class="col-auto brightness-0 invert"
+                      />
+                    </.link>
+                    <.link class="relative flex items-center justify-center" href={~p"/golemcloud"}>
+                      <Wordmarks.golemcloud class="col-auto w-[80%]" alt="Golem Cloud" />
+                    </.link>
+                    <.link
+                      class="font-bold font-display text-sm sm:text-base whitespace-nowrap flex items-center justify-center"
+                      navigate={~p"/browser-use"}
+                    >
+                      <img
+                        loading="eager"
+                        src={~p"/images/wordmarks/browser-use.svg"}
+                        alt="Browser Use"
+                        class="saturate-0 w-4 sm:w-4 mr-1 sm:mr-1"
+                      /> Browser Use
+                    </.link>
+                  </div> --%>
+                </div>
+
+                <div class="w-full max-w-[34rem] text-left -mt-4">
+                  <div class="rounded-xl bg-card text-card-foreground shadow-2xl ring-1 ring-white/10">
+                    <div class="p-8">
+                      <h2 class="text-3xl font-semibold leading-7 text-white">
+                        View your candidates
+                      </h2>
+                      <p class="pt-2 text-sm text-muted-foreground">
+                        Share your JD to receive your candidates within hours.
+                      </p>
+
+                      <form class="mt-6 flex flex-col gap-6">
+                        <.input
+                          type="textarea"
+                          name="job_description"
+                          value=""
+                          label="Job description / careers URL"
+                          rows="4"
+                          placeholder="Tell us about the role and your requirements..."
+                        />
+                        <.input
+                          type="textarea"
+                          name="job_description"
+                          value=""
+                          label="Describe your ideal candidate, heuristics, green/red flags etc."
+                          rows="4"
+                          placeholder={placeholder_text()}
+                        />
+                        <.input
+                          name="email"
+                          value=""
+                          label="Work email"
+                          placeholder="you@company.com"
+                        />
+                        <div class="flex flex-col gap-4">
+                          <.button class="w-full">Receive your candidates</.button>
+                          <div class="text-xs text-muted-foreground text-center">
+                            No credit card required - only pay when you hire
+                          </div>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section class="relative isolate pt-20 pb-8 sm:pb-12">
           <div class="mx-auto max-w-4xl px-6 lg:px-8 text-center">
             <h1 class="pt-12 sm:pt-20 font-display text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-semibold tracking-tight text-foreground">
@@ -1438,5 +1611,14 @@ defmodule AlgoraWeb.HomeLive do
       |> Enum.sort_by(& &1.timestamp, {:desc, DateTime})
 
     assign(socket, :events, events)
+  end
+
+  defp placeholder_text do
+    """
+    - GitHub looks like a green carpet, red flag if wearing suit
+    - Great communication skills, can talk to customers
+    - Must be a shark, aggressive, has urgency and agency
+    - Has contributions to open source inference engines (like vLLM)
+    """
   end
 end

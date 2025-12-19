@@ -23,17 +23,17 @@ defmodule AlgoraWeb.HomeLive do
     # Get cached platform stats
     platform_stats = HomeCache.get_platform_stats()
 
-    stats = [
+    stats1 = [
       %{label: "Full-time SWEs Hired", value: "30+"},
       %{label: "1st Year Retention", value: "100%"},
       %{label: "Happy Customers", value: "100+"}
-      # %{label: "Countries", value: format_number(platform_stats.total_countries)},
-      # %{label: "Paid Out", value: format_money(platform_stats.total_paid_out)},
-      # %{label: "Completed Bounties", value: format_number(platform_stats.completed_bounties_count)}
     ]
 
-    # Get company and people avatars for the section
-    company_people_examples = get_company_people_examples()
+    stats2 = [
+      %{label: "Countries", value: format_number(platform_stats.total_countries)},
+      %{label: "Paid Out", value: format_money(platform_stats.total_paid_out)},
+      %{label: "Completed Bounties", value: format_number(platform_stats.completed_bounties_count)}
+    ]
 
     # Get cached jobs and orgs data
     jobs_by_user = HomeCache.get_jobs_by_user()
@@ -50,10 +50,12 @@ defmodule AlgoraWeb.HomeLive do
          |> assign(:page_title_suffix, "")
          |> assign(:page_image, "#{AlgoraWeb.Endpoint.url()}/images/og/home.png")
          |> assign(:screenshot?, not is_nil(params["screenshot"]))
-         |> assign(:stats, stats)
+         |> assign(:stats1, stats1)
+         |> assign(:stats2, stats2)
          |> assign(:jobs_by_user, jobs_by_user)
          |> assign(:orgs_with_stats, orgs_with_stats)
-         |> assign(:company_people_examples, company_people_examples)
+         |> assign(:hires1, hires1())
+         |> assign(:hires2, hires2())
          |> assign(:show_challenge_drawer, false)
          |> assign(:challenge_form, to_form(ChallengeForm.changeset(%ChallengeForm{}, %{})))
          |> assign_user_applications()
@@ -123,14 +125,14 @@ defmodule AlgoraWeb.HomeLive do
         <section class="relative isolate py-16 sm:pb-40">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-12 pl-12">
             <div class="md:col-span-2 ml-auto max-w-7xl pl-12">
-              <div class="flex flex-col md:flex-row md:justify-center gap-8 max-w-6xl mx-auto">
-                <%= for example <- @company_people_examples do %>
-                  <%= if Map.get(example, :special) do %>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+                <%= for hire <- @hires1 do %>
+                  <%= if Map.get(hire, :special) do %>
                     <div class="relative flex-1 flex mb-12 max-w-md">
                       <div class="truncate flex items-center gap-2 sm:gap-3 p-4 sm:py-6 bg-gradient-to-br from-emerald-900/30 to-emerald-800/20 rounded-xl border-2 border-emerald-400/30 shadow-xl shadow-emerald-400/10 w-full">
                         <img
-                          src={example.person_avatar}
-                          alt={example.person_name}
+                          src={hire.person_avatar}
+                          alt={hire.person_name}
                           class="size-8 sm:size-12 rounded-full ring-2 ring-emerald-400/50"
                         />
                         <.icon
@@ -138,18 +140,18 @@ defmodule AlgoraWeb.HomeLive do
                           class="size-3 sm:size-4 text-emerald-400 shrink-0"
                         />
                         <img
-                          src={example.company_avatar}
-                          alt={example.company_name}
+                          src={hire.company_avatar}
+                          alt={hire.company_name}
                           class="size-8 sm:size-12 rounded-full ring-2 ring-emerald-400/50"
                         />
                         <div class="flex-1">
                           <div class="text-sm font-medium whitespace-nowrap text-emerald-100">
-                            {example.person_name}
-                            <.icon name="tabler-arrow-right" class="size-3 text-emerald-400" /> {example.company_name}
+                            {hire.person_name}
+                            <.icon name="tabler-arrow-right" class="size-3 text-emerald-400" /> {hire.company_name}
                           </div>
-                          <div class="text-xs text-emerald-200/80 mt-1">{example.person_title}</div>
-                          <div :if={example[:hire_date]} class="text-xs text-emerald-300/70 mt-1">
-                            {example.hire_date}
+                          <div class="text-xs text-emerald-200/80 mt-1">{hire.person_title}</div>
+                          <div :if={hire[:hire_date]} class="text-xs text-emerald-300/70 mt-1">
+                            {hire.hire_date}
                           </div>
                         </div>
                       </div>
@@ -161,7 +163,7 @@ defmodule AlgoraWeb.HomeLive do
                         New hire!
                       </.badge>
 
-                      <%= if String.contains?(example.company_name, "YC") do %>
+                      <%= if String.contains?(hire.company_name, "YC") do %>
                         <img
                           src={~p"/images/logos/yc.svg"}
                           alt="Y Combinator"
@@ -174,12 +176,12 @@ defmodule AlgoraWeb.HomeLive do
               </div>
 
               <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-                <%= for example <- @company_people_examples do %>
-                  <%= unless Map.get(example, :special) do %>
+                <%= for hire <- @hires1 do %>
+                  <%= unless Map.get(hire, :special) do %>
                     <div class="relative flex items-center gap-2 sm:gap-3 p-4 sm:py-6 bg-card rounded-xl border shrink-0">
                       <img
-                        src={example.person_avatar}
-                        alt={example.person_name}
+                        src={hire.person_avatar}
+                        alt={hire.person_name}
                         class="size-8 sm:size-12 rounded-full"
                       />
                       <.icon
@@ -187,17 +189,17 @@ defmodule AlgoraWeb.HomeLive do
                         class="size-3 sm:size-4 text-muted-foreground shrink-0"
                       />
                       <img
-                        src={example.company_avatar}
-                        alt={example.company_name}
+                        src={hire.company_avatar}
+                        alt={hire.company_name}
                         class="size-8 sm:size-12 rounded-full"
                       />
                       <div class="flex-1">
                         <div class="text-sm font-medium whitespace-nowrap">
-                          {example.person_name}
+                          {hire.person_name}
                           <.icon name="tabler-arrow-right" class="size-3 text-foreground" /> {Algora.Util.compact_org_name(
-                            example.company_name
+                            hire.company_name
                           )}
-                          <%= if String.contains?(example.company_name, "YC") do %>
+                          <%= if String.contains?(hire.company_name, "YC") do %>
                             <img
                               src={~p"/images/logos/yc.svg"}
                               alt="Y Combinator"
@@ -205,9 +207,9 @@ defmodule AlgoraWeb.HomeLive do
                             />
                           <% end %>
                         </div>
-                        <div class="text-xs text-muted-foreground mt-1">{example.person_title}</div>
+                        <div class="text-xs text-muted-foreground mt-1">{hire.person_title}</div>
                       </div>
-                      <%= if String.contains?(example.company_name, "Permit.io") or String.contains?(example.company_name, "Prefix.dev") or String.contains?(example.company_name, "Twenty") or String.contains?(example.company_name, "Comfy") do %>
+                      <%= if String.contains?(hire.company_name, "Permit.io") or String.contains?(hire.company_name, "Prefix.dev") or String.contains?(hire.company_name, "Twenty") or String.contains?(hire.company_name, "Comfy") do %>
                         <.badge
                           variant="secondary"
                           class="absolute -top-2 -left-2 text-xs px-2 py-1 text-emerald-400 bg-emerald-950"
@@ -229,7 +231,7 @@ defmodule AlgoraWeb.HomeLive do
             </div>
             <div class="mr-auto max-w-7xl px-6 pt-2 pl-12">
               <div class="grid grid-cols-1 gap-16 text-center">
-                <%= for stat <- @stats do %>
+                <%= for stat <- @stats1 do %>
                   <div>
                     <div class="text-2xl sm:text-3xl md:text-4xl font-bold font-display text-foreground">
                       {stat.value}
@@ -391,6 +393,130 @@ defmodule AlgoraWeb.HomeLive do
                     </div>
                   </figcaption>
                 </figure>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="relative isolate py-16 sm:pb-40">
+          <div class="flex flex-col gap-12">
+            <div class="max-w-7xl px-6 pt-2">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-16 text-center">
+                <%= for stat <- @stats2 do %>
+                  <div>
+                    <div class="text-2xl sm:text-3xl md:text-4xl font-bold font-display text-foreground">
+                      {stat.value}
+                    </div>
+                    <div class="text-sm sm:text-base text-muted-foreground mt-2">
+                      {stat.label}
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+            <div class="mx-auto max-w-7xl">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                <%= for hire <- @hires2 do %>
+                  <%= if Map.get(hire, :special) do %>
+                    <div class="relative flex-1 flex mb-12 max-w-md">
+                      <div class="truncate flex items-center gap-2 sm:gap-3 p-4 sm:py-6 bg-gradient-to-br from-emerald-900/30 to-emerald-800/20 rounded-xl border-2 border-emerald-400/30 shadow-xl shadow-emerald-400/10 w-full">
+                        <img
+                          src={hire.person_avatar}
+                          alt={hire.person_name}
+                          class="size-8 sm:size-12 rounded-full ring-2 ring-emerald-400/50"
+                        />
+                        <.icon
+                          name="tabler-arrow-right"
+                          class="size-3 sm:size-4 text-emerald-400 shrink-0"
+                        />
+                        <img
+                          src={hire.company_avatar}
+                          alt={hire.company_name}
+                          class="size-8 sm:size-12 rounded-full ring-2 ring-emerald-400/50"
+                        />
+                        <div class="flex-1">
+                          <div class="text-sm font-medium whitespace-nowrap text-emerald-100">
+                            {hire.person_name}
+                            <.icon name="tabler-arrow-right" class="size-3 text-emerald-400" /> {hire.company_name}
+                          </div>
+                          <div class="text-xs text-emerald-200/80 mt-1">{hire.person_title}</div>
+                          <div :if={hire[:hire_date]} class="text-xs text-emerald-300/70 mt-1">
+                            {hire.hire_date}
+                          </div>
+                        </div>
+                      </div>
+                      <.badge
+                        variant="secondary"
+                        class="absolute -top-2 -left-2 text-xs px-2 sm:px-3 py-0.5 sm:py-1 text-black bg-gradient-to-r from-emerald-400 to-emerald-500 font-semibold shadow-lg"
+                      >
+                        <.icon name="tabler-star-filled" class="size-4 text-black mr-1 -ml-0.5" />
+                        New hire!
+                      </.badge>
+
+                      <%= if String.contains?(hire.company_name, "YC") do %>
+                        <img
+                          src={~p"/images/logos/yc.svg"}
+                          alt="Y Combinator"
+                          class="absolute -top-2 -right-2 size-6 opacity-90"
+                        />
+                      <% end %>
+                    </div>
+                  <% end %>
+                <% end %>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                <%= for hire <- @hires2 do %>
+                  <%= unless Map.get(hire, :special) do %>
+                    <div class="relative flex items-center gap-2 sm:gap-3 p-4 sm:py-6 bg-card rounded-xl border shrink-0">
+                      <img
+                        src={hire.person_avatar}
+                        alt={hire.person_name}
+                        class="size-8 sm:size-12 rounded-full"
+                      />
+                      <.icon
+                        name="tabler-arrow-right"
+                        class="size-3 sm:size-4 text-muted-foreground shrink-0"
+                      />
+                      <img
+                        src={hire.company_avatar}
+                        alt={hire.company_name}
+                        class="size-8 sm:size-12 rounded-full"
+                      />
+                      <div class="flex-1">
+                        <div class="text-sm font-medium whitespace-nowrap">
+                          {hire.person_name}
+                          <.icon name="tabler-arrow-right" class="size-3 text-foreground" /> {Algora.Util.compact_org_name(
+                            hire.company_name
+                          )}
+                          <%= if String.contains?(hire.company_name, "YC") do %>
+                            <img
+                              src={~p"/images/logos/yc.svg"}
+                              alt="Y Combinator"
+                              class="size-4 opacity-90 inline-flex ml-1"
+                            />
+                          <% end %>
+                        </div>
+                        <div class="text-xs text-muted-foreground mt-1">{hire.person_title}</div>
+                      </div>
+                      <%= if String.contains?(hire.company_name, "Permit.io") or String.contains?(hire.company_name, "Prefix.dev") or String.contains?(hire.company_name, "Twenty") or String.contains?(hire.company_name, "Comfy") do %>
+                        <.badge
+                          variant="secondary"
+                          class="absolute -top-2 -left-2 text-xs px-2 py-1 text-emerald-400 bg-emerald-950"
+                        >
+                          Contract hire!
+                        </.badge>
+                      <% else %>
+                        <.badge
+                          variant="secondary"
+                          class="absolute -top-2 -left-2 text-xs px-2 py-1 text-emerald-400 bg-emerald-950"
+                        >
+                          Full-time hire!
+                        </.badge>
+                      <% end %>
+                    </div>
+                  <% end %>
+                <% end %>
               </div>
             </div>
           </div>
@@ -1077,7 +1203,7 @@ defmodule AlgoraWeb.HomeLive do
     """
   end
 
-  defp get_company_people_examples do
+  defp hires1 do
     [
       %{
         company_name: "Comfy",
@@ -1085,6 +1211,20 @@ defmodule AlgoraWeb.HomeLive do
         person_name: "Gavin Li",
         person_avatar: "https://avatars.githubusercontent.com/u/1113905?v=4",
         person_title: "Staff Applied ML Engineer"
+      },
+      %{
+        company_name: "Trigger.dev (YC W23)",
+        company_avatar: "https://github.com/triggerdotdev.png",
+        person_name: "Nick",
+        person_avatar: "https://trigger.dev/blog/authors/nick.png",
+        person_title: "Founding Engineer"
+      },
+      %{
+        company_name: "Golem Cloud",
+        company_avatar: "https://github.com/golemcloud.png",
+        person_name: "Maxim S",
+        person_avatar: "https://github.com/mschuwalow.png",
+        person_title: "Lead Engineer"
       },
       %{
         company_name: "Comfy",
@@ -1106,110 +1246,101 @@ defmodule AlgoraWeb.HomeLive do
         person_name: "Gergő Móricz",
         person_avatar: "https://github.com/mogery.png",
         person_title: "Software Engineer"
-      },
-      # %{
-      #   company_name: "Cal.com",
-      #   company_avatar: "https://github.com/calcom.png",
-      #   person_name: "Efraín",
-      #   person_avatar: "https://github.com/roae.png",
-      #   person_title: "Software Engineer"
-      # },
-      # %{
-      #   company_name: "Hanko",
-      #   company_avatar: "https://avatars.githubusercontent.com/u/20222142?v=4",
-      #   person_name: "Ashutosh",
-      #   person_avatar: "https://algora-console.fly.storage.tigris.dev/avatars/Ashutosh-Bhadauriya.jpeg",
-      #   person_title: "Developer Advocate"
-      # },
+      }
+    ]
+  end
+
+  defp hires2 do
+    [
       %{
-        company_name: "Trigger.dev (YC W23)",
-        company_avatar: "https://github.com/triggerdotdev.png",
-        person_name: "Nick",
-        person_avatar: "https://trigger.dev/blog/authors/nick.png",
+        company_name: "Cal.com",
+        company_avatar: "https://github.com/calcom.png",
+        person_name: "Efraín",
+        person_avatar: "https://github.com/roae.png",
+        person_title: "Software Engineer"
+      },
+      %{
+        company_name: "Hanko",
+        company_avatar: "https://avatars.githubusercontent.com/u/20222142?v=4",
+        person_name: "Ashutosh",
+        person_avatar: "https://algora-console.fly.storage.tigris.dev/avatars/Ashutosh-Bhadauriya.jpeg",
+        person_title: "Developer Advocate"
+      },
+      %{
+        company_name: "Tailcall",
+        company_avatar:
+          "https://algora.io/asset/storage/v1/object/public/images/org/cli0b0kdt0000mh0fngt4r4bk-1741007407053",
+        person_name: "Kiryl",
+        person_avatar: "https://algora.io/asset/storage/v1/object/public/images/user/clg4rtl2n0002jv0fg30lto6l",
         person_title: "Founding Engineer"
       },
       %{
-        company_name: "Golem Cloud",
-        company_avatar: "https://github.com/golemcloud.png",
-        person_name: "Maxim S",
-        person_avatar: "https://github.com/mschuwalow.png",
-        person_title: "Lead Engineer"
+        company_name: "Forge Code",
+        company_avatar: "https://avatars.githubusercontent.com/u/197551910?s=200&v=4",
+        person_name: "Sandipsinh",
+        person_avatar: "https://algora-console.fly.storage.tigris.dev/avatars/ssddOnTop.jpeg",
+        person_title: "Software Engineer"
+      },
+      %{
+        company_name: "Twenty (YC S22)",
+        company_avatar: "https://github.com/twentyhq.png",
+        person_name: "Neo",
+        person_avatar: "https://github.com/neo773.png",
+        person_title: "Software Engineer"
+      },
+      %{
+        company_name: "Tailcall",
+        company_avatar:
+          "https://algora.io/asset/storage/v1/object/public/images/org/cli0b0kdt0000mh0fngt4r4bk-1741007407053",
+        person_name: "Panagiotis",
+        person_avatar: "https://github.com/karatakis.png",
+        person_title: "Software Engineer"
+      },
+      %{
+        company_name: "TraceMachina",
+        company_avatar: "https://avatars.githubusercontent.com/u/144973251?s=200&v=4",
+        person_name: "Tom",
+        person_avatar: "https://avatars.githubusercontent.com/u/38532?v=4",
+        person_title: "Staff Software Engineer",
+        special: true
+      },
+      %{
+        company_name: "TraceMachina",
+        company_avatar: "https://avatars.githubusercontent.com/u/144973251?s=200&v=4",
+        person_name: "Aman",
+        person_avatar: "https://avatars.githubusercontent.com/u/53134669?v=4",
+        person_title: "Software Engineer",
+        special: true
+      },
+      %{
+        company_name: "Activepieces (YC S22)",
+        company_avatar: "https://avatars.githubusercontent.com/u/99494700?s=48&v=4",
+        person_name: "David",
+        person_avatar: "https://avatars.githubusercontent.com/u/51977119?v=4",
+        person_title: "Software Engineer",
+        special: true
+      },
+      %{
+        company_name: "Permit.io",
+        company_avatar: "https://github.com/permitio.png",
+        person_name: "David",
+        person_avatar: "https://github.com/daveads.png",
+        person_title: "Software Engineer"
+      },
+      %{
+        company_name: "Shuttle (YC S20)",
+        company_avatar: "https://app.algora.io/asset/storage/v1/object/public/images/org/shuttle.png",
+        person_name: "Jon",
+        person_avatar: "https://github.com/jonaro00.png",
+        person_title: "Software Engineer"
+      },
+      %{
+        company_name: "Prefix.dev",
+        company_avatar: "https://github.com/prefix-dev.png",
+        person_name: "Denizhan",
+        person_avatar: "https://algora-console.fly.storage.tigris.dev/avatars/zelosleone.jpeg",
+        person_title: "Software Engineer"
       }
-      # %{
-      #   company_name: "Tailcall",
-      #   company_avatar:
-      #     "https://algora.io/asset/storage/v1/object/public/images/org/cli0b0kdt0000mh0fngt4r4bk-1741007407053",
-      #   person_name: "Kiryl",
-      #   person_avatar: "https://algora.io/asset/storage/v1/object/public/images/user/clg4rtl2n0002jv0fg30lto6l",
-      #   person_title: "Founding Engineer"
-      # },
-      # %{
-      #   company_name: "Forge Code",
-      #   company_avatar: "https://avatars.githubusercontent.com/u/197551910?s=200&v=4",
-      #   person_name: "Sandipsinh",
-      #   person_avatar: "https://algora-console.fly.storage.tigris.dev/avatars/ssddOnTop.jpeg",
-      #   person_title: "Software Engineer"
-      # },
-      # %{
-      #   company_name: "Twenty (YC S22)",
-      #   company_avatar: "https://github.com/twentyhq.png",
-      #   person_name: "Neo",
-      #   person_avatar: "https://github.com/neo773.png",
-      #   person_title: "Software Engineer"
-      # },
-      # %{
-      #   company_name: "Tailcall",
-      #   company_avatar:
-      #     "https://algora.io/asset/storage/v1/object/public/images/org/cli0b0kdt0000mh0fngt4r4bk-1741007407053",
-      #   person_name: "Panagiotis",
-      #   person_avatar: "https://github.com/karatakis.png",
-      #   person_title: "Software Engineer"
-      # },
-      # %{
-      #   company_name: "TraceMachina",
-      #   company_avatar: "https://avatars.githubusercontent.com/u/144973251?s=200&v=4",
-      #   person_name: "Tom",
-      #   person_avatar: "https://avatars.githubusercontent.com/u/38532?v=4",
-      #   person_title: "Staff Software Engineer",
-      #   special: true
-      # },
-      # %{
-      #   company_name: "TraceMachina",
-      #   company_avatar: "https://avatars.githubusercontent.com/u/144973251?s=200&v=4",
-      #   person_name: "Aman",
-      #   person_avatar: "https://avatars.githubusercontent.com/u/53134669?v=4",
-      #   person_title: "Software Engineer",
-      #   special: true
-      # },
-      # %{
-      #   company_name: "Activepieces (YC S22)",
-      #   company_avatar: "https://avatars.githubusercontent.com/u/99494700?s=48&v=4",
-      #   person_name: "David",
-      #   person_avatar: "https://avatars.githubusercontent.com/u/51977119?v=4",
-      #   person_title: "Software Engineer",
-      #   special: true
-      # },
-      # %{
-      #   company_name: "Permit.io",
-      #   company_avatar: "https://github.com/permitio.png",
-      #   person_name: "David",
-      #   person_avatar: "https://github.com/daveads.png",
-      #   person_title: "Software Engineer"
-      # },
-      # %{
-      #   company_name: "Shuttle (YC S20)",
-      #   company_avatar: "https://app.algora.io/asset/storage/v1/object/public/images/org/shuttle.png",
-      #   person_name: "Jon",
-      #   person_avatar: "https://github.com/jonaro00.png",
-      #   person_title: "Software Engineer"
-      # },
-      # %{
-      #   company_name: "Prefix.dev",
-      #   company_avatar: "https://github.com/prefix-dev.png",
-      #   person_name: "Denizhan",
-      #   person_avatar: "https://algora-console.fly.storage.tigris.dev/avatars/zelosleone.jpeg",
-      #   person_title: "Software Engineer"
-      # }
     ]
   end
 

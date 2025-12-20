@@ -435,6 +435,7 @@ defmodule AlgoraWeb.PlatformLive do
             </div>
           </div>
         </section>
+
         <section class="relative isolate py-24 sm:py-48">
           <div class="lg:text-center mx-auto max-w-3xl px-6 lg:px-8 pt-24 xl:pt-0">
             <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-7xl mb-4 sm:mb-6">

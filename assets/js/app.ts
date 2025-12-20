@@ -911,7 +911,7 @@ const Hooks = {
       const candidateIds = JSON.parse(candidateIdsAttr);
       if (!candidateIds || candidateIds.length === 0) return;
 
-      const img = this.el.querySelector("#carousel-image") as HTMLImageElement;
+      const img = this.el.querySelector("img") as HTMLImageElement;
       if (!img) return;
 
       let currentIndex = 0;

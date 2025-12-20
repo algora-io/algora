@@ -285,14 +285,13 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           </div>
           <div :if={!@candidate_data} class="hidden lg:flex flex-col gap-3 w-full">
             <div
-              id="candidate-carousel"
+              id="candidate-carousel-org"
               phx-hook="CandidateCarousel"
               data-candidate-ids={
                 Jason.encode!(["9EL2CWmJxZ57eqGv", "Hx4qKGE9CLkLHySJ", "8oXJpLYUp3M4dYsf"])
               }
             >
               <img
-                id="carousel-image"
                 src="https://algora.io/og/coderabbit/candidates/9EL2CWmJxZ57eqGv"
                 alt="Job candidates"
                 class="rounded-xl object-cover w-full h-auto transition-opacity duration-500"

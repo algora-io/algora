@@ -420,85 +420,55 @@ defmodule AlgoraWeb.HomeLive do
         <section class="relative isolate py-16 sm:py-40">
           <div class="mx-auto max-w-7xl px-6 lg:px-8 pt-24 xl:pt-0">
             <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
-              Hire
-              <span class="block sm:inline text-success-300 drop-shadow-[0_1px_5px_#34d39980]">
-                with confidence
-              </span>
+              Receive candidates
             </h2>
             <p class="text-center font-medium text-[15px] text-muted-foreground sm:text-xl mb-12 mx-auto">
-              Highlight your applicants'
-              <span class="hidden sm:inline"> open source</span><span class="inline sm:hidden">OSS</span>
-              contributions<br /> and match with the top developers on Algora
+              Share your JDs and receive handpicked candidates with the right skills and experience
             </p>
-            <video
-              src={~p"/videos/jobs.mp4"}
-              autoplay
-              loop
-              muted
-              playsinline
-              class="mt-8 w-full h-full object-cover mx-auto border border-border rounded-xl"
-              speed={2}
-              playbackspeed={2}
-            />
-            <div class="pt-12 sm:pt-24 text-center">
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <div class="mb-2 mx-auto flex items-center justify-center h-12 w-12 bg-emerald-400/10 rounded-full">
-                    <.icon name="tabler-filter" class="h-8 w-8 text-emerald-400" />
-                  </div>
-                  <h4 class="font-semibold text-foreground mb-1">High Signal Only</h4>
-                  <p class="text-sm text-foreground-light">
-                    Your Algora job board automatically <br /> screens and ranks applicants
-                  </p>
-                </div>
-                <div>
-                  <div class="mb-2 mx-auto flex items-center justify-center h-12 w-12 bg-emerald-400/10 rounded-full">
-                    <.icon name="tabler-clock" class="h-8 w-8 text-emerald-400" />
-                  </div>
-                  <h4 class="font-semibold text-foreground mb-1">Save Time & Money</h4>
-                  <p class="text-sm text-foreground-light">
-                    Match with top developers efficiently
-                  </p>
-                </div>
-                <div>
-                  <div class="mb-2 mx-auto flex items-center justify-center h-12 w-12 bg-emerald-400/10 rounded-full">
-                    <.icon name="tabler-shield-check" class="h-8 w-8 text-emerald-400" />
-                  </div>
-                  <h4 class="font-semibold text-foreground mb-1">Avoid Bad Hires</h4>
-                  <p class="text-sm text-foreground-light">
-                    Trial candidates with real paid projects<br />
-                    to assess role fit and job performance
-                  </p>
-                </div>
-                <div>
-                  <div class="mb-2 mx-auto flex items-center justify-center h-12 w-12 bg-emerald-400/10 rounded-full">
-                    <.icon name="tabler-users" class="h-8 w-8 text-emerald-400" />
-                  </div>
-                  <h4 class="font-semibold text-foreground mb-1">Massive Reach</h4>
-                  <p class="text-sm text-foreground-light">
-                    Reach 50K+ devs with unlimited job postings
-                  </p>
-                </div>
-                <div>
-                  <div class="mb-2 mx-auto flex items-center justify-center h-12 w-12 bg-emerald-400/10 rounded-full">
-                    <.icon name="tabler-target" class="h-8 w-8 text-emerald-400" />
-                  </div>
-                  <h4 class="font-semibold text-foreground mb-1">Top Talent</h4>
-                  <p class="text-sm text-foreground-light">
-                    Access top 1% users matching your<br />tech, skills, seniority and location preferences
-                  </p>
-                </div>
-                <div>
-                  <div class="mb-2 mx-auto flex items-center justify-center h-12 w-12 bg-emerald-400/10 rounded-full">
-                    <.icon name="tabler-plug-connected" class="h-8 w-8 text-emerald-400" />
-                  </div>
-                  <h4 class="font-semibold text-foreground mb-1">White-label</h4>
-                  <p class="text-sm text-foreground-light">
-                    Embed 1-click apply on your website<br />
-                    and add custom branding to your job board
-                  </p>
-                </div>
-              </div>
+            <div class="flex mx-auto gap-8">
+              <img
+                src={~p"/images/screenshots/candidate-drip.png"}
+                alt="Onboarding org"
+                class="w-[47%] object-cover aspect-[1008/561] rounded-xl border border-border bg-gray-800"
+                loading="lazy"
+              />
+              <img
+                src={~p"/images/screenshots/candidates.png"}
+                alt="Onboarding org"
+                class="w-[53%] object-cover aspect-[1480/726] rounded-xl border border-border bg-gray-800"
+                loading="lazy"
+              />
+            </div>
+          </div>
+        </section>
+
+        <section class="relative isolate py-16 sm:py-40">
+          <div class="mx-auto max-w-7xl px-6 lg:px-8 pt-24 xl:pt-0">
+            <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
+              Publish jobs
+            </h2>
+            <p class="text-center font-medium text-[15px] text-muted-foreground sm:text-xl mb-12 mx-auto">
+              Access top 1% users matching your tech, skills, seniority and location preferences
+            </p>
+            <div class="grid grid-cols-3 gap-8">
+              <img
+                src="https://algora.io/og/coderabbit/jobs?cached"
+                alt="CodeRabbit jobs"
+                class="object-cover aspect-[1200/630] rounded-xl border border-border bg-gray-800"
+                loading="lazy"
+              />
+              <img
+                src="https://algora.io/og/comfy-org/jobs?cached"
+                alt="Comfy.org jobs"
+                class="object-cover aspect-[1200/630] rounded-xl border border-border bg-gray-800"
+                loading="lazy"
+              />
+              <img
+                src="https://algora.io/og/lovable/jobs?cached"
+                alt="Lovable jobs"
+                class="object-cover aspect-[1200/630] rounded-xl border border-border bg-gray-800"
+                loading="lazy"
+              />
             </div>
 
             <div class="pt-12 sm:pt-24 flex flex-col md:flex-row gap-8 px-4">
@@ -557,6 +527,81 @@ defmodule AlgoraWeb.HomeLive do
                     </div>
                   </figcaption>
                 </figure>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="relative isolate py-16 sm:py-40">
+          <div class="mx-auto max-w-7xl px-6 lg:px-8">
+            <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-7xl text-center mb-2 sm:mb-4">
+              Paid trials
+            </h2>
+            <p class="text-center font-medium text-base text-muted-foreground sm:text-xl mb-12 mx-auto">
+              Use bounties and contract work to trial your top candidates before hiring them full-time.
+            </p>
+
+            <div class="mx-auto max-w-6xl gap-8 text-sm leading-6">
+              <div class="flex gap-4 sm:gap-8">
+                <div class="w-[40%]">
+                  <.modal_video
+                    class="aspect-[9/16] rounded-xl lg:rounded-2xl lg:rounded-r-none"
+                    src="https://www.youtube.com/embed/xObOGcUdtY0"
+                    start={122}
+                    title="$15,000 Open source bounty to hire a Rust engineer"
+                    poster={~p"/images/people/john-de-goes.jpg"}
+                    alt="John A De Goes"
+                  />
+                </div>
+                <div class="w-[60%]">
+                  <.link
+                    href="https://github.com/golemcloud/golem/issues/1004"
+                    rel="noopener"
+                    target="_blank"
+                    class="relative flex aspect-[1121/1343] w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl lg:rounded-l-none"
+                  >
+                    <img
+                      src={~p"/images/screenshots/bounty-to-hire-golem2.png"}
+                      alt="Golem bounty to hire"
+                      class="object-cover"
+                      loading="lazy"
+                    />
+                  </.link>
+                </div>
+              </div>
+            </div>
+
+            <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
+              <div class="grid grid-cols-1 items-center gap-x-16 gap-y-8 lg:grid-cols-11">
+                <div class="lg:col-span-5">
+                  <.modal_video
+                    class="rounded-xl lg:rounded-2xl"
+                    src="https://www.youtube.com/embed/3wZGDuoPajk"
+                    start={13}
+                    title="OSS Bounties & Hiring engineers on Algora.io | Founder Testimonial"
+                    poster="https://img.youtube.com/vi/3wZGDuoPajk/maxresdefault.jpg"
+                    alt="Tushar Mathur"
+                  />
+                </div>
+                <div class="lg:col-span-6">
+                  <h3 class="text-xl sm:text-2xl xl:text-3xl font-display font-bold leading-[1.2] sm:leading-[2rem] xl:leading-[3rem]">
+                    Bounties help us control our burn rate, get work done & meet new hires. I've made
+                    <span class="text-success">4 full-time hires</span>
+                    using Algora
+                  </h3>
+                  <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-4 sm:pt-12">
+                    <div class="flex items-center gap-4">
+                      <div>
+                        <div class="text-xl sm:text-2xl xl:text-3xl font-semibold text-foreground">
+                          Tushar Mathur
+                        </div>
+                        <div class="sm:pt-2 text-sm sm:text-lg xl:text-2xl font-medium text-muted-foreground">
+                          Founder & CEO at Tailcall
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -664,82 +709,6 @@ defmodule AlgoraWeb.HomeLive do
                     </div>
                   </figcaption>
                 </figure>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section class="relative isolate py-16 sm:py-40">
-          <div class="mx-auto max-w-7xl px-6 lg:px-8">
-            <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-7xl text-center mb-2 sm:mb-4">
-              Paid trials with <br />
-              <span class="text-success-300 drop-shadow-[0_1px_5px_#34d39980]">GitHub bounties</span>
-            </h2>
-            <p class="text-center font-medium text-base text-muted-foreground sm:text-xl mb-12 mx-auto">
-              Use bounties and contract work to trial your top candidates before hiring them full-time.
-            </p>
-
-            <div class="mx-auto max-w-6xl gap-8 text-sm leading-6">
-              <div class="flex gap-4 sm:gap-8">
-                <div class="w-[40%]">
-                  <.modal_video
-                    class="aspect-[9/16] rounded-xl lg:rounded-2xl lg:rounded-r-none"
-                    src="https://www.youtube.com/embed/xObOGcUdtY0"
-                    start={122}
-                    title="$15,000 Open source bounty to hire a Rust engineer"
-                    poster={~p"/images/people/john-de-goes.jpg"}
-                    alt="John A De Goes"
-                  />
-                </div>
-                <div class="w-[60%]">
-                  <.link
-                    href="https://github.com/golemcloud/golem/issues/1004"
-                    rel="noopener"
-                    target="_blank"
-                    class="relative flex aspect-[1121/1343] w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl lg:rounded-l-none"
-                  >
-                    <img
-                      src={~p"/images/screenshots/bounty-to-hire-golem2.png"}
-                      alt="Golem bounty to hire"
-                      class="object-cover"
-                      loading="lazy"
-                    />
-                  </.link>
-                </div>
-              </div>
-            </div>
-
-            <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
-              <div class="grid grid-cols-1 items-center gap-x-16 gap-y-8 lg:grid-cols-11">
-                <div class="lg:col-span-5">
-                  <.modal_video
-                    class="rounded-xl lg:rounded-2xl"
-                    src="https://www.youtube.com/embed/3wZGDuoPajk"
-                    start={13}
-                    title="OSS Bounties & Hiring engineers on Algora.io | Founder Testimonial"
-                    poster="https://img.youtube.com/vi/3wZGDuoPajk/maxresdefault.jpg"
-                    alt="Tushar Mathur"
-                  />
-                </div>
-                <div class="lg:col-span-6">
-                  <h3 class="text-xl sm:text-2xl xl:text-3xl font-display font-bold leading-[1.2] sm:leading-[2rem] xl:leading-[3rem]">
-                    Bounties help us control our burn rate, get work done & meet new hires. I've made
-                    <span class="text-success">4 full-time hires</span>
-                    using Algora
-                  </h3>
-                  <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-4 sm:pt-12">
-                    <div class="flex items-center gap-4">
-                      <div>
-                        <div class="text-xl sm:text-2xl xl:text-3xl font-semibold text-foreground">
-                          Tushar Mathur
-                        </div>
-                        <div class="sm:pt-2 text-sm sm:text-lg xl:text-2xl font-medium text-muted-foreground">
-                          Founder & CEO at Tailcall
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
@@ -1328,7 +1297,7 @@ defmodule AlgoraWeb.HomeLive do
                   class="group block rounded-2xl overflow-hidden border-2 border-border hover:border-red-400/50 transition-all duration-300 hover:shadow-2xl hover:shadow-red-400/10"
                 >
                   <img
-                    src={~p"/images/oss-founder-podcast.png"}
+                    src={~p"/images/screenshots/oss-founder-podcast.png"}
                     alt="OSS Founder Podcast"
                     class="w-full h-full aspect-[1825/775]"
                   />

@@ -11,6 +11,7 @@ defmodule AlgoraWeb.HomeLive do
   alias Algora.Matches
   alias Algora.Matches.JobMatch
   alias Algora.Payments
+  alias AlgoraCloud.LanguageContributions
   alias AlgoraWeb.Components.Footer
   alias AlgoraWeb.Components.Header
   alias AlgoraWeb.Data.HomeCache
@@ -39,6 +40,9 @@ defmodule AlgoraWeb.HomeLive do
     jobs_by_user = HomeCache.get_jobs_by_user()
     orgs_with_stats = HomeCache.get_orgs_with_stats()
 
+    # Load candidate data
+    candidate_data = load_candidate_data("9EL2CWmJxZ57eqGv")
+
     case socket.assigns[:current_user] do
       %{handle: handle} = user when is_binary(handle) ->
         {:ok, redirect(socket, to: AlgoraWeb.UserAuth.signed_in_path(user))}
@@ -59,6 +63,7 @@ defmodule AlgoraWeb.HomeLive do
          |> assign(:show_challenge_drawer, false)
          |> assign(:challenge_form, to_form(ChallengeForm.changeset(%ChallengeForm{}, %{})))
          |> assign(:tech_stack, [])
+         |> assign(:candidate_data, candidate_data)
          |> assign_user_applications()
          |> assign_events()}
     end
@@ -150,7 +155,11 @@ defmodule AlgoraWeb.HomeLive do
                       </span>
                     </li>
                   </ul> --%>
+                  <div :if={@candidate_data} class="-ml-2 mt-4 max-w-[48rem]">
+                    <AlgoraCloud.Components.CandidateCard.candidate_card {Map.merge(@candidate_data, %{screenshot?: true, fullscreen?: false, anonymize: false})} />
+                  </div>
                   <div
+                    :if={!@candidate_data}
                     id="candidate-carousel-home"
                     phx-hook="CandidateCarousel"
                     data-candidate-ids={
@@ -294,128 +303,7 @@ defmodule AlgoraWeb.HomeLive do
         </section>
 
         <section class="relative isolate py-16 sm:pb-40">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-12 pl-12">
-            <div class="md:col-span-2 ml-auto max-w-7xl pl-12">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-                <%= for hire <- @hires1 do %>
-                  <%= if Map.get(hire, :special) do %>
-                    <div class="relative flex-1 flex mb-12 max-w-md">
-                      <div class="truncate flex items-center gap-2 sm:gap-3 p-4 sm:py-6 bg-gradient-to-br from-emerald-900/30 to-emerald-800/20 rounded-xl border-2 border-emerald-400/30 shadow-xl shadow-emerald-400/10 w-full">
-                        <img
-                          src={hire.person_avatar}
-                          alt={hire.person_name}
-                          class="size-8 sm:size-12 rounded-full ring-2 ring-emerald-400/50"
-                        />
-                        <.icon
-                          name="tabler-arrow-right"
-                          class="size-3 sm:size-4 text-emerald-400 shrink-0"
-                        />
-                        <img
-                          src={hire.company_avatar}
-                          alt={hire.company_name}
-                          class="size-8 sm:size-12 rounded-full ring-2 ring-emerald-400/50"
-                        />
-                        <div class="flex-1">
-                          <div class="text-sm font-medium whitespace-nowrap text-emerald-100">
-                            {hire.person_name}
-                            <.icon name="tabler-arrow-right" class="size-3 text-emerald-400" /> {hire.company_name}
-                          </div>
-                          <div class="text-xs text-emerald-200/80 mt-1">{hire.person_title}</div>
-                          <div :if={hire[:hire_date]} class="text-xs text-emerald-300/70 mt-1">
-                            {hire.hire_date}
-                          </div>
-                        </div>
-                      </div>
-                      <.badge
-                        variant="secondary"
-                        class="absolute -top-2 -left-2 text-xs px-2 sm:px-3 py-0.5 sm:py-1 text-black bg-gradient-to-r from-emerald-400 to-emerald-500 font-semibold shadow-lg"
-                      >
-                        <.icon name="tabler-star-filled" class="size-4 text-black mr-1 -ml-0.5" />
-                        New hire!
-                      </.badge>
-
-                      <%= if String.contains?(hire.company_name, "YC") do %>
-                        <img
-                          src={~p"/images/logos/yc.svg"}
-                          alt="Y Combinator"
-                          class="absolute -top-2 -right-2 size-6 opacity-90"
-                        />
-                      <% end %>
-                    </div>
-                  <% end %>
-                <% end %>
-              </div>
-
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-                <%= for hire <- @hires1 do %>
-                  <%= unless Map.get(hire, :special) do %>
-                    <div class="relative flex items-center gap-2 sm:gap-3 p-4 sm:py-6 bg-card rounded-xl border shrink-0">
-                      <img
-                        src={hire.person_avatar}
-                        alt={hire.person_name}
-                        class="size-8 sm:size-12 rounded-full"
-                      />
-                      <.icon
-                        name="tabler-arrow-right"
-                        class="size-3 sm:size-4 text-muted-foreground shrink-0"
-                      />
-                      <img
-                        src={hire.company_avatar}
-                        alt={hire.company_name}
-                        class="size-8 sm:size-12 rounded-full"
-                      />
-                      <div class="flex-1">
-                        <div class="text-sm font-medium whitespace-nowrap">
-                          {hire.person_name}
-                          <.icon name="tabler-arrow-right" class="size-3 text-foreground" /> {Algora.Util.compact_org_name(
-                            hire.company_name
-                          )}
-                          <%= if String.contains?(hire.company_name, "YC") do %>
-                            <img
-                              src={~p"/images/logos/yc.svg"}
-                              alt="Y Combinator"
-                              class="size-4 opacity-90 inline-flex ml-1"
-                            />
-                          <% end %>
-                        </div>
-                        <div class="text-xs text-muted-foreground mt-1">{hire.person_title}</div>
-                      </div>
-                      <%= if String.contains?(hire.company_name, "Permit.io") or String.contains?(hire.company_name, "Prefix.dev") or String.contains?(hire.company_name, "Twenty") or String.contains?(hire.company_name, "Comfy") do %>
-                        <.badge
-                          variant="secondary"
-                          class="absolute -top-2 -left-2 text-xs px-2 py-1 text-emerald-400 bg-emerald-950"
-                        >
-                          Contract hire!
-                        </.badge>
-                      <% else %>
-                        <.badge
-                          variant="secondary"
-                          class="absolute -top-2 -left-2 text-xs px-2 py-1 text-emerald-400 bg-emerald-950"
-                        >
-                          Full-time hire!
-                        </.badge>
-                      <% end %>
-                    </div>
-                  <% end %>
-                <% end %>
-              </div>
-            </div>
-            <div class="mr-auto max-w-7xl px-6 pt-2 pl-12">
-              <div class="grid grid-cols-1 gap-16 text-center">
-                <%= for stat <- @stats1 do %>
-                  <div>
-                    <div class="text-2xl sm:text-3xl md:text-4xl font-bold font-display text-foreground">
-                      {stat.value}
-                    </div>
-                    <div class="text-sm sm:text-base text-muted-foreground mt-2">
-                      {stat.label}
-                    </div>
-                  </div>
-                <% end %>
-              </div>
-            </div>
-          </div>
-          <div class="pt-6 sm:pt-12 max-w-[69rem] mx-auto flex flex-col md:flex-row gap-8 sm:gap-12 px-4">
+          <div class="max-w-[68rem] mx-auto flex flex-col md:flex-row gap-8 sm:gap-12 px-4">
             <div class="flex-1 mx-auto flex flex-col justify-between">
               <figure class="relative flex flex-col h-full">
                 <blockquote class="text-lg font-medium text-foreground/90 flex-grow">
@@ -475,8 +363,8 @@ defmodule AlgoraWeb.HomeLive do
             <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
               Hire with Confidence
             </h2>
-            <div class="flex flex-col items-center justify-center mx-auto gap-12 max-w-3xl">
-              <div class="w-full space-y-4">
+            <div class="flex flex-col items-center justify-center">
+              <div class="w-full space-y-4 max-w-3xl mx-auto">
                 <div class="mt-6 flex items-center gap-3">
                   <p class="text-foreground text-lg font-medium">
                     <.icon
@@ -493,7 +381,7 @@ defmodule AlgoraWeb.HomeLive do
                   loading="lazy"
                 />
               </div>
-              <div class="w-full space-y-4">
+              <div class="mt-12 w-full space-y-4 max-w-3xl mx-auto">
                 <div class="mt-6 flex items-center gap-3">
                   <p class="text-foreground text-lg font-medium">
                     <.icon
@@ -522,30 +410,159 @@ defmodule AlgoraWeb.HomeLive do
                   loading="lazy"
                 />
               </div>
-              <div class="w-full space-y-4">
-                <div class="mt-6 flex items-center gap-3">
-                  <p class="text-foreground text-lg font-medium">
-                    <.icon
-                      name="tabler-circle-number-3"
-                      class="w-8 h-8 mr-1 text-foreground shrink-0"
-                    /> Sync with your
-                    <div class="w-9 h-9 rounded-lg overflow-hidden border border-border flex items-center justify-center flex-shrink-0">
-                      <img
-                        src={~p"/images/logos/ashby.png"}
-                        alt="Gmail"
-                        class="w-full h-full object-cover"
-                      />
-                    </div>
-                    <span class="font-semibold">Ashby</span>
-                    to track interview progress
-                  </p>
+              <div class="mt-12 flex items-center gap-3 max-w-3xl mx-auto">
+                <p class="text-foreground text-lg font-medium">
+                  <.icon name="tabler-circle-number-3" class="w-8 h-8 mr-1 text-foreground shrink-0" />
+                  Sync with your
+                  <div class="w-9 h-9 rounded-lg overflow-hidden border border-border flex items-center justify-center flex-shrink-0">
+                    <img
+                      src={~p"/images/logos/ashby.png"}
+                      alt="Gmail"
+                      class="w-full h-full object-cover"
+                    />
+                  </div>
+                  <span class="font-semibold">Ashby</span>
+                  to track interview progress
+                </p>
+              </div>
+              <div class="mt-6 grid grid-cols-2 gap-8 max-w-[80rem] mx-auto">
+                <div class="w-full space-y-4">
+                  <img
+                    src={~p"/images/screenshots/candidates.png"}
+                    alt="Candidates"
+                    class="w-full object-cover aspect-[1480/726] rounded-xl border border-border bg-[#121214]"
+                    loading="lazy"
+                  />
                 </div>
-                <img
-                  src={~p"/images/screenshots/candidates.png"}
-                  alt="Candidates"
-                  class="w-full object-cover aspect-[1480/726] rounded-xl border border-border bg-[#121214]"
-                  loading="lazy"
-                />
+                <div class="w-full space-y-4">
+                  <img
+                    src={~p"/images/screenshots/ashby.png"}
+                    alt="Candidates"
+                    class="w-full object-cover aspect-[787/419] rounded-xl border border-border bg-[#121214]"
+                    loading="lazy"
+                  />
+                </div>
+              </div>
+              <div class="pt-12 sm:pt-24 grid grid-cols-1 md:grid-cols-3 gap-12 pl-12">
+                <div class="md:col-span-2 ml-auto max-w-7xl pl-12">
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+                    <%= for hire <- @hires1 do %>
+                      <%= if Map.get(hire, :special) do %>
+                        <div class="relative flex-1 flex mb-12 max-w-md">
+                          <div class="truncate flex items-center gap-2 sm:gap-3 p-4 sm:py-6 bg-gradient-to-br from-emerald-900/30 to-emerald-800/20 rounded-xl border-2 border-emerald-400/30 shadow-xl shadow-emerald-400/10 w-full">
+                            <img
+                              src={hire.person_avatar}
+                              alt={hire.person_name}
+                              class="size-8 sm:size-12 rounded-full ring-2 ring-emerald-400/50"
+                            />
+                            <.icon
+                              name="tabler-arrow-right"
+                              class="size-3 sm:size-4 text-emerald-400 shrink-0"
+                            />
+                            <img
+                              src={hire.company_avatar}
+                              alt={hire.company_name}
+                              class="size-8 sm:size-12 rounded-full ring-2 ring-emerald-400/50"
+                            />
+                            <div class="flex-1">
+                              <div class="text-sm font-medium whitespace-nowrap text-emerald-100">
+                                {hire.person_name}
+                                <.icon name="tabler-arrow-right" class="size-3 text-emerald-400" /> {hire.company_name}
+                              </div>
+                              <div class="text-xs text-emerald-200/80 mt-1">{hire.person_title}</div>
+                              <div :if={hire[:hire_date]} class="text-xs text-emerald-300/70 mt-1">
+                                {hire.hire_date}
+                              </div>
+                            </div>
+                          </div>
+                          <.badge
+                            variant="secondary"
+                            class="absolute -top-2 -left-2 text-xs px-2 sm:px-3 py-0.5 sm:py-1 text-black bg-gradient-to-r from-emerald-400 to-emerald-500 font-semibold shadow-lg"
+                          >
+                            <.icon name="tabler-star-filled" class="size-4 text-black mr-1 -ml-0.5" />
+                            New hire!
+                          </.badge>
+
+                          <%= if String.contains?(hire.company_name, "YC") do %>
+                            <img
+                              src={~p"/images/logos/yc.svg"}
+                              alt="Y Combinator"
+                              class="absolute -top-2 -right-2 size-6 opacity-90"
+                            />
+                          <% end %>
+                        </div>
+                      <% end %>
+                    <% end %>
+                  </div>
+
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+                    <%= for hire <- @hires1 do %>
+                      <%= unless Map.get(hire, :special) do %>
+                        <div class="relative flex items-center gap-2 sm:gap-3 p-4 sm:py-6 bg-card rounded-xl border shrink-0">
+                          <img
+                            src={hire.person_avatar}
+                            alt={hire.person_name}
+                            class="size-8 sm:size-12 rounded-full"
+                          />
+                          <.icon
+                            name="tabler-arrow-right"
+                            class="size-3 sm:size-4 text-muted-foreground shrink-0"
+                          />
+                          <img
+                            src={hire.company_avatar}
+                            alt={hire.company_name}
+                            class="size-8 sm:size-12 rounded-full"
+                          />
+                          <div class="flex-1">
+                            <div class="text-sm font-medium whitespace-nowrap">
+                              {hire.person_name}
+                              <.icon name="tabler-arrow-right" class="size-3 text-foreground" /> {Algora.Util.compact_org_name(
+                                hire.company_name
+                              )}
+                              <%= if String.contains?(hire.company_name, "YC") do %>
+                                <img
+                                  src={~p"/images/logos/yc.svg"}
+                                  alt="Y Combinator"
+                                  class="size-4 opacity-90 inline-flex ml-1"
+                                />
+                              <% end %>
+                            </div>
+                            <div class="text-xs text-muted-foreground mt-1">{hire.person_title}</div>
+                          </div>
+                          <%= if String.contains?(hire.company_name, "Permit.io") or String.contains?(hire.company_name, "Prefix.dev") or String.contains?(hire.company_name, "Twenty") or String.contains?(hire.company_name, "Comfy") do %>
+                            <.badge
+                              variant="secondary"
+                              class="absolute -top-2 -left-2 text-xs px-2 py-1 text-emerald-400 bg-emerald-950"
+                            >
+                              Contract hire!
+                            </.badge>
+                          <% else %>
+                            <.badge
+                              variant="secondary"
+                              class="absolute -top-2 -left-2 text-xs px-2 py-1 text-emerald-400 bg-emerald-950"
+                            >
+                              Full-time hire!
+                            </.badge>
+                          <% end %>
+                        </div>
+                      <% end %>
+                    <% end %>
+                  </div>
+                </div>
+                <div class="mr-auto max-w-7xl px-6 pt-2 pl-12">
+                  <div class="grid grid-cols-1 gap-16 text-center">
+                    <%= for stat <- @stats1 do %>
+                      <div>
+                        <div class="text-2xl sm:text-3xl md:text-4xl font-bold font-display text-foreground">
+                          {stat.value}
+                        </div>
+                        <div class="text-sm sm:text-base text-muted-foreground mt-2">
+                          {stat.label}
+                        </div>
+                      </div>
+                    <% end %>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -557,7 +574,7 @@ defmodule AlgoraWeb.HomeLive do
               Publish jobs
             </h2>
             <p class="text-center font-medium text-[15px] text-muted-foreground sm:text-xl mb-12 mx-auto">
-              Access top 1% users matching your tech, skills, seniority and location preferences
+              Reach top 1% users matching your tech, skills, seniority and location preferences
             </p>
             <div class="grid grid-cols-3 gap-8">
               <.link href="https://algora.io/coderabbit/jobs" target="_blank">
@@ -585,25 +602,24 @@ defmodule AlgoraWeb.HomeLive do
                 />
               </.link>
             </div>
-            <div class="pt-12 sm:pt-24 text-center">
+            <div class="pt-9 sm:pt-18 text-center">
               <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                   <div class="mb-2 mx-auto flex items-center justify-center h-12 w-12 bg-emerald-400/10 rounded-full">
-                    <.icon name="tabler-filter" class="h-8 w-8 text-emerald-400" />
+                    <.icon name="github" class="h-8 w-8 text-emerald-400" />
                   </div>
-                  <h4 class="font-semibold text-foreground mb-1">High Signal Only</h4>
+                  <h4 class="font-semibold text-foreground mb-1">Apply with GitHub</h4>
                   <p class="text-sm text-foreground-light">
-                    Your Algora job board automatically <br /> screens and ranks applicants
+                    Your Algora job board automatically screens and ranks applicants based on OSS contributions
                   </p>
                 </div>
-
                 <div>
                   <div class="mb-2 mx-auto flex items-center justify-center h-12 w-12 bg-emerald-400/10 rounded-full">
-                    <.icon name="tabler-target" class="h-8 w-8 text-emerald-400" />
+                    <.icon name="tabler-speakerphone" class="h-8 w-8 text-emerald-400" />
                   </div>
-                  <h4 class="font-semibold text-foreground mb-1">Top Talent</h4>
+                  <h4 class="font-semibold text-foreground mb-1">Massive Reach</h4>
                   <p class="text-sm text-foreground-light">
-                    Reach top 1% users matching your<br />tech, skills, seniority and location preferences
+                    Reach 50K+ devs with unlimited job postings
                   </p>
                 </div>
                 <div>
@@ -660,7 +676,7 @@ defmodule AlgoraWeb.HomeLive do
               </div>
             </div>
 
-            <div class="mx-auto mt-4 max-w-7xl gap-8 text-sm leading-6 sm:mt-8">
+            <div class="mx-auto mt-4 max-w-7xl md:ml-10 gap-8 text-sm leading-6 sm:mt-8">
               <div class="lg:col-span-7">
                 <h3 class="text-xl sm:text-2xl xl:text-3xl font-display font-bold leading-[1.2] sm:leading-[2rem] xl:leading-[3rem]">
                   We used Algora extensively at Ziverge to reward over
@@ -2044,6 +2060,124 @@ defmodule AlgoraWeb.HomeLive do
       |> Enum.sort_by(& &1.timestamp, {:desc, DateTime})
 
     assign(socket, :events, events)
+  end
+
+  defp load_candidate_data(match_id) do
+    case Matches.get_job_match_by_id(match_id) do
+      nil ->
+        nil
+
+      match ->
+        # Preload the nested job_posting.user association
+        match = Algora.Repo.preload(match, job_posting: :user)
+        user = match.user
+
+        # Fetch contributions for this user
+        contributions = Algora.Workspace.list_user_contributions([user.id], exclude_personal: false, display_all: true)
+
+        contributions_map = %{user.id => contributions}
+
+        # Fetch language contributions for this user
+        language_contributions_map =
+          [user.id]
+          |> LanguageContributions.list_language_contributions_batch()
+          |> transform_language_contributions()
+
+        # Fetch heatmap data for this user
+        heatmaps_map =
+          [user.id]
+          |> AlgoraCloud.Profiles.list_heatmaps()
+          |> Map.new(fn heatmap -> {heatmap.user_id, heatmap.data} end)
+
+        # Build interviews map
+        interviews_map = build_interviews_map([match])
+
+        %{
+          candidate: %{
+            match: match,
+            job_posting: match.job_posting,
+            job_title: match.job_posting.title || "Software Engineer"
+          },
+          contributions_map: contributions_map,
+          language_contributions_map: language_contributions_map,
+          heatmaps_map: heatmaps_map,
+          org_badge_data: nil,
+          hiring_managers: [],
+          interviews_map: interviews_map,
+          current_org: match.job_posting.user,
+          anonymize: false,
+          base_anonymize: false,
+          screenshot?: true,
+          fullscreen?: false,
+          current_user: nil,
+          current_user_role: nil,
+          tech_stack: match.job_posting.tech_stack || []
+        }
+    end
+  end
+
+  defp transform_language_contributions(contributions_map) do
+    # Transform language contributions similar to candidates2_live.ex
+    Map.new(contributions_map, fn {user_id, contributions} ->
+      transformed =
+        contributions
+        |> Enum.map(fn contrib ->
+          case contrib.language do
+            "JavaScript" -> %{contrib | language: "TypeScript"}
+            "Jupyter Notebook" -> %{contrib | language: "Python"}
+            "Markdown" -> nil
+            "MDX" -> nil
+            "TeX" -> nil
+            "HTML" -> nil
+            "CSS" -> nil
+            "Nunjucks" -> nil
+            "Nushell" -> nil
+            "reStructuredText" -> nil
+            "Nix" -> nil
+            "Makefile" -> nil
+            "Emacs Lisp" -> nil
+            "Mustache" -> nil
+            _ -> contrib
+          end
+        end)
+        |> Enum.reject(&is_nil/1)
+        |> Enum.group_by(& &1.language)
+        |> Enum.map(fn {_language, contribs} ->
+          # Combine contributions for the same language
+          Enum.reduce(contribs, fn contrib, acc ->
+            %{
+              acc
+              | prs: acc.prs + contrib.prs,
+                percentage: Decimal.add(acc.percentage, contrib.percentage)
+            }
+          end)
+        end)
+        |> Enum.sort_by(& &1.percentage, {:desc, Decimal})
+
+      {user_id, transformed}
+    end)
+  end
+
+  defp build_interviews_map(matches) do
+    # Build interviews map for matches similar to candidates2_live.ex
+    import Ecto.Query
+
+    alias Algora.Repo
+
+    user_ids = matches |> Enum.map(& &1.user_id) |> Enum.uniq()
+    job_posting_ids = matches |> Enum.map(& &1.job_posting_id) |> Enum.uniq()
+
+    interviews =
+      Repo.all(
+        from(ji in Algora.Interviews.JobInterview,
+          where: ji.user_id in ^user_ids and ji.job_posting_id in ^job_posting_ids,
+          preload: [:user]
+        )
+      )
+
+    Enum.reduce(interviews, %{}, fn interview, acc ->
+      Map.put(acc, {interview.user_id, interview.job_posting_id}, interview)
+    end)
   end
 
   defp placeholder_text do

@@ -905,33 +905,39 @@ const Hooks = {
   },
   CandidateCarousel: {
     mounted() {
-      const candidateIdsAttr = this.el.getAttribute("data-candidate-ids");
-      if (!candidateIdsAttr) return;
-
-      const candidateIds = JSON.parse(candidateIdsAttr);
-      if (!candidateIds || candidateIds.length === 0) return;
-
-      const img = this.el.querySelector("img") as HTMLImageElement;
-      if (!img) return;
+      // Get all carousel items
+      const items = this.el.querySelectorAll("[data-carousel-item]");
+      if (!items || items.length === 0) return;
 
       let currentIndex = 0;
 
-      // Preload all images
-      candidateIds.forEach((id: string) => {
-        const preloadImg = new Image();
-        preloadImg.src = `https://algora.io/og/coderabbit/candidates/${id}`;
-      });
-
-      // Set up interval to rotate images every 3 seconds
+      // Set up interval to rotate items every 5 seconds
       this.interval = setInterval(() => {
-        // Fade out
-        img.style.opacity = "0";
+        const currentItem = items[currentIndex] as HTMLElement;
+        const nextIndex = (currentIndex + 1) % items.length;
+        const nextItem = items[nextIndex] as HTMLElement;
 
-        // After fade out completes, change image and fade in
+        // Fade out current item
+        currentItem.classList.remove("opacity-100");
+        currentItem.classList.add("opacity-0");
+
+        // After fade out completes, show next item
         setTimeout(() => {
-          currentIndex = (currentIndex + 1) % candidateIds.length;
-          img.src = `https://algora.io/og/coderabbit/candidates/${candidateIds[currentIndex]}`;
-          img.style.opacity = "1";
+          // Position current item absolutely so it doesn't take up space
+          if (!currentItem.classList.contains("absolute")) {
+            currentItem.classList.add("absolute", "inset-0");
+          }
+
+          // Remove absolute positioning from next item if it's the first one
+          if (nextIndex === 0 && nextItem.classList.contains("absolute")) {
+            nextItem.classList.remove("absolute", "inset-0");
+          }
+
+          // Fade in next item
+          nextItem.classList.remove("opacity-0");
+          nextItem.classList.add("opacity-100");
+
+          currentIndex = nextIndex;
         }, 500); // Match the transition-opacity duration-500 from the CSS
       }, 5000);
     },

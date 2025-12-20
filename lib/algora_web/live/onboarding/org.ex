@@ -45,14 +45,18 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    # Load candidate data
-    # candidate_data = load_candidate_data("")
-    candidate_data = load_candidate_data("mqYKH8Nox4FVyPcF")
+    # Load multiple candidates for carousel - using valid match IDs with different users
+    candidate_ids = ["QGFEwrH3K7mipQGB", "ogftjcpCuvTLverF", "bVqi5v6HPYtUg1Fj", "LbJoZ78WJs1K2RVS"]
+
+    candidates_data =
+      candidate_ids
+      |> Enum.map(&load_candidate_data/1)
+      |> Enum.reject(&is_nil/1)
 
     socket =
       socket
       |> assign(:form, to_form(Form.changeset(%Form{}, %{tech_stack: []})))
-      |> assign(:candidate_data, candidate_data)
+      |> assign(:candidates_data, candidates_data)
 
     {:ok, socket}
   end
@@ -362,23 +366,20 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
               </div>
             </.form>
           </div>
-          <div :if={@candidate_data} class="hidden lg:flex flex-col gap-3 w-full">
-            <AlgoraCloud.Components.CandidateCard.candidate_card {Map.merge(@candidate_data, %{screenshot?: true, fullscreen?: false})} />
-          </div>
-          <div :if={!@candidate_data} class="hidden lg:flex flex-col gap-3 w-full">
+          <div :if={length(@candidates_data) > 0} class="hidden lg:flex flex-col gap-3 w-full">
             <div
               id="candidate-carousel-org"
               phx-hook="CandidateCarousel"
-              data-candidate-ids={
-                Jason.encode!(["9EL2CWmJxZ57eqGv", "Hx4qKGE9CLkLHySJ", "8oXJpLYUp3M4dYsf"])
-              }
+              class="relative w-full"
             >
-              <img
-                src="https://algora.io/og/coderabbit/candidates/9EL2CWmJxZ57eqGv"
-                alt="Job candidates"
-                class="rounded-xl object-cover w-full h-auto transition-opacity duration-500"
-                style="aspect-ratio: 1200/630;"
-              />
+              <%= for {candidate_data, index} <- Enum.with_index(@candidates_data) do %>
+                <div
+                  data-carousel-item={index}
+                  class={"transition-opacity duration-500 #{if index == 0, do: "opacity-100", else: "opacity-0 absolute inset-0"}"}
+                >
+                  <AlgoraCloud.Components.CandidateCard.candidate_card {Map.merge(candidate_data, %{screenshot?: true, fullscreen?: false, anonymize: true})} />
+                </div>
+              <% end %>
             </div>
           </div>
         </div>

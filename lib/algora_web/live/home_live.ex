@@ -209,32 +209,26 @@ defmodule AlgoraWeb.HomeLive do
                         Share your JD to receive your candidates within hours.
                       </p>
 
-                      <form class="mt-6 flex flex-col gap-6">
+                      <form class="mt-6 flex flex-col gap-3">
                         <div class="space-y-3">
-                          <label class="text-base font-medium text-foreground">
+                          <label class="text-sm font-medium text-foreground">
                             Hire type
                           </label>
                           <div class="grid grid-cols-2 gap-4">
-                            <label class="group relative flex cursor-pointer rounded-lg px-4 py-3 shadow-sm focus:outline-none border-2 bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10 border-border has-[:checked]:border-primary has-[:checked]:bg-primary/10">
-                              <input
-                                type="radio"
-                                name="hire_type"
-                                value="full_time"
-                                checked
-                                class="sr-only"
-                              />
+                            <label class="group relative flex cursor-pointer rounded-lg px-3 py-2 shadow-sm focus:outline-none border-2 bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10 border-border has-[:checked]:border-primary has-[:checked]:bg-primary/10">
+                              <input type="radio" name="hire_type" value="full_time" class="sr-only" />
                               <div class="flex items-center gap-3">
                                 <.icon name="tabler-briefcase" class="h-6 w-6 text-primary shrink-0" />
-                                <span class="text-sm text-foreground">
+                                <span class="text-xs text-foreground">
                                   Full-time
                                 </span>
                               </div>
                             </label>
-                            <label class="group relative flex cursor-pointer rounded-lg px-4 py-3 shadow-sm focus:outline-none border-2 bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10 border-border has-[:checked]:border-primary has-[:checked]:bg-primary/10">
+                            <label class="group relative flex cursor-pointer rounded-lg px-3 py-2 shadow-sm focus:outline-none border-2 bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10 border-border has-[:checked]:border-primary has-[:checked]:bg-primary/10">
                               <input type="radio" name="hire_type" value="contract" class="sr-only" />
                               <div class="flex items-center gap-3">
                                 <.icon name="tabler-clock" class="h-6 w-6 text-primary shrink-0" />
-                                <span class="text-sm text-foreground">
+                                <span class="text-xs text-foreground">
                                   Contract
                                 </span>
                               </div>
@@ -254,7 +248,7 @@ defmodule AlgoraWeb.HomeLive do
                             name="location"
                             value=""
                             label="Location"
-                            placeholder="e.g. San Francisco, Remote"
+                            placeholder="San Francisco, Remote"
                           />
                           <.input
                             name="compensation"
@@ -269,7 +263,7 @@ defmodule AlgoraWeb.HomeLive do
                           name="job_description"
                           value=""
                           label="Job description / careers URL"
-                          rows="4"
+                          rows="3"
                           placeholder="Tell us about the role and your requirements..."
                         />
 
@@ -281,9 +275,6 @@ defmodule AlgoraWeb.HomeLive do
                         />
                         <div class="flex flex-col gap-4">
                           <.button class="w-full">Receive your candidates</.button>
-                          <div class="text-xs text-muted-foreground text-center">
-                            No credit card required - only pay when you hire
-                          </div>
                         </div>
                       </form>
                     </div>

@@ -71,20 +71,22 @@
     value={JSON.stringify(tech)}
   />
 
-  <div class="flex flex-wrap gap-3 mt-4">
-    {#each tech as tech}
-      <div
-        class="bg-success/10 text-success rounded-lg px-3 py-1.5 text-sm font-semibold flex items-center"
-      >
-        {tech}
-        <button
-          type="button"
-          class="ml-2 text-success hover:text-success/80"
-          on:click={() => removeTech(tech)}
+    {#if tech?.length}
+	  <div class="flex flex-wrap gap-3 mt-4">
+      {#each tech as tech}
+        <div
+          class="bg-success/10 text-success rounded-lg px-3 py-1.5 text-sm font-semibold flex items-center"
         >
-          ×
-        </button>
+          {tech}
+          <button
+            type="button"
+            class="ml-2 text-success hover:text-success/80"
+            on:click={() => removeTech(tech)}
+          >
+            ×
+            </button>
+          </div>
+        {/each}
       </div>
-    {/each}
-  </div>
+    {/if}
 </div>

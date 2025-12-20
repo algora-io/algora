@@ -10,17 +10,29 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     use Ecto.Schema
 
     @primary_key false
-    @derive {Jason.Encoder, only: [:email, :job_description, :candidate_description, :comp_range]}
+    @derive {Jason.Encoder,
+             only: [:email, :job_description, :candidate_description, :comp_range, :location, :location_type, :tech_stack]}
     embedded_schema do
       field :email, :string
       field :job_description, :string
       field :candidate_description, :string
       field :comp_range, :string
+      field :location, :string
+      field :location_type, :string
+      field :tech_stack, {:array, :string}
     end
 
     def changeset(form, attrs \\ %{}) do
       form
-      |> Ecto.Changeset.cast(attrs, [:email, :job_description, :candidate_description, :comp_range])
+      |> Ecto.Changeset.cast(attrs, [
+        :email,
+        :job_description,
+        :candidate_description,
+        :comp_range,
+        :location,
+        :location_type,
+        :tech_stack
+      ])
       |> Ecto.Changeset.validate_required([:email, :job_description])
       |> Ecto.Changeset.validate_format(:email, ~r/@/)
     end
@@ -28,7 +40,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, :form, to_form(Form.changeset(%Form{}, %{})))}
+    {:ok, assign(socket, :form, to_form(Form.changeset(%Form{}, %{tech_stack: []})))}
   end
 
   defp placeholder_text do
@@ -40,7 +52,22 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   end
 
   @impl true
+  def handle_event("tech_stack_changed", %{"tech_stack" => tech_stack}, socket) do
+    changeset = Form.changeset(socket.assigns.form.source, %{tech_stack: tech_stack})
+    {:noreply, assign(socket, :form, to_form(changeset))}
+  end
+
+  @impl true
   def handle_event("submit", %{"form" => params}, socket) do
+    tech_stack =
+      Jason.decode!(params["tech_stack"] || "[]") ++
+        case String.trim(params["tech_stack_input"] || "") do
+          "" -> []
+          tech_stack_input -> String.split(tech_stack_input, ",")
+        end
+
+    params = Map.put(params, "tech_stack", tech_stack)
+
     case %Form{} |> Form.changeset(params) |> Ecto.Changeset.apply_action(:save) do
       {:ok, data} ->
         # Create alert for immediate notification
@@ -64,6 +91,9 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         job_description: data.job_description,
         candidate_description: data.candidate_description,
         comp_range: data.comp_range,
+        location: data.location,
+        location_type: data.location_type,
+        tech_stack: data.tech_stack,
         submitted_at: DateTime.utc_now(),
         source: "jd_submission"
       },
@@ -108,44 +138,106 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         </div>
       </header>
 
-      <div class="flex-1 p-4 md:py-4 flex items-center justify-center max-h-[calc(100vh-11rem)] overflow-y-auto scrollbar-thin">
-        <div class="w-full max-w-[28rem] text-left">
-          <.form for={@form} phx-submit="submit" class="flex flex-col gap-6">
-            <.input
-              field={@form[:email]}
-              type="email"
-              label="Work email"
-              placeholder="you@company.com"
-            />
-            <.input
-              field={@form[:job_description]}
-              type="textarea"
-              label="Job description / careers URL"
-              rows="3"
-              class="resize-none"
-              placeholder="Tell us about the role and your requirements..."
-            />
-            <.input
-              field={@form[:comp_range]}
-              type="text"
-              label="Compensation range"
-              placeholder="$150k - $250k"
-            />
-            <.input
-              field={@form[:candidate_description]}
-              type="textarea"
-              label="Describe your ideal candidate"
-              rows="3"
-              class="resize-none"
-              placeholder={placeholder_text()}
-            />
-            <div class="flex flex-col gap-4">
-              <.button class="w-full" type="submit">Receive your candidates</.button>
-              <div class="text-xs text-muted-foreground text-center">
-                No credit card required - only pay when you hire
+      <div class="flex-1 p-4 md:py-4 flex items-center justify-center max-h-[calc(100vh-11rem)] overflow-hidden">
+        <div class="w-full grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] gap-6 items-center px-4 lg:px-8 max-w-[90rem]">
+          <div class="w-full max-w-[32rem] text-left">
+            <.form for={@form} phx-submit="submit" class="flex flex-col gap-4">
+              <div>
+                <label class="block text-sm font-medium text-foreground mb-2">
+                  Tech stack
+                </label>
+                <.TechStack
+                  tech={Ecto.Changeset.get_field(@form.source, :tech_stack) || []}
+                  socket={@socket}
+                  form="form"
+                />
               </div>
-            </div>
-          </.form>
+              <.input
+                field={@form[:job_description]}
+                type="textarea"
+                label="Job description / careers URL"
+                rows="3"
+                class="resize-none"
+                placeholder="Tell us about the role, your requirements, your ideal candidate..."
+              />
+              <div class="grid grid-cols-2 gap-4">
+                <.input
+                  field={@form[:comp_range]}
+                  type="text"
+                  label="Compensation range"
+                  placeholder="$150k - $250k"
+                />
+                <.input
+                  field={@form[:location]}
+                  type="text"
+                  label="Location"
+                  placeholder="San Francisco"
+                />
+              </div>
+              <div class="space-y-2">
+                <label class="block text-sm font-medium text-foreground">
+                  Type
+                </label>
+                <div class="grid grid-cols-3 gap-3">
+                  <label class="group relative flex cursor-pointer rounded-lg px-3 py-2.5 shadow-sm focus:outline-none border-2 bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10 border-border has-[:checked]:border-primary has-[:checked]:bg-primary/10">
+                    <input type="radio" name="form[location_type]" value="onsite" class="sr-only" />
+                    <div class="flex items-center gap-2">
+                      <.icon name="tabler-building" class="h-5 w-5 text-primary shrink-0" />
+                      <span class="text-sm text-foreground">
+                        Onsite
+                      </span>
+                    </div>
+                  </label>
+                  <label class="group relative flex cursor-pointer rounded-lg px-3 py-2.5 shadow-sm focus:outline-none border-2 bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10 border-border has-[:checked]:border-primary has-[:checked]:bg-primary/10">
+                    <input type="radio" name="form[location_type]" value="hybrid" class="sr-only" />
+                    <div class="flex items-center gap-2">
+                      <.icon name="tabler-arrows-shuffle" class="h-5 w-5 text-primary shrink-0" />
+                      <span class="text-sm text-foreground">
+                        Hybrid
+                      </span>
+                    </div>
+                  </label>
+                  <label class="group relative flex cursor-pointer rounded-lg px-3 py-2.5 shadow-sm focus:outline-none border-2 bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10 border-border has-[:checked]:border-primary has-[:checked]:bg-primary/10">
+                    <input type="radio" name="form[location_type]" value="remote" class="sr-only" />
+                    <div class="flex items-center gap-2">
+                      <.icon name="tabler-home" class="h-5 w-5 text-primary shrink-0" />
+                      <span class="text-sm text-foreground">
+                        Remote
+                      </span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+              <%!-- <.input
+                field={@form[:candidate_description]}
+                type="textarea"
+                label="Describe your ideal candidate"
+                rows="3"
+                class="resize-none"
+                placeholder={placeholder_text()}
+              /> --%>
+              <.input
+                field={@form[:email]}
+                type="email"
+                label="Your work email"
+                placeholder="you@company.com"
+              />
+              <div class="flex flex-col gap-3 mt-2">
+                <.button class="w-full" type="submit">Receive your candidates</.button>
+                <div class="text-xs text-muted-foreground text-center">
+                  No credit card required - only pay when you hire
+                </div>
+              </div>
+            </.form>
+          </div>
+          <div class="hidden lg:flex flex-col gap-3 w-full">
+            <img
+              src="https://algora.io/og/coderabbit/candidates/9EL2CWmJxZ57eqGv"
+              alt="Job candidates"
+              class="rounded-xl object-cover w-full h-auto"
+              style="aspect-ratio: 1200/630;"
+            />
+          </div>
         </div>
       </div>
 

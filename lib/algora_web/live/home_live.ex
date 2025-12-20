@@ -1172,9 +1172,9 @@ defmodule AlgoraWeb.HomeLive do
               </p> --%>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+            <div class="flex flex-col lg:flex-row gap-12 items-start">
               <%!-- Left column: Stats --%>
-              <div class="space-y-8">
+              <div class="w-full lg:w-[60%] space-y-4">
                 <%= for stat <- @stats2 do %>
                   <div class="p-8 rounded-2xl bg-card border border-border">
                     <div class="text-4xl sm:text-5xl md:text-6xl font-bold font-display text-emerald-400 mb-3">
@@ -1188,10 +1188,10 @@ defmodule AlgoraWeb.HomeLive do
               </div>
 
               <%!-- Right column: GitHub repo and YouTube --%>
-              <div class="space-y-8">
+              <div class="w-full lg:w-[40%] space-y-4">
                 <div>
-                  <p class="text-xl font-medium text-muted-foreground mb-2">
-                    We're open source!
+                  <p class="text-xl font-medium text-foreground mb-2">
+                    Algora is open source!
                   </p>
                 </div>
                 <.link
@@ -1208,7 +1208,7 @@ defmodule AlgoraWeb.HomeLive do
                 </.link>
 
                 <div>
-                  <p class="text-xl font-medium text-muted-foreground mb-2">
+                  <p class="text-xl font-medium text-foreground mb-2">
                     OSS Founder Podcast
                   </p>
                 </div>

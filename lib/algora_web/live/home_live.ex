@@ -285,7 +285,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="relative isolate pt-20 pb-8 sm:pb-12">
+        <%!-- <section class="relative isolate pt-20 pb-8 sm:pb-12">
           <div class="mx-auto max-w-4xl px-6 lg:px-8 text-center">
             <h1 class="pt-12 sm:pt-20 font-display text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-semibold tracking-tight text-foreground">
               Open source <br />
@@ -312,13 +312,13 @@ defmodule AlgoraWeb.HomeLive do
               </.button>
             </div>
           </div>
-        </section>
+        </section> --%>
 
-        <section class="relative isolate py-8 sm:py-12">
+        <%!-- <section class="relative isolate py-8 sm:py-12">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
-            <%!-- <h3 class="text-center text-sm font-medium text-muted-foreground mb-6">
+            <h3 class="text-center text-sm font-medium text-muted-foreground mb-6">
               Trusted by
-            </h3> --%>
+            </h3>
             <div class="flex items-center justify-center gap-12 overflow-x-auto scrollbar-thin pb-0">
               <img
                 src="/images/wordmarks/coderabbit.svg"
@@ -351,7 +351,7 @@ defmodule AlgoraWeb.HomeLive do
               />
             </div>
           </div>
-        </section>
+        </section> --%>
 
         <section class="relative isolate py-16 sm:pb-40">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-12 pl-12">

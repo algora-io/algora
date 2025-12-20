@@ -58,6 +58,7 @@ defmodule AlgoraWeb.HomeLive do
          |> assign(:hires2, hires2())
          |> assign(:show_challenge_drawer, false)
          |> assign(:challenge_form, to_form(ChallengeForm.changeset(%ChallengeForm{}, %{})))
+         |> assign(:tech_stack, [])
          |> assign_user_applications()
          |> assign_events()}
     end
@@ -78,15 +79,14 @@ defmodule AlgoraWeb.HomeLive do
           <div class="h-full mx-auto max-w-[88rem] px-6 lg:px-8 flex flex-col items-center justify-center pt-32 pb-12">
             <div class="h-full mx-auto lg:mx-0 flex lg:max-w-none items-center justify-center text-center w-full">
               <div class="w-full flex flex-col lg:flex-row lg:justify-center gap-6">
-                <div class="w-full flex flex-col items-center lg:items-start text-center lg:text-left">
+                <div class="w-full flex flex-col items-center lg:items-start text-center lg:text-left lg:pl-8">
                   <h1 class="font-display text-3xl sm:text-lg md:text-5xl xl:text-[3.25rem] font-semibold tracking-tight text-foreground">
-                    Meet your new <span class="text-emerald-400">hire today</span>
+                    Open source <span class="text-emerald-400">tech recruiting</span>
                   </h1>
-                  <p class="mt-4 text-lg leading-8 text-muted-foreground max-w-2xl">
-                    Access a network of top 1% engineers, pre-vetted through their OSS contributions.
-                    <span class="font-semibold">Only pay when you hire.</span>
+                  <p class="mt-4 text-lg leading-8 text-muted-foreground">
+                    Connecting the most prolific open source maintainers & contributors with their next jobs.
                   </p>
-                  <div class="flex items-center justify-center gap-12 overflow-x-auto scrollbar-thin pb-0">
+                  <div class="flex items-center justify-center lg:justify-start gap-12 overflow-x-auto scrollbar-thin pb-0">
                     <img
                       src="/images/wordmarks/coderabbit.svg"
                       alt="CodeRabbit"
@@ -210,6 +210,60 @@ defmodule AlgoraWeb.HomeLive do
                       </p>
 
                       <form class="mt-6 flex flex-col gap-6">
+                        <div class="space-y-3">
+                          <label class="text-base font-medium text-foreground">
+                            Hire type
+                          </label>
+                          <div class="grid grid-cols-2 gap-4">
+                            <label class="group relative flex cursor-pointer rounded-lg px-4 py-3 shadow-sm focus:outline-none border-2 bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10 border-border has-[:checked]:border-primary has-[:checked]:bg-primary/10">
+                              <input
+                                type="radio"
+                                name="hire_type"
+                                value="full_time"
+                                checked
+                                class="sr-only"
+                              />
+                              <div class="flex items-center gap-3">
+                                <.icon name="tabler-briefcase" class="h-6 w-6 text-primary shrink-0" />
+                                <span class="text-sm text-foreground">
+                                  Full-time
+                                </span>
+                              </div>
+                            </label>
+                            <label class="group relative flex cursor-pointer rounded-lg px-4 py-3 shadow-sm focus:outline-none border-2 bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10 border-border has-[:checked]:border-primary has-[:checked]:bg-primary/10">
+                              <input type="radio" name="hire_type" value="contract" class="sr-only" />
+                              <div class="flex items-center gap-3">
+                                <.icon name="tabler-clock" class="h-6 w-6 text-primary shrink-0" />
+                                <span class="text-sm text-foreground">
+                                  Contract
+                                </span>
+                              </div>
+                            </label>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label class="block text-sm font-medium text-foreground mb-2">
+                            Tech stack
+                          </label>
+                          <.TechStack tech={@tech_stack} socket={@socket} form="home_form" />
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                          <.input
+                            name="location"
+                            value=""
+                            label="Location"
+                            placeholder="e.g. San Francisco, Remote"
+                          />
+                          <.input
+                            name="compensation"
+                            value=""
+                            label="Compensation range"
+                            placeholder="$150k - $250k"
+                          />
+                        </div>
+
                         <.input
                           type="textarea"
                           name="job_description"
@@ -218,14 +272,7 @@ defmodule AlgoraWeb.HomeLive do
                           rows="4"
                           placeholder="Tell us about the role and your requirements..."
                         />
-                        <.input
-                          type="textarea"
-                          name="job_description"
-                          value=""
-                          label="Describe your ideal candidate, heuristics, green/red flags etc."
-                          rows="4"
-                          placeholder={placeholder_text()}
-                        />
+
                         <.input
                           name="email"
                           value=""
@@ -1010,6 +1057,11 @@ defmodule AlgoraWeb.HomeLive do
       challenge_form={@challenge_form}
     />
     """
+  end
+
+  @impl true
+  def handle_event("tech_stack_changed", %{"tech_stack" => tech_stack}, socket) do
+    {:noreply, assign(socket, :tech_stack, tech_stack)}
   end
 
   @impl true

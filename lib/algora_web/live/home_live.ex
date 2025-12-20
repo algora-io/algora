@@ -471,24 +471,35 @@ defmodule AlgoraWeb.HomeLive do
         </section>
 
         <section class="relative isolate py-16 sm:py-40">
-          <div class="mx-auto max-w-7xl px-6 lg:px-8 pt-24 xl:pt-0">
+          <div class="mx-auto px-6 lg:px-8 pt-24 xl:pt-0">
             <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
-              Receive candidates
+              Hire with Confidence
             </h2>
-            <p class="text-center font-medium text-[15px] text-muted-foreground sm:text-xl mb-12 mx-auto">
-              Share your JDs and receive handpicked candidates with the right skills and experience
-            </p>
-            <div class="flex mx-auto gap-8">
-              <div class="w-[47%]">
-                <img
-                  src={~p"/images/screenshots/candidate-drip.png"}
-                  alt="Candidate drip"
-                  class="w-full object-cover aspect-[1008/561] rounded-xl border border-border bg-[#121214] p-1"
-                  loading="lazy"
-                />
+            <div class="flex flex-col items-center justify-center mx-auto gap-12 max-w-3xl">
+              <div class="w-full space-y-4">
                 <div class="mt-6 flex items-center gap-3">
                   <p class="text-foreground text-lg font-medium">
-                    Receive candidates in your
+                    <.icon
+                      name="tabler-circle-number-1"
+                      class="w-8 h-8 mr-1 text-foreground shrink-0"
+                    />
+                    Share your JDs and receive handpicked candidates with the right skills and experience
+                  </p>
+                </div>
+                <img
+                  src={~p"/images/screenshots/candidates-page.png"}
+                  alt="Candidates page"
+                  class="w-full object-cover aspect-[1200/630] rounded-xl border border-border bg-[#121214]"
+                  loading="lazy"
+                />
+              </div>
+              <div class="w-full space-y-4">
+                <div class="mt-6 flex items-center gap-3">
+                  <p class="text-foreground text-lg font-medium">
+                    <.icon
+                      name="tabler-circle-number-2"
+                      class="w-8 h-8 mr-1 text-foreground shrink-0"
+                    /> Get notified in your
                     <div class="w-9 h-9 rounded-lg bg-white/10 border border-border flex items-center justify-center flex-shrink-0">
                       <img
                         src={~p"/images/logos/gmail.png"}
@@ -504,17 +515,20 @@ defmodule AlgoraWeb.HomeLive do
                     <span class="font-semibold">Slack</span>
                   </p>
                 </div>
-              </div>
-              <div class="w-[53%]">
                 <img
-                  src={~p"/images/screenshots/candidates.png"}
-                  alt="Candidates"
-                  class="w-full object-cover aspect-[1480/726] rounded-xl border border-border bg-[#121214]"
+                  src={~p"/images/screenshots/candidate-drip.png"}
+                  alt="Candidate drip"
+                  class="w-full object-cover aspect-[1008/561] rounded-xl border border-border bg-[#121214] p-1"
                   loading="lazy"
                 />
+              </div>
+              <div class="w-full space-y-4">
                 <div class="mt-6 flex items-center gap-3">
                   <p class="text-foreground text-lg font-medium">
-                    Sync with your
+                    <.icon
+                      name="tabler-circle-number-3"
+                      class="w-8 h-8 mr-1 text-foreground shrink-0"
+                    /> Sync with your
                     <div class="w-9 h-9 rounded-lg overflow-hidden border border-border flex items-center justify-center flex-shrink-0">
                       <img
                         src={~p"/images/logos/ashby.png"}
@@ -526,6 +540,12 @@ defmodule AlgoraWeb.HomeLive do
                     to track interview progress
                   </p>
                 </div>
+                <img
+                  src={~p"/images/screenshots/candidates.png"}
+                  alt="Candidates"
+                  class="w-full object-cover aspect-[1480/726] rounded-xl border border-border bg-[#121214]"
+                  loading="lazy"
+                />
               </div>
             </div>
           </div>
@@ -854,124 +874,123 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="relative isolate py-16 sm:pb-40 dev:bg-zinc-900">
-          <div class="flex flex-col gap-12">
-            <div class="mx-auto max-w-7xl">
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                <%= for hire <- @hires2 do %>
-                  <%= if Map.get(hire, :special) do %>
-                    <div class="relative flex-1 flex mb-12 max-w-md">
-                      <div class="truncate flex items-center gap-2 sm:gap-3 p-4 sm:py-6 bg-gradient-to-br from-emerald-900/30 to-emerald-800/20 rounded-xl border-2 border-emerald-400/30 shadow-xl shadow-emerald-400/10 w-full">
-                        <img
-                          src={hire.person_avatar}
-                          alt={hire.person_name}
-                          class="size-8 sm:size-12 rounded-full ring-2 ring-emerald-400/50"
-                        />
-                        <.icon
-                          name="tabler-arrow-right"
-                          class="size-3 sm:size-4 text-emerald-400 shrink-0"
-                        />
-                        <img
-                          src={hire.company_avatar}
-                          alt={hire.company_name}
-                          class="size-8 sm:size-12 rounded-full ring-2 ring-emerald-400/50"
-                        />
-                        <div class="flex-1">
-                          <div class="text-sm font-medium whitespace-nowrap text-emerald-100">
-                            {hire.person_name}
-                            <.icon name="tabler-arrow-right" class="size-3 text-emerald-400" /> {hire.company_name}
-                          </div>
-                          <div class="text-xs text-emerald-200/80 mt-1">{hire.person_title}</div>
-                          <div :if={hire[:hire_date]} class="text-xs text-emerald-300/70 mt-1">
-                            {hire.hire_date}
-                          </div>
-                        </div>
-                      </div>
-                      <.badge
-                        variant="secondary"
-                        class="absolute -top-2 -left-2 text-xs px-2 sm:px-3 py-0.5 sm:py-1 text-black bg-gradient-to-r from-emerald-400 to-emerald-500 font-semibold shadow-lg"
-                      >
-                        <.icon name="tabler-star-filled" class="size-4 text-black mr-1 -ml-0.5" />
-                        New hire!
-                      </.badge>
-
-                      <%= if String.contains?(hire.company_name, "YC") do %>
-                        <img
-                          src={~p"/images/logos/yc.svg"}
-                          alt="Y Combinator"
-                          class="absolute -top-2 -right-2 size-6 opacity-90"
-                        />
-                      <% end %>
-                    </div>
-                  <% end %>
-                <% end %>
-              </div>
-
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                <%= for hire <- @hires2 do %>
-                  <%= unless Map.get(hire, :special) do %>
-                    <div class="relative flex items-center gap-2 sm:gap-3 p-4 sm:py-6 bg-card rounded-xl border shrink-0">
-                      <img
-                        src={hire.person_avatar}
-                        alt={hire.person_name}
-                        class="size-8 sm:size-12 rounded-full"
-                      />
-                      <.icon
-                        name="tabler-arrow-right"
-                        class="size-3 sm:size-4 text-muted-foreground shrink-0"
-                      />
-                      <img
-                        src={hire.company_avatar}
-                        alt={hire.company_name}
-                        class="size-8 sm:size-12 rounded-full"
-                      />
-                      <div class="flex-1">
-                        <div class="text-sm font-medium whitespace-nowrap">
-                          {hire.person_name}
-                          <.icon name="tabler-arrow-right" class="size-3 text-foreground" /> {Algora.Util.compact_org_name(
-                            hire.company_name
-                          )}
-                          <%= if String.contains?(hire.company_name, "YC") do %>
-                            <img
-                              src={~p"/images/logos/yc.svg"}
-                              alt="Y Combinator"
-                              class="size-4 opacity-90 inline-flex ml-1"
-                            />
-                          <% end %>
-                        </div>
-                        <div class="text-xs text-muted-foreground mt-1">{hire.person_title}</div>
-                      </div>
-                      <%= if String.contains?(hire.company_name, "Permit.io") or String.contains?(hire.company_name, "Prefix.dev") or String.contains?(hire.company_name, "Twenty") or String.contains?(hire.company_name, "Comfy") do %>
-                        <.badge
-                          variant="secondary"
-                          class="absolute -top-2 -left-2 text-xs px-2 py-1 text-emerald-400 bg-emerald-950"
-                        >
-                          Contract hire!
-                        </.badge>
-                      <% else %>
-                        <.badge
-                          variant="secondary"
-                          class="absolute -top-2 -left-2 text-xs px-2 py-1 text-emerald-400 bg-emerald-950"
-                        >
-                          Full-time hire!
-                        </.badge>
-                      <% end %>
-                    </div>
-                  <% end %>
-                <% end %>
-              </div>
-            </div>
-          </div>
-        </section>
-
         <section class="relative isolate pb-16 sm:pb-40 dev:bg-zinc-900">
-          <div class="flex flex-col gap-4 px-4 pt-6 sm:pt-10 mx-auto max-w-4xl">
+          <div class="flex flex-col gap-4 px-4 pt-6 sm:pt-10 mx-auto">
             <div class="mx-auto max-w-7xl px-6 lg:px-8 pt-24 xl:pt-0">
               <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl mb-2 sm:mb-4">
                 Community highlights
               </h2>
             </div>
-            <.events events={@events} />
+            <div class="flex flex-col gap-12">
+              <div class="mx-auto max-w-7xl">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                  <%= for hire <- @hires2 do %>
+                    <%= if Map.get(hire, :special) do %>
+                      <div class="relative flex-1 flex mb-12 max-w-md">
+                        <div class="truncate flex items-center gap-2 sm:gap-3 p-4 sm:py-6 bg-gradient-to-br from-emerald-900/30 to-emerald-800/20 rounded-xl border-2 border-emerald-400/30 shadow-xl shadow-emerald-400/10 w-full">
+                          <img
+                            src={hire.person_avatar}
+                            alt={hire.person_name}
+                            class="size-8 sm:size-12 rounded-full ring-2 ring-emerald-400/50"
+                          />
+                          <.icon
+                            name="tabler-arrow-right"
+                            class="size-3 sm:size-4 text-emerald-400 shrink-0"
+                          />
+                          <img
+                            src={hire.company_avatar}
+                            alt={hire.company_name}
+                            class="size-8 sm:size-12 rounded-full ring-2 ring-emerald-400/50"
+                          />
+                          <div class="flex-1">
+                            <div class="text-sm font-medium whitespace-nowrap text-emerald-100">
+                              {hire.person_name}
+                              <.icon name="tabler-arrow-right" class="size-3 text-emerald-400" /> {hire.company_name}
+                            </div>
+                            <div class="text-xs text-emerald-200/80 mt-1">{hire.person_title}</div>
+                            <div :if={hire[:hire_date]} class="text-xs text-emerald-300/70 mt-1">
+                              {hire.hire_date}
+                            </div>
+                          </div>
+                        </div>
+                        <.badge
+                          variant="secondary"
+                          class="absolute -top-2 -left-2 text-xs px-2 sm:px-3 py-0.5 sm:py-1 text-black bg-gradient-to-r from-emerald-400 to-emerald-500 font-semibold shadow-lg"
+                        >
+                          <.icon name="tabler-star-filled" class="size-4 text-black mr-1 -ml-0.5" />
+                          New hire!
+                        </.badge>
+
+                        <%= if String.contains?(hire.company_name, "YC") do %>
+                          <img
+                            src={~p"/images/logos/yc.svg"}
+                            alt="Y Combinator"
+                            class="absolute -top-2 -right-2 size-6 opacity-90"
+                          />
+                        <% end %>
+                      </div>
+                    <% end %>
+                  <% end %>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                  <%= for hire <- @hires2 do %>
+                    <%= unless Map.get(hire, :special) do %>
+                      <div class="relative flex items-center gap-2 sm:gap-3 p-4 sm:py-6 bg-card rounded-xl border shrink-0">
+                        <img
+                          src={hire.person_avatar}
+                          alt={hire.person_name}
+                          class="size-8 sm:size-12 rounded-full"
+                        />
+                        <.icon
+                          name="tabler-arrow-right"
+                          class="size-3 sm:size-4 text-muted-foreground shrink-0"
+                        />
+                        <img
+                          src={hire.company_avatar}
+                          alt={hire.company_name}
+                          class="size-8 sm:size-12 rounded-full"
+                        />
+                        <div class="flex-1">
+                          <div class="text-sm font-medium whitespace-nowrap">
+                            {hire.person_name}
+                            <.icon name="tabler-arrow-right" class="size-3 text-foreground" /> {Algora.Util.compact_org_name(
+                              hire.company_name
+                            )}
+                            <%= if String.contains?(hire.company_name, "YC") do %>
+                              <img
+                                src={~p"/images/logos/yc.svg"}
+                                alt="Y Combinator"
+                                class="size-4 opacity-90 inline-flex ml-1"
+                              />
+                            <% end %>
+                          </div>
+                          <div class="text-xs text-muted-foreground mt-1">{hire.person_title}</div>
+                        </div>
+                        <%= if String.contains?(hire.company_name, "Permit.io") or String.contains?(hire.company_name, "Prefix.dev") or String.contains?(hire.company_name, "Twenty") or String.contains?(hire.company_name, "Comfy") do %>
+                          <.badge
+                            variant="secondary"
+                            class="absolute -top-2 -left-2 text-xs px-2 py-1 text-emerald-400 bg-emerald-950"
+                          >
+                            Contract hire!
+                          </.badge>
+                        <% else %>
+                          <.badge
+                            variant="secondary"
+                            class="absolute -top-2 -left-2 text-xs px-2 py-1 text-emerald-400 bg-emerald-950"
+                          >
+                            Full-time hire!
+                          </.badge>
+                        <% end %>
+                      </div>
+                    <% end %>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+            <div class="max-w-4xl mx-auto">
+              <.events events={@events} />
+            </div>
           </div>
         </section>
 

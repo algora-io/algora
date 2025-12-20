@@ -793,7 +793,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="relative isolate pb-16 sm:pb-40 dev:bg-zinc-900">
+        <section class="relative isolate py-16 sm:py-40 bg-gray-950">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <h2 class="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-semibold tracking-tight text-foreground text-center mb-2">
               Open source bounties
@@ -874,7 +874,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="relative isolate pb-16 sm:pb-40 dev:bg-zinc-900">
+        <section class="relative isolate py-16 sm:py-40 bg-gray-950">
           <div class="flex flex-col gap-4 px-4 pt-6 sm:pt-10 mx-auto">
             <div class="mx-auto max-w-7xl px-6 lg:px-8 pt-24 xl:pt-0">
               <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl mb-2 sm:mb-4">
@@ -994,7 +994,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="relative isolate py-16 sm:py-40">
+        <section class="relative isolate py-16 sm:py-40 bg-gray-950">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
               Trusted by open source founders
@@ -1082,7 +1082,7 @@ defmodule AlgoraWeb.HomeLive do
                 <div class="lg:col-span-7">
                   <h3 class="text-xl sm:text-2xl xl:text-3xl font-display font-bold leading-[1.2] sm:leading-[2rem] xl:leading-[3rem]">
                     We used Algora extensively at Ziverge to reward over
-                    <span class="text-success">$143,000</span>
+                    <span class="text-success">$180,000</span>
                     in bounties and introduce a whole
                     <span class="text-success">new generation of contributors</span>
                     to the ZIO and Golem ecosystems.
@@ -1105,7 +1105,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="relative isolate pb-16 sm:pb-40 dev:bg-zinc-900">
+        <section class="relative isolate py-8 sm:py-20 bg-gray-950">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <h2 class="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-semibold tracking-tight text-foreground text-center mb-2">
               Challenges
@@ -1162,7 +1162,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="relative isolate py-16 sm:py-40 dev:bg-zinc-900">
+        <section class="relative isolate py-16 sm:py-40 bg-gray-950">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <div class="text-center mb-16">
               <h2 class="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight text-foreground mb-4 !leading-[1.25]">
@@ -1174,7 +1174,7 @@ defmodule AlgoraWeb.HomeLive do
 
             <div class="flex flex-col lg:flex-row gap-12 items-start">
               <%!-- Left column: Stats --%>
-              <div class="w-full lg:w-[60%] space-y-4">
+              <div class="w-full lg:w-[62%] space-y-4">
                 <%= for stat <- @stats2 do %>
                   <div class="p-8 rounded-2xl bg-card border border-border">
                     <div class="text-4xl sm:text-5xl md:text-6xl font-bold font-display text-emerald-400 mb-3">
@@ -1188,9 +1188,9 @@ defmodule AlgoraWeb.HomeLive do
               </div>
 
               <%!-- Right column: GitHub repo and YouTube --%>
-              <div class="w-full lg:w-[40%] space-y-4">
+              <div class="w-full lg:w-[38%] space-y-4">
                 <div>
-                  <p class="text-xl font-medium text-foreground mb-2">
+                  <p class="text-xl font-semibold text-foreground mb-2">
                     Algora is open source!
                   </p>
                 </div>
@@ -1198,7 +1198,7 @@ defmodule AlgoraWeb.HomeLive do
                   href="https://github.com/algora-io/algora"
                   target="_blank"
                   rel="noopener"
-                  class="group block rounded-2xl overflow-hidden border-2 border-border hover:border-emerald-400/50 transition-all duration-300 hover:shadow-2xl hover:shadow-emerald-400/10"
+                  class="group block rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-[#704a7c]/10"
                 >
                   <img
                     src={~p"/images/repo-og.png"}
@@ -1208,7 +1208,7 @@ defmodule AlgoraWeb.HomeLive do
                 </.link>
 
                 <div>
-                  <p class="text-xl font-medium text-foreground mb-2">
+                  <p class="text-xl font-semibold text-foreground mb-2">
                     OSS Founder Podcast
                   </p>
                 </div>
@@ -1216,12 +1216,12 @@ defmodule AlgoraWeb.HomeLive do
                   href="https://www.youtube.com/@algora-io"
                   target="_blank"
                   rel="noopener"
-                  class="group block rounded-2xl overflow-hidden border-2 border-border hover:border-red-400/50 transition-all duration-300 hover:shadow-2xl hover:shadow-red-400/10"
+                  class="group block rounded-2xl overflow-hidden aspect-[1825/775] transition-all duration-300 hover:shadow-2xl hover:shadow-red-400/10"
                 >
                   <img
                     src={~p"/images/screenshots/oss-founder-podcast.png"}
                     alt="OSS Founder Podcast"
-                    class="w-full h-full aspect-[1825/775]"
+                    class="w-full h-full object-cover"
                   />
                 </.link>
               </div>
@@ -1229,7 +1229,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="relative isolate pb-16 sm:pb-40 bg-black">
+        <section class="relative isolate py-16 sm:py-40 bg-black">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <h2 class="font-display text-4xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-semibold tracking-tight text-foreground text-center mb-4 !leading-[1.25]">
               Our journey
@@ -1541,7 +1541,7 @@ defmodule AlgoraWeb.HomeLive do
           <div class="w-full relative flex space-x-3">
             <div class="w-full flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
               <div class="w-full flex items-center gap-3">
-                <div class="flex -space-x-1 ring-8 ring-black">
+                <div class="flex -space-x-1 ring-8 ring-gray-950">
                   <span class="relative shrink-0 overflow-hidden flex h-9 w-9 sm:h-12 sm:w-12 items-center justify-center rounded-xl ring-4 bg-gray-950 ring-black">
                     <img
                       class="aspect-square h-full w-full"
@@ -1644,7 +1644,7 @@ defmodule AlgoraWeb.HomeLive do
           <div class="w-full relative flex space-x-3">
             <div class="w-full flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
               <div class="w-full flex items-center gap-3">
-                <div class="flex -space-x-1 ring-8 ring-black">
+                <div class="flex -space-x-1 ring-8 ring-gray-950">
                   <span class="ml-6 relative shrink-0 overflow-hidden flex h-9 w-9 sm:h-12 sm:w-12 items-center justify-center rounded-xl">
                     <img
                       class="aspect-square h-full w-full"
@@ -1703,7 +1703,7 @@ defmodule AlgoraWeb.HomeLive do
           <div class="w-full relative flex space-x-3">
             <div class="w-full flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
               <div class="w-full flex items-center gap-3">
-                <div class="flex -space-x-1 ring-8 ring-black">
+                <div class="flex -space-x-1 ring-8 ring-gray-950">
                   <span class="ml-6 relative shrink-0 overflow-hidden flex h-9 w-9 sm:h-12 sm:w-12 items-center justify-center rounded-xl bg-gray-950">
                     <img
                       class="aspect-square h-full w-full"
@@ -1759,7 +1759,7 @@ defmodule AlgoraWeb.HomeLive do
           <div class="w-full relative flex space-x-3">
             <div class="w-full flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
               <div class="w-full flex items-center gap-3">
-                <div class="flex -space-x-1 ring-8 ring-black">
+                <div class="flex -space-x-1 ring-8 ring-gray-950">
                   <span class="relative shrink-0 overflow-hidden flex h-9 w-9 sm:h-12 sm:w-12 items-center justify-center rounded-xl ring-4 bg-gray-950 ring-black">
                     <img
                       class="aspect-square h-full w-full"

@@ -46,8 +46,8 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   @impl true
   def mount(_params, _session, socket) do
     # Load candidate data
-    candidate_data = load_candidate_data("")
-    # candidate_data = load_candidate_data("mqYKH8Nox4FVyPcF")
+    # candidate_data = load_candidate_data("")
+    candidate_data = load_candidate_data("mqYKH8Nox4FVyPcF")
 
     socket =
       socket
@@ -63,9 +63,29 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         nil
 
       match ->
+        # Preload the nested job_posting.user association
+        match = Algora.Repo.preload(match, job_posting: :user)
+        user = match.user
+
+        # Fetch contributions for this user
+        contributions = Algora.Workspace.list_user_contributions([user.id], exclude_personal: false, display_all: true)
+
+        contributions_map = %{user.id => contributions}
+
         # Fetch language contributions for this user
-        language_contributions =
-          LanguageContributions.list_language_contributions(user_id: match.user_id)
+        language_contributions_map =
+          [user.id]
+          |> LanguageContributions.list_language_contributions_batch()
+          |> transform_language_contributions()
+
+        # Fetch heatmap data for this user
+        heatmaps_map =
+          [user.id]
+          |> AlgoraCloud.Profiles.list_heatmaps()
+          |> Map.new(fn heatmap -> {heatmap.user_id, heatmap.data} end)
+
+        # Build interviews map
+        interviews_map = build_interviews_map([match])
 
         %{
           candidate: %{
@@ -73,14 +93,12 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             job_posting: match.job_posting,
             job_title: match.job_posting.title || "Software Engineer"
           },
-          contributions_map: %{},
-          language_contributions_map: %{
-            match.user_id => language_contributions
-          },
-          heatmaps_map: %{},
+          contributions_map: contributions_map,
+          language_contributions_map: language_contributions_map,
+          heatmaps_map: heatmaps_map,
           org_badge_data: nil,
           hiring_managers: [],
-          interviews_map: %{},
+          interviews_map: interviews_map,
           current_org: match.job_posting.user,
           anonymize: false,
           base_anonymize: false,
@@ -91,6 +109,70 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           tech_stack: match.job_posting.tech_stack || []
         }
     end
+  end
+
+  defp transform_language_contributions(contributions_map) do
+    # Transform language contributions similar to candidates2_live.ex
+    Map.new(contributions_map, fn {user_id, contributions} ->
+      transformed =
+        contributions
+        |> Enum.map(fn contrib ->
+          case contrib.language do
+            "JavaScript" -> %{contrib | language: "TypeScript"}
+            "Jupyter Notebook" -> %{contrib | language: "Python"}
+            "Markdown" -> nil
+            "MDX" -> nil
+            "TeX" -> nil
+            "HTML" -> nil
+            "CSS" -> nil
+            "Nunjucks" -> nil
+            "Nushell" -> nil
+            "reStructuredText" -> nil
+            "Nix" -> nil
+            "Makefile" -> nil
+            "Emacs Lisp" -> nil
+            "Mustache" -> nil
+            _ -> contrib
+          end
+        end)
+        |> Enum.reject(&is_nil/1)
+        |> Enum.group_by(& &1.language)
+        |> Enum.map(fn {_language, contribs} ->
+          # Combine contributions for the same language
+          Enum.reduce(contribs, fn contrib, acc ->
+            %{
+              acc
+              | prs: acc.prs + contrib.prs,
+                percentage: Decimal.add(acc.percentage, contrib.percentage)
+            }
+          end)
+        end)
+        |> Enum.sort_by(& &1.percentage, {:desc, Decimal})
+
+      {user_id, transformed}
+    end)
+  end
+
+  defp build_interviews_map(matches) do
+    # Build interviews map for matches similar to candidates2_live.ex
+    import Ecto.Query
+
+    alias Algora.Repo
+
+    user_ids = matches |> Enum.map(& &1.user_id) |> Enum.uniq()
+    job_posting_ids = matches |> Enum.map(& &1.job_posting_id) |> Enum.uniq()
+
+    interviews =
+      Repo.all(
+        from(ji in Algora.Interviews.JobInterview,
+          where: ji.user_id in ^user_ids and ji.job_posting_id in ^job_posting_ids,
+          preload: [:user]
+        )
+      )
+
+    Enum.reduce(interviews, %{}, fn interview, acc ->
+      Map.put(acc, {interview.user_id, interview.job_posting_id}, interview)
+    end)
   end
 
   defp placeholder_text do

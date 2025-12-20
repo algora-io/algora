@@ -571,33 +571,23 @@ defmodule AlgoraWeb.HomeLive do
               </div>
             </div>
 
-            <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
-              <div class="grid grid-cols-1 items-center gap-x-16 gap-y-8 lg:grid-cols-11">
-                <div class="lg:col-span-5">
-                  <.modal_video
-                    class="rounded-xl lg:rounded-2xl"
-                    src="https://www.youtube.com/embed/3wZGDuoPajk"
-                    start={13}
-                    title="OSS Bounties & Hiring engineers on Algora.io | Founder Testimonial"
-                    poster="https://img.youtube.com/vi/3wZGDuoPajk/maxresdefault.jpg"
-                    alt="Tushar Mathur"
-                  />
-                </div>
-                <div class="lg:col-span-6">
-                  <h3 class="text-xl sm:text-2xl xl:text-3xl font-display font-bold leading-[1.2] sm:leading-[2rem] xl:leading-[3rem]">
-                    Bounties help us control our burn rate, get work done & meet new hires. I've made
-                    <span class="text-success">4 full-time hires</span>
-                    using Algora
-                  </h3>
-                  <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-4 sm:pt-12">
-                    <div class="flex items-center gap-4">
-                      <div>
-                        <div class="text-xl sm:text-2xl xl:text-3xl font-semibold text-foreground">
-                          Tushar Mathur
-                        </div>
-                        <div class="sm:pt-2 text-sm sm:text-lg xl:text-2xl font-medium text-muted-foreground">
-                          Founder & CEO at Tailcall
-                        </div>
+            <div class="mx-auto mt-4 max-w-7xl gap-8 text-sm leading-6 sm:mt-8">
+              <div class="lg:col-span-7">
+                <h3 class="text-xl sm:text-2xl xl:text-3xl font-display font-bold leading-[1.2] sm:leading-[2rem] xl:leading-[3rem]">
+                  We used Algora extensively at Ziverge to reward over
+                  <span class="text-success">$180,000</span>
+                  in bounties and introduce a whole
+                  <span class="text-success">new generation of contributors</span>
+                  and <span class="text-success">hired multiple engineers.</span>
+                </h3>
+                <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-2 sm:pt-6">
+                  <div class="flex items-center gap-4">
+                    <div>
+                      <div class="text-xl sm:text-2xl xl:text-3xl font-semibold text-foreground">
+                        John A De Goes
+                      </div>
+                      <div class="sm:pt-2 text-sm sm:text-lg xl:text-2xl font-medium text-muted-foreground">
+                        Founder & CEO at Ziverge
                       </div>
                     </div>
                   </div>

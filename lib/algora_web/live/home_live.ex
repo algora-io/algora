@@ -487,18 +487,20 @@ defmodule AlgoraWeb.HomeLive do
                   loading="lazy"
                 />
                 <div class="mt-6 flex items-center gap-3">
-                  <div class="w-12 h-12 rounded-xl bg-white/10 border border-border flex items-center justify-center flex-shrink-0">
-                    <img
-                      src={~p"/images/logos/gmail.png"}
-                      alt="Gmail"
-                      class="w-8 h-auto aspect-[800/601]"
-                    />
-                  </div>
-                  <div class="w-12 h-12 rounded-xl bg-white/10 border border-border flex items-center justify-center flex-shrink-0">
-                    <img src={~p"/images/logos/slack.svg"} alt="Slack" class="w-7 h-7" />
-                  </div>
                   <p class="text-foreground text-lg font-medium">
-                    Receive candidates in your inbox/Slack
+                    Receive candidates in your
+                    <div class="w-9 h-9 rounded-lg bg-white/10 border border-border flex items-center justify-center flex-shrink-0">
+                      <img
+                        src={~p"/images/logos/gmail.png"}
+                        alt="Gmail"
+                        class="w-6 h-auto aspect-[800/601]"
+                      />
+                    </div>
+                    Inbox
+                    <div class="w-9 h-9 rounded-lg bg-white/10 border border-border flex items-center justify-center flex-shrink-0">
+                      <img src={~p"/images/logos/slack.svg"} alt="Slack" class="w-5 h-5" />
+                    </div>
+                    Slack
                   </p>
                 </div>
               </div>
@@ -510,13 +512,16 @@ defmodule AlgoraWeb.HomeLive do
                   loading="lazy"
                 />
                 <div class="mt-6 flex items-center gap-3">
-                  <img
-                    src={~p"/images/logos/ashby.png"}
-                    alt="Ashby"
-                    class="w-12 h-12 rounded-xl bg-white/10 border border-border"
-                  />
                   <p class="text-foreground text-lg font-medium">
-                    Sync with your Ashby to track candidates
+                    Sync with your
+                    <div class="w-9 h-9 rounded-lg overflow-hidden border border-border flex items-center justify-center flex-shrink-0">
+                      <img
+                        src={~p"/images/logos/ashby.png"}
+                        alt="Gmail"
+                        class="w-full h-full object-cover"
+                      />
+                    </div>
+                    Ashby to track candidates
                   </p>
                 </div>
               </div>

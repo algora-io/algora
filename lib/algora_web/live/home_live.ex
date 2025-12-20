@@ -415,6 +415,59 @@ defmodule AlgoraWeb.HomeLive do
               </div>
             </div>
           </div>
+          <div class="pt-6 sm:pt-12 max-w-[69rem] mx-auto flex flex-col md:flex-row gap-8 sm:gap-12 px-4">
+            <div class="flex-1 mx-auto flex flex-col justify-between">
+              <figure class="relative flex flex-col h-full">
+                <blockquote class="text-lg font-medium text-foreground/90 flex-grow">
+                  "Algora helped us meet Nick, who after being contracted a few months, joined the Trigger founding team full-time. It was the
+                  <span class="text-success">easiest hire</span>
+                  and turned out to be <span class="text-success">very very good</span>."
+                </blockquote>
+                <figcaption class="mt-8 flex items-center gap-x-4">
+                  <img
+                    src="/images/people/eric-allam.jpg"
+                    alt="Eric Allam"
+                    class="h-16 w-16 rounded-full object-cover bg-gray-800"
+                    loading="lazy"
+                  />
+                  <div class="text-sm">
+                    <div class="text-base font-semibold text-foreground">Eric Allam</div>
+                    <div class="text-foreground/90 font-medium">Co-founder & CTO</div>
+                    <div class="text-muted-foreground font-medium">
+                      Trigger.dev <span class="text-orange-400">(YC W23)</span>
+                    </div>
+                  </div>
+                </figcaption>
+              </figure>
+            </div>
+
+            <div class="flex-1 mx-auto flex flex-col justify-between">
+              <figure class="relative flex flex-col h-full">
+                <blockquote class="text-lg font-medium text-foreground/90 flex-grow">
+                  "Algora helped us meet Gergő and
+                  <span class="text-success">I couldn't be happier</span>
+                  with the results. He's been working full-time with us for
+                  <span class="text-success">over a year</span>
+                  now and is a key contributor to our product."
+                </blockquote>
+                <figcaption class="mt-8 flex items-center gap-x-4">
+                  <img
+                    src="/images/people/nicolas-camara.jpg"
+                    alt="Nicolas Camara"
+                    class="h-16 w-16 rounded-full object-cover bg-gray-800"
+                    loading="lazy"
+                  />
+                  <div class="text-sm">
+                    <div class="text-base font-semibold text-foreground">Nicolas Camara</div>
+                    <div class="text-foreground/90 font-medium">Co-founder & CTO</div>
+                    <div class="text-muted-foreground font-medium">
+                      Firecrawl <span class="text-orange-400">(YC S22)</span>
+                    </div>
+                  </div>
+                </figcaption>
+              </figure>
+            </div>
+          </div>
         </section>
 
         <section class="relative isolate py-16 sm:py-40">
@@ -426,70 +479,46 @@ defmodule AlgoraWeb.HomeLive do
               Share your JDs and receive handpicked candidates with the right skills and experience
             </p>
             <div class="flex mx-auto gap-8">
-              <img
-                src={~p"/images/screenshots/candidate-drip.png"}
-                alt="Onboarding org"
-                class="w-[47%] object-cover aspect-[1008/561] rounded-xl bg-gray-800"
-                loading="lazy"
-              />
-              <img
-                src={~p"/images/screenshots/candidates.png"}
-                alt="Onboarding org"
-                class="w-[53%] object-cover aspect-[1480/726] rounded-xl border border-border bg-gray-800"
-                loading="lazy"
-              />
-            </div>
-            <div class="pt-12 sm:pt-24 flex flex-col md:flex-row gap-8 px-4">
-              <div class="flex-1 mx-auto max-w-xl flex flex-col justify-between">
-                <figure class="relative flex flex-col h-full">
-                  <blockquote class="text-lg font-medium text-foreground/90 flex-grow">
-                    "Algora helped us meet Nick, who after being contracted a few months, joined the Trigger founding team full-time. It was the
-                    <span class="text-success">easiest hire</span>
-                    and turned out to be <span class="text-success">very very good</span>."
-                  </blockquote>
-                  <figcaption class="mt-8 flex items-center gap-x-4">
+              <div class="w-[47%]">
+                <img
+                  src={~p"/images/screenshots/candidate-drip.png"}
+                  alt="Candidate drip"
+                  class="w-full object-cover aspect-[1008/561] rounded-xl border border-border bg-[#121214] p-1"
+                  loading="lazy"
+                />
+                <div class="mt-6 flex items-center gap-3">
+                  <div class="w-12 h-12 rounded-xl bg-white/10 border border-border flex items-center justify-center flex-shrink-0">
                     <img
-                      src="/images/people/eric-allam.jpg"
-                      alt="Eric Allam"
-                      class="h-16 w-16 rounded-full object-cover bg-gray-800"
-                      loading="lazy"
+                      src={~p"/images/logos/gmail.png"}
+                      alt="Gmail"
+                      class="w-8 h-auto aspect-[800/601]"
                     />
-                    <div class="text-sm">
-                      <div class="text-base font-semibold text-foreground">Eric Allam</div>
-                      <div class="text-foreground/90 font-medium">Co-founder & CTO</div>
-                      <div class="text-muted-foreground font-medium">
-                        Trigger.dev <span class="text-orange-400">(YC W23)</span>
-                      </div>
-                    </div>
-                  </figcaption>
-                </figure>
+                  </div>
+                  <div class="w-12 h-12 rounded-xl bg-white/10 border border-border flex items-center justify-center flex-shrink-0">
+                    <img src={~p"/images/logos/slack.svg"} alt="Slack" class="w-7 h-7" />
+                  </div>
+                  <p class="text-foreground text-lg font-medium">
+                    Receive candidates in your inbox/Slack
+                  </p>
+                </div>
               </div>
-
-              <div class="flex-1 mx-auto max-w-xl flex flex-col justify-between">
-                <figure class="relative flex flex-col h-full">
-                  <blockquote class="text-lg font-medium text-foreground/90 flex-grow">
-                    "Algora helped us meet Gergő and
-                    <span class="text-success">I couldn't be happier</span>
-                    with the results. He's been working full-time with us for
-                    <span class="text-success">over a year</span>
-                    now and is a key contributor to our product."
-                  </blockquote>
-                  <figcaption class="mt-8 flex items-center gap-x-4">
-                    <img
-                      src="/images/people/nicolas-camara.jpg"
-                      alt="Nicolas Camara"
-                      class="h-16 w-16 rounded-full object-cover bg-gray-800"
-                      loading="lazy"
-                    />
-                    <div class="text-sm">
-                      <div class="text-base font-semibold text-foreground">Nicolas Camara</div>
-                      <div class="text-foreground/90 font-medium">Co-founder & CTO</div>
-                      <div class="text-muted-foreground font-medium">
-                        Firecrawl <span class="text-orange-400">(YC S22)</span>
-                      </div>
-                    </div>
-                  </figcaption>
-                </figure>
+              <div class="w-[53%]">
+                <img
+                  src={~p"/images/screenshots/candidates.png"}
+                  alt="Candidates"
+                  class="w-full object-cover aspect-[1480/726] rounded-xl border border-border bg-[#121214]"
+                  loading="lazy"
+                />
+                <div class="mt-6 flex items-center gap-3">
+                  <img
+                    src={~p"/images/logos/ashby.png"}
+                    alt="Ashby"
+                    class="w-12 h-12 rounded-xl bg-white/10 border border-border"
+                  />
+                  <p class="text-foreground text-lg font-medium">
+                    Sync with your Ashby to track candidates
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -528,6 +557,66 @@ defmodule AlgoraWeb.HomeLive do
                   loading="lazy"
                 />
               </.link>
+            </div>
+            <div class="pt-12 sm:pt-24 text-center">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <div class="mb-2 mx-auto flex items-center justify-center h-12 w-12 bg-emerald-400/10 rounded-full">
+                    <.icon name="tabler-filter" class="h-8 w-8 text-emerald-400" />
+                  </div>
+                  <h4 class="font-semibold text-foreground mb-1">High Signal Only</h4>
+                  <p class="text-sm text-foreground-light">
+                    Your Algora job board automatically <br /> screens and ranks applicants
+                  </p>
+                </div>
+                <div>
+                  <div class="mb-2 mx-auto flex items-center justify-center h-12 w-12 bg-emerald-400/10 rounded-full">
+                    <.icon name="tabler-clock" class="h-8 w-8 text-emerald-400" />
+                  </div>
+                  <h4 class="font-semibold text-foreground mb-1">Save Time & Money</h4>
+                  <p class="text-sm text-foreground-light">
+                    Match with top developers efficiently
+                  </p>
+                </div>
+                <div>
+                  <div class="mb-2 mx-auto flex items-center justify-center h-12 w-12 bg-emerald-400/10 rounded-full">
+                    <.icon name="tabler-shield-check" class="h-8 w-8 text-emerald-400" />
+                  </div>
+                  <h4 class="font-semibold text-foreground mb-1">Avoid Bad Hires</h4>
+                  <p class="text-sm text-foreground-light">
+                    Trial candidates with real paid projects<br />
+                    to assess role fit and job performance
+                  </p>
+                </div>
+                <div>
+                  <div class="mb-2 mx-auto flex items-center justify-center h-12 w-12 bg-emerald-400/10 rounded-full">
+                    <.icon name="tabler-users" class="h-8 w-8 text-emerald-400" />
+                  </div>
+                  <h4 class="font-semibold text-foreground mb-1">Massive Reach</h4>
+                  <p class="text-sm text-foreground-light">
+                    Reach 50K+ devs with unlimited job postings
+                  </p>
+                </div>
+                <div>
+                  <div class="mb-2 mx-auto flex items-center justify-center h-12 w-12 bg-emerald-400/10 rounded-full">
+                    <.icon name="tabler-target" class="h-8 w-8 text-emerald-400" />
+                  </div>
+                  <h4 class="font-semibold text-foreground mb-1">Top Talent</h4>
+                  <p class="text-sm text-foreground-light">
+                    Access top 1% users matching your<br />tech, skills, seniority and location preferences
+                  </p>
+                </div>
+                <div>
+                  <div class="mb-2 mx-auto flex items-center justify-center h-12 w-12 bg-emerald-400/10 rounded-full">
+                    <.icon name="tabler-plug-connected" class="h-8 w-8 text-emerald-400" />
+                  </div>
+                  <h4 class="font-semibold text-foreground mb-1">White-label</h4>
+                  <p class="text-sm text-foreground-light">
+                    Embed 1-click apply on your website<br />
+                    and add custom branding to your job board
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </section>

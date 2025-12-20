@@ -429,7 +429,7 @@ defmodule AlgoraWeb.HomeLive do
               <img
                 src={~p"/images/screenshots/candidate-drip.png"}
                 alt="Onboarding org"
-                class="w-[47%] object-cover aspect-[1008/561] rounded-xl border border-border bg-gray-800"
+                class="w-[47%] object-cover aspect-[1008/561] rounded-xl bg-gray-800"
                 loading="lazy"
               />
               <img
@@ -439,48 +439,13 @@ defmodule AlgoraWeb.HomeLive do
                 loading="lazy"
               />
             </div>
-          </div>
-        </section>
-
-        <section class="relative isolate py-16 sm:py-40">
-          <div class="mx-auto max-w-7xl px-6 lg:px-8 pt-24 xl:pt-0">
-            <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
-              Publish jobs
-            </h2>
-            <p class="text-center font-medium text-[15px] text-muted-foreground sm:text-xl mb-12 mx-auto">
-              Access top 1% users matching your tech, skills, seniority and location preferences
-            </p>
-            <div class="grid grid-cols-3 gap-8">
-              <img
-                src="https://algora.io/og/coderabbit/jobs?cached"
-                alt="CodeRabbit jobs"
-                class="object-cover aspect-[1200/630] rounded-xl border border-border bg-gray-800"
-                loading="lazy"
-              />
-              <img
-                src="https://algora.io/og/comfy-org/jobs?cached"
-                alt="Comfy.org jobs"
-                class="object-cover aspect-[1200/630] rounded-xl border border-border bg-gray-800"
-                loading="lazy"
-              />
-              <img
-                src="https://algora.io/og/lovable/jobs?cached"
-                alt="Lovable jobs"
-                class="object-cover aspect-[1200/630] rounded-xl border border-border bg-gray-800"
-                loading="lazy"
-              />
-            </div>
-
             <div class="pt-12 sm:pt-24 flex flex-col md:flex-row gap-8 px-4">
               <div class="flex-1 mx-auto max-w-xl flex flex-col justify-between">
                 <figure class="relative flex flex-col h-full">
                   <blockquote class="text-lg font-medium text-foreground/90 flex-grow">
-                    <p>
-                      "Algora helped us meet Nick, who started as an open source contributor, and after being contracted a few months, joined the Trigger founding team full-time.
-                    </p>
-                    <p class="pt-4">
-                      It was the easiest hire and turned out to be very very good."
-                    </p>
+                    "Algora helped us meet Nick, who after being contracted a few months, joined the Trigger founding team full-time. It was the
+                    <span class="text-success">easiest hire</span>
+                    and turned out to be <span class="text-success">very very good</span>."
                   </blockquote>
                   <figcaption class="mt-8 flex items-center gap-x-4">
                     <img
@@ -503,13 +468,11 @@ defmodule AlgoraWeb.HomeLive do
               <div class="flex-1 mx-auto max-w-xl flex flex-col justify-between">
                 <figure class="relative flex flex-col h-full">
                   <blockquote class="text-lg font-medium text-foreground/90 flex-grow">
-                    <p>
-                      "We met Gergő from his open source contributions on Algora and contracted him to help us at Firecrawl. He's been working full-time with us for over a year now and is a key contributor to our product.
-                    </p>
-
-                    <p class="pt-4">
-                      I think you realized this by now, but you have such a powerful sourcing/hiring engine in your hands!"
-                    </p>
+                    "Algora helped us meet Gergő and
+                    <span class="text-success">I couldn't be happier</span>
+                    with the results. He's been working full-time with us for
+                    <span class="text-success">over a year</span>
+                    now and is a key contributor to our product."
                   </blockquote>
                   <figcaption class="mt-8 flex items-center gap-x-4">
                     <img
@@ -528,6 +491,43 @@ defmodule AlgoraWeb.HomeLive do
                   </figcaption>
                 </figure>
               </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="relative isolate py-16 sm:py-40">
+          <div class="mx-auto max-w-7xl px-6 lg:px-8 pt-24 xl:pt-0">
+            <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
+              Publish jobs
+            </h2>
+            <p class="text-center font-medium text-[15px] text-muted-foreground sm:text-xl mb-12 mx-auto">
+              Access top 1% users matching your tech, skills, seniority and location preferences
+            </p>
+            <div class="grid grid-cols-3 gap-8">
+              <.link href="https://algora.io/coderabbit/jobs" target="_blank">
+                <img
+                  src="https://algora.io/og/coderabbit/jobs?cached"
+                  alt="CodeRabbit jobs"
+                  class="object-cover aspect-[1200/630] rounded-xl border border-border bg-gray-800"
+                  loading="lazy"
+                />
+              </.link>
+              <.link href="https://algora.io/comfy-org/jobs" target="_blank">
+                <img
+                  src="https://algora.io/og/comfy-org/jobs?cached"
+                  alt="Comfy.org jobs"
+                  class="object-cover aspect-[1200/630] rounded-xl border border-border bg-gray-800"
+                  loading="lazy"
+                />
+              </.link>
+              <.link href="https://algora.io/lovable/jobs" target="_blank">
+                <img
+                  src="https://algora.io/og/lovable/jobs?cached"
+                  alt="Lovable jobs"
+                  class="object-cover aspect-[1200/630] rounded-xl border border-border bg-gray-800"
+                  loading="lazy"
+                />
+              </.link>
             </div>
           </div>
         </section>

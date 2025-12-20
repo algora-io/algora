@@ -3,6 +3,11 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   use AlgoraWeb, :live_view
   use LiveSvelte.Components
 
+  import AlgoraCloud.Components.CandidateCard
+
+  alias Algora.Matches
+  alias AlgoraCloud.LanguageContributions
+
   require Logger
 
   defmodule Form do
@@ -40,7 +45,52 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, :form, to_form(Form.changeset(%Form{}, %{tech_stack: []})))}
+    # Load candidate data
+    candidate_data = load_candidate_data("")
+    # candidate_data = load_candidate_data("mqYKH8Nox4FVyPcF")
+
+    socket =
+      socket
+      |> assign(:form, to_form(Form.changeset(%Form{}, %{tech_stack: []})))
+      |> assign(:candidate_data, candidate_data)
+
+    {:ok, socket}
+  end
+
+  defp load_candidate_data(match_id) do
+    case Matches.get_job_match_by_id(match_id) do
+      nil ->
+        nil
+
+      match ->
+        # Fetch language contributions for this user
+        language_contributions =
+          LanguageContributions.list_language_contributions(user_id: match.user_id)
+
+        %{
+          candidate: %{
+            match: match,
+            job_posting: match.job_posting,
+            job_title: match.job_posting.title || "Software Engineer"
+          },
+          contributions_map: %{},
+          language_contributions_map: %{
+            match.user_id => language_contributions
+          },
+          heatmaps_map: %{},
+          org_badge_data: nil,
+          hiring_managers: [],
+          interviews_map: %{},
+          current_org: match.job_posting.user,
+          anonymize: false,
+          base_anonymize: false,
+          screenshot?: true,
+          fullscreen?: false,
+          current_user: nil,
+          current_user_role: nil,
+          tech_stack: match.job_posting.tech_stack || []
+        }
+    end
   end
 
   defp placeholder_text do
@@ -230,7 +280,10 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
               </div>
             </.form>
           </div>
-          <div class="hidden lg:flex flex-col gap-3 w-full">
+          <div :if={@candidate_data} class="hidden lg:flex flex-col gap-3 w-full">
+            <AlgoraCloud.Components.CandidateCard.candidate_card {Map.merge(@candidate_data, %{screenshot?: true, fullscreen?: false})} />
+          </div>
+          <div :if={!@candidate_data} class="hidden lg:flex flex-col gap-3 w-full">
             <img
               src="https://algora.io/og/coderabbit/candidates/9EL2CWmJxZ57eqGv"
               alt="Job candidates"

@@ -83,10 +83,10 @@ defmodule AlgoraWeb.HomeLive do
                   <h1 class="font-display text-3xl sm:text-lg md:text-5xl xl:text-[3.25rem] font-semibold tracking-tight text-foreground">
                     Open source <span class="text-emerald-400">tech recruiting</span>
                   </h1>
-                  <p class="mt-4 text-lg leading-8 text-muted-foreground">
-                    Connecting the most prolific open source maintainers & contributors with their next jobs.
+                  <p class="mt-2 text-lg leading-8 font-medium text-foreground">
+                    Connecting the most prolific open source maintainers & contributors with their next jobs
                   </p>
-                  <div class="flex items-center justify-center lg:justify-start gap-12 overflow-x-auto scrollbar-thin pb-0">
+                  <div class="flex items-center justify-center lg:justify-start gap-12 overflow-x-auto scrollbar-thin py-4">
                     <img
                       src="/images/wordmarks/coderabbit.svg"
                       alt="CodeRabbit"

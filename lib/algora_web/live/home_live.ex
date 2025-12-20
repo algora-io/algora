@@ -493,14 +493,15 @@ defmodule AlgoraWeb.HomeLive do
                       <img
                         src={~p"/images/logos/gmail.png"}
                         alt="Gmail"
-                        class="w-6 h-auto aspect-[800/601]"
+                        class="w-5 h-auto aspect-[800/601]"
                       />
                     </div>
-                    Inbox
+                    <span class="font-semibold">Inbox</span>
+                    and
                     <div class="w-9 h-9 rounded-lg bg-white/10 border border-border flex items-center justify-center flex-shrink-0">
                       <img src={~p"/images/logos/slack.svg"} alt="Slack" class="w-5 h-5" />
                     </div>
-                    Slack
+                    <span class="font-semibold">Slack</span>
                   </p>
                 </div>
               </div>
@@ -521,7 +522,8 @@ defmodule AlgoraWeb.HomeLive do
                         class="w-full h-full object-cover"
                       />
                     </div>
-                    Ashby to track candidates
+                    <span class="font-semibold">Ashby</span>
+                    to track interview progress
                   </p>
                 </div>
               </div>
@@ -574,41 +576,14 @@ defmodule AlgoraWeb.HomeLive do
                     Your Algora job board automatically <br /> screens and ranks applicants
                   </p>
                 </div>
-                <div>
-                  <div class="mb-2 mx-auto flex items-center justify-center h-12 w-12 bg-emerald-400/10 rounded-full">
-                    <.icon name="tabler-clock" class="h-8 w-8 text-emerald-400" />
-                  </div>
-                  <h4 class="font-semibold text-foreground mb-1">Save Time & Money</h4>
-                  <p class="text-sm text-foreground-light">
-                    Match with top developers efficiently
-                  </p>
-                </div>
-                <div>
-                  <div class="mb-2 mx-auto flex items-center justify-center h-12 w-12 bg-emerald-400/10 rounded-full">
-                    <.icon name="tabler-shield-check" class="h-8 w-8 text-emerald-400" />
-                  </div>
-                  <h4 class="font-semibold text-foreground mb-1">Avoid Bad Hires</h4>
-                  <p class="text-sm text-foreground-light">
-                    Trial candidates with real paid projects<br />
-                    to assess role fit and job performance
-                  </p>
-                </div>
-                <div>
-                  <div class="mb-2 mx-auto flex items-center justify-center h-12 w-12 bg-emerald-400/10 rounded-full">
-                    <.icon name="tabler-users" class="h-8 w-8 text-emerald-400" />
-                  </div>
-                  <h4 class="font-semibold text-foreground mb-1">Massive Reach</h4>
-                  <p class="text-sm text-foreground-light">
-                    Reach 50K+ devs with unlimited job postings
-                  </p>
-                </div>
+
                 <div>
                   <div class="mb-2 mx-auto flex items-center justify-center h-12 w-12 bg-emerald-400/10 rounded-full">
                     <.icon name="tabler-target" class="h-8 w-8 text-emerald-400" />
                   </div>
                   <h4 class="font-semibold text-foreground mb-1">Top Talent</h4>
                   <p class="text-sm text-foreground-light">
-                    Access top 1% users matching your<br />tech, skills, seniority and location preferences
+                    Reach top 1% users matching your<br />tech, skills, seniority and location preferences
                   </p>
                 </div>
                 <div>

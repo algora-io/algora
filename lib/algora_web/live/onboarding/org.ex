@@ -284,12 +284,21 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             <AlgoraCloud.Components.CandidateCard.candidate_card {Map.merge(@candidate_data, %{screenshot?: true, fullscreen?: false})} />
           </div>
           <div :if={!@candidate_data} class="hidden lg:flex flex-col gap-3 w-full">
-            <img
-              src="https://algora.io/og/coderabbit/candidates/9EL2CWmJxZ57eqGv"
-              alt="Job candidates"
-              class="rounded-xl object-cover w-full h-auto"
-              style="aspect-ratio: 1200/630;"
-            />
+            <div
+              id="candidate-carousel"
+              phx-hook="CandidateCarousel"
+              data-candidate-ids={
+                Jason.encode!(["9EL2CWmJxZ57eqGv", "Hx4qKGE9CLkLHySJ", "8oXJpLYUp3M4dYsf"])
+              }
+            >
+              <img
+                id="carousel-image"
+                src="https://algora.io/og/coderabbit/candidates/9EL2CWmJxZ57eqGv"
+                alt="Job candidates"
+                class="rounded-xl object-cover w-full h-auto transition-opacity duration-500"
+                style="aspect-ratio: 1200/630;"
+              />
+            </div>
           </div>
         </div>
       </div>

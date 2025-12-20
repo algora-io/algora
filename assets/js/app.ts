@@ -903,6 +903,44 @@ const Hooks = {
       trigger.addEventListener("mouseenter", loadImage);
     },
   },
+  CandidateCarousel: {
+    mounted() {
+      const candidateIdsAttr = this.el.getAttribute("data-candidate-ids");
+      if (!candidateIdsAttr) return;
+
+      const candidateIds = JSON.parse(candidateIdsAttr);
+      if (!candidateIds || candidateIds.length === 0) return;
+
+      const img = this.el.querySelector("#carousel-image") as HTMLImageElement;
+      if (!img) return;
+
+      let currentIndex = 0;
+
+      // Preload all images
+      candidateIds.forEach((id: string) => {
+        const preloadImg = new Image();
+        preloadImg.src = `https://algora.io/og/coderabbit/candidates/${id}`;
+      });
+
+      // Set up interval to rotate images every 3 seconds
+      this.interval = setInterval(() => {
+        // Fade out
+        img.style.opacity = "0";
+
+        // After fade out completes, change image and fade in
+        setTimeout(() => {
+          currentIndex = (currentIndex + 1) % candidateIds.length;
+          img.src = `https://algora.io/og/coderabbit/candidates/${candidateIds[currentIndex]}`;
+          img.style.opacity = "1";
+        }, 500); // Match the transition-opacity duration-500 from the CSS
+      }, 5000);
+    },
+    destroyed() {
+      if (this.interval) {
+        clearInterval(this.interval);
+      }
+    },
+  },
 } satisfies Record<string, Partial<ViewHook> & Record<string, unknown>>;
 
 // Accessible focus handling

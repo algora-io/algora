@@ -301,7 +301,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <%!-- <div class="py-16 sm:py-24 relative">
+        <div class="py-16 sm:py-24 relative">
           <div class="">
             <div class="z-10 relative overflow-hidden px-6 py-20 sm:px-10 sm:py-36 md:px-12 lg:px-20 dark:shadow-none dark:after:pointer-events-none dark:after:absolute dark:after:inset-0 dark:after:inset-ring dark:after:inset-ring-white/10 dark:after:sm:rounded-3xl">
               <img
@@ -333,7 +333,7 @@ defmodule AlgoraWeb.HomeLive do
                   <blockquote class="mt-6 text-lg font-semibold text-white sm:text-xl/8">
                     <p>
                       “Within one week of onboarding, we started interviewing qualified candidates interested to join 🐰CodeRabbit in San Francisco”</p>
-
+                    
                   </blockquote>
                   <figcaption class="mt-6 text-base text-white dark:text-gray-200">
                     <div class="font-semibold">Sam Hayes</div>
@@ -343,9 +343,9 @@ defmodule AlgoraWeb.HomeLive do
               </div>
             </div>
           </div>
-        </div> --%>
+        </div>
 
-        <section class="isolate overflow-hidden px-6 lg:px-8">
+        <%!-- <section class="isolate overflow-hidden px-6 lg:px-8">
           <div class="relative mx-auto max-w-2xl py-24 sm:py-32 lg:max-w-4xl">
             <div class="absolute top-0 left-1/2 -z-10 h-200 w-360 -translate-x-1/2 bg-[radial-gradient(50%_100%_at_top,var(--color-indigo-100),white)] opacity-20 lg:left-36 dark:bg-[radial-gradient(45rem_50rem_at_top,var(--color-indigo-500),transparent)] dark:opacity-10">
             </div>
@@ -386,7 +386,7 @@ defmodule AlgoraWeb.HomeLive do
               </figcaption>
             </figure>
           </div>
-        </section>
+        </section> --%>
 
         <%!-- <section class="relative isolate py-16 sm:pb-40">
           <div class="max-w-[68rem] mx-auto flex flex-col md:flex-row gap-8 sm:gap-12 px-4">
@@ -487,6 +487,7 @@ defmodule AlgoraWeb.HomeLive do
                       <img src={~p"/images/logos/slack.svg"} alt="Slack" class="w-5 h-5" />
                     </div>
                     <span class="font-semibold">Slack</span>
+                    with candidates ready to interview
                   </p>
                 </div>
                 <img
@@ -496,54 +497,32 @@ defmodule AlgoraWeb.HomeLive do
                   loading="lazy"
                 />
               </div>
-              <div class="mt-12 flex items-center gap-3 max-w-3xl mx-auto">
-                <p class="text-foreground text-lg font-medium">
-                  <.icon name="tabler-circle-number-3" class="w-8 h-8 mr-1 text-foreground shrink-0" />
-                  Sync with your
-                  <div class="w-9 h-9 rounded-lg overflow-hidden border border-border flex items-center justify-center flex-shrink-0">
-                    <img
-                      src={~p"/images/logos/ashby.png"}
-                      alt="Gmail"
-                      class="w-full h-full object-cover"
-                    />
-                  </div>
-                  <span class="font-semibold">Ashby</span>
-                  to track interview progress
-                </p>
-              </div>
-              <div class="mt-6 grid grid-cols-2 gap-8 max-w-[80rem] mx-auto">
-                <div class="w-full space-y-4">
-                  <img
-                    src={~p"/images/screenshots/candidates.png"}
-                    alt="Candidates"
-                    class="w-full object-cover aspect-[1480/726] rounded-xl border border-border bg-[#121214]"
-                    loading="lazy"
-                  />
+              <div class="mt-12 w-full space-y-4 max-w-3xl mx-auto">
+                <div class="mt-6 flex items-center gap-3">
+                  <p class="text-foreground text-lg font-medium">
+                    <.icon
+                      name="tabler-circle-number-3"
+                      class="w-8 h-8 mr-1 text-foreground shrink-0"
+                    /> Candidates are automatically added to your
+                    <div class="w-9 h-9 rounded-lg overflow-hidden border border-border flex items-center justify-center flex-shrink-0">
+                      <img
+                        src={~p"/images/logos/ashby.png"}
+                        alt="Gmail"
+                        class="w-full h-full object-cover"
+                      />
+                    </div>
+                    <span class="font-semibold">Ashby</span>
+                  </p>
                 </div>
-                <div class="w-full space-y-4">
-                  <img
-                    src={~p"/images/screenshots/ashby.png"}
-                    alt="Candidates"
-                    class="w-full object-cover aspect-[787/419] rounded-xl border border-border bg-[#121214]"
-                    loading="lazy"
-                  />
-                </div>
+                <img
+                  src={~p"/images/screenshots/ashby.png"}
+                  alt="Candidates"
+                  class="w-full object-cover aspect-[787/419] rounded-xl border border-border bg-[#121214]"
+                  loading="lazy"
+                />
               </div>
-              <div class="mt-12 flex items-center gap-3 max-w-3xl mx-auto">
-                <p class="text-foreground text-lg font-medium">
-                  <.icon name="tabler-circle-number-4" class="w-8 h-8 mr-1 text-foreground shrink-0" />
-                  Hire with confidence with
-                  <div class="w-9 h-9 rounded-lg overflow-hidden border border-border flex items-center justify-center flex-shrink-0">
-                    <img
-                      src={~p"/images/logo-512px.png"}
-                      alt="Algora"
-                      class="w-full h-full object-cover"
-                    />
-                  </div>
-                  <span class="font-semibold">Algora</span>
-                </p>
-              </div>
-              <div class="pt-6 sm:pt-12 grid grid-cols-1 gap-12">
+
+              <div class="pt-12 sm:pt-24 grid grid-cols-1 gap-12">
                 <div class="max-w-7xl px-6 pt-2">
                   <div class="grid grid-cols-1 md:grid-cols-3 gap-16 text-center">
                     <%= for stat <- @stats1 do %>
@@ -719,7 +698,7 @@ defmodule AlgoraWeb.HomeLive do
                   </div>
                   <h4 class="font-semibold text-foreground mb-1">Massive Reach</h4>
                   <p class="text-sm text-foreground-light">
-                    Reach 50K+ devs with unlimited job postings
+                    Reach 200K+ devs with unlimited job postings
                   </p>
                 </div>
                 <div>

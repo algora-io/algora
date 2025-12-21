@@ -298,7 +298,12 @@ defmodule AlgoraWeb.HomeLive do
                               <div class="h-2.5 w-2.5 rounded-full bg-yellow-400"></div>
                               <div class="h-2.5 w-2.5 rounded-full bg-green-400"></div>
                             </div>
-                            <div class="flex items-center justify-center">
+                            <div class="flex items-center justify-center gap-2">
+                              <img
+                                src={~p"/images/logo-192px.png"}
+                                alt="Algora"
+                                class="w-4 h-4 rounded"
+                              />
                               <div class="text-xs text-foreground">
                                 algora.io<span class="text-foreground/70">/candidates</span>
                               </div>
@@ -322,31 +327,8 @@ defmodule AlgoraWeb.HomeLive do
                         name="tabler-circle-number-2"
                         class="w-6 h-6 sm:w-8 sm:h-8 mt-0.5 text-foreground shrink-0"
                       />
-                      <p class="text-foreground text-base sm:text-lg font-medium flex flex-wrap items-center gap-x-2 gap-y-1">
-                        <span>Get notified in your</span>
-                        <span class="inline-flex items-center gap-1.5">
-                          <span class="w-7 h-7 sm:w-9 sm:h-9 rounded-lg bg-white/10 border border-border inline-flex items-center justify-center">
-                            <img
-                              src={~p"/images/logos/gmail.png"}
-                              alt="Gmail"
-                              class="w-4 sm:w-5 h-auto aspect-[800/601]"
-                            />
-                          </span>
-                          <span class="font-semibold">Inbox</span>
-                        </span>
-                        <span class="hidden lg:inline">and</span>
-                        <span class="inline lg:hidden">&</span>
-                        <span class="inline-flex items-center gap-1.5">
-                          <span class="w-7 h-7 sm:w-9 sm:h-9 rounded-lg bg-white/10 border border-border inline-flex items-center justify-center">
-                            <img
-                              src={~p"/images/logos/slack.svg"}
-                              alt="Slack"
-                              class="w-4 sm:w-5 h-4 sm:h-5"
-                            />
-                          </span>
-                          <span class="font-semibold">Slack</span>
-                        </span>
-                        <span>with candidates ready to interview</span>
+                      <p class="text-foreground text-base sm:text-lg font-medium">
+                        Get notified in your inbox and Slack with candidates ready to interview
                       </p>
                     </div>
 
@@ -359,7 +341,12 @@ defmodule AlgoraWeb.HomeLive do
                               <div class="h-2.5 w-2.5 rounded-full bg-yellow-400"></div>
                               <div class="h-2.5 w-2.5 rounded-full bg-green-400"></div>
                             </div>
-                            <div class="flex items-center justify-center">
+                            <div class="flex items-center justify-center gap-2">
+                              <img
+                                src={~p"/images/logos/slack.svg"}
+                                alt="Slack"
+                                class="w-4 h-4 rounded"
+                              />
                               <div class="text-xs text-foreground">
                                 app.slack.com<span class="text-foreground/70">/client/T05UQ2UMHFX/C09FC54M0S3</span>
                               </div>
@@ -383,21 +370,8 @@ defmodule AlgoraWeb.HomeLive do
                         name="tabler-circle-number-3"
                         class="w-6 h-6 sm:w-8 sm:h-8 mt-0.5 text-foreground shrink-0"
                       />
-                      <p class="text-foreground text-base sm:text-lg font-medium flex flex-wrap items-center gap-x-2 gap-y-1">
-                        <span class="hidden lg:inline">
-                          Candidates are automatically added to your
-                        </span>
-                        <span class="inline lg:hidden">Candidates are auto-added to</span>
-                        <span class="inline-flex items-center gap-1.5">
-                          <span class="w-7 h-7 sm:w-9 sm:h-9 rounded-lg overflow-hidden border border-border inline-flex items-center justify-center">
-                            <img
-                              src={~p"/images/logos/ashby.png"}
-                              alt="Ashby"
-                              class="w-full h-full object-cover"
-                            />
-                          </span>
-                          <span class="font-semibold">Ashby</span>
-                        </span>
+                      <p class="text-foreground text-base sm:text-lg font-medium">
+                        Candidates are automatically added to your Ashby
                       </p>
                     </div>
                     <div class="relative z-30 mx-auto">
@@ -409,7 +383,12 @@ defmodule AlgoraWeb.HomeLive do
                               <div class="h-2.5 w-2.5 rounded-full bg-yellow-400"></div>
                               <div class="h-2.5 w-2.5 rounded-full bg-green-400"></div>
                             </div>
-                            <div class="flex items-center justify-center">
+                            <div class="flex items-center justify-center gap-2">
+                              <img
+                                src={~p"/images/logos/ashby.png"}
+                                alt="Ashby"
+                                class="w-4 h-4 rounded"
+                              />
                               <div class="text-xs text-foreground">
                                 app.ashbyhq.com<span class="text-foreground/70">/candidates/pipeline/active</span>
                               </div>

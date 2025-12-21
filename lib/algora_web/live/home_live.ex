@@ -554,7 +554,7 @@ defmodule AlgoraWeb.HomeLive do
               </div>
             </section>
 
-            <section class="relative isolate py-8 sm:py-20">
+            <%!-- <section class="relative isolate py-8 sm:py-20">
               <div class="mx-auto max-w-7xl px-6 lg:px-8 pt-24 xl:pt-0">
                 <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-6xl mb-2 sm:mb-4">
                   Publish jobs
@@ -621,7 +621,7 @@ defmodule AlgoraWeb.HomeLive do
                   </div>
                 </div>
               </div>
-            </section>
+            </section> --%>
           </div>
         </div>
       </main>

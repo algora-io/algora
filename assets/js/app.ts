@@ -928,8 +928,8 @@ const Hooks = {
             currentItem.classList.add("absolute", "inset-0");
           }
 
-          // Remove absolute positioning from next item if it's the first one
-          if (nextIndex === 0 && nextItem.classList.contains("absolute")) {
+          // Remove absolute positioning from next item so it's in normal flow
+          if (nextItem.classList.contains("absolute")) {
             nextItem.classList.remove("absolute", "inset-0");
           }
 

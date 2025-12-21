@@ -45,8 +45,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    # Load multiple candidates for carousel - using valid match IDs with different users
-    candidate_ids = ["QGFEwrH3K7mipQGB", "ogftjcpCuvTLverF", "bVqi5v6HPYtUg1Fj", "LbJoZ78WJs1K2RVS"]
+    candidate_ids = ["1ErYxMGNt6zTfjKS", "qsQa7KN3Cq4PwGWG", "EPYrDRS1ojkjqL9w", "jzwPf2Vn7v8NbM33"]
 
     candidates_data =
       candidate_ids
@@ -367,11 +366,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             </.form>
           </div>
           <div :if={length(@candidates_data) > 0} class="hidden lg:flex flex-col gap-3 w-full">
-            <div
-              id="candidate-carousel-org"
-              phx-hook="CandidateCarousel"
-              class="relative w-full"
-            >
+            <div id="candidate-carousel-org" phx-hook="CandidateCarousel" class="relative w-full">
               <%= for {candidate_data, index} <- Enum.with_index(@candidates_data) do %>
                 <div
                   data-carousel-item={index}

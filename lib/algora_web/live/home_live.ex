@@ -97,7 +97,7 @@ defmodule AlgoraWeb.HomeLive do
                       Open source <br class="block lg:hidden" />
                       <span class="text-emerald-400">tech recruiting</span>
                     </h1>
-                    <p class="mt-2 lg:mt-4 text-[0.9rem] lg:text-xl leading-6 font-medium text-foreground">
+                    <p class="mt-2 lg:mt-8 text-[0.9rem] lg:text-xl leading-6 font-medium text-foreground">
                       Connecting the most prolific open source maintainers & contributors with their next jobs
                     </p>
                     <div class="flex items-center justify-start gap-6 lg:gap-12 overflow-x-auto scrollbar-thin py-4">

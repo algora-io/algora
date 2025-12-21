@@ -1146,11 +1146,11 @@ defmodule AlgoraWeb.HomeLive do
         person_title: "Lead Engineer"
       },
       %{
-        company_name: "Comfy",
-        company_avatar: "https://avatars.githubusercontent.com/u/166579949?v=4",
-        person_name: "Jiawei Zhang",
-        person_avatar: "https://algora-console.t3.storageapi.dev/avatars/jiawei-zhang-a.jpeg",
-        person_title: "Senior Applied ML Engineer"
+        company_name: "TraceMachina",
+        company_avatar: "https://avatars.githubusercontent.com/u/144973251?s=200&v=4",
+        person_name: "Tom",
+        person_avatar: "https://avatars.githubusercontent.com/u/38532?v=4",
+        person_title: "Staff Software Engineer"
       },
       %{
         company_name: "Firecrawl (YC S22)",

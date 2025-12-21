@@ -274,8 +274,8 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
       </header>
 
       <div class="flex-1 p-4 md:py-4 flex items-center justify-center max-h-[calc(100vh-11rem)] overflow-hidden">
-        <div class="w-full grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] gap-6 items-center px-4 lg:px-8 max-w-[90rem]">
-          <div class="w-full max-w-[32rem] text-left">
+        <div class="w-full flex flex-col lg:flex-row gap-6 items-center px-4 lg:px-8 max-w-[90rem]">
+          <div class="w-full lg:w-[30%] text-left">
             <.form for={@form} phx-submit="submit" class="flex flex-col gap-4">
               <div>
                 <label class="block text-sm font-medium text-foreground mb-2">
@@ -293,7 +293,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                 label="Job description / careers URL"
                 rows="3"
                 class="resize-none"
-                placeholder="Tell us about the role, your requirements, your ideal candidate..."
+                placeholder="Tell us about the role, requirements, ideal candidate..."
               />
               <div class="grid grid-cols-2 gap-4">
                 <.input
@@ -365,7 +365,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
               </div>
             </.form>
           </div>
-          <div :if={length(@candidates_data) > 0} class="hidden lg:flex flex-col gap-3 w-full">
+          <div :if={length(@candidates_data) > 0} class="hidden lg:flex flex-col gap-3 lg:w-[70%]">
             <div id="candidate-carousel-org" phx-hook="CandidateCarousel" class="relative w-full">
               <%= for {candidate_data, index} <- Enum.with_index(@candidates_data) do %>
                 <div

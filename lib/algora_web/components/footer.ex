@@ -8,11 +8,18 @@ defmodule AlgoraWeb.Components.Footer do
   alias AlgoraWeb.Components.Logos
   alias AlgoraWeb.Constants
 
+  attr :class, :string, default: nil
+
   def footer(assigns) do
     ~H"""
     <footer aria-labelledby="footer-heading">
       <h2 id="footer-heading" class="sr-only">Footer</h2>
-      <div class="mx-auto max-w-7xl px-6 pb-8 lg:px-8">
+      <div class={
+        classes([
+          "mx-auto max-w-7xl px-6 pb-8 lg:px-8",
+          @class
+        ])
+      }>
         <%!-- <div class="border-t border-white/10 pt-16 sm:pt-24">
           <div class="grid grid-cols-2 gap-x-12 gap-y-20 md:grid-cols-4">
             <div>

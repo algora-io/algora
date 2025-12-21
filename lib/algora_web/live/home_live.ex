@@ -151,7 +151,7 @@ defmodule AlgoraWeb.HomeLive do
             </section>
           </div>
 
-          <div class="order-2 lg:sticky lg:top-0 lg:order-2 lg:col-start-2 lg:row-start-1 lg:self-start px-6 lg:px-0 pb-12 lg:pb-0 lg:pt-32">
+          <div class="order-2 lg:sticky lg:top-0 lg:order-2 lg:col-start-2 lg:row-start-1 lg:self-start px-6 lg:px-0 pb-12 lg:pb-12 lg:pt-32">
             <div class="text-left">
               <div class="rounded-xl bg-card text-card-foreground shadow-2xl ring-1 ring-white/10">
                 <div class="p-6 lg:p-8">
@@ -424,7 +424,7 @@ defmodule AlgoraWeb.HomeLive do
                   </div>
 
                   <div class="pt-12 sm:pt-24 grid grid-cols-1 gap-12">
-                    <div class="max-w-7xl px-6 pt-2">
+                    <div class="max-w-[88rem] px-6 pt-2">
                       <div class="grid grid-cols-3 gap-8 lg:gap-16 text-center">
                         <%= for stat <- @stats1 do %>
                           <div>
@@ -438,7 +438,7 @@ defmodule AlgoraWeb.HomeLive do
                         <% end %>
                       </div>
                     </div>
-                    <div class="max-w-7xl">
+                    <div class="max-w-[88rem]">
                       <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
                         <%= for hire <- @hires1 do %>
                           <%= if Map.get(hire, :special) do %>
@@ -555,7 +555,7 @@ defmodule AlgoraWeb.HomeLive do
             </section>
 
             <%!-- <section class="relative isolate py-8 sm:py-20">
-              <div class="mx-auto max-w-7xl px-6 lg:px-8 pt-24 xl:pt-0">
+              <div class="mx-auto max-w-[88rem] px-6 lg:px-8 pt-24 xl:pt-0">
                 <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-6xl mb-2 sm:mb-4">
                   Publish jobs
                 </h2>
@@ -625,6 +625,10 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </div>
       </main>
+    </div>
+
+    <div class="relative isolate overflow-hidden bg-gradient-to-br from-black to-background">
+      <Footer.footer class="max-w-[88rem]" />
     </div>
 
     <.modal_video_dialog />

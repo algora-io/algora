@@ -83,10 +83,10 @@ defmodule AlgoraWeb.HomeLive do
       <%= if @screenshot? do %>
         <div class="-mt-24" />
       <% else %>
-        <Header.header class="container" />
+        <Header.header class="container fixed top-0 left-0 right-0 z-50 bg-black" />
       <% end %>
 
-      <main class="bg-black relative overflow-hidden">
+      <main class="bg-black relative">
         <div class="flex flex-col lg:grid lg:grid-cols-[1fr_28rem] lg:gap-8 lg:max-w-[88rem] lg:mx-auto">
           <%!-- Hero section: order-1 on mobile, left column on desktop --%>
           <div class="order-1 lg:order-1 lg:col-start-1">
@@ -98,10 +98,8 @@ defmodule AlgoraWeb.HomeLive do
                       Open source <br class="block lg:hidden" />
                       <span class="text-emerald-400">tech recruiting</span>
                     </h1>
-                    <p class="mt-2 text-lg leading-8 font-medium text-foreground">
-                      Connecting the most prolific
-                      <span class="hidden lg:inline">open source</span><span class="inline lg:hidden">OSS</span>
-                      maintainers & contributors with their next jobs
+                    <p class="mt-2 text-base lg:text-lg leading-8 font-medium text-foreground">
+                      Connecting the most prolific open source maintainers & contributors with their next jobs
                     </p>
                     <div class="flex items-center justify-start gap-6 lg:gap-12 overflow-x-auto scrollbar-thin py-4">
                       <img
@@ -132,35 +130,6 @@ defmodule AlgoraWeb.HomeLive do
                         />
                       </div>
                     </div>
-                    <%!-- <ul class="mt-2 flex flex-col gap-2 text-sm">
-                      <li class="flex items-center text-left text-foreground/80">
-                        <.icon
-                          name="tabler-square-rounded-number-1"
-                          class="size-6 mr-2 shrink-0 text-foreground/80"
-                        />
-                        <span class="font-medium leading-7 whitespace-nowrap">
-                          Submit JD
-                        </span>
-                      </li>
-                      <li class="flex items-center text-left text-foreground/80">
-                        <.icon
-                          name="tabler-square-rounded-number-2"
-                          class="size-6 mr-2 shrink-0 text-foreground/80"
-                        />
-                        <span class="font-medium leading-7 whitespace-nowrap">
-                          Receive matches <span class="text-emerald-300">within hours</span>
-                        </span>
-                      </li>
-                      <li class="flex items-center text-left text-foreground/80">
-                        <.icon
-                          name="tabler-square-rounded-number-3"
-                          class="size-6 mr-2 shrink-0 text-foreground/80"
-                        />
-                        <span class="font-medium leading-7 whitespace-nowrap">
-                          Interview <span class="text-emerald-300">within days</span>
-                        </span>
-                      </li>
-                    </ul> --%>
                     <div :if={length(@candidates_data) > 0} class="-ml-2 mt-4 max-w-[48rem] w-full">
                       <div
                         id="candidate-carousel-home"
@@ -225,8 +194,8 @@ defmodule AlgoraWeb.HomeLive do
           </div>
 
           <%!-- Form: order-2 on mobile, sticky on right on desktop --%>
-          <div class="order-2 lg:order-2 lg:col-start-2 lg:row-start-1 lg:self-start px-6 lg:px-0 pb-12 lg:pb-0 lg:pt-32">
-            <div class="lg:sticky lg:top-32 text-left">
+          <div class="order-2 lg:sticky lg:top-0 lg:order-2 lg:col-start-2 lg:row-start-1 lg:self-start px-6 lg:px-0 pb-12 lg:pb-0 lg:pt-32">
+            <div class="text-left">
               <div class="rounded-xl bg-card text-card-foreground shadow-2xl ring-1 ring-white/10">
                 <div class="p-6 lg:p-8">
                   <h2 class="text-2xl lg:text-3xl font-semibold leading-7 text-white">
@@ -465,12 +434,12 @@ defmodule AlgoraWeb.HomeLive do
                 </h2>
                 <div class="flex flex-col items-center justify-center">
                   <div class="w-full space-y-4 max-w-3xl mx-auto">
-                    <div class="mt-6 flex items-center gap-3">
-                      <p class="text-foreground text-lg font-medium">
-                        <.icon
-                          name="tabler-circle-number-1"
-                          class="w-8 h-8 mr-1 text-foreground shrink-0"
-                        />
+                    <div class="mt-6 flex items-start gap-2 sm:gap-3">
+                      <.icon
+                        name="tabler-circle-number-1"
+                        class="w-6 h-6 sm:w-8 sm:h-8 mt-0.5 text-foreground shrink-0"
+                      />
+                      <p class="text-foreground text-base sm:text-lg font-medium">
                         Share your JDs and receive handpicked candidates with the right skills and experience
                       </p>
                     </div>
@@ -482,26 +451,35 @@ defmodule AlgoraWeb.HomeLive do
                     />
                   </div>
                   <div class="mt-12 w-full space-y-4 max-w-3xl mx-auto">
-                    <div class="mt-6 flex items-center gap-3">
-                      <p class="text-foreground text-lg font-medium">
-                        <.icon
-                          name="tabler-circle-number-2"
-                          class="w-8 h-8 mr-1 text-foreground shrink-0"
-                        /> Get notified in your
-                        <div class="w-9 h-9 rounded-lg bg-white/10 border border-border flex items-center justify-center flex-shrink-0">
-                          <img
-                            src={~p"/images/logos/gmail.png"}
-                            alt="Gmail"
-                            class="w-5 h-auto aspect-[800/601]"
-                          />
-                        </div>
-                        <span class="font-semibold">Inbox</span>
-                        and
-                        <div class="w-9 h-9 rounded-lg bg-white/10 border border-border flex items-center justify-center flex-shrink-0">
-                          <img src={~p"/images/logos/slack.svg"} alt="Slack" class="w-5 h-5" />
-                        </div>
-                        <span class="font-semibold">Slack</span>
-                        with candidates ready to interview
+                    <div class="mt-6 flex items-start gap-2 sm:gap-3">
+                      <.icon
+                        name="tabler-circle-number-2"
+                        class="w-6 h-6 sm:w-8 sm:h-8 mt-0.5 text-foreground shrink-0"
+                      />
+                      <p class="text-foreground text-base sm:text-lg font-medium flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <span>Get notified in your</span>
+                        <span class="inline-flex items-center gap-1.5">
+                          <span class="w-7 h-7 sm:w-9 sm:h-9 rounded-lg bg-white/10 border border-border inline-flex items-center justify-center">
+                            <img
+                              src={~p"/images/logos/gmail.png"}
+                              alt="Gmail"
+                              class="w-4 sm:w-5 h-auto aspect-[800/601]"
+                            />
+                          </span>
+                          <span class="font-semibold">Inbox</span>
+                        </span>
+                        <span>&</span>
+                        <span class="inline-flex items-center gap-1.5">
+                          <span class="w-7 h-7 sm:w-9 sm:h-9 rounded-lg bg-white/10 border border-border inline-flex items-center justify-center">
+                            <img
+                              src={~p"/images/logos/slack.svg"}
+                              alt="Slack"
+                              class="w-4 sm:w-5 h-4 sm:h-5"
+                            />
+                          </span>
+                          <span class="font-semibold">Slack</span>
+                        </span>
+                        <span>with candidates ready to interview</span>
                       </p>
                     </div>
                     <img
@@ -512,20 +490,26 @@ defmodule AlgoraWeb.HomeLive do
                     />
                   </div>
                   <div class="mt-12 w-full space-y-4 max-w-3xl mx-auto">
-                    <div class="mt-6 flex items-center gap-3">
-                      <p class="text-foreground text-lg font-medium">
-                        <.icon
-                          name="tabler-circle-number-3"
-                          class="w-8 h-8 mr-1 text-foreground shrink-0"
-                        /> Candidates are automatically added to your
-                        <div class="w-9 h-9 rounded-lg overflow-hidden border border-border flex items-center justify-center flex-shrink-0">
-                          <img
-                            src={~p"/images/logos/ashby.png"}
-                            alt="Gmail"
-                            class="w-full h-full object-cover"
-                          />
-                        </div>
-                        <span class="font-semibold">Ashby</span>
+                    <div class="mt-6 flex items-start gap-2 sm:gap-3">
+                      <.icon
+                        name="tabler-circle-number-3"
+                        class="w-6 h-6 sm:w-8 sm:h-8 mt-0.5 text-foreground shrink-0"
+                      />
+                      <p class="text-foreground text-base sm:text-lg font-medium flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <span class="hidden lg:inline">
+                          Candidates are automatically added to your
+                        </span>
+                        <span class="inline lg:hidden">Candidates are auto-added to</span>
+                        <span class="inline-flex items-center gap-1.5">
+                          <span class="w-7 h-7 sm:w-9 sm:h-9 rounded-lg overflow-hidden border border-border inline-flex items-center justify-center">
+                            <img
+                              src={~p"/images/logos/ashby.png"}
+                              alt="Ashby"
+                              class="w-full h-full object-cover"
+                            />
+                          </span>
+                          <span class="font-semibold">Ashby</span>
+                        </span>
                       </p>
                     </div>
                     <img
@@ -538,13 +522,13 @@ defmodule AlgoraWeb.HomeLive do
 
                   <div class="pt-12 sm:pt-24 grid grid-cols-1 gap-12">
                     <div class="max-w-7xl px-6 pt-2">
-                      <div class="grid grid-cols-1 md:grid-cols-3 gap-16 text-center">
+                      <div class="grid grid-cols-3 gap-8 lg:gap-16 text-center">
                         <%= for stat <- @stats1 do %>
                           <div>
-                            <div class="text-2xl sm:text-3xl md:text-4xl font-bold font-display text-foreground">
+                            <div class="text-4xl font-bold font-display text-foreground">
                               {stat.value}
                             </div>
-                            <div class="text-sm sm:text-base text-muted-foreground mt-2">
+                            <div class="text-base text-muted-foreground mt-2">
                               {stat.label}
                             </div>
                           </div>
@@ -552,7 +536,7 @@ defmodule AlgoraWeb.HomeLive do
                       </div>
                     </div>
                     <div class="max-w-7xl">
-                      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
                         <%= for hire <- @hires1 do %>
                           <%= if Map.get(hire, :special) do %>
                             <div class="relative flex-1 flex mb-12 max-w-md">
@@ -606,7 +590,7 @@ defmodule AlgoraWeb.HomeLive do
                         <% end %>
                       </div>
 
-                      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
                         <%= for hire <- @hires1 do %>
                           <%= unless Map.get(hire, :special) do %>
                             <div class="relative flex items-center gap-2 sm:gap-3 p-4 sm:py-6 bg-card rounded-xl border shrink-0">
@@ -675,7 +659,7 @@ defmodule AlgoraWeb.HomeLive do
                 <p class="text-center font-medium text-[15px] text-muted-foreground sm:text-xl mb-12 mx-auto">
                   Reach top 1% users matching your tech, skills, seniority and location preferences
                 </p>
-                <div class="grid grid-cols-3 gap-8">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                   <.link href="https://algora.io/coderabbit/jobs" target="_blank">
                     <img
                       src="https://algora.io/og/coderabbit/jobs?cached"

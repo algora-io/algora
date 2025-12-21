@@ -529,9 +529,37 @@ defmodule AlgoraWeb.HomeLive do
                   />
                 </div>
               </div>
-              <div class="pt-12 sm:pt-24 grid grid-cols-1 md:grid-cols-3 gap-12 pl-12">
-                <div class="md:col-span-2 ml-auto max-w-7xl pl-12">
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+              <div class="mt-12 flex items-center gap-3 max-w-3xl mx-auto">
+                <p class="text-foreground text-lg font-medium">
+                  <.icon name="tabler-circle-number-4" class="w-8 h-8 mr-1 text-foreground shrink-0" />
+                  Hire with confidence with
+                  <div class="w-9 h-9 rounded-lg overflow-hidden border border-border flex items-center justify-center flex-shrink-0">
+                    <img
+                      src={~p"/images/logo-512px.png"}
+                      alt="Algora"
+                      class="w-full h-full object-cover"
+                    />
+                  </div>
+                  <span class="font-semibold">Algora</span>
+                </p>
+              </div>
+              <div class="pt-6 sm:pt-12 grid grid-cols-1 gap-12">
+                <div class="max-w-7xl px-6 pt-2">
+                  <div class="grid grid-cols-1 md:grid-cols-3 gap-16 text-center">
+                    <%= for stat <- @stats1 do %>
+                      <div>
+                        <div class="text-2xl sm:text-3xl md:text-4xl font-bold font-display text-foreground">
+                          {stat.value}
+                        </div>
+                        <div class="text-sm sm:text-base text-muted-foreground mt-2">
+                          {stat.label}
+                        </div>
+                      </div>
+                    <% end %>
+                  </div>
+                </div>
+                <div class="max-w-7xl">
+                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
                     <%= for hire <- @hires1 do %>
                       <%= if Map.get(hire, :special) do %>
                         <div class="relative flex-1 flex mb-12 max-w-md">
@@ -581,7 +609,7 @@ defmodule AlgoraWeb.HomeLive do
                     <% end %>
                   </div>
 
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
                     <%= for hire <- @hires1 do %>
                       <%= unless Map.get(hire, :special) do %>
                         <div class="relative flex items-center gap-2 sm:gap-3 p-4 sm:py-6 bg-card rounded-xl border shrink-0">
@@ -632,20 +660,6 @@ defmodule AlgoraWeb.HomeLive do
                           <% end %>
                         </div>
                       <% end %>
-                    <% end %>
-                  </div>
-                </div>
-                <div class="mr-auto max-w-7xl px-6 pt-2 pl-12">
-                  <div class="grid grid-cols-1 gap-16 text-center">
-                    <%= for stat <- @stats1 do %>
-                      <div>
-                        <div class="text-2xl sm:text-3xl md:text-4xl font-bold font-display text-foreground">
-                          {stat.value}
-                        </div>
-                        <div class="text-sm sm:text-base text-muted-foreground mt-2">
-                          {stat.label}
-                        </div>
-                      </div>
                     <% end %>
                   </div>
                 </div>
@@ -1948,6 +1962,13 @@ defmodule AlgoraWeb.HomeLive do
         person_title: "Founding Engineer"
       },
       %{
+        company_name: "Comfy",
+        company_avatar: "https://avatars.githubusercontent.com/u/166579949?v=4",
+        person_name: "David Aguilar",
+        person_avatar: "https://algora-console.t3.storageapi.dev/avatars/davvid.jpeg",
+        person_title: "Staff AI Cloud Infra Engineer"
+      },
+      %{
         company_name: "Golem Cloud",
         company_avatar: "https://github.com/golemcloud.png",
         person_name: "Maxim S",
@@ -1960,13 +1981,6 @@ defmodule AlgoraWeb.HomeLive do
         person_name: "Jiawei Zhang",
         person_avatar: "https://algora-console.t3.storageapi.dev/avatars/jiawei-zhang-a.jpeg",
         person_title: "Senior Applied ML Engineer"
-      },
-      %{
-        company_name: "Comfy",
-        company_avatar: "https://avatars.githubusercontent.com/u/166579949?v=4",
-        person_name: "David Aguilar",
-        person_avatar: "https://algora-console.t3.storageapi.dev/avatars/davvid.jpeg",
-        person_title: "Staff AI Cloud Infra Engineer"
       },
       %{
         company_name: "Firecrawl (YC S22)",
@@ -2033,18 +2047,18 @@ defmodule AlgoraWeb.HomeLive do
         special: true
       },
       %{
-        company_name: "TraceMachina",
-        company_avatar: "https://avatars.githubusercontent.com/u/144973251?s=200&v=4",
-        person_name: "Aman",
-        person_avatar: "https://avatars.githubusercontent.com/u/53134669?v=4",
-        person_title: "Software Engineer",
-        special: true
-      },
-      %{
         company_name: "Activepieces (YC S22)",
         company_avatar: "https://avatars.githubusercontent.com/u/99494700?s=48&v=4",
         person_name: "David",
         person_avatar: "https://avatars.githubusercontent.com/u/51977119?v=4",
+        person_title: "Software Engineer",
+        special: true
+      },
+      %{
+        company_name: "TraceMachina",
+        company_avatar: "https://avatars.githubusercontent.com/u/144973251?s=200&v=4",
+        person_name: "Aman",
+        person_avatar: "https://avatars.githubusercontent.com/u/53134669?v=4",
         person_title: "Software Engineer",
         special: true
       },

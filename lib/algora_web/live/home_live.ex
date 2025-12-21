@@ -301,29 +301,29 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <div class="py-16 sm:py-24 relative">
+        <%!-- <div class="py-16 sm:py-24 relative">
           <div class="">
-            <div class="z-10 relative overflow-hidden px-6 py-20 sm:px-10 sm:py-24 md:px-12 lg:px-20 dark:shadow-none dark:after:pointer-events-none dark:after:absolute dark:after:inset-0 dark:after:inset-ring dark:after:inset-ring-white/10 dark:after:sm:rounded-3xl">
+            <div class="z-10 relative overflow-hidden px-6 py-20 sm:px-10 sm:py-36 md:px-12 lg:px-20 dark:shadow-none dark:after:pointer-events-none dark:after:absolute dark:after:inset-0 dark:after:inset-ring dark:after:inset-ring-white/10 dark:after:sm:rounded-3xl">
               <img
                 src="https://algora.io/storage/avatars/coderabbit/sam-hayes-85a0ba25.jpg"
                 alt=""
                 class="absolute inset-0 size-full object-cover object-top brightness-150 saturate-0"
               />
               <div class="absolute inset-0 bg-gray-900/90 mix-blend-multiply"></div>
-              <div aria-hidden="true" class="absolute -top-56 -left-80 transform-gpu blur-3xl">
+              <div aria-hidden="true" class="absolute -top-[56px] -left-[80px] transform-gpu blur-3xl">
                 <div
                   style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)"
-                  class="aspect-1097/845 w-274.25 bg-linear-to-r from-[#ff4694] to-[#776fff] opacity-[0.45] dark:opacity-[0.30]"
+                  class="aspect-[1097/845] w-[274.25px] bg-linear-to-r from-[#ff4694] to-[#776fff] opacity-100"
                 >
                 </div>
               </div>
               <div
                 aria-hidden="true"
-                class="hidden md:absolute md:bottom-16 md:left-200 md:block md:transform-gpu md:blur-3xl"
+                class="hidden md:absolute md:bottom-[16px] md:left-[200px] md:block md:transform-gpu md:blur-3xl"
               >
                 <div
                   style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)"
-                  class="aspect-1097/845 w-274.25 bg-linear-to-r from-[#ff4694] to-[#776fff] opacity-25 dark:opacity-20"
+                  class="aspect-[1097/845] w-[274.25px] bg-linear-to-r from-[#ff4694] to-[#776fff] opacity-100"
                 >
                 </div>
               </div>
@@ -333,7 +333,7 @@ defmodule AlgoraWeb.HomeLive do
                   <blockquote class="mt-6 text-lg font-semibold text-white sm:text-xl/8">
                     <p>
                       “Within one week of onboarding, we started interviewing qualified candidates interested to join 🐰CodeRabbit in San Francisco”</p>
-                    
+
                   </blockquote>
                   <figcaption class="mt-6 text-base text-white dark:text-gray-200">
                     <div class="font-semibold">Sam Hayes</div>
@@ -343,9 +343,9 @@ defmodule AlgoraWeb.HomeLive do
               </div>
             </div>
           </div>
-        </div>
+        </div> --%>
 
-        <section class="isolate overflow-hiddenpx-6 lg:px-8">
+        <section class="isolate overflow-hidden px-6 lg:px-8">
           <div class="relative mx-auto max-w-2xl py-24 sm:py-32 lg:max-w-4xl">
             <div class="absolute top-0 left-1/2 -z-10 h-200 w-360 -translate-x-1/2 bg-[radial-gradient(50%_100%_at_top,var(--color-indigo-100),white)] opacity-20 lg:left-36 dark:bg-[radial-gradient(45rem_50rem_at_top,var(--color-indigo-500),transparent)] dark:opacity-10">
             </div>
@@ -388,7 +388,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="relative isolate py-16 sm:pb-40">
+        <%!-- <section class="relative isolate py-16 sm:pb-40">
           <div class="max-w-[68rem] mx-auto flex flex-col md:flex-row gap-8 sm:gap-12 px-4">
             <div class="flex-1 mx-auto flex flex-col justify-between">
               <figure class="relative flex flex-col h-full">
@@ -442,7 +442,7 @@ defmodule AlgoraWeb.HomeLive do
               </figure>
             </div>
           </div>
-        </section>
+        </section> --%>
 
         <section class="relative isolate py-16 sm:py-40">
           <div class="mx-auto px-6 lg:px-8 pt-24 xl:pt-0">
@@ -1096,7 +1096,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="relative isolate py-16 sm:py-40 bg-gray-950">
+        <%!-- <section class="relative isolate py-16 sm:py-40 bg-gray-950">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
               Trusted by open source founders
@@ -1205,7 +1205,7 @@ defmodule AlgoraWeb.HomeLive do
               </div>
             </div>
           </div>
-        </section>
+        </section> --%>
 
         <section class="relative isolate py-8 sm:py-20 bg-gray-950">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">

@@ -45,7 +45,8 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    candidate_ids = ["1ErYxMGNt6zTfjKS", "qsQa7KN3Cq4PwGWG", "EPYrDRS1ojkjqL9w", "jzwPf2Vn7v8NbM33"]
+    # candidate_ids = ["1ErYxMGNt6zTfjKS", "qsQa7KN3Cq4PwGWG", "EPYrDRS1ojkjqL9w", "jzwPf2Vn7v8NbM33"]
+    candidate_ids = ["1ErYxMGNt6zTfjKS", "jzwPf2Vn7v8NbM33"]
 
     candidates_data =
       candidate_ids
@@ -275,7 +276,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
       <div class="flex-1 p-4 md:py-4 flex items-center justify-center overflow-hidden max-w-7xl w-full mx-auto">
         <div class="w-full flex flex-col lg:flex-row gap-6 lg:gap-12 items-center px-4 lg:px-8">
-          <div class="w-full lg:w-[35%] text-left">
+          <div class="shrink-0 w-full lg:w-[35%] text-left">
             <.form for={@form} phx-submit="submit" class="flex flex-col gap-4">
               <div>
                 <label class="block text-sm font-semibold text-foreground mb-2">
@@ -363,7 +364,10 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
               </div>
             </.form>
           </div>
-          <div :if={length(@candidates_data) > 0} class="hidden lg:flex flex-col gap-3 lg:w-[65%]">
+          <div
+            :if={length(@candidates_data) > 0}
+            class="shrink-0 hidden lg:flex flex-col gap-3 lg:w-[65%]"
+          >
             <div id="candidate-carousel-org" phx-hook="CandidateCarousel" class="relative w-full">
               <%= for {candidate_data, index} <- Enum.with_index(@candidates_data) do %>
                 <div

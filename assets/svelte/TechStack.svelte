@@ -58,7 +58,7 @@
     name={`${form}[tech_stack_input]`}
     bind:value={input}
     on:keydown={addTech}
-    placeholder="Elixir, Phoenix, PostgreSQL, etc."
+    placeholder="Python, PyTorch, LangChain, Kubernetes, Terraform"
     class={cn(
       "bg-background block w-full rounded-lg border-input py-[7px] px-[11px] text-foreground focus:outline-none focus:ring-4 sm:text-sm sm:leading-6 phx-no-feedback:border-input phx-no-feedback:focus:border-ring phx-no-feedback:focus:ring-ring/5 focus:border-ring focus:ring-ring/5",
       classes
@@ -72,7 +72,7 @@
   />
 
     {#if tech?.length}
-	  <div class="flex flex-wrap gap-3 mt-4">
+	  <div class="flex flex-wrap gap-3 mt-2">
       {#each tech as tech}
         <div
           class="bg-success/10 text-success rounded-lg px-3 py-1.5 text-sm font-semibold flex items-center"

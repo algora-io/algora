@@ -278,13 +278,14 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           <div class="w-full lg:w-[30%] text-left">
             <.form for={@form} phx-submit="submit" class="flex flex-col gap-4">
               <div>
-                <label class="block text-sm font-medium text-foreground mb-2">
+                <label class="block text-sm font-semibold text-foreground mb-2">
                   Tech stack
                 </label>
                 <.TechStack
                   tech={Ecto.Changeset.get_field(@form.source, :tech_stack) || []}
                   socket={@socket}
                   form="form"
+                  classes="-mt-2"
                 />
               </div>
               <.input
@@ -299,8 +300,8 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                 <.input
                   field={@form[:comp_range]}
                   type="text"
-                  label="Compensation range"
-                  placeholder="$150k - $250k"
+                  label="Compensation"
+                  placeholder="$175k-$330k + equity"
                 />
                 <.input
                   field={@form[:location]}
@@ -314,7 +315,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                   Type
                 </label>
                 <div class="grid grid-cols-3 gap-3">
-                  <label class="group relative flex cursor-pointer rounded-lg px-3 py-2.5 shadow-sm focus:outline-none border-2 bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10 border-border has-[:checked]:border-primary has-[:checked]:bg-primary/10">
+                  <label class="group relative flex cursor-pointer rounded-lg px-3 py-2.5 shadow-sm focus:outline-none border bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10 border-input has-[:checked]:border-primary has-[:checked]:bg-primary/10">
                     <input type="radio" name="form[location_type]" value="onsite" class="sr-only" />
                     <div class="flex items-center gap-2">
                       <.icon name="tabler-building" class="h-5 w-5 text-primary shrink-0" />
@@ -323,7 +324,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                       </span>
                     </div>
                   </label>
-                  <label class="group relative flex cursor-pointer rounded-lg px-3 py-2.5 shadow-sm focus:outline-none border-2 bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10 border-border has-[:checked]:border-primary has-[:checked]:bg-primary/10">
+                  <label class="group relative flex cursor-pointer rounded-lg px-3 py-2.5 shadow-sm focus:outline-none border bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10 border-input has-[:checked]:border-primary has-[:checked]:bg-primary/10">
                     <input type="radio" name="form[location_type]" value="hybrid" class="sr-only" />
                     <div class="flex items-center gap-2">
                       <.icon name="tabler-arrows-shuffle" class="h-5 w-5 text-primary shrink-0" />
@@ -332,7 +333,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                       </span>
                     </div>
                   </label>
-                  <label class="group relative flex cursor-pointer rounded-lg px-3 py-2.5 shadow-sm focus:outline-none border-2 bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10 border-border has-[:checked]:border-primary has-[:checked]:bg-primary/10">
+                  <label class="group relative flex cursor-pointer rounded-lg px-3 py-2.5 shadow-sm focus:outline-none border bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10 border-input has-[:checked]:border-primary has-[:checked]:bg-primary/10">
                     <input type="radio" name="form[location_type]" value="remote" class="sr-only" />
                     <div class="flex items-center gap-2">
                       <.icon name="tabler-home" class="h-5 w-5 text-primary shrink-0" />

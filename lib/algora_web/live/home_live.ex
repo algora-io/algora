@@ -221,12 +221,12 @@ defmodule AlgoraWeb.HomeLive do
                       </p>
 
                       <form class="mt-6 flex flex-col gap-3">
-                        <div class="space-y-3">
-                          <label class="text-sm font-medium text-foreground">
+                        <div>
+                          <label class="block text-sm font-semibold text-foreground mb-2">
                             Hire type
                           </label>
                           <div class="grid grid-cols-2 gap-4">
-                            <label class="group relative flex cursor-pointer rounded-lg px-3 py-2 shadow-sm focus:outline-none border-2 bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10 border-border has-[:checked]:border-primary has-[:checked]:bg-primary/10">
+                            <label class="group relative flex cursor-pointer rounded-lg px-3 py-2 shadow-sm focus:outline-none border bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10 border-input has-[:checked]:border-primary has-[:checked]:bg-primary/10">
                               <input type="radio" name="hire_type" value="full_time" class="sr-only" />
                               <div class="flex items-center gap-3">
                                 <.icon name="tabler-briefcase" class="h-6 w-6 text-primary shrink-0" />
@@ -235,7 +235,7 @@ defmodule AlgoraWeb.HomeLive do
                                 </span>
                               </div>
                             </label>
-                            <label class="group relative flex cursor-pointer rounded-lg px-3 py-2 shadow-sm focus:outline-none border-2 bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10 border-border has-[:checked]:border-primary has-[:checked]:bg-primary/10">
+                            <label class="group relative flex cursor-pointer rounded-lg px-3 py-2 shadow-sm focus:outline-none border bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10 border-input has-[:checked]:border-primary has-[:checked]:bg-primary/10">
                               <input type="radio" name="hire_type" value="contract" class="sr-only" />
                               <div class="flex items-center gap-3">
                                 <.icon name="tabler-clock" class="h-6 w-6 text-primary shrink-0" />
@@ -248,10 +248,15 @@ defmodule AlgoraWeb.HomeLive do
                         </div>
 
                         <div>
-                          <label class="block text-sm font-medium text-foreground mb-2">
+                          <label class="block text-sm font-semibold text-foreground mb-2">
                             Tech stack
                           </label>
-                          <.TechStack tech={@tech_stack} socket={@socket} form="home_form" />
+                          <.TechStack
+                            tech={@tech_stack}
+                            socket={@socket}
+                            form="home_form"
+                            classes="-mt-2"
+                          />
                         </div>
 
                         <div class="grid grid-cols-2 gap-4">
@@ -265,7 +270,7 @@ defmodule AlgoraWeb.HomeLive do
                             name="compensation"
                             value=""
                             label="Compensation range"
-                            placeholder="$150k - $250k"
+                            placeholder="$175k - $330k"
                           />
                         </div>
 
@@ -275,7 +280,7 @@ defmodule AlgoraWeb.HomeLive do
                           value=""
                           label="Job description / careers URL"
                           rows="3"
-                          placeholder="Tell us about the role and your requirements..."
+                          placeholder="Tell us about the role, requirements, ideal candidate..."
                         />
 
                         <.input

@@ -822,7 +822,7 @@ defmodule AlgoraWeb.CoreComponents do
         name={@name}
         class={
           classes([
-            "min-h-[6rem] py-[7px] px-[11px] block w-full rounded-lg border-input bg-background",
+            "min-h-[6rem] py-[7px] px-[11px] block w-full rounded-lg border-input bg-background resize-none",
             "text-foreground focus:border-ring focus:outline-none focus:ring-4 focus:ring-ring/5 sm:text-sm sm:leading-6",
             "border-input focus:border-ring focus:ring-ring/5",
             @errors != [] &&

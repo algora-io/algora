@@ -334,7 +334,8 @@ defmodule AlgoraWeb.HomeLive do
                           </span>
                           <span class="font-semibold">Inbox</span>
                         </span>
-                        <span>&</span>
+                        <span class="hidden lg:inline">and</span>
+                        <span class="inline lg:hidden">&</span>
                         <span class="inline-flex items-center gap-1.5">
                           <span class="w-7 h-7 sm:w-9 sm:h-9 rounded-lg bg-white/10 border border-border inline-flex items-center justify-center">
                             <img

@@ -275,11 +275,11 @@ defmodule AlgoraWeb.HomeLive do
 
             <section class="relative isolate py-16 sm:py-40">
               <div class="mx-auto px-6 lg:px-8 pt-24 xl:pt-0">
-                <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
+                <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-6xl mb-2 sm:mb-4">
                   Hire with Confidence
                 </h2>
-                <div class="flex flex-col items-center justify-center">
-                  <div class="w-full space-y-4 max-w-3xl mx-auto">
+                <div class="flex flex-col">
+                  <div class="w-full space-y-4">
                     <div class="mt-6 flex items-start gap-2 sm:gap-3">
                       <.icon
                         name="tabler-circle-number-1"
@@ -296,7 +296,7 @@ defmodule AlgoraWeb.HomeLive do
                       loading="lazy"
                     />
                   </div>
-                  <div class="mt-12 w-full space-y-4 max-w-3xl mx-auto">
+                  <div class="mt-12 w-full space-y-4">
                     <div class="mt-6 flex items-start gap-2 sm:gap-3">
                       <.icon
                         name="tabler-circle-number-2"
@@ -335,7 +335,7 @@ defmodule AlgoraWeb.HomeLive do
                       loading="lazy"
                     />
                   </div>
-                  <div class="mt-12 w-full space-y-4 max-w-3xl mx-auto">
+                  <div class="mt-12 w-full space-y-4">
                     <div class="mt-6 flex items-start gap-2 sm:gap-3">
                       <.icon
                         name="tabler-circle-number-3"
@@ -499,10 +499,10 @@ defmodule AlgoraWeb.HomeLive do
 
             <section class="relative isolate py-16 sm:py-40">
               <div class="mx-auto max-w-7xl px-6 lg:px-8 pt-24 xl:pt-0">
-                <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
+                <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-6xl mb-2 sm:mb-4">
                   Publish jobs
                 </h2>
-                <p class="text-center font-medium text-[15px] text-muted-foreground sm:text-xl mb-12 mx-auto">
+                <p class="font-medium text-[15px] text-muted-foreground sm:text-xl mb-12 mx-auto">
                   Reach top 1% users matching your tech, skills, seniority and location preferences
                 </p>
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">

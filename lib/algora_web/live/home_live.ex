@@ -358,12 +358,28 @@ defmodule AlgoraWeb.HomeLive do
                         </span>
                       </p>
                     </div>
-                    <img
-                      src={~p"/images/screenshots/ashby.png"}
-                      alt="Candidates"
-                      class="w-full object-cover aspect-[816/414] rounded-xl border border-border bg-[#121214]"
-                      loading="lazy"
-                    />
+                    <div class="relative z-30 mx-auto">
+                      <div class="relative mx-auto">
+                        <div class="group/card h-full border-2 border-white/15 bg-muted md:gap-8 group relative flex-1 overflow-hidden rounded-xl bg-cover hover:no-underline">
+                          <div class="grid h-7 grid-cols-[1fr_auto_1fr] overflow-hidden border-b border-gray-800 ">
+                            <div class="ml-2 flex items-center gap-1">
+                              <div class="h-2.5 w-2.5 rounded-full bg-red-400"></div>
+                              <div class="h-2.5 w-2.5 rounded-full bg-yellow-400"></div>
+                              <div class="h-2.5 w-2.5 rounded-full bg-green-400"></div>
+                            </div>
+                            <div class="flex items-center justify-center">
+                              <div class="text-xs text-foreground">
+                                app.ashbyhq.com<span class="text-foreground/70">/candidates/pipeline/active</span>
+                              </div>
+                            </div>
+                            <div></div>
+                          </div>
+                          <div class="relative flex aspect-[816/414] h-full w-full items-center justify-center text-balance text-center text-xl font-medium text-red-100 sm:text-2xl">
+                            <img src={~p"/images/screenshots/ashby.png"} alt="Ashby" class="w-full" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   <div class="pt-12 sm:pt-24 grid grid-cols-1 gap-12">

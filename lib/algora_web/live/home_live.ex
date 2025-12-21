@@ -93,11 +93,11 @@ defmodule AlgoraWeb.HomeLive do
               <div class="h-full mx-auto max-w-[88rem] px-6 lg:px-8 flex flex-col items-center justify-center pt-20 lg:pt-32 pb-12">
                 <div class="h-full mx-auto lg:mx-0 flex lg:max-w-none items-center justify-center text-center w-full">
                   <div class="w-full flex flex-col lg:items-start text-left lg:text-left">
-                    <h1 class="text-5xl xl:text-[3.75rem] font-semibold tracking-tight text-foreground">
+                    <h1 class="text-5xl xl:text-[4rem] font-semibold tracking-tight text-foreground">
                       Open source <br class="block lg:hidden" />
                       <span class="text-emerald-400">tech recruiting</span>
                     </h1>
-                    <p class="mt-2 text-base lg:text-lg leading-8 font-medium text-foreground">
+                    <p class="mt-4 text-base lg:text-xl leading-8 font-medium text-foreground">
                       Connecting the most prolific open source maintainers & contributors with their next jobs
                     </p>
                     <div class="flex items-center justify-start gap-6 lg:gap-12 overflow-x-auto scrollbar-thin py-4">
@@ -129,7 +129,7 @@ defmodule AlgoraWeb.HomeLive do
                         />
                       </div>
                     </div>
-                    <div :if={length(@candidates_data) > 0} class="-ml-2 mt-4 max-w-[48rem] w-full">
+                    <div :if={length(@candidates_data) > 0} class="-ml-2 mt-4 w-full">
                       <div
                         id="candidate-carousel-home"
                         phx-hook="CandidateCarousel"
@@ -289,12 +289,32 @@ defmodule AlgoraWeb.HomeLive do
                         Share your JDs and receive handpicked candidates with the right skills and experience
                       </p>
                     </div>
-                    <img
-                      src={~p"/images/screenshots/candidates-page.png"}
-                      alt="Candidates page"
-                      class="w-full object-cover aspect-[1200/630] rounded-xl border border-border bg-[#121214]"
-                      loading="lazy"
-                    />
+                    <div class="relative z-30 mx-auto">
+                      <div class="relative mx-auto">
+                        <div class="group/card h-full border-2 border-white/10 bg-muted md:gap-8 group relative flex-1 overflow-hidden rounded-xl bg-cover hover:no-underline">
+                          <div class="grid h-7 grid-cols-[1fr_auto_1fr] overflow-hidden border-b border-gray-800 ">
+                            <div class="ml-2 flex items-center gap-1">
+                              <div class="h-2.5 w-2.5 rounded-full bg-red-400"></div>
+                              <div class="h-2.5 w-2.5 rounded-full bg-yellow-400"></div>
+                              <div class="h-2.5 w-2.5 rounded-full bg-green-400"></div>
+                            </div>
+                            <div class="flex items-center justify-center">
+                              <div class="text-xs text-foreground">
+                                algora.io<span class="text-foreground/70">/candidates</span>
+                              </div>
+                            </div>
+                            <div></div>
+                          </div>
+                          <div class="relative flex aspect-[1200/630] h-full w-full items-center justify-center text-balance text-center text-xl font-medium text-red-100 sm:text-2xl">
+                            <img
+                              src={~p"/images/screenshots/candidates-page.png"}
+                              alt="Candidates page"
+                              class="w-full bg-[#121214] p-1"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                   <div class="mt-12 w-full space-y-4">
                     <div class="mt-6 flex items-start gap-2 sm:gap-3">
@@ -328,12 +348,33 @@ defmodule AlgoraWeb.HomeLive do
                         <span>with candidates ready to interview</span>
                       </p>
                     </div>
-                    <img
-                      src={~p"/images/screenshots/candidate-drip.png"}
-                      alt="Candidate drip"
-                      class="w-full object-cover aspect-[1008/561] rounded-xl border border-border bg-[#121214] p-1"
-                      loading="lazy"
-                    />
+
+                    <div class="relative z-30 mx-auto">
+                      <div class="relative mx-auto">
+                        <div class="group/card h-full border-2 border-white/10 bg-muted md:gap-8 group relative flex-1 overflow-hidden rounded-xl bg-cover hover:no-underline">
+                          <div class="grid h-7 grid-cols-[1fr_auto_1fr] overflow-hidden border-b border-gray-800 ">
+                            <div class="ml-2 flex items-center gap-1">
+                              <div class="h-2.5 w-2.5 rounded-full bg-red-400"></div>
+                              <div class="h-2.5 w-2.5 rounded-full bg-yellow-400"></div>
+                              <div class="h-2.5 w-2.5 rounded-full bg-green-400"></div>
+                            </div>
+                            <div class="flex items-center justify-center">
+                              <div class="text-xs text-foreground">
+                                app.slack.com<span class="text-foreground/70">/client/T05UQ2UMHFX/C09FC54M0S3</span>
+                              </div>
+                            </div>
+                            <div></div>
+                          </div>
+                          <div class="relative flex aspect-[1008/561] h-full w-full items-center justify-center text-balance text-center text-xl font-medium text-red-100 sm:text-2xl">
+                            <img
+                              src={~p"/images/screenshots/candidate-drip.png"}
+                              alt="Candidate drip"
+                              class="w-full bg-[#121214] p-1"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                   <div class="mt-12 w-full space-y-4">
                     <div class="mt-6 flex items-start gap-2 sm:gap-3">
@@ -360,7 +401,7 @@ defmodule AlgoraWeb.HomeLive do
                     </div>
                     <div class="relative z-30 mx-auto">
                       <div class="relative mx-auto">
-                        <div class="group/card h-full border-2 border-white/15 bg-muted md:gap-8 group relative flex-1 overflow-hidden rounded-xl bg-cover hover:no-underline">
+                        <div class="group/card h-full border-2 border-white/10 bg-muted md:gap-8 group relative flex-1 overflow-hidden rounded-xl bg-cover hover:no-underline">
                           <div class="grid h-7 grid-cols-[1fr_auto_1fr] overflow-hidden border-b border-gray-800 ">
                             <div class="ml-2 flex items-center gap-1">
                               <div class="h-2.5 w-2.5 rounded-full bg-red-400"></div>

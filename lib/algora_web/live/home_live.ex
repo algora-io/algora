@@ -88,7 +88,6 @@ defmodule AlgoraWeb.HomeLive do
 
       <main class="bg-black relative">
         <div class="flex flex-col lg:grid lg:grid-cols-[1fr_28rem] lg:gap-8 lg:max-w-[88rem] lg:mx-auto">
-          <%!-- Hero section: order-1 on mobile, left column on desktop --%>
           <div class="order-1 lg:order-1 lg:col-start-1">
             <section class="relative isolate min-h-[calc(100vh)]">
               <div class="h-full mx-auto max-w-[88rem] px-6 lg:px-8 flex flex-col items-center justify-center pt-20 lg:pt-32 pb-12">
@@ -146,54 +145,12 @@ defmodule AlgoraWeb.HomeLive do
                         <% end %>
                       </div>
                     </div>
-                    <%!-- <div class="pt-4 sm:max-w-[40rem] grid w-full grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-y-4 gap-x-4 mx-auto items-center justify-center sm:ml-0">
-                      <.link class="relative flex items-center justify-center" href={~p"/cal"}>
-                        <Wordmarks.calcom class="w-[80%] col-auto" alt="Cal.com" />
-                      </.link>
-                      <.link class="relative flex items-center justify-center" href={~p"/qdrant"}>
-                        <Wordmarks.qdrant class="w-[80%] col-auto" alt="Qdrant" />
-                      </.link>
-                      <.link class="relative flex items-center justify-center" href={~p"/zio"}>
-                        <img
-                          loading="eager"
-                          src={~p"/images/wordmarks/zio.png"}
-                          alt="ZIO"
-                          class="mt-1 sm:mt-3 w-[70%] col-auto brightness-0 invert"
-                        />
-                      </.link>
-                      <.link
-                        class="relative flex items-center justify-center"
-                        navigate={~p"/activepieces"}
-                      >
-                        <img
-                          loading="eager"
-                          src={~p"/images/wordmarks/activepieces.svg"}
-                          alt="Activepieces"
-                          class="col-auto brightness-0 invert"
-                        />
-                      </.link>
-                      <.link class="relative flex items-center justify-center" href={~p"/golemcloud"}>
-                        <Wordmarks.golemcloud class="col-auto w-[80%]" alt="Golem Cloud" />
-                      </.link>
-                      <.link
-                        class="font-bold font-display text-sm sm:text-base whitespace-nowrap flex items-center justify-center"
-                        navigate={~p"/browser-use"}
-                      >
-                        <img
-                          loading="eager"
-                          src={~p"/images/wordmarks/browser-use.svg"}
-                          alt="Browser Use"
-                          class="saturate-0 w-4 sm:w-4 mr-1 sm:mr-1"
-                        /> Browser Use
-                      </.link>
-                    </div> --%>
                   </div>
                 </div>
               </div>
             </section>
           </div>
 
-          <%!-- Form: order-2 on mobile, sticky on right on desktop --%>
           <div class="order-2 lg:sticky lg:top-0 lg:order-2 lg:col-start-2 lg:row-start-1 lg:self-start px-6 lg:px-0 pb-12 lg:pb-0 lg:pt-32">
             <div class="text-left">
               <div class="rounded-xl bg-card text-card-foreground shadow-2xl ring-1 ring-white/10">
@@ -279,7 +236,6 @@ defmodule AlgoraWeb.HomeLive do
             </div>
           </div>
 
-          <%!-- Other sections: order-3 on mobile, left column on desktop --%>
           <div class="order-3 lg:order-1 lg:col-start-1">
             <div class="py-16 sm:py-24 relative">
               <div class="">
@@ -327,105 +283,6 @@ defmodule AlgoraWeb.HomeLive do
                 </div>
               </div>
             </div>
-
-            <%!-- <section class="isolate overflow-hidden px-6 lg:px-8">
-          <div class="relative mx-auto max-w-2xl py-24 sm:py-32 lg:max-w-4xl">
-            <div class="absolute top-0 left-1/2 -z-10 h-200 w-360 -translate-x-1/2 bg-[radial-gradient(50%_100%_at_top,var(--color-indigo-100),white)] opacity-20 lg:left-36 dark:bg-[radial-gradient(45rem_50rem_at_top,var(--color-indigo-500),transparent)] dark:opacity-10">
-            </div>
-            <div class="absolute inset-y-0 right-1/2 -z-10 mr-12 w-[150vw] origin-bottom-left skew-x-[-30deg] bg-white shadow-xl ring-1 shadow-indigo-600/10 ring-indigo-50 sm:mr-20 md:mr-0 lg:right-full lg:-mr-36 lg:origin-center dark:bg-gray-900 dark:shadow-2xl dark:shadow-indigo-500/5 dark:ring-white/10">
-            </div>
-            <figure class="grid grid-cols-1 items-center gap-x-6 gap-y-8 lg:gap-x-10">
-              <div class="relative col-span-2 lg:col-start-1 lg:row-start-2">
-                <svg
-                  viewBox="0 0 162 128"
-                  fill="none"
-                  aria-hidden="true"
-                  class="absolute -top-12 left-0 -z-10 h-32 stroke-gray-900/10 dark:stroke-white/20"
-                >
-                  <path
-                    id="b56e9dab-6ccb-4d32-ad02-6b4bb5d9bbeb"
-                    d="M65.5697 118.507L65.8918 118.89C68.9503 116.314 71.367 113.253 73.1386 109.71C74.9162 106.155 75.8027 102.28 75.8027 98.0919C75.8027 94.237 75.16 90.6155 73.8708 87.2314C72.5851 83.8565 70.8137 80.9533 68.553 78.5292C66.4529 76.1079 63.9476 74.2482 61.0407 72.9536C58.2795 71.4949 55.276 70.767 52.0386 70.767C48.9935 70.767 46.4686 71.1668 44.4872 71.9924L44.4799 71.9955L44.4726 71.9988C42.7101 72.7999 41.1035 73.6831 39.6544 74.6492C38.2407 75.5916 36.8279 76.455 35.4159 77.2394L35.4047 77.2457L35.3938 77.2525C34.2318 77.9787 32.6713 78.3634 30.6736 78.3634C29.0405 78.3634 27.5131 77.2868 26.1274 74.8257C24.7483 72.2185 24.0519 69.2166 24.0519 65.8071C24.0519 60.0311 25.3782 54.4081 28.0373 48.9335C30.703 43.4454 34.3114 38.345 38.8667 33.6325C43.5812 28.761 49.0045 24.5159 55.1389 20.8979C60.1667 18.0071 65.4966 15.6179 71.1291 13.7305C73.8626 12.8145 75.8027 10.2968 75.8027 7.38572C75.8027 3.6497 72.6341 0.62247 68.8814 1.1527C61.1635 2.2432 53.7398 4.41426 46.6119 7.66522C37.5369 11.6459 29.5729 17.0612 22.7236 23.9105C16.0322 30.6019 10.618 38.4859 6.47981 47.558L6.47976 47.558L6.47682 47.5647C2.4901 56.6544 0.5 66.6148 0.5 77.4391C0.5 84.2996 1.61702 90.7679 3.85425 96.8404L3.8558 96.8445C6.08991 102.749 9.12394 108.02 12.959 112.654L12.959 112.654L12.9646 112.661C16.8027 117.138 21.2829 120.739 26.4034 123.459L26.4033 123.459L26.4144 123.465C31.5505 126.033 37.0873 127.316 43.0178 127.316C47.5035 127.316 51.6783 126.595 55.5376 125.148L55.5376 125.148L55.5477 125.144C59.5516 123.542 63.0052 121.456 65.9019 118.881L65.5697 118.507Z"
-                  />
-                  <use x="86" href="#b56e9dab-6ccb-4d32-ad02-6b4bb5d9bbeb" />
-                </svg>
-                <blockquote class="text-xl/8 font-semibold text-gray-900 sm:text-2xl/9 dark:text-white">
-                  <p>
-                    Within one week of onboarding, we started interviewing qualified candidates interested to join 🐰CodeRabbit in San Francisco
-                  </p>
-                </blockquote>
-              </div>
-              <div class="col-end-1 w-16 lg:row-span-4 lg:w-72">
-                <img
-                  src="https://algora.io/storage/avatars/coderabbit/sam-hayes-85a0ba25.jpg"
-                  alt=""
-                  class="rounded-xl bg-indigo-50 lg:rounded-3xl dark:bg-indigo-900/20"
-                />
-              </div>
-              <figcaption class="text-base lg:col-start-1 lg:row-start-3">
-                <div class="font-semibold text-gray-900 dark:text-white">Sam Hayes</div>
-                <div class="mt-1 text-gray-500 dark:text-gray-400">
-                  Talent Acquisition Lead at CodeRabbit
-                </div>
-              </figcaption>
-            </figure>
-          </div>
-        </section> --%>
-
-            <%!-- <section class="relative isolate py-16 sm:pb-40">
-          <div class="max-w-[68rem] mx-auto flex flex-col md:flex-row gap-8 sm:gap-12 px-4">
-            <div class="flex-1 mx-auto flex flex-col justify-between">
-              <figure class="relative flex flex-col h-full">
-                <blockquote class="text-lg font-medium text-foreground/90 flex-grow">
-                  "Algora helped us meet Nick, who after being contracted a few months, joined the Trigger founding team full-time. It was the
-                  <span class="text-success">easiest hire</span>
-                  and turned out to be <span class="text-success">very very good</span>."
-                </blockquote>
-                <figcaption class="mt-8 flex items-center gap-x-4">
-                  <img
-                    src="/images/people/eric-allam.jpg"
-                    alt="Eric Allam"
-                    class="h-16 w-16 rounded-full object-cover bg-gray-800"
-                    loading="lazy"
-                  />
-                  <div class="text-sm">
-                    <div class="text-base font-semibold text-foreground">Eric Allam</div>
-                    <div class="text-foreground/90 font-medium">Co-founder & CTO</div>
-                    <div class="text-muted-foreground font-medium">
-                      Trigger.dev <span class="text-orange-400">(YC W23)</span>
-                    </div>
-                  </div>
-                </figcaption>
-              </figure>
-            </div>
-
-            <div class="flex-1 mx-auto flex flex-col justify-between">
-              <figure class="relative flex flex-col h-full">
-                <blockquote class="text-lg font-medium text-foreground/90 flex-grow">
-                  "Algora helped us meet Gergő and
-                  <span class="text-success">I couldn't be happier</span>
-                  with the results. He's been working full-time with us for
-                  <span class="text-success">over a year</span>
-                  now and is a key contributor to our product."
-                </blockquote>
-                <figcaption class="mt-8 flex items-center gap-x-4">
-                  <img
-                    src="/images/people/nicolas-camara.jpg"
-                    alt="Nicolas Camara"
-                    class="h-16 w-16 rounded-full object-cover bg-gray-800"
-                    loading="lazy"
-                  />
-                  <div class="text-sm">
-                    <div class="text-base font-semibold text-foreground">Nicolas Camara</div>
-                    <div class="text-foreground/90 font-medium">Co-founder & CTO</div>
-                    <div class="text-muted-foreground font-medium">
-                      Firecrawl <span class="text-orange-400">(YC S22)</span>
-                    </div>
-                  </div>
-                </figcaption>
-              </figure>
-            </div>
-          </div>
-        </section> --%>
 
             <section class="relative isolate py-16 sm:py-40">
               <div class="mx-auto px-6 lg:px-8 pt-24 xl:pt-0">

@@ -243,35 +243,16 @@ defmodule AlgoraWeb.HomeLive do
                   <img
                     src="https://algora.io/storage/avatars/coderabbit/sam-hayes-85a0ba25.jpg"
                     alt=""
-                    class="absolute inset-0 size-full object-cover object-top brightness-150 saturate-0"
+                    class="absolute inset-0 size-full object-cover object-top grayscale"
                   />
-                  <div class="absolute inset-0 bg-gray-900/90 mix-blend-multiply"></div>
-                  <div
-                    aria-hidden="true"
-                    class="absolute -top-[56px] -left-[80px] transform-gpu blur-3xl"
-                  >
-                    <div
-                      style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)"
-                      class="aspect-[1097/845] w-[274.25px] bg-linear-to-r from-[#ff4694] to-[#776fff] opacity-100"
-                    >
-                    </div>
-                  </div>
-                  <div
-                    aria-hidden="true"
-                    class="hidden md:absolute md:bottom-[16px] md:left-[200px] md:block md:transform-gpu md:blur-3xl"
-                  >
-                    <div
-                      style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)"
-                      class="aspect-[1097/845] w-[274.25px] bg-linear-to-r from-[#ff4694] to-[#776fff] opacity-100"
-                    >
-                    </div>
-                  </div>
+                  <div class="absolute inset-0 bg-orange-950/50 mix-blend-multiply"></div>
+
                   <div class="relative mx-auto max-w-2xl lg:mx-0">
                     <img src="/images/wordmarks/coderabbit.svg" alt="CodeRabbit" class="h-12 w-auto" />
                     <figure>
                       <blockquote class="mt-6 text-lg font-semibold text-white sm:text-xl/8">
                         <p>
-                          "Within one week of onboarding, we started interviewing qualified candidates interested to join 🐰CodeRabbit in San Francisco"
+                          "Within one week of onboarding, we started interviewing qualified candidates interested to join CodeRabbit in San Francisco."
                         </p>
                       </blockquote>
                       <figcaption class="mt-6 text-base text-white dark:text-gray-200">

@@ -245,7 +245,15 @@ defmodule AlgoraWeb.HomeLive do
                     alt=""
                     class="absolute inset-0 size-full object-cover object-top grayscale"
                   />
-                  <div class="absolute inset-0 bg-orange-950/50 mix-blend-multiply"></div>
+                  <div class="absolute inset-0 bg-orange-950/60 mix-blend-multiply"></div>
+                  <div class="absolute inset-0 bg-gradient-to-t from-transparent from-[97%] to-black">
+                  </div>
+                  <div class="absolute inset-0 bg-gradient-to-b from-transparent from-[97%] to-black">
+                  </div>
+                  <div class="absolute inset-0 bg-gradient-to-r from-transparent from-[97%] to-black">
+                  </div>
+                  <div class="absolute inset-0 bg-gradient-to-l from-transparent from-[97%] to-black">
+                  </div>
 
                   <div class="relative mx-auto max-w-2xl lg:mx-0">
                     <img src="/images/wordmarks/coderabbit.svg" alt="CodeRabbit" class="h-12 w-auto" />
@@ -976,18 +984,18 @@ defmodule AlgoraWeb.HomeLive do
         person_title: "Founding Engineer"
       },
       %{
-        company_name: "Comfy",
-        company_avatar: "https://avatars.githubusercontent.com/u/166579949?v=4",
-        person_name: "David Aguilar",
-        person_avatar: "https://algora-console.t3.storageapi.dev/avatars/davvid.jpeg",
-        person_title: "Staff AI Cloud Infra Engineer"
-      },
-      %{
         company_name: "Golem Cloud",
         company_avatar: "https://github.com/golemcloud.png",
         person_name: "Maxim S",
         person_avatar: "https://github.com/mschuwalow.png",
         person_title: "Lead Engineer"
+      },
+      %{
+        company_name: "Comfy",
+        company_avatar: "https://avatars.githubusercontent.com/u/166579949?v=4",
+        person_name: "David Aguilar",
+        person_avatar: "https://algora-console.t3.storageapi.dev/avatars/davvid.jpeg",
+        person_title: "Staff AI Cloud Infra Engineer"
       },
       %{
         company_name: "TraceMachina",

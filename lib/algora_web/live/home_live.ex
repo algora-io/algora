@@ -93,28 +93,28 @@ defmodule AlgoraWeb.HomeLive do
               <div class="h-full mx-auto max-w-[88rem] px-6 lg:px-8 flex flex-col items-center justify-center pt-20 lg:pt-32 pb-12">
                 <div class="h-full mx-auto lg:mx-0 flex lg:max-w-none items-center justify-center text-center w-full">
                   <div class="w-full flex flex-col lg:items-start text-left lg:text-left">
-                    <h1 class="text-5xl xl:text-[4rem] font-semibold tracking-tight text-foreground">
+                    <h1 class="text-4xl xl:text-[4rem] font-semibold tracking-tight text-foreground">
                       Open source <br class="block lg:hidden" />
                       <span class="text-emerald-400">tech recruiting</span>
                     </h1>
-                    <p class="mt-4 text-base lg:text-xl leading-8 font-medium text-foreground">
+                    <p class="mt-2 lg:mt-4 text-[0.9rem] lg:text-xl leading-6 font-medium text-foreground">
                       Connecting the most prolific open source maintainers & contributors with their next jobs
                     </p>
                     <div class="flex items-center justify-start gap-6 lg:gap-12 overflow-x-auto scrollbar-thin py-4">
                       <img
                         src="/images/wordmarks/coderabbit.svg"
                         alt="CodeRabbit"
-                        class="h-6 shrink-0 transition-all"
+                        class="h-5 lg:h-6 shrink-0 transition-all"
                       />
                       <img
                         src="/images/wordmarks/comfy.svg"
                         alt="Comfy"
-                        class="h-5 shrink-0 transition-all"
+                        class="h-4 lg:h-5 shrink-0 transition-all"
                       />
                       <img
                         src="/images/wordmarks/lovable.svg"
                         alt="Lovable"
-                        class="h-4 shrink-0 transition-all"
+                        class="h-3 lg:h-4 shrink-0 transition-all"
                       />
                       <div class="hidden lg:flex items-center transition-all">
                         <img
@@ -202,7 +202,7 @@ defmodule AlgoraWeb.HomeLive do
                       />
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                       <.input
                         name="location"
                         value=""
@@ -250,9 +250,9 @@ defmodule AlgoraWeb.HomeLive do
                   </div>
                   <div class="absolute inset-0 bg-gradient-to-b from-transparent from-[97%] to-black">
                   </div>
-                  <div class="absolute inset-0 bg-gradient-to-r from-transparent from-[97%] to-black">
+                  <div class="absolute hidden lg:block inset-0 bg-gradient-to-r from-transparent from-[97%] to-black">
                   </div>
-                  <div class="absolute inset-0 bg-gradient-to-l from-transparent from-[97%] to-black">
+                  <div class="absolute hidden lg:block inset-0 bg-gradient-to-l from-transparent from-[97%] to-black">
                   </div>
 
                   <div class="relative mx-auto max-w-2xl lg:mx-0">
@@ -265,7 +265,7 @@ defmodule AlgoraWeb.HomeLive do
                       </blockquote>
                       <figcaption class="mt-6 text-base text-white dark:text-gray-200">
                         <div class="font-semibold">Sam Hayes</div>
-                        <div class="mt-1">Talent Acquisition Lead at CodeRabbit</div>
+                        <div class="mt-1">Talent Acquisition Lead</div>
                       </figcaption>
                     </figure>
                   </div>

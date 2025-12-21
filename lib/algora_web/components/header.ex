@@ -24,7 +24,7 @@ defmodule AlgoraWeb.Components.Header do
       <nav
         class={
           classes([
-            "mx-auto flex container items-center justify-between p-6 lg:px-8",
+            "mx-auto flex container items-center justify-between px-6 py-4 lg:px-8 lg:py-6",
             # !@hide_banner && "-mt-3",
             @class
           ])

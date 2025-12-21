@@ -16,7 +16,7 @@ defmodule AlgoraWeb.Components.Footer do
       <h2 id="footer-heading" class="sr-only">Footer</h2>
       <div class={
         classes([
-          "mx-auto max-w-7xl px-6 pb-8 lg:px-8",
+          "mx-auto max-w-7xl px-6 pb-4 lg:px-8",
           @class
         ])
       }>
@@ -168,7 +168,7 @@ defmodule AlgoraWeb.Components.Footer do
         </div> --%>
         <div class={
           classes([
-            "pt-8 border-t border-white/10 flex flex-col md:flex-row md:justify-between md:items-start gap-8"
+            "pt-4 border-t border-white/10 flex flex-col md:flex-row md:justify-between md:items-start gap-8"
             # "mt-16 sm:mt-20 lg:mt-24"
           ])
         }>
@@ -232,13 +232,28 @@ defmodule AlgoraWeb.Components.Footer do
               © {Date.utc_today().year} Algora, Public Benefit Corporation
             </div>
 
-            <div class="flex flex-col gap-2">
+            <div class="grid grid-cols-1 md:flex md:flex-row items-stretch gap-2 w-full md:w-auto">
               <.link
-                class="flex w-max items-center gap-2 rounded-full border border-gray-500 py-2 pl-2 pr-3.5 text-xs text-foreground/90 hover:text-foreground transition-colors hover:border-gray-400"
-                href={"tel:" <> Constants.get(:tel)}
+                class="w-full md:w-auto flex items-center justify-center rounded-lg border border-gray-500 py-2 pl-2 pr-3.5 text-xs text-foreground/90 hover:text-foreground transition-colors hover:border-gray-400"
+                href={AlgoraWeb.Constants.get(:calendar_url)}
+                rel="noopener"
               >
-                <.icon name="tabler-phone-filled" class="size-4" /> Call us
-                <span>{Constants.get(:tel_formatted)}</span>
+                <.icon name="tabler-calendar-clock" class="size-4" />
+                <span class="ml-2">Schedule a call</span>
+              </.link>
+              <.link
+                class="w-full md:w-auto flex items-center justify-center rounded-lg border border-gray-500 py-2 pl-2 pr-3.5 text-xs text-foreground/90 hover:text-foreground transition-colors hover:border-gray-400"
+                href="tel:+16504202207"
+              >
+                <.icon name="tabler-phone" class="size-4" /> <span class="font-bold ml-1">US</span>
+                <span class="ml-2">+1 (650) 420-2207</span>
+              </.link>
+              <.link
+                class="w-full md:w-auto flex items-center justify-center rounded-lg border border-gray-500 py-2 pl-2 pr-3.5 text-xs text-foreground/90 hover:text-foreground transition-colors hover:border-gray-400"
+                href="tel:+306973184144"
+              >
+                <.icon name="tabler-phone" class="size-4" /> <span class="font-bold ml-1">EU</span>
+                <span class="ml-2">+30 (697) 318-4144</span>
               </.link>
             </div>
           </div>

@@ -151,7 +151,7 @@ defmodule AlgoraWeb.HomeLive do
             </section>
           </div>
 
-          <div class="order-2 lg:sticky lg:top-0 lg:order-2 lg:col-start-2 lg:row-start-1 lg:self-start px-6 lg:px-0 pb-12 lg:pb-12 lg:pt-32">
+          <div class="order-2 lg:sticky lg:top-0 lg:order-2 lg:col-start-2 lg:row-start-1 lg:self-start px-6 lg:px-0 pb-12 lg:pb-8 lg:pt-32">
             <div class="text-left">
               <div class="rounded-xl bg-card text-card-foreground shadow-2xl ring-1 ring-white/10">
                 <div class="p-6 lg:p-8">
@@ -424,8 +424,8 @@ defmodule AlgoraWeb.HomeLive do
                   </div>
 
                   <div class="pt-12 sm:pt-24 grid grid-cols-1 gap-12">
-                    <div class="max-w-[88rem] px-6 pt-2">
-                      <div class="grid grid-cols-3 gap-8 lg:gap-16 text-center">
+                    <div class="max-w-[88rem] pt-2">
+                      <div class="grid grid-cols-3 gap-8 lg:gap-16">
                         <%= for stat <- @stats1 do %>
                           <div>
                             <div class="text-4xl font-bold font-display text-foreground">

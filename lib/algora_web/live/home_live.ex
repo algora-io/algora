@@ -273,7 +273,7 @@ defmodule AlgoraWeb.HomeLive do
               </div>
             </div>
 
-            <section class="relative isolate py-16 sm:py-40">
+            <section class="relative isolate py-8 sm:py-20">
               <div class="mx-auto px-6 lg:px-8 pt-24 xl:pt-0">
                 <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-6xl mb-2 sm:mb-4">
                   Hire with Confidence
@@ -361,7 +361,7 @@ defmodule AlgoraWeb.HomeLive do
                     <img
                       src={~p"/images/screenshots/ashby.png"}
                       alt="Candidates"
-                      class="w-full object-cover aspect-[787/419] rounded-xl border border-border bg-[#121214]"
+                      class="w-full object-cover aspect-[816/414] rounded-xl border border-border bg-[#121214]"
                       loading="lazy"
                     />
                   </div>
@@ -497,7 +497,7 @@ defmodule AlgoraWeb.HomeLive do
               </div>
             </section>
 
-            <section class="relative isolate py-16 sm:py-40">
+            <section class="relative isolate py-8 sm:py-20">
               <div class="mx-auto max-w-7xl px-6 lg:px-8 pt-24 xl:pt-0">
                 <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-6xl mb-2 sm:mb-4">
                   Publish jobs

@@ -5,12 +5,11 @@ defmodule AlgoraWeb.Components.Header do
 
   import AlgoraWeb.CoreComponents
 
-  # defp nav_links do
-  #   [
-  #     %{name: "Bounties", path: ~p"/bounties"},
-  #     %{name: "Docs", path: ~p"/docs"}
-  #   ]
-  # end
+  defp nav_links do
+    [
+      %{name: "Explore", path: ~p"/explore"}
+    ]
+  end
 
   attr :class, :string, default: nil
   attr :hide_banner, :boolean, default: false
@@ -46,7 +45,7 @@ defmodule AlgoraWeb.Components.Header do
           </button>
         </div>
         <!-- Desktop nav -->
-        <%!-- <div class="hidden lg:flex-1 lg:flex lg:justify-center gap-4 mx-auto">
+        <div class="hidden lg:flex-1 lg:flex lg:justify-center gap-2 mx-auto">
           <%= for link <- nav_links() do %>
             <.button
               navigate={link.path}
@@ -56,26 +55,16 @@ defmodule AlgoraWeb.Components.Header do
               {link.name}
             </.button>
           <% end %>
-        </div> --%>
-
-        <div class="hidden lg:flex-1 lg:flex lg:justify-center gap-4 mx-auto whitespace-nowrap">
-          <.link
-            class="w-full md:w-auto flex items-center justify-center rounded-lg border border-gray-500 py-2 pl-2 pr-3.5 text-xs text-foreground/90 hover:text-foreground transition-colors hover:border-gray-400"
-            href="tel:+16504202207"
-          >
-            <.icon name="tabler-phone" class="size-4" /> <span class="font-bold ml-1">US</span>
-            <span class="ml-2">+1 (650) 420-2207</span>
-          </.link>
-          <.link
-            class="w-full md:w-auto flex items-center justify-center rounded-lg border border-gray-500 py-2 pl-2 pr-3.5 text-xs text-foreground/90 hover:text-foreground transition-colors hover:border-gray-400"
-            href="tel:+306973184144"
-          >
-            <.icon name="tabler-phone" class="size-4" /> <span class="font-bold ml-1">FaceTime</span>
-            <span class="ml-2">+30 (697) 318-4144</span>
-          </.link>
         </div>
 
-        <div class="hidden lg:flex-1 lg:flex lg:justify-end gap-2">
+        <div class="w-full hidden lg:flex-1 lg:flex lg:justify-end gap-4">
+          <.link
+            class="flex items-center justify-center text-sm text-foreground/80 hover:text-foreground"
+            href="tel:+16504202207"
+          >
+            <.icon name="tabler-phone" class="size-5 shrink-0" />
+            <span class="ml-1 shrink-0 font-medium">1-650-420-2207</span>
+          </.link>
           <.link
             :if={Algora.Stargazer.count()}
             class="group w-fit outline-none items-center hidden lg:flex"
@@ -83,17 +72,18 @@ defmodule AlgoraWeb.Components.Header do
             rel="noopener"
             href={AlgoraWeb.Constants.get(:github_repo_url)}
           >
-            <div class="rounded-[3px] hidden shrink-0 select-none items-center justify-center whitespace-nowrap bg-transparent text-center text-sm font-semibold transition duration-150 hover:bg-gray-850 disabled:opacity-50 group-focus:outline-none group-disabled:pointer-events-none group-disabled:opacity-75 lg:flex">
+            <div class="rounded-[3px] hidden shrink-0 select-none items-center justify-center whitespace-nowrap bg-transparent text-center text-sm font-semibold hover:bg-gray-850 disabled:opacity-50 group-focus:outline-none group-disabled:pointer-events-none group-disabled:opacity-75 lg:flex">
               <div class="flex w-full items-center justify-center gap-x-1">
                 <.icon
                   name="github"
-                  class="mr-0.5 h-5 shrink-0 justify-start text-foreground/80 group-hover:text-foreground transition"
+                  class="mr-0.5 h-5 shrink-0 justify-start text-foreground/80 group-hover:text-foreground"
                 />
                 <span class="hidden xl:block text-foreground/80 group-hover:text-foreground">
                   Star
                 </span>
-                <span class="font-semibold text-amber-300 flex items-center gap-1">
-                  {Algora.Stargazer.count()}
+                <span class="font-semibold text-muted-foreground flex items-center gap-1">
+                  {Algora.Util.format_number_compact(Algora.Stargazer.count())
+                  |> String.replace("k", "K")}
                   <.icon name="tabler-star-filled" class="h-3 w-3 shrink-0" />
                 </span>
               </div>
@@ -101,7 +91,7 @@ defmodule AlgoraWeb.Components.Header do
           </.link>
           <.button
             navigate={~p"/auth/login"}
-            variant="ghost"
+            variant="secondary"
             class="font-semibold text-foreground/80 hover:text-foreground"
           >
             Sign in

@@ -273,9 +273,9 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         </div>
       </header>
 
-      <div class="flex-1 p-4 md:py-4 flex items-center justify-center max-h-[calc(100vh-11rem)] overflow-hidden">
-        <div class="w-full flex flex-col lg:flex-row gap-6 items-center px-4 lg:px-8 max-w-[90rem]">
-          <div class="w-full lg:w-[30%] text-left">
+      <div class="flex-1 p-4 md:py-4 flex items-center justify-center overflow-hidden max-w-7xl w-full mx-auto">
+        <div class="w-full flex flex-col lg:flex-row gap-6 lg:gap-12 items-center px-4 lg:px-8">
+          <div class="w-full lg:w-[35%] text-left">
             <.form for={@form} phx-submit="submit" class="flex flex-col gap-4">
               <div>
                 <label class="block text-sm font-semibold text-foreground mb-2">
@@ -360,20 +360,17 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
               />
               <div class="flex flex-col gap-3 mt-2">
                 <.button class="w-full" type="submit">Receive your candidates</.button>
-                <div class="text-xs text-muted-foreground text-center">
-                  No credit card required - only pay when you hire
-                </div>
               </div>
             </.form>
           </div>
-          <div :if={length(@candidates_data) > 0} class="hidden lg:flex flex-col gap-3 lg:w-[70%]">
+          <div :if={length(@candidates_data) > 0} class="hidden lg:flex flex-col gap-3 lg:w-[65%]">
             <div id="candidate-carousel-org" phx-hook="CandidateCarousel" class="relative w-full">
               <%= for {candidate_data, index} <- Enum.with_index(@candidates_data) do %>
                 <div
                   data-carousel-item={index}
                   class={"transition-opacity duration-500 #{if index == 0, do: "opacity-100", else: "opacity-0 absolute inset-0"}"}
                 >
-                  <AlgoraCloud.Components.CandidateCard.candidate_card {Map.merge(candidate_data, %{anonymize: true, root_class: "h-[32rem]", fade_to_black?: false, tech_stack: []})} />
+                  <AlgoraCloud.Components.CandidateCard.candidate_card {Map.merge(candidate_data, %{anonymize: true, root_class: "h-[33rem]", fade_to_black?: false, tech_stack: []})} />
                 </div>
               <% end %>
             </div>

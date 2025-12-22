@@ -121,45 +121,45 @@ defmodule AlgoraWeb.HomeLive do
       <% end %>
 
       <main class="bg-black relative">
-        <div class="flex flex-col lg:grid lg:grid-cols-[1fr_28rem] lg:gap-8 lg:max-w-[88rem] lg:mx-auto">
+        <div class="flex flex-col lg:grid lg:grid-cols-[1fr_28rem] lg:gap-4 xl:gap-8 lg:max-w-[88rem] lg:w-full lg:mx-auto">
           <div class="order-1 lg:order-1 lg:col-start-1">
             <section class="relative isolate min-h-[calc(100vh)]">
-              <div class="h-full mx-auto max-w-[88rem] px-6 lg:px-8 flex flex-col items-center justify-center pt-20 lg:pt-32 pb-12">
+              <div class="h-full mx-auto px-6 lg:px-8 flex flex-col items-center justify-center pt-20 lg:pt-32 pb-12">
                 <div class="h-full mx-auto lg:mx-0 flex lg:max-w-none items-center justify-center text-center w-full">
                   <div class="w-full flex flex-col lg:items-start text-left lg:text-left">
-                    <h1 class="text-4xl xl:text-[4rem] font-semibold tracking-tight text-foreground">
-                      Open source <br class="block lg:hidden" />
+                    <h1 class="text-2xl min-[412px]:text-[1.75rem] sm:text-[2.5rem]/[3rem] md:text-[4rem]/[4.5rem] lg:text-[3rem]/[3.5rem] xl:text-[4rem]/[4.5rem] font-semibold tracking-tight text-foreground">
+                      Open source <br class="hidden" />
                       <span class="text-emerald-400">tech recruiting</span>
                     </h1>
-                    <p class="mt-2 lg:mt-8 text-[0.9rem] lg:text-xl leading-6 font-medium text-foreground">
+                    <p class="mt-2 md:mt-6 lg:mt-2 xl:mt-8 text-[0.9rem]/[1.4rem] min-[412px]:text-base md:text-xl lg:text-xl leading-6 font-medium text-foreground">
                       Connecting the most prolific open source maintainers & contributors with their next jobs
                     </p>
                     <div class="flex items-center justify-start gap-3 lg:gap-12 overflow-x-auto scrollbar-thin py-4">
                       <img
                         src="/images/wordmarks/coderabbit.svg"
                         alt="CodeRabbit"
-                        class="h-5 lg:h-6 shrink-0 transition-all"
+                        class="h-5 sm:h-6 shrink-0 transition-all"
                       />
                       <img
                         src="/images/wordmarks/comfy.svg"
                         alt="Comfy"
-                        class="h-3.5 lg:h-5 shrink-0 transition-all"
+                        class="h-3.5 sm:h-5 shrink-0 transition-all"
                       />
                       <img
                         src="/images/wordmarks/lovable.svg"
                         alt="Lovable"
-                        class="h-3 lg:h-4 shrink-0 transition-all"
+                        class="h-3 sm:h-4 shrink-0 transition-all"
                       />
                       <div class="hidden min-[412px]:flex items-center transition-all">
                         <img
                           src="/images/wordmarks/firecrawl.svg"
                           alt="Firecrawl"
-                          class="h-6 lg:h-7 shrink-0"
+                          class="h-6 sm:h-7 shrink-0"
                         />
                         <img
                           src="/images/wordmarks/firecrawl2.svg"
                           alt="Firecrawl2"
-                          class="h-3 lg:h-4 shrink-0"
+                          class="h-3 sm:h-4 shrink-0"
                         />
                       </div>
                     </div>

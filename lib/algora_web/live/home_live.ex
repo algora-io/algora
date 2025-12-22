@@ -121,7 +121,7 @@ defmodule AlgoraWeb.HomeLive do
       <% end %>
 
       <main class="bg-black relative">
-        <div class="flex flex-col lg:grid lg:grid-cols-[1fr_28rem] lg:gap-4 xl:gap-8 lg:max-w-[88rem] lg:w-full lg:mx-auto">
+        <div class="flex flex-col lg:grid lg:grid-cols-[1fr_28rem] lg:gap-4 md:gap-8 lg:max-w-[88rem] lg:w-full lg:mx-auto">
           <div class="order-1 lg:order-1 lg:col-start-1">
             <section class="relative isolate min-h-[calc(100vh)]">
               <div class="h-full mx-auto px-6 lg:px-8 flex flex-col items-center justify-center pt-20 lg:pt-32 pb-12">

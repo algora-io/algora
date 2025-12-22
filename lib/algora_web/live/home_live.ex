@@ -42,8 +42,7 @@ defmodule AlgoraWeb.HomeLive do
     orgs_with_stats = HomeCache.get_orgs_with_stats()
 
     # Load candidate data
-    # candidate_ids = ["1ErYxMGNt6zTfjKS", "qsQa7KN3Cq4PwGWG", "EPYrDRS1ojkjqL9w", "jzwPf2Vn7v8NbM33"]
-    candidate_ids = ["1ErYxMGNt6zTfjKS"]
+    candidate_ids = ["qsQa7KN3Cq4PwGWG", "Y5JrLmNRvL7o3Bes", "EPYrDRS1ojkjqL9w", "Y1LQ896AbtT9Wjj1", "1ErYxMGNt6zTfjKS"]
 
     candidates_data =
       candidate_ids
@@ -140,7 +139,7 @@ defmodule AlgoraWeb.HomeLive do
                             data-carousel-item={index}
                             class={"transition-opacity duration-500 #{if index == 0, do: "opacity-100", else: "opacity-0 absolute inset-0"}"}
                           >
-                            <AlgoraCloud.Components.CandidateCard.candidate_card {Map.merge(candidate_data, %{anonymize: true, root_class: "h-[30rem]", tech_stack: []})} />
+                            <AlgoraCloud.Components.CandidateCard.candidate_card {Map.merge(candidate_data, %{anonymize: true, root_class: "h-[38rem] lg:h-[31rem]", tech_stack: [], hide_badges?: true})} />
                           </div>
                         <% end %>
                       </div>

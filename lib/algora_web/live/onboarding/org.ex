@@ -45,8 +45,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    # candidate_ids = ["1ErYxMGNt6zTfjKS", "qsQa7KN3Cq4PwGWG", "EPYrDRS1ojkjqL9w", "jzwPf2Vn7v8NbM33"]
-    candidate_ids = ["1ErYxMGNt6zTfjKS", "jzwPf2Vn7v8NbM33"]
+    candidate_ids = ["qsQa7KN3Cq4PwGWG", "Y5JrLmNRvL7o3Bes", "EPYrDRS1ojkjqL9w", "Y1LQ896AbtT9Wjj1", "1ErYxMGNt6zTfjKS"]
 
     candidates_data =
       candidate_ids
@@ -275,7 +274,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
       </header>
 
       <div class="flex-1 p-4 md:py-4 flex items-center justify-center overflow-hidden max-w-7xl w-full mx-auto">
-        <div class="w-full flex flex-col lg:flex-row gap-6 lg:gap-12 items-center px-4 lg:px-8">
+        <div class="w-full flex flex-col lg:flex-row gap-6 lg:gap-12 items-center px-2 lg:px-8">
           <div class="shrink-0 w-full lg:w-[35%] text-left">
             <.form for={@form} phx-submit="submit" class="flex flex-col gap-4">
               <div>
@@ -297,7 +296,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                 class="resize-none"
                 placeholder="Tell us about the role, requirements, ideal candidate..."
               />
-              <div class="grid grid-cols-2 gap-4">
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <.input
                   field={@form[:comp_range]}
                   type="text"
@@ -366,7 +365,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           </div>
           <div
             :if={length(@candidates_data) > 0}
-            class="shrink-0 hidden lg:flex flex-col gap-3 lg:w-[65%]"
+            class="shrink-0 flex flex-col gap-3 w-full lg:w-[65%]"
           >
             <div id="candidate-carousel-org" phx-hook="CandidateCarousel" class="relative w-full">
               <%= for {candidate_data, index} <- Enum.with_index(@candidates_data) do %>
@@ -374,7 +373,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                   data-carousel-item={index}
                   class={"transition-opacity duration-500 #{if index == 0, do: "opacity-100", else: "opacity-0 absolute inset-0"}"}
                 >
-                  <AlgoraCloud.Components.CandidateCard.candidate_card {Map.merge(candidate_data, %{anonymize: true, root_class: "h-[33rem]", fade_to_black?: false, tech_stack: []})} />
+                  <AlgoraCloud.Components.CandidateCard.candidate_card {Map.merge(candidate_data, %{anonymize: true, root_class: "h-[40rem] lg:h-[31.5rem]", fade_to_black?: false, tech_stack: [], hide_badges?: true})} />
                 </div>
               <% end %>
             </div>
@@ -385,31 +384,31 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
       <footer class="w-full py-4 border-t border-white/20">
         <div class="container mx-auto px-4">
           <div class="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div class="text-sm text-foreground/90 text-center md:text-left w-full md:w-auto">
+            <div class="text-sm text-foreground/90 text-left md:text-left w-full md:w-auto">
               © 2025 Algora PBC. All rights reserved.
             </div>
             <div class="grid grid-cols-1 md:flex md:flex-row items-stretch gap-2 w-full md:w-auto">
               <.link
-                class="w-full md:w-auto flex items-center justify-center rounded-lg border border-gray-500 py-2 pl-2 pr-3.5 text-xs text-foreground/90 hover:text-foreground transition-colors hover:border-gray-400"
+                class="w-full md:w-auto flex items-center rounded-lg border border-gray-500 py-2 pl-2 pr-3.5 text-xs text-foreground/90 hover:text-foreground transition-colors hover:border-gray-400"
                 href={AlgoraWeb.Constants.get(:calendar_url)}
                 rel="noopener"
               >
                 <.icon name="tabler-calendar-clock" class="size-4" />
-                <span class="ml-2">Schedule a call</span>
+                <span class="ml-1.5">Schedule a call</span>
               </.link>
               <.link
-                class="w-full md:w-auto flex items-center justify-center rounded-lg border border-gray-500 py-2 pl-2 pr-3.5 text-xs text-foreground/90 hover:text-foreground transition-colors hover:border-gray-400"
+                class="w-full md:w-auto flex items-center rounded-lg border border-gray-500 py-2 pl-2 pr-3.5 text-xs text-foreground/90 hover:text-foreground transition-colors hover:border-gray-400"
                 href="tel:+16504202207"
               >
                 <.icon name="tabler-phone" class="size-4" /> <span class="font-bold ml-1">US</span>
-                <span class="ml-2">+1 (650) 420-2207</span>
+                <span class="ml-1">+1 (650) 420-2207</span>
               </.link>
               <.link
-                class="w-full md:w-auto flex items-center justify-center rounded-lg border border-gray-500 py-2 pl-2 pr-3.5 text-xs text-foreground/90 hover:text-foreground transition-colors hover:border-gray-400"
+                class="w-full md:w-auto flex items-center rounded-lg border border-gray-500 py-2 pl-2 pr-3.5 text-xs text-foreground/90 hover:text-foreground transition-colors hover:border-gray-400"
                 href="tel:+306973184144"
               >
                 <.icon name="tabler-phone" class="size-4" /> <span class="font-bold ml-1">EU</span>
-                <span class="ml-2">+30 (697) 318-4144</span>
+                <span class="ml-1">+30 (697) 318-4144</span>
               </.link>
             </div>
           </div>

@@ -134,7 +134,7 @@ defmodule AlgoraWeb.HomeLive do
                     <p class="mt-2 lg:mt-8 text-[0.9rem] lg:text-xl leading-6 font-medium text-foreground">
                       Connecting the most prolific open source maintainers & contributors with their next jobs
                     </p>
-                    <div class="flex items-center justify-start gap-6 lg:gap-12 overflow-x-auto scrollbar-thin py-4">
+                    <div class="flex items-center justify-start gap-3 lg:gap-12 overflow-x-auto scrollbar-thin py-4">
                       <img
                         src="/images/wordmarks/coderabbit.svg"
                         alt="CodeRabbit"
@@ -143,14 +143,14 @@ defmodule AlgoraWeb.HomeLive do
                       <img
                         src="/images/wordmarks/comfy.svg"
                         alt="Comfy"
-                        class="h-4 lg:h-5 shrink-0 transition-all"
+                        class="h-3.5 lg:h-5 shrink-0 transition-all"
                       />
                       <img
                         src="/images/wordmarks/lovable.svg"
                         alt="Lovable"
                         class="h-3 lg:h-4 shrink-0 transition-all"
                       />
-                      <div class="hidden lg:flex items-center transition-all">
+                      <div class="hidden min-[412px]:flex items-center transition-all">
                         <img
                           src="/images/wordmarks/firecrawl.svg"
                           alt="Firecrawl"

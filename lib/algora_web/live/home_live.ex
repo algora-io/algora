@@ -121,17 +121,17 @@ defmodule AlgoraWeb.HomeLive do
       <% end %>
 
       <main class="bg-black relative">
-        <div class="flex flex-col lg:grid lg:grid-cols-[1fr_28rem] lg:gap-4 md:gap-8 lg:max-w-[88rem] lg:w-full lg:mx-auto">
-          <div class="order-1 lg:order-1 lg:col-start-1">
+        <div class="flex flex-col lg:grid lg:grid-cols-[1fr_28rem] lg:gap-2 md:gap-8 lg:max-w-[88rem] lg:w-full lg:mx-auto">
+          <div class="order-1 lg:order-1 lg:col-start-1 lg:min-w-[860px]">
             <section class="relative isolate min-h-[calc(100vh)]">
               <div class="h-full mx-auto px-6 lg:px-8 flex flex-col items-center justify-center pt-20 lg:pt-32 pb-12">
                 <div class="h-full mx-auto lg:mx-0 flex lg:max-w-none items-center justify-center text-center w-full">
                   <div class="w-full flex flex-col lg:items-start text-left lg:text-left">
-                    <h1 class="text-2xl min-[412px]:text-[1.75rem] sm:text-[2.5rem]/[3rem] md:text-[4rem]/[4.5rem] lg:text-[3rem]/[3.5rem] xl:text-[4rem]/[4.5rem] font-semibold tracking-tight text-foreground">
+                    <h1 class="text-2xl min-[412px]:text-[1.75rem] sm:text-[2.5rem]/[3rem] md:text-[3.5rem]/[4rem] lg:text-[3rem]/[3.5rem] xl:text-[4rem]/[4.5rem] font-semibold tracking-tight text-foreground">
                       Open source <br class="hidden" />
                       <span class="text-emerald-400">tech recruiting</span>
                     </h1>
-                    <p class="mt-2 md:mt-6 lg:mt-2 xl:mt-8 text-[0.9rem]/[1.4rem] min-[412px]:text-base md:text-xl lg:text-xl leading-6 font-medium text-foreground">
+                    <p class="mt-2 text-[0.9rem]/[1.4rem] min-[412px]:text-base md:text-lg xl:text-lg 2xl:text-xl leading-6 font-medium text-foreground">
                       Connecting the most prolific open source maintainers & contributors with their next jobs
                     </p>
                     <div class="flex items-center justify-start gap-3 lg:gap-12 overflow-x-auto scrollbar-thin py-4">

@@ -3,7 +3,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   use AlgoraWeb, :live_view
   use LiveSvelte.Components
 
-  import AlgoraCloud.Components.CandidateCard
+  import Ecto.Changeset
 
   alias Algora.Matches
   alias AlgoraCloud.LanguageContributions
@@ -16,7 +16,16 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
     @primary_key false
     @derive {Jason.Encoder,
-             only: [:email, :job_description, :candidate_description, :comp_range, :location, :location_type, :tech_stack]}
+             only: [
+               :email,
+               :job_description,
+               :candidate_description,
+               :comp_range,
+               :location,
+               :location_type,
+               :hire_type,
+               :tech_stack
+             ]}
     embedded_schema do
       field :email, :string
       field :job_description, :string
@@ -24,6 +33,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
       field :comp_range, :string
       field :location, :string
       field :location_type, :string
+      field :hire_type, :string
       field :tech_stack, {:array, :string}
     end
 
@@ -36,6 +46,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         :comp_range,
         :location,
         :location_type,
+        :hire_type,
         :tech_stack
       ])
       |> Ecto.Changeset.validate_required([:email, :job_description])
@@ -211,7 +222,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         # Create admin task for welcoming the user
         create_welcome_task(data)
 
-        {:noreply, put_flash(socket, :info, "Thanks for submitting your JD! We'll follow up soon")}
+        {:noreply, put_flash(socket, :info, "Thanks for submitting your JD, you'll hear back soon!")}
 
       {:error, changeset} ->
         {:noreply, assign(socket, form: to_form(changeset))}
@@ -228,6 +239,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         comp_range: data.comp_range,
         location: data.location,
         location_type: data.location_type,
+        hire_type: data.hire_type,
         tech_stack: data.tech_stack,
         submitted_at: DateTime.utc_now(),
         source: "jd_submission"
@@ -273,9 +285,9 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         </div>
       </header>
 
-      <div class="flex-1 p-4 md:py-4 flex items-center justify-center overflow-hidden max-w-7xl w-full mx-auto">
+      <div class="flex-1 p-4 md:py-4 flex items-center justify-center overflow-hidden max-w-[88rem] w-full mx-auto">
         <div class="w-full flex flex-col lg:flex-row gap-6 lg:gap-12 items-center px-2 lg:px-8">
-          <div class="shrink-0 w-full lg:w-[35%] text-left">
+          <div class="shrink-0 w-full lg:w-[32%] text-left">
             <.form for={@form} phx-submit="submit" class="flex flex-col gap-4">
               <div>
                 <label class="block text-sm font-semibold text-foreground mb-2">
@@ -296,6 +308,95 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                 class="resize-none"
                 placeholder="Tell us about the role, requirements, ideal candidate..."
               />
+              <div class="space-y-2">
+                <label class="block text-sm font-medium text-foreground">
+                  Commitment
+                </label>
+                <div class="grid grid-cols-2 gap-3" phx-update="ignore" id="hire-type-radio-group">
+                  <label class="group relative flex cursor-pointer rounded-lg px-3 py-2.5 shadow-sm focus:outline-none border bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10 border-input has-[:checked]:border-primary has-[:checked]:bg-primary/10">
+                    <input
+                      type="radio"
+                      class="sr-only"
+                      name={@form[:hire_type].name}
+                      value="full_time"
+                      checked={get_field(@form.source, :hire_type) == "full_time"}
+                    />
+                    <div class="flex items-center gap-2">
+                      <.icon name="tabler-briefcase" class="h-5 w-5 text-primary shrink-0" />
+                      <span class="text-sm text-foreground">
+                        Full-time
+                      </span>
+                    </div>
+                  </label>
+                  <label class="group relative flex cursor-pointer rounded-lg px-3 py-2.5 shadow-sm focus:outline-none border bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10 border-input has-[:checked]:border-primary has-[:checked]:bg-primary/10">
+                    <input
+                      type="radio"
+                      class="sr-only"
+                      name={@form[:hire_type].name}
+                      value="contract"
+                      checked={get_field(@form.source, :hire_type) == "contract"}
+                    />
+                    <div class="flex items-center gap-2">
+                      <.icon name="tabler-clock" class="h-5 w-5 text-primary shrink-0" />
+                      <span class="text-sm text-foreground">
+                        Contract
+                      </span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+              <div class="space-y-2">
+                <label class="block text-sm font-medium text-foreground">
+                  Location type
+                </label>
+                <div class="grid grid-cols-3 gap-3" phx-update="ignore" id="location-type-radio-group">
+                  <label class="group relative flex cursor-pointer rounded-lg px-3 py-2.5 shadow-sm focus:outline-none border bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10 border-input has-[:checked]:border-primary has-[:checked]:bg-primary/10">
+                    <input
+                      type="radio"
+                      class="sr-only"
+                      name={@form[:location_type].name}
+                      value="onsite"
+                      checked={get_field(@form.source, :location_type) == "onsite"}
+                    />
+                    <div class="flex items-center gap-2">
+                      <.icon name="tabler-building" class="h-5 w-5 text-primary shrink-0" />
+                      <span class="text-sm text-foreground">
+                        Onsite
+                      </span>
+                    </div>
+                  </label>
+                  <label class="group relative flex cursor-pointer rounded-lg px-3 py-2.5 shadow-sm focus:outline-none border bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10 border-input has-[:checked]:border-primary has-[:checked]:bg-primary/10">
+                    <input
+                      type="radio"
+                      class="sr-only"
+                      name={@form[:location_type].name}
+                      value="hybrid"
+                      checked={get_field(@form.source, :location_type) == "hybrid"}
+                    />
+                    <div class="flex items-center gap-2">
+                      <.icon name="tabler-arrows-shuffle" class="h-5 w-5 text-primary shrink-0" />
+                      <span class="text-sm text-foreground">
+                        Hybrid
+                      </span>
+                    </div>
+                  </label>
+                  <label class="group relative flex cursor-pointer rounded-lg px-3 py-2.5 shadow-sm focus:outline-none border bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10 border-input has-[:checked]:border-primary has-[:checked]:bg-primary/10">
+                    <input
+                      type="radio"
+                      class="sr-only"
+                      name={@form[:location_type].name}
+                      value="remote"
+                      checked={get_field(@form.source, :location_type) == "remote"}
+                    />
+                    <div class="flex items-center gap-2">
+                      <.icon name="tabler-home" class="h-5 w-5 text-primary shrink-0" />
+                      <span class="text-sm text-foreground">
+                        Remote
+                      </span>
+                    </div>
+                  </label>
+                </div>
+              </div>
               <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <.input
                   field={@form[:comp_range]}
@@ -310,40 +411,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                   placeholder="San Francisco"
                 />
               </div>
-              <div class="space-y-2">
-                <label class="block text-sm font-medium text-foreground">
-                  Type
-                </label>
-                <div class="grid grid-cols-3 gap-3">
-                  <label class="group relative flex cursor-pointer rounded-lg px-3 py-2.5 shadow-sm focus:outline-none border bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10 border-input has-[:checked]:border-primary has-[:checked]:bg-primary/10">
-                    <input type="radio" name="form[location_type]" value="onsite" class="sr-only" />
-                    <div class="flex items-center gap-2">
-                      <.icon name="tabler-building" class="h-5 w-5 text-primary shrink-0" />
-                      <span class="text-sm text-foreground">
-                        Onsite
-                      </span>
-                    </div>
-                  </label>
-                  <label class="group relative flex cursor-pointer rounded-lg px-3 py-2.5 shadow-sm focus:outline-none border bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10 border-input has-[:checked]:border-primary has-[:checked]:bg-primary/10">
-                    <input type="radio" name="form[location_type]" value="hybrid" class="sr-only" />
-                    <div class="flex items-center gap-2">
-                      <.icon name="tabler-arrows-shuffle" class="h-5 w-5 text-primary shrink-0" />
-                      <span class="text-sm text-foreground">
-                        Hybrid
-                      </span>
-                    </div>
-                  </label>
-                  <label class="group relative flex cursor-pointer rounded-lg px-3 py-2.5 shadow-sm focus:outline-none border bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10 border-input has-[:checked]:border-primary has-[:checked]:bg-primary/10">
-                    <input type="radio" name="form[location_type]" value="remote" class="sr-only" />
-                    <div class="flex items-center gap-2">
-                      <.icon name="tabler-home" class="h-5 w-5 text-primary shrink-0" />
-                      <span class="text-sm text-foreground">
-                        Remote
-                      </span>
-                    </div>
-                  </label>
-                </div>
-              </div>
+
               <%!-- <.input
                 field={@form[:candidate_description]}
                 type="textarea"
@@ -365,7 +433,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           </div>
           <div
             :if={length(@candidates_data) > 0}
-            class="shrink-0 flex flex-col gap-3 w-full lg:w-[65%]"
+            class="shrink-0 flex flex-col gap-3 w-full lg:w-[68%]"
           >
             <div id="candidate-carousel-org" phx-hook="CandidateCarousel" class="relative w-full">
               <%= for {candidate_data, index} <- Enum.with_index(@candidates_data) do %>

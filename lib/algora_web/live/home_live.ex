@@ -3,7 +3,6 @@ defmodule AlgoraWeb.HomeLive do
   use AlgoraWeb, :live_view
   use LiveSvelte.Components
 
-  import AlgoraCloud.Components.CandidateCard
   import AlgoraWeb.Components.ModalVideo
   import Ecto.Changeset
 
@@ -211,7 +210,6 @@ defmodule AlgoraWeb.HomeLive do
                         <label class="group relative flex cursor-pointer rounded-lg px-3 py-2 shadow-sm focus:outline-none border bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10 border-input has-[:checked]:border-primary has-[:checked]:bg-primary/10">
                           <input
                             type="radio"
-                            name="hire_type"
                             class="sr-only"
                             name={@form[:hire_type].name}
                             value="full_time"
@@ -219,7 +217,7 @@ defmodule AlgoraWeb.HomeLive do
                           />
                           <div class="flex items-center gap-3">
                             <.icon name="tabler-briefcase" class="h-6 w-6 text-primary shrink-0" />
-                            <span class="text-xs text-foreground">
+                            <span class="text-sm text-foreground">
                               Full-time
                             </span>
                           </div>
@@ -227,7 +225,6 @@ defmodule AlgoraWeb.HomeLive do
                         <label class="group relative flex cursor-pointer rounded-lg px-3 py-2 shadow-sm focus:outline-none border bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10 border-input has-[:checked]:border-primary has-[:checked]:bg-primary/10">
                           <input
                             type="radio"
-                            name="hire_type"
                             class="sr-only"
                             name={@form[:hire_type].name}
                             value="contract"
@@ -235,7 +232,7 @@ defmodule AlgoraWeb.HomeLive do
                           />
                           <div class="flex items-center gap-3">
                             <.icon name="tabler-clock" class="h-6 w-6 text-primary shrink-0" />
-                            <span class="text-xs text-foreground">
+                            <span class="text-sm text-foreground">
                               Contract
                             </span>
                           </div>
@@ -255,13 +252,13 @@ defmodule AlgoraWeb.HomeLive do
                         field={@form[:location]}
                         type="text"
                         label="Location"
-                        placeholder="San Francisco, Remote"
+                        placeholder="San Francisco"
                       />
                       <.input
                         field={@form[:comp_range]}
                         type="text"
-                        label="Compensation range"
-                        placeholder="$175k - $330k"
+                        label="Compensation"
+                        placeholder="$175k-$330k + equity"
                       />
                     </div>
 
@@ -701,6 +698,8 @@ defmodule AlgoraWeb.HomeLive do
 
   @impl true
   def handle_event("submit", %{"form" => params}, socket) do
+    dbg(params)
+
     tech_stack =
       Jason.decode!(params["tech_stack"] || "[]") ++
         case String.trim(params["tech_stack_input"] || "") do

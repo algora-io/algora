@@ -324,17 +324,17 @@ defmodule AlgoraWeb.HomeLive do
 
             <section class="relative isolate py-8 sm:py-20">
               <div class="mx-auto px-6 lg:px-8 pt-24 xl:pt-0">
-                <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-6xl mb-2 sm:mb-4">
+                <h2 class="font-display text-[2rem] font-semibold tracking-tight text-foreground sm:text-6xl sm:mb-4">
                   Hire with Confidence
                 </h2>
                 <div class="flex flex-col">
                   <div class="w-full space-y-4">
-                    <div class="mt-6 flex items-start gap-2 sm:gap-3">
+                    <div class="mt-6 flex items-start lg:items-center gap-2 sm:gap-3">
                       <.icon
                         name="tabler-circle-number-1"
-                        class="w-6 h-6 sm:w-8 sm:h-8 mt-0.5 text-foreground shrink-0"
+                        class="w-6 h-6 sm:w-8 sm:h-8 text-foreground shrink-0"
                       />
-                      <p class="text-foreground text-base sm:text-lg font-medium">
+                      <p class="text-foreground text-sm sm:text-lg font-medium">
                         Share your JDs and receive handpicked candidates with the right skills and experience
                       </p>
                     </div>
@@ -354,7 +354,7 @@ defmodule AlgoraWeb.HomeLive do
                                 class="w-4 h-4 rounded"
                               />
                               <div class="text-xs text-foreground">
-                                algora.io<span class="text-foreground/70">/candidates</span>
+                                algora.io<span class="text-foreground/70 hidden sm:inline">/candidates</span>
                               </div>
                             </div>
                             <div></div>
@@ -371,12 +371,12 @@ defmodule AlgoraWeb.HomeLive do
                     </div>
                   </div>
                   <div class="mt-12 w-full space-y-4">
-                    <div class="mt-6 flex items-start gap-2 sm:gap-3">
+                    <div class="mt-6 flex items-start lg:items-center gap-2 sm:gap-3">
                       <.icon
                         name="tabler-circle-number-2"
-                        class="w-6 h-6 sm:w-8 sm:h-8 mt-0.5 text-foreground shrink-0"
+                        class="w-6 h-6 sm:w-8 sm:h-8 text-foreground shrink-0"
                       />
-                      <p class="text-foreground text-base sm:text-lg font-medium">
+                      <p class="text-foreground text-sm sm:text-lg font-medium">
                         Get notified in your inbox and Slack with candidates ready to interview
                       </p>
                     </div>
@@ -397,7 +397,7 @@ defmodule AlgoraWeb.HomeLive do
                                 class="w-4 h-4 rounded"
                               />
                               <div class="text-xs text-foreground">
-                                app.slack.com<span class="text-foreground/70">/client/T05UQ2UMHFX/C09FC54M0S3</span>
+                                app.slack.com<span class="text-foreground/70 hidden sm:inline">/client/T05UQ2UMHFX/C09FC54M0S3</span>
                               </div>
                             </div>
                             <div></div>
@@ -414,13 +414,13 @@ defmodule AlgoraWeb.HomeLive do
                     </div>
                   </div>
                   <div class="mt-12 w-full space-y-4">
-                    <div class="mt-6 flex items-start gap-2 sm:gap-3">
+                    <div class="mt-6 flex items-start lg:items-center gap-2 sm:gap-3">
                       <.icon
                         name="tabler-circle-number-3"
-                        class="w-6 h-6 sm:w-8 sm:h-8 mt-0.5 text-foreground shrink-0"
+                        class="w-6 h-6 sm:w-8 sm:h-8 text-foreground shrink-0"
                       />
-                      <p class="text-foreground text-base sm:text-lg font-medium">
-                        Candidates are automatically added to your Ashby
+                      <p class="text-foreground text-sm sm:text-lg font-medium">
+                        Candidates are auto-added to your Ashby
                       </p>
                     </div>
                     <div class="relative z-30 mx-auto">
@@ -439,7 +439,7 @@ defmodule AlgoraWeb.HomeLive do
                                 class="w-4 h-4 rounded"
                               />
                               <div class="text-xs text-foreground">
-                                app.ashbyhq.com<span class="text-foreground/70">/candidates/pipeline/active</span>
+                                app.ashbyhq.com<span class="text-foreground/70 hidden sm:inline">/candidates/pipeline/active</span>
                               </div>
                             </div>
                             <div></div>

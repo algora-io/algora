@@ -8,7 +8,7 @@ defmodule AlgoraWeb.Components.Header do
   defp nav_links do
     [
       %{name: "Explore", path: ~p"/platform"},
-      %{name: "Contact us", path: AlgoraWeb.Constants.get(:calendar_url)}
+      %{name: "Contact us", path: AlgoraWeb.Constants.get(:calendar_url), desktop_only: true}
     ]
   end
 
@@ -105,7 +105,7 @@ defmodule AlgoraWeb.Components.Header do
       <!-- Mobile menu -->
       <div id="mobile-menu" class="lg:hidden hidden" role="dialog" aria-modal="true">
         <div class="fixed inset-0 z-50"></div>
-        <div class="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-background px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-border scrollbar-thin">
+        <div class="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-background px-6 py-4 sm:max-w-sm sm:ring-1 sm:ring-border scrollbar-thin">
           <!-- Mobile menu content -->
           <div class="flex items-center justify-between">
             <.wordmark class="h-8 w-auto text-foreground" />
@@ -121,31 +121,40 @@ defmodule AlgoraWeb.Components.Header do
 
           <div class="mt-6 flow-root">
             <div class="-my-6 divide-y divide-border">
-              <%!-- <div class="space-y-2 py-6">
+              <div class="space-y-2 py-6">
                 <%= for link <- nav_links() do %>
                   <.link
+                    :if={!link[:desktop_only]}
                     navigate={link.path}
                     class="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-muted-foreground hover:bg-muted"
                   >
                     {link.name}
                   </.link>
                 <% end %>
-              </div> --%>
+              </div>
               <div class="space-y-4 py-6">
+                <.link
+                  class="w-full md:w-auto flex items-center rounded-lg border border-gray-500 py-2 pl-2 pr-3.5 text-xs text-foreground/90 hover:text-foreground transition-colors hover:border-gray-400"
+                  href={AlgoraWeb.Constants.get(:calendar_url)}
+                  rel="noopener"
+                >
+                  <.icon name="tabler-calendar-clock" class="size-4" />
+                  <span class="ml-1.5">Schedule a call</span>
+                </.link>
                 <.link
                   class="w-full md:w-auto flex items-center rounded-lg border border-gray-500 py-2 pl-2 pr-3.5 text-xs text-foreground/90 hover:text-foreground transition-colors hover:border-gray-400"
                   href="tel:+16504202207"
                 >
                   <.icon name="tabler-phone" class="size-4" /> <span class="font-bold ml-1">US</span>
-                  <span class="ml-2">+1 (650) 420-2207</span>
+                  <span class="ml-1">+1 (650) 420-2207</span>
                 </.link>
                 <.link
                   class="w-full md:w-auto flex items-center rounded-lg border border-gray-500 py-2 pl-2 pr-3.5 text-xs text-foreground/90 hover:text-foreground transition-colors hover:border-gray-400"
                   href="tel:+306973184144"
                 >
                   <.icon name="tabler-phone" class="size-4" />
-                  <span class="font-bold ml-1">FaceTime</span>
-                  <span class="ml-2">+30 (697) 318-4144</span>
+                  <span class="font-bold ml-1">EU</span>
+                  <span class="ml-1">+30 (697) 318-4144</span>
                 </.link>
               </div>
               <div class="py-6 space-y-4">

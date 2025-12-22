@@ -5,6 +5,7 @@ defmodule AlgoraWeb.HomeLive do
 
   import AlgoraCloud.Components.CandidateCard
   import AlgoraWeb.Components.ModalVideo
+  import Ecto.Changeset
 
   alias Algora.Accounts
   alias Algora.Bounties
@@ -19,6 +20,40 @@ defmodule AlgoraWeb.HomeLive do
   alias AlgoraWeb.Forms.ChallengeForm
 
   require Logger
+
+  defmodule Form do
+    @moduledoc false
+    use Ecto.Schema
+
+    @primary_key false
+    @derive Jason.Encoder
+    embedded_schema do
+      field :email, :string
+      field :job_description, :string
+      field :candidate_description, :string
+      field :comp_range, :string
+      field :location, :string
+      field :location_type, :string
+      field :hire_type, :string
+      field :tech_stack, {:array, :string}
+    end
+
+    def changeset(form, attrs \\ %{}) do
+      form
+      |> Ecto.Changeset.cast(attrs, [
+        :email,
+        :job_description,
+        :candidate_description,
+        :comp_range,
+        :location,
+        :location_type,
+        :hire_type,
+        :tech_stack
+      ])
+      |> Ecto.Changeset.validate_required([:email, :job_description])
+      |> Ecto.Changeset.validate_format(:email, ~r/@/)
+    end
+  end
 
   @impl true
   def mount(params, _session, socket) do
@@ -70,6 +105,7 @@ defmodule AlgoraWeb.HomeLive do
          |> assign(:challenge_form, to_form(ChallengeForm.changeset(%ChallengeForm{}, %{})))
          |> assign(:tech_stack, [])
          |> assign(:candidates_data, candidates_data)
+         |> assign(:form, to_form(Form.changeset(%Form{}, %{tech_stack: []})))
          |> assign_user_applications()
          |> assign_events()}
     end
@@ -139,7 +175,7 @@ defmodule AlgoraWeb.HomeLive do
                             data-carousel-item={index}
                             class={"transition-opacity duration-500 #{if index == 0, do: "opacity-100", else: "opacity-0 absolute inset-0"}"}
                           >
-                            <AlgoraCloud.Components.CandidateCard.candidate_card {Map.merge(candidate_data, %{anonymize: true, root_class: "h-[38rem] lg:h-[31rem]", tech_stack: [], hide_badges?: true})} />
+                            <AlgoraCloud.Components.CandidateCard.candidate_card {Map.merge(candidate_data, %{anonymize: true, root_class: "h-[38rem] lg:h-[31rem]", tech_stack: [], hide_badges?: true, hide_scrollbars?: true})} />
                           </div>
                         <% end %>
                       </div>
@@ -152,9 +188,9 @@ defmodule AlgoraWeb.HomeLive do
 
           <div class="order-2 lg:sticky lg:top-0 lg:order-2 lg:col-start-2 lg:row-start-1 lg:self-start px-6 lg:px-0 pb-12 lg:pb-8 lg:pt-32">
             <div class="text-left">
-              <div class="rounded-xl bg-card text-card-foreground shadow-2xl ring-1 ring-white/10">
+              <div class="rounded-xl bg-card text-card-foreground shadow-2xl border">
                 <div class="p-6 lg:p-8">
-                  <h2 class="text-2xl lg:text-3xl font-semibold leading-7 text-white">
+                  <h2 class="text-2xl lg:text-3xl font-semibold leading-7 text-foreground">
                     View your candidates
                   </h2>
                   <p class="pt-2 text-sm text-muted-foreground">
@@ -162,14 +198,25 @@ defmodule AlgoraWeb.HomeLive do
                     JD to receive your candidates within hours
                   </p>
 
-                  <form class="mt-6 flex flex-col gap-3">
+                  <.form for={@form} phx-submit="submit" class="mt-6 flex flex-col gap-3">
                     <div>
                       <label class="block text-sm font-semibold text-foreground mb-2">
                         Hire type
                       </label>
-                      <div class="grid grid-cols-2 gap-4">
+                      <div
+                        class="grid grid-cols-2 gap-4"
+                        phx-update="ignore"
+                        id="hire-type-radio-group"
+                      >
                         <label class="group relative flex cursor-pointer rounded-lg px-3 py-2 shadow-sm focus:outline-none border bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10 border-input has-[:checked]:border-primary has-[:checked]:bg-primary/10">
-                          <input type="radio" name="hire_type" value="full_time" class="sr-only" />
+                          <input
+                            type="radio"
+                            name="hire_type"
+                            class="sr-only"
+                            name={@form[:hire_type].name}
+                            value="full_time"
+                            checked={get_field(@form.source, :hire_type) == "full_time"}
+                          />
                           <div class="flex items-center gap-3">
                             <.icon name="tabler-briefcase" class="h-6 w-6 text-primary shrink-0" />
                             <span class="text-xs text-foreground">
@@ -178,7 +225,14 @@ defmodule AlgoraWeb.HomeLive do
                           </div>
                         </label>
                         <label class="group relative flex cursor-pointer rounded-lg px-3 py-2 shadow-sm focus:outline-none border bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10 border-input has-[:checked]:border-primary has-[:checked]:bg-primary/10">
-                          <input type="radio" name="hire_type" value="contract" class="sr-only" />
+                          <input
+                            type="radio"
+                            name="hire_type"
+                            class="sr-only"
+                            name={@form[:hire_type].name}
+                            value="contract"
+                            checked={get_field(@form.source, :hire_type) == "contract"}
+                          />
                           <div class="flex items-center gap-3">
                             <.icon name="tabler-clock" class="h-6 w-6 text-primary shrink-0" />
                             <span class="text-xs text-foreground">
@@ -193,43 +247,42 @@ defmodule AlgoraWeb.HomeLive do
                       <label class="block text-sm font-semibold text-foreground mb-2">
                         Tech stack
                       </label>
-                      <.TechStack
-                        tech={@tech_stack}
-                        socket={@socket}
-                        form="home_form"
-                        classes="-mt-2"
-                      />
+                      <.TechStack tech={@tech_stack} socket={@socket} form="form" classes="-mt-2" />
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                       <.input
-                        name="location"
-                        value=""
+                        field={@form[:location]}
+                        type="text"
                         label="Location"
                         placeholder="San Francisco, Remote"
                       />
                       <.input
-                        name="compensation"
-                        value=""
+                        field={@form[:comp_range]}
+                        type="text"
                         label="Compensation range"
                         placeholder="$175k - $330k"
                       />
                     </div>
 
                     <.input
+                      field={@form[:job_description]}
                       type="textarea"
-                      name="job_description"
-                      value=""
                       label="Job description / careers URL"
                       rows="3"
                       placeholder="Tell us about the role, requirements, ideal candidate..."
                     />
 
-                    <.input name="email" value="" label="Work email" placeholder="you@company.com" />
+                    <.input
+                      field={@form[:email]}
+                      type="email"
+                      label="Work email"
+                      placeholder="you@company.com"
+                    />
                     <div class="flex flex-col gap-4">
                       <.button class="w-full">Receive your candidates</.button>
                     </div>
-                  </form>
+                  </.form>
                 </div>
               </div>
             </div>
@@ -616,6 +669,60 @@ defmodule AlgoraWeb.HomeLive do
       challenge_form={@challenge_form}
     />
     """
+  end
+
+  defp create_welcome_task(data) do
+    task_attrs = %{
+      type: "user_welcome",
+      payload: %{
+        email: data.email,
+        job_description: data.job_description,
+        candidate_description: data.candidate_description,
+        comp_range: data.comp_range,
+        location: data.location,
+        location_type: data.location_type,
+        hire_type: data.hire_type,
+        tech_stack: data.tech_stack,
+        submitted_at: DateTime.utc_now(),
+        source: "jd_submission"
+      },
+      seq: 0,
+      origin_id: Nanoid.generate()
+    }
+
+    case Algora.Cloud.create_admin_task(task_attrs) do
+      {:ok, _task} ->
+        Logger.info("Created welcome task for #{data.email}")
+
+      {:error, changeset} ->
+        Logger.error("Failed to create welcome task: #{inspect(changeset)}")
+    end
+  end
+
+  @impl true
+  def handle_event("submit", %{"form" => params}, socket) do
+    tech_stack =
+      Jason.decode!(params["tech_stack"] || "[]") ++
+        case String.trim(params["tech_stack_input"] || "") do
+          "" -> []
+          tech_stack_input -> String.split(tech_stack_input, ",")
+        end
+
+    params = Map.put(params, "tech_stack", tech_stack)
+
+    case %Form{} |> Form.changeset(params) |> Ecto.Changeset.apply_action(:save) do
+      {:ok, data} ->
+        # Create alert for immediate notification
+        Algora.Activities.alert(Jason.encode!(data), :critical)
+
+        # Create admin task for welcoming the user
+        create_welcome_task(data)
+
+        {:noreply, put_flash(socket, :info, "Thanks for submitting your JD, you'll hear back soon!")}
+
+      {:error, changeset} ->
+        {:noreply, assign(socket, form: to_form(changeset))}
+    end
   end
 
   @impl true

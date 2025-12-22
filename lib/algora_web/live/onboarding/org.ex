@@ -373,7 +373,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                   data-carousel-item={index}
                   class={"transition-opacity duration-500 #{if index == 0, do: "opacity-100", else: "opacity-0 absolute inset-0"}"}
                 >
-                  <AlgoraCloud.Components.CandidateCard.candidate_card {Map.merge(candidate_data, %{anonymize: true, root_class: "h-[40rem] lg:h-[31.5rem]", fade_to_black?: false, tech_stack: [], hide_badges?: true})} />
+                  <AlgoraCloud.Components.CandidateCard.candidate_card {Map.merge(candidate_data, %{anonymize: true, root_class: "h-[40rem] lg:h-[31.5rem]", fade_to_black?: false, tech_stack: [], hide_badges?: true, hide_scrollbars?: true})} />
                 </div>
               <% end %>
             </div>

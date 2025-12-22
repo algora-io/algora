@@ -7,7 +7,7 @@ defmodule AlgoraWeb.Components.Header do
 
   defp nav_links do
     [
-      %{name: "Explore", path: ~p"/explore"},
+      %{name: "Explore", path: ~p"/platform"},
       %{name: "Contact us", path: AlgoraWeb.Constants.get(:calendar_url)}
     ]
   end
@@ -79,13 +79,13 @@ defmodule AlgoraWeb.Components.Header do
                   name="github"
                   class="mr-0.5 h-5 shrink-0 justify-start text-foreground/80 group-hover:text-foreground"
                 />
-                <span class="hidden xl:block text-foreground/80 group-hover:text-foreground">
+                <%!-- <span class="hidden xl:block text-foreground/80 group-hover:text-foreground">
                   Star
-                </span>
+                </span> --%>
                 <span class="font-semibold text-muted-foreground flex items-center gap-1">
                   {Algora.Util.format_number_compact(Algora.Stargazer.count())
                   |> String.replace("k", "K")}
-                  <.icon name="tabler-star-filled" class="h-3 w-3 shrink-0" />
+                  <%!-- <.icon name="tabler-star-filled" class="h-3 w-3 shrink-0" /> --%>
                 </span>
               </div>
             </div>

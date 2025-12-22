@@ -324,7 +324,7 @@ defmodule AlgoraWeb.HomeLive do
 
             <section class="relative isolate py-8 sm:py-20">
               <div class="mx-auto px-6 lg:px-8 pt-24 xl:pt-0">
-                <h2 class="font-display text-[2rem] font-semibold tracking-tight text-foreground sm:text-6xl sm:mb-4">
+                <h2 class="font-display text-[2rem] font-semibold tracking-tight text-foreground sm:text-6xl sm:mb-4 text-center sm:text-left">
                   Hire with Confidence
                 </h2>
                 <div class="flex flex-col">

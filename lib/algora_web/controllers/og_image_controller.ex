@@ -72,6 +72,31 @@ defmodule AlgoraWeb.OGImageController do
   end
 
   def generate(conn, %{"path" => path} = params, search_params \\ "") do
+    Task.start(fn ->
+      ip_address = nil
+
+      user_agent =
+        conn.req_headers
+        |> Enum.find(fn {key, _} -> key == "user-agent" end)
+        |> then(fn {_, value} -> value end)
+
+      payload =
+        %{
+          user_id: nil,
+          country: AlgoraWeb.Analytics.get_country_code(ip_address),
+          ip_address: ip_address,
+          user_agent: user_agent,
+          timezone: nil,
+          path: Path.join(["/" | path]),
+          search_params: search_params,
+          params: params
+        }
+        |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+        |> Map.new()
+
+      AlgoraCloud.Events.create_origin_event("og_image_open", payload)
+    end)
+
     object_path = Path.join(["og"] ++ path ++ ["og.png"])
     url = Path.join(Algora.S3.bucket_url(), object_path)
 

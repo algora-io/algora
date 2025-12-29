@@ -1,6 +1,6 @@
 defmodule Algora.Util do
   @moduledoc false
-  def to_csv(data, output_path) do
+  def to_csv(data, output_path \\ nil) do
     rows = Enum.to_list(data)
 
     # Collect all unique keys across all entries
@@ -21,10 +21,16 @@ defmodule Algora.Util do
         end)
       end)
 
-    [all_keys | normalized_rows]
-    |> CSV.encode()
-    |> Enum.join("")
-    |> then(&File.write!(output_path, &1))
+    csv =
+      [all_keys | normalized_rows]
+      |> CSV.encode()
+      |> Enum.join("")
+
+    if output_path do
+      File.write!(output_path, csv)
+    else
+      csv
+    end
   end
 
   def random_string do

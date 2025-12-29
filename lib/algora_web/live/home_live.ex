@@ -163,7 +163,7 @@ defmodule AlgoraWeb.HomeLive do
                         />
                       </div>
                     </div>
-                    <div :if={length(@candidates_data) > 0} class="-ml-2 mt-4 w-full">
+                    <div :if={length(@candidates_data) > 0} class="mt-4 w-full">
                       <div
                         id="candidate-carousel-home"
                         phx-hook="CandidateCarousel"
@@ -185,7 +185,7 @@ defmodule AlgoraWeb.HomeLive do
             </section>
           </div>
 
-          <div class="order-2 lg:sticky lg:top-0 lg:order-2 lg:col-start-2 lg:row-start-1 lg:self-start px-6 lg:px-0 pb-12 lg:pb-8 lg:pt-24 2xl:pt-32 overflow-y-auto max-h-[calc(100vh-2rem)] scrollbar-thin">
+          <div class="order-2 lg:sticky lg:top-0 lg:order-2 lg:col-start-2 lg:row-start-1 lg:self-start px-6 lg:px-0 pb-12 lg:pb-8 lg:pt-24 2xl:pt-32 overflow-y-auto lg:max-h-screen scrollbar-thin">
             <div class="text-left">
               <div class="rounded-xl bg-card text-card-foreground shadow-2xl border">
                 <div class="p-6 lg:p-8">

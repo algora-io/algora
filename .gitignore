@@ -63,4 +63,5 @@ npm-debug.log
 /test/algora_cloud*
 CLAUDE.md
 /.claude/agents
+/.cursor/settings.json
 /.playwright-mcp

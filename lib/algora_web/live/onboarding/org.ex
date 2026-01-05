@@ -217,7 +217,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     case %Form{} |> Form.changeset(params) |> Ecto.Changeset.apply_action(:save) do
       {:ok, data} ->
         # Create alert for immediate notification
-        Algora.Activities.alert(Jason.encode!(data), :critical)
+        Algora.Activities.alert(Jason.encode!(data), :inbound)
 
         # Create admin task for welcoming the user
         create_welcome_task(data)

@@ -388,6 +388,30 @@ defmodule Algora.Activities do
     Oban.insert_all([email_job, discord_job])
   end
 
+  def alert(message, :inbound = severity) do
+    Logger.info(message)
+
+    email_job =
+      SendEmail.changeset(%{
+        title: "#{message}",
+        body: message,
+        name: "Inbound",
+        email: "info@algora.io"
+      })
+
+    discord_job =
+      SendDiscord.changeset(%{
+        url: Algora.Settings.get("discord_webhook_url")["inbound"] || Algora.config([:discord, :webhook_url]),
+        payload: %{
+          embeds: [
+            %{color: color(severity), title: "Inbound", description: message, timestamp: DateTime.utc_now()}
+          ]
+        }
+      })
+
+    Oban.insert_all([email_job, discord_job])
+  end
+
   def alert(message, severity) do
     Logger.info(message)
 
@@ -408,6 +432,7 @@ defmodule Algora.Activities do
     |> Oban.insert()
   end
 
+  def color(:inbound), do: 0x10B981
   def color(:critical), do: 0xEF4444
   def color(:error), do: 0xEF4444
   def color(:debug), do: 0x64748B

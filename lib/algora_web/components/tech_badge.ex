@@ -340,7 +340,8 @@ defmodule AlgoraWeb.Components.TechBadge do
       "Webpack",
       "SQLite",
       "DataFusion",
-      "Modal"
+      "Modal",
+      "MongoDB"
     ]
   end
 end

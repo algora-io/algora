@@ -11,6 +11,9 @@ defmodule Algora.Crawler do
   @retry_delay to_timeout(second: 1)
   @blacklist_filename "domain_blacklist.txt"
 
+  def blacklisted?(nil), do: true
+  def blacklisted?(""), do: true
+
   def blacklisted?(domain) do
     :algora
     |> :code.priv_dir()

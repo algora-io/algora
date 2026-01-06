@@ -5,7 +5,6 @@ defmodule AlgoraWeb.Org.JobsLive do
   import AlgoraWeb.Components.ModalVideo
 
   alias Algora.Accounts
-  alias Algora.Activities
   alias Algora.Jobs
   alias Algora.Markdown
   alias Algora.Matches
@@ -220,11 +219,6 @@ defmodule AlgoraWeb.Org.JobsLive do
 
           case Matches.create_job_match(match_attrs) do
             {:ok, _created_match} ->
-              {:ok, job} = Jobs.get_job_posting(job_id)
-              company_name = job.company_name || org.name
-              user_name = current_user.name
-              Activities.alert("⏱️ #{user_name} is interested in chatting with #{company_name}", :critical)
-
               {:noreply, push_navigate(socket, to: "/#{org.handle}/job/#{job_id}/apply")}
 
             {:error, _changeset} ->
@@ -235,18 +229,11 @@ defmodule AlgoraWeb.Org.JobsLive do
           end
 
         match ->
-          # Match exists, update it before redirecting
-          {:ok, job} = Jobs.get_job_posting(job_id)
-
           case Matches.update_job_match(match, %{
                  candidate_approved_at: DateTime.utc_now(),
                  candidate_discarded_at: nil
                }) do
             {:ok, _updated_match} ->
-              company_name = job.company_name || org.name
-              user_name = current_user.name
-              Activities.alert("⏱️ #{user_name} is interested in chatting with #{company_name}", :critical)
-
               {:noreply, push_navigate(socket, to: "/#{org.handle}/job/#{job_id}/apply")}
 
             {:error, _changeset} ->

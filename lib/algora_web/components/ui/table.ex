@@ -81,9 +81,9 @@ defmodule AlgoraWeb.Components.UI.DataTable do
   end
 
   # Add this helper function
-  defp get_alignment_class(%{align: "right"}), do: "p-4 text-right"
-  defp get_alignment_class(%{align: "center"}), do: "p-4 text-center"
-  defp get_alignment_class(_), do: "p-4 text-left"
+  defp get_alignment_class(%{align: "right"}), do: "p-4 text-right align-top"
+  defp get_alignment_class(%{align: "center"}), do: "p-4 text-center align-top"
+  defp get_alignment_class(_), do: "p-4 text-left align-top"
 
   attr :class, :string, default: nil
   attr :rest, :global

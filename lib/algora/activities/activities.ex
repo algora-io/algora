@@ -389,7 +389,14 @@ defmodule Algora.Activities do
   end
 
   def alert(message, :inbound = severity) do
+    alert(message, severity, [])
+  end
+
+  def alert(message, :inbound = severity, opts) do
     Logger.info(message)
+
+    is_company_domain = Keyword.get(opts, :is_company_domain, true)
+    alert_color = if is_company_domain, do: color(severity), else: 0x64748B
 
     email_job =
       SendEmail.changeset(%{
@@ -404,7 +411,7 @@ defmodule Algora.Activities do
         url: Algora.Settings.get("discord_webhook_url")["inbound"] || Algora.config([:discord, :webhook_url]),
         payload: %{
           embeds: [
-            %{color: color(severity), title: "Inbound", description: message, timestamp: DateTime.utc_now()}
+            %{color: alert_color, title: "Inbound", description: message, timestamp: DateTime.utc_now()}
           ]
         }
       })

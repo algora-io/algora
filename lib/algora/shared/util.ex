@@ -67,7 +67,7 @@ defmodule Algora.Util do
     |> format_number_compact()
   end
 
-  def format_number_compact(number) do
+  def format_number_compact(number) when is_number(number) do
     n = trunc(number)
 
     case n do
@@ -83,6 +83,10 @@ defmodule Algora.Util do
       n ->
         to_string(n)
     end
+  end
+
+  def format_number_compact(number) do
+    number
   end
 
   defp trim_trailing_zero(number) do

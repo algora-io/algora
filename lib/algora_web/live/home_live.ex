@@ -83,6 +83,9 @@ defmodule AlgoraWeb.HomeLive do
       |> Enum.map(&load_candidate_data/1)
       |> Enum.reject(&is_nil/1)
 
+    # Build mixed carousel items: Candidate, Candidate, Job page, Candidate, Candidate, Job page
+    carousel_items = build_carousel_items(candidates_data)
+
     case socket.assigns[:current_user] do
       %{handle: handle} = user when is_binary(handle) ->
         {:ok, redirect(socket, to: AlgoraWeb.UserAuth.signed_in_path(user))}
@@ -104,6 +107,7 @@ defmodule AlgoraWeb.HomeLive do
          |> assign(:challenge_form, to_form(ChallengeForm.changeset(%ChallengeForm{}, %{})))
          |> assign(:tech_stack, [])
          |> assign(:candidates_data, candidates_data)
+         |> assign(:carousel_items, carousel_items)
          |> assign(:form, to_form(Form.changeset(%Form{}, %{tech_stack: []})))
          |> assign_user_applications()
          |> assign_events()}
@@ -163,18 +167,30 @@ defmodule AlgoraWeb.HomeLive do
                         />
                       </div>
                     </div>
-                    <div :if={length(@candidates_data) > 0} class="mt-4 w-full">
+                    <div :if={length(@carousel_items) > 0} class="mt-4 w-full">
                       <div
                         id="candidate-carousel-home"
                         phx-hook="CandidateCarousel"
                         class="relative w-full"
                       >
-                        <%= for {candidate_data, index} <- Enum.with_index(@candidates_data) do %>
+                        <%= for {item, index} <- Enum.with_index(@carousel_items) do %>
                           <div
                             data-carousel-item={index}
                             class={"transition-opacity duration-500 #{if index == 0, do: "opacity-100", else: "opacity-0 absolute inset-0"}"}
                           >
-                            <AlgoraCloud.Components.CandidateCard.candidate_card {Map.merge(candidate_data, %{anonymize: true, root_class: "h-[38rem] lg:h-[31rem]", tech_stack: [], hide_badges?: true, hide_scrollbars?: true})} />
+                            <%= case item do %>
+                              <% {:candidate, candidate_data} -> %>
+                                <AlgoraCloud.Components.CandidateCard.candidate_card {Map.merge(candidate_data, %{anonymize: true, root_class: "h-[38rem] lg:h-[31rem]", tech_stack: [], hide_badges?: true, hide_scrollbars?: true})} />
+                              <% {:job_page, %{url: url, alt: alt}} -> %>
+                                <div class="h-[38rem] lg:h-[31rem] flex items-center justify-center bg-card rounded-xl border overflow-hidden">
+                                  <img
+                                    src={url}
+                                    alt={alt}
+                                    class="w-full h-full object-cover"
+                                    loading="lazy"
+                                  />
+                                </div>
+                            <% end %>
                           </div>
                         <% end %>
                       </div>
@@ -1423,5 +1439,29 @@ defmodule AlgoraWeb.HomeLive do
     - Must be a shark, aggressive, has urgency and agency
     - Has contributions to open source inference engines (like vLLM)
     """
+  end
+
+  defp build_carousel_items(candidates_data) do
+    job_pages = [
+      %{url: "https://algora.io/og/coderabbit/jobs", alt: "CodeRabbit jobs"},
+      %{url: "https://algora.io/og/lovable/jobs", alt: "Lovable jobs"}
+    ]
+
+    # Cadence: Candidate, Candidate, Job page, Candidate, Candidate, Job page
+    candidates_data
+    |> Enum.reduce({[], 0, 0}, fn candidate, {acc, candidate_count, job_page_index} ->
+      # Add the candidate
+      acc_with_candidate = acc ++ [{:candidate, candidate}]
+      new_candidate_count = candidate_count + 1
+
+      # After every 2 candidates, insert a job page
+      if rem(new_candidate_count, 2) == 0 do
+        job_page = Enum.at(job_pages, rem(job_page_index, length(job_pages)))
+        {acc_with_candidate ++ [{:job_page, job_page}], new_candidate_count, job_page_index + 1}
+      else
+        {acc_with_candidate, new_candidate_count, job_page_index}
+      end
+    end)
+    |> elem(0)
   end
 end

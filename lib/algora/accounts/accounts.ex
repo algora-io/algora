@@ -739,15 +739,15 @@ defmodule Algora.Accounts do
       Email.new()
       |> Email.to(email)
       |> Email.from({"Algora", "info@algora.io"})
-      |> Email.subject("#{code} - Algora Sign-up Verification")
+      |> Email.subject("#{code} - Your Algora verification code")
       |> Email.text_body("""
       Hi there,
 
-      To complete the sign-up process; enter the 6-digit code in the original window:
+      To verify your identity, enter the 6-digit code in the original window:
 
       #{code}
 
-      If you didn't request this link, you can safely ignore this email.
+      If you didn't request this code, you can safely ignore this email.
 
       --------------------------------------------------------------------------------
 

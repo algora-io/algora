@@ -5,7 +5,8 @@ defmodule Algora.ScreenshotQueue do
   require Logger
 
   @timeout 30_000
-  @max_concurrent_tasks 3
+  @max_concurrent_tasks 0
+  @max_queue_size 100
 
   def start_link(_) do
     GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
@@ -21,6 +22,14 @@ defmodule Algora.ScreenshotQueue do
     result
   end
 
+  def queue_size do
+    GenServer.call(__MODULE__, :queue_size)
+  end
+
+  def clear_queue do
+    GenServer.call(__MODULE__, :clear_queue)
+  end
+
   @impl true
   def init(:ok) do
     {:ok, %{active_tasks: %{}, queue: :queue.new(), waiting: %{}}}
@@ -28,6 +37,9 @@ defmodule Algora.ScreenshotQueue do
 
   @impl true
   def handle_call({:generate_image, url, opts}, from, state) do
+    path = Keyword.get(opts, :path, "no path")
+    Logger.info("Screenshot request: url=#{url} path=#{path}")
+
     active_count = map_size(state.active_tasks)
     :telemetry.execute([:algora, :screenshot_queue], %{length: :queue.len(state.queue)})
     :telemetry.execute([:algora, :screenshot_queue], %{active_count: active_count})
@@ -37,8 +49,21 @@ defmodule Algora.ScreenshotQueue do
       {:noreply, new_state}
     else
       queue = :queue.in({url, opts, from}, state.queue)
+      queue = enforce_max_queue_size(queue)
       {:noreply, %{state | queue: queue}}
     end
+  end
+
+  @impl true
+  def handle_call(:queue_size, _from, state) do
+    {:reply, %{queue: :queue.len(state.queue), active: map_size(state.active_tasks)}, state}
+  end
+
+  @impl true
+  def handle_call(:clear_queue, _from, state) do
+    dropped_count = :queue.len(state.queue)
+    Logger.info("Clearing screenshot queue, dropping #{dropped_count} items")
+    {:reply, {:ok, dropped_count}, %{state | queue: :queue.new()}}
   end
 
   @impl true
@@ -69,6 +94,27 @@ defmodule Algora.ScreenshotQueue do
       end)
 
     {task, %{state | active_tasks: Map.put(state.active_tasks, task.ref, from)}}
+  end
+
+  defp enforce_max_queue_size(queue) do
+    queue_len = :queue.len(queue)
+
+    if queue_len > @max_queue_size do
+      dropped = queue_len - @max_queue_size
+      Logger.warning("Screenshot queue exceeded max size (#{queue_len}), dropping #{dropped} oldest items")
+      drop_oldest(queue, dropped)
+    else
+      queue
+    end
+  end
+
+  defp drop_oldest(queue, 0), do: queue
+
+  defp drop_oldest(queue, count) do
+    case :queue.out(queue) do
+      {{:value, _}, new_queue} -> drop_oldest(new_queue, count - 1)
+      {:empty, queue} -> queue
+    end
   end
 
   defp try_generate_image(url, opts, attempts_left) when attempts_left > 0 do

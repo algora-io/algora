@@ -60,6 +60,9 @@ defmodule AlgoraWeb.Components.TechBadge do
   defp icon_url("datadog"), do: "https://avatars.githubusercontent.com/u/365230?s=200&v=4"
   defp icon_url("modal"), do: "https://avatars.githubusercontent.com/u/88658467?s=200&v=4"
   defp icon_url("tanstack"), do: "https://avatars.githubusercontent.com/u/72518640?s=200&v=4"
+  defp icon_url("google maps"), do: "https://avatars.githubusercontent.com/u/3717923?s=200&v=4"
+  defp icon_url("mapbox"), do: "https://avatars.githubusercontent.com/u/600935?s=200&v=4"
+  defp icon_url("maplibre"), do: "https://avatars.githubusercontent.com/u/75709127?s=200&v=4"
   defp icon_url("datafusion"), do: "https://datafusion.apache.org/blog/images/logo_original4x.png"
   defp icon_url(tech), do: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/#{icon_path(tech)}"
 
@@ -93,6 +96,7 @@ defmodule AlgoraWeb.Components.TechBadge do
   defp icon_class("prisma"), do: "bg-white invert saturate-0"
   defp icon_class("vercel"), do: "bg-white invert saturate-0"
   defp icon_class("expo"), do: "bg-white invert saturate-0"
+  defp icon_class("threejs"), do: "bg-white invert saturate-0"
   defp icon_class(_tech), do: "bg-transparent"
 
   defp normalize(tech) do
@@ -201,6 +205,9 @@ defmodule AlgoraWeb.Components.TechBadge do
 
       "react query" ->
         "tanstack"
+
+      "webgl / webgpu" ->
+        "webgpu"
 
       t ->
         t
@@ -347,7 +354,12 @@ defmodule AlgoraWeb.Components.TechBadge do
       "Modal",
       "MongoDB",
       "Tanstack",
-      "Clojure"
+      "Clojure",
+      "Mapbox",
+      "MapLibre",
+      "ThreeJS",
+      "WebGPU",
+      "Google Maps"
     ]
   end
 end

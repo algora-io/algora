@@ -50,8 +50,14 @@ defmodule AlgoraWeb.Util do
     |> Phoenix.LiveView.get_connect_info(:x_headers)
     |> Enum.filter(fn {header, _value} -> header == "x-forwarded-for" end)
     |> then(fn
-      [{_header, value}] -> value |> String.split(",") |> Enum.at(-2)
-      _other -> nil
+      [{_header, value}] ->
+        value
+        |> String.split(",")
+        |> Enum.map(&String.trim/1)
+        |> List.first()
+
+      _other ->
+        nil
     end)
   end
 

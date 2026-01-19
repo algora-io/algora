@@ -5,7 +5,7 @@ defmodule Algora.ScreenshotQueue do
   require Logger
 
   @timeout 30_000
-  @max_concurrent_tasks 0
+  @max_concurrent_tasks 3
   @max_queue_size 100
 
   def start_link(_) do

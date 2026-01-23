@@ -64,6 +64,12 @@ defmodule AlgoraWeb.Components.TechBadge do
   defp icon_url("mapbox"), do: "https://avatars.githubusercontent.com/u/600935?s=200&v=4"
   defp icon_url("maplibre"), do: "https://avatars.githubusercontent.com/u/75709127?s=200&v=4"
   defp icon_url("datafusion"), do: "https://datafusion.apache.org/blog/images/logo_original4x.png"
+  defp icon_url("grpc"), do: "https://algora-console.t3.storage.dev/avatars/grpc.png"
+  defp icon_url("ebpf"), do: "https://algora-console.t3.storage.dev/avatars/ebpf.png"
+  defp icon_url("scylladb"), do: "https://algora-console.t3.storage.dev/avatars/scylladb.png"
+  defp icon_url("temporal"), do: "https://avatars.githubusercontent.com/u/56493103?s=200&v=4"
+  defp icon_url("wireguard"), do: "https://avatars.githubusercontent.com/u/13991055?s=200&v=4"
+  defp icon_url("ceph"), do: "https://algora-console.t3.storage.dev/avatars/ceph.png"
   defp icon_url(tech), do: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/#{icon_path(tech)}"
 
   defp icon_path("aws"), do: "amazonwebservices/amazonwebservices-plain-wordmark.svg"
@@ -359,7 +365,13 @@ defmodule AlgoraWeb.Components.TechBadge do
       "MapLibre",
       "ThreeJS",
       "WebGPU",
-      "Google Maps"
+      "Google Maps",
+      "gRPC",
+      "eBPF",
+      "ScyllaDB",
+      "Temporal",
+      "WireGuard",
+      "Ceph"
     ]
   end
 end

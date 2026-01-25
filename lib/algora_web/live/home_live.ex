@@ -1382,6 +1382,7 @@ defmodule AlgoraWeb.HomeLive do
             "TeX" -> nil
             "HTML" -> nil
             "CSS" -> nil
+            "Sass" -> nil
             "Nunjucks" -> nil
             "Nushell" -> nil
             "reStructuredText" -> nil

@@ -84,8 +84,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
         |> Workspace.list_user_contributions()
         |> Enum.group_by(& &1.user.id)
 
-      admins_last_active = Accounts.admins_last_active()
-
       developers =
         contributors
         |> Enum.map(& &1.user)
@@ -119,7 +117,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
        |> assign(:screenshot?, not is_nil(params["screenshot"]))
        |> assign(:pending_action, nil)
        |> assign(:ip_address, AlgoraWeb.Util.get_ip(socket))
-       |> assign(:admins_last_active, admins_last_active)
        |> assign(:has_fresh_token?, Accounts.has_fresh_token?(socket.assigns.current_user))
        |> assign(:installations, installations)
        |> assign(:experts, experts)
@@ -548,7 +545,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
       </div>
     </div>
     <.sidebar
-      admins_last_active={@admins_last_active}
       achievements={@achievements}
       current_user={@current_user}
       current_org={@current_org}
@@ -1609,32 +1605,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
         </div>
       <% end %>
       <div class="pb-16 mt-auto -mr-12 grid grid-cols-1 lg:grid-cols-2 gap-y-4 gap-x-6 text-sm whitespace-nowrap">
-        <div class="-ml-3 flex items-center gap-2">
-          <div class="flex -space-x-2 shrink-0">
-            <img
-              src="https://github.com/ioannisflo.png"
-              alt="Ioannis Florokapis"
-              class="relative z-10 inline-block size-6 rounded-full ring-2 ring-background"
-            />
-            <img
-              src="https://github.com/zcesur.png"
-              alt="Zafer Cesur"
-              class="relative z-0 inline-block size-6 rounded-full ring-2 ring-background"
-            />
-          </div>
-          <button phx-click="start_chat" class="hover:underline">
-            Chat with founders
-          </button>
-        </div>
-        <.link
-          href={Constants.get(:twitter_url)}
-          rel="noopener"
-          target="_blank"
-          class="flex items-center gap-2"
-        >
-          <.icon name="tabler-brand-x" class="size-6 text-muted-foreground" />
-          @{Constants.get(:twitter_handle)}
-        </.link>
         <.link href={"tel:" <> Constants.get(:tel)} class="flex items-center gap-2">
           <.icon name="tabler-phone" class="size-6 text-muted-foreground" />
           {Constants.get(:tel_formatted)}
@@ -1659,9 +1629,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
               </div>
               <div>
                 <h2 class="text-lg font-semibold">Algora Founders</h2>
-                <p class="text-xs text-muted-foreground">
-                  Active {Algora.Util.time_ago(@admins_last_active)}
-                </p>
               </div>
             </div>
             <.button variant="ghost" size="icon" phx-click="close_chat">

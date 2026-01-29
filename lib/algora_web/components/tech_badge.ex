@@ -203,6 +203,9 @@ defmodule AlgoraWeb.Components.TechBadge do
       "elk" ->
         "elasticsearch"
 
+      "elk stack" ->
+        "elasticsearch"
+
       "cypress" ->
         "cypressio"
 
@@ -214,6 +217,9 @@ defmodule AlgoraWeb.Components.TechBadge do
 
       "webgl / webgpu" ->
         "webgpu"
+
+      "webassembly" ->
+        "wasm"
 
       t ->
         t

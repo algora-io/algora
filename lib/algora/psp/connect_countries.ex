@@ -22,7 +22,6 @@ defmodule Algora.PSP.ConnectCountries do
       {"Bolivia", "BO"},
       {"Bosnia and Herzegovina", "BA"},
       {"Botswana", "BW"},
-      {"Brazil", "BR"},
       {"Brunei", "BN"},
       {"Bulgaria", "BG"},
       {"Cambodia", "KH"},

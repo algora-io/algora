@@ -609,4 +609,11 @@ defmodule Algora.Accounts.User do
 
   def url(%{handle: handle}) when is_binary(handle), do: "#{Endpoint.url()}/#{handle}"
   def url(%{provider_login: handle}), do: "https://github.com/#{handle}"
+
+  @doc """
+  Returns the primary email for a user (internal_email > email > provider_meta["email"])
+  """
+  def primary_email(%User{} = user) do
+    user.internal_email || user.email || get_in(user.provider_meta, ["email"])
+  end
 end

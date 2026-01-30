@@ -70,6 +70,9 @@ defmodule AlgoraWeb.Components.TechBadge do
   defp icon_url("temporal"), do: "https://avatars.githubusercontent.com/u/56493103?s=200&v=4"
   defp icon_url("wireguard"), do: "https://avatars.githubusercontent.com/u/13991055?s=200&v=4"
   defp icon_url("ceph"), do: "https://algora-console.t3.storage.dev/avatars/ceph.png"
+  defp icon_url("scikit-learn"), do: "https://avatars.githubusercontent.com/u/365630?s=200&v=4"
+  defp icon_url("apache beam"), do: "https://algora-console.t3.storage.dev/avatars/apache-beam.png"
+  defp icon_url("mlflow"), do: "https://avatars.githubusercontent.com/u/39938107?s=200&v=4"
   defp icon_url(tech), do: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/#{icon_path(tech)}"
 
   defp icon_path("aws"), do: "amazonwebservices/amazonwebservices-plain-wordmark.svg"
@@ -103,6 +106,7 @@ defmodule AlgoraWeb.Components.TechBadge do
   defp icon_class("vercel"), do: "bg-white invert saturate-0"
   defp icon_class("expo"), do: "bg-white invert saturate-0"
   defp icon_class("threejs"), do: "bg-white invert saturate-0"
+  defp icon_class("helm"), do: "bg-white invert saturate-0"
   defp icon_class(_tech), do: "bg-transparent"
 
   defp normalize(tech) do
@@ -215,11 +219,14 @@ defmodule AlgoraWeb.Components.TechBadge do
       "react query" ->
         "tanstack"
 
-      "webgl / webgpu" ->
+      "webgl/webgpu" ->
         "webgpu"
 
       "webassembly" ->
         "wasm"
+
+      "k8s" ->
+        "kubernetes"
 
       t ->
         t
@@ -377,7 +384,11 @@ defmodule AlgoraWeb.Components.TechBadge do
       "ScyllaDB",
       "Temporal",
       "WireGuard",
-      "Ceph"
+      "Ceph",
+      "Helm",
+      "scikit-learn",
+      "Apache Beam",
+      "MLflow"
     ]
   end
 end

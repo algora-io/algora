@@ -12,7 +12,6 @@ defmodule AlgoraWeb.HomeLive do
   alias Algora.Matches
   alias Algora.Matches.JobMatch
   alias Algora.Payments
-  alias AlgoraCloud.LanguageContributions
   alias AlgoraWeb.Components.Footer
   alias AlgoraWeb.Components.Header
   alias AlgoraWeb.Data.HomeCache
@@ -180,7 +179,7 @@ defmodule AlgoraWeb.HomeLive do
                           >
                             <%= case item do %>
                               <% {:candidate, candidate_data} -> %>
-                                <AlgoraCloud.Components.CandidateCard.candidate_card {Map.merge(candidate_data, %{anonymize: true, root_class: "h-[38rem] lg:h-[31rem]", tech_stack: [], hide_badges?: true, hide_scrollbars?: true})} />
+                                <Algora.Cloud.candidate_card {Map.merge(candidate_data, %{anonymize: true, root_class: "h-[38rem] lg:h-[31rem]", tech_stack: [], hide_badges?: true, hide_scrollbars?: true})} />
                               <% {:job_page, %{url: url, alt: alt}} -> %>
                                 <div class="h-[38rem] lg:h-[31rem] flex items-center justify-center bg-card rounded-xl border overflow-hidden">
                                   <img
@@ -774,301 +773,6 @@ defmodule AlgoraWeb.HomeLive do
     assign(socket, :user_applications, user_applications)
   end
 
-  defp events(assigns) do
-    ~H"""
-    <ul class="w-full pl-10 relative space-y-8">
-      <li :for={{event, index} <- @events |> Enum.with_index()} class="relative">
-        <.event_item type={event.type} event={event} last?={index == length(@events) - 1} />
-      </li>
-    </ul>
-    """
-  end
-
-  defp event_item(%{type: :transaction} = assigns) do
-    assigns = assign(assigns, :transaction, assigns.event.item)
-
-    ~H"""
-    <div>
-      <div class="relative -ml-[2.75rem]">
-        <span
-          :if={!@last?}
-          class="absolute left-1 top-6 h-full w-0.5 block ml-[2.75rem] bg-muted-foreground/25"
-          aria-hidden="true"
-        >
-        </span>
-        <.link
-          rel="noopener"
-          target="_blank"
-          class="w-full group inline-flex"
-          href={
-            if @transaction.ticket.repository,
-              do: @transaction.ticket.url,
-              else: ~p"/#{@transaction.linked_transaction.user.handle}/home"
-          }
-        >
-          <div class="w-full relative flex space-x-3">
-            <div class="w-full flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
-              <div class="w-full flex items-center gap-3">
-                <div class="flex -space-x-1 ring-8 ring-gray-950">
-                  <span class="relative shrink-0 overflow-hidden flex h-9 w-9 sm:h-12 sm:w-12 items-center justify-center rounded-xl ring-4 bg-gray-950 ring-black">
-                    <img
-                      class="aspect-square h-full w-full"
-                      alt={@transaction.user.name}
-                      src={@transaction.user.avatar_url}
-                    />
-                  </span>
-                  <span class="relative shrink-0 overflow-hidden flex h-9 w-9 sm:h-12 sm:w-12 items-center justify-center rounded-xl ring-4 bg-gray-950 ring-black">
-                    <img
-                      class="aspect-square h-full w-full"
-                      alt={@transaction.linked_transaction.user.name}
-                      src={@transaction.linked_transaction.user.avatar_url}
-                    />
-                  </span>
-                </div>
-                <div class="w-full z-10 flex gap-3 items-start xl:items-end">
-                  <p class="text-xs transition-colors text-muted-foreground group-hover:text-foreground/90 sm:text-xl text-left">
-                    <span class="font-semibold text-foreground/80 group-hover:text-foreground transition-colors">
-                      {@transaction.linked_transaction.user.name}
-                    </span>
-                    awarded
-                    <span class="font-semibold text-foreground/80 group-hover:text-foreground transition-colors">
-                      {@transaction.user.name}
-                    </span>
-                    a
-                    <span class={
-                      classes([
-                        "font-bold font-display transition-colors",
-                        cond do
-                          @transaction.bounty_id && @transaction.ticket.repository ->
-                            "text-success-400 group-hover:text-success-300"
-
-                          @transaction.bounty_id && !@transaction.ticket.repository ->
-                            "text-blue-400 group-hover:text-blue-300"
-
-                          true ->
-                            "text-red-400 group-hover:text-red-300"
-                        end
-                      ])
-                    }>
-                      {Money.to_string!(@transaction.net_amount)}
-                      <%= if @transaction.bounty_id do %>
-                        <%= if @transaction.ticket.repository do %>
-                          bounty
-                        <% else %>
-                          contract
-                        <% end %>
-                      <% else %>
-                        tip
-                      <% end %>
-                    </span>
-                  </p>
-                  <div class="ml-auto xl:ml-0 xl:mb-[2px] whitespace-nowrap text-xs text-muted-foreground sm:text-sm">
-                    <time datetime={@transaction.succeeded_at}>
-                      {cond do
-                        @transaction.bounty_id && !@transaction.ticket.repository ->
-                          start_month = Calendar.strftime(@transaction.succeeded_at, "%B")
-                          end_date = Date.add(@transaction.succeeded_at, 30)
-                          end_month = Calendar.strftime(end_date, "%B")
-
-                          if start_month == end_month do
-                            "#{start_month} #{Calendar.strftime(end_date, "%Y")}"
-                          else
-                            "#{start_month} - #{end_month} #{Calendar.strftime(end_date, "%Y")}"
-                          end
-
-                        true ->
-                          Algora.Util.time_ago(@transaction.succeeded_at)
-                      end}
-                    </time>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </.link>
-      </div>
-    </div>
-    """
-  end
-
-  defp event_item(%{type: :job} = assigns) do
-    assigns = assign(assigns, :job, assigns.event.item)
-
-    ~H"""
-    <div :if={@job.user.handle}>
-      <div class="relative -ml-[2.75rem]">
-        <span
-          :if={!@last?}
-          class="absolute left-1 top-6 h-full w-0.5 block ml-[2.75rem] bg-muted-foreground/25"
-          aria-hidden="true"
-        >
-        </span>
-        <.link
-          rel="noopener"
-          target="_blank"
-          class="w-full group inline-flex"
-          href={~p"/#{@job.user.handle}/jobs"}
-        >
-          <div class="w-full relative flex space-x-3">
-            <div class="w-full flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
-              <div class="w-full flex items-center gap-3">
-                <div class="flex -space-x-1 ring-8 ring-gray-950">
-                  <span class="ml-6 relative shrink-0 overflow-hidden flex h-9 w-9 sm:h-12 sm:w-12 items-center justify-center rounded-xl">
-                    <img
-                      class="aspect-square h-full w-full"
-                      alt={@job.user.name}
-                      src={@job.user.avatar_url}
-                    />
-                  </span>
-                </div>
-                <div class="w-full z-10 flex gap-3 items-start xl:items-end">
-                  <p class="text-xs transition-colors text-muted-foreground group-hover:text-foreground/90 sm:text-xl text-left">
-                    <span class="font-semibold text-foreground/80 group-hover:text-foreground transition-colors">
-                      {@job.user.name}
-                    </span>
-                    is hiring!
-                    <span class="font-semibold text-purple-400 group-hover:text-purple-300 transition-colors">
-                      {@job.title}
-                    </span>
-                  </p>
-                  <div class="ml-auto xl:ml-0 xl:mb-[2px] whitespace-nowrap text-xs text-muted-foreground sm:text-sm">
-                    <time datetime={@job.inserted_at}>
-                      {Algora.Util.time_ago(@job.inserted_at)}
-                    </time>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </.link>
-      </div>
-    </div>
-    """
-  end
-
-  defp event_item(%{type: :bounty} = assigns) do
-    assigns = assign(assigns, :bounty, assigns.event.item)
-
-    ~H"""
-    <div>
-      <div class="relative -ml-[2.75rem]">
-        <span
-          :if={!@last?}
-          class="absolute left-1 top-6 h-full w-0.5 block ml-[2.75rem] bg-muted-foreground/25"
-          aria-hidden="true"
-        >
-        </span>
-        <.link
-          rel="noopener"
-          target="_blank"
-          class="w-full group inline-flex"
-          href={
-            if @bounty.repository,
-              do: @bounty.ticket.url,
-              else: ~p"/#{@bounty.owner.handle}/home"
-          }
-        >
-          <div class="w-full relative flex space-x-3">
-            <div class="w-full flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
-              <div class="w-full flex items-center gap-3">
-                <div class="flex -space-x-1 ring-8 ring-gray-950">
-                  <span class="ml-6 relative shrink-0 overflow-hidden flex h-9 w-9 sm:h-12 sm:w-12 items-center justify-center rounded-xl bg-gray-950">
-                    <img
-                      class="aspect-square h-full w-full"
-                      alt={@bounty.owner.name}
-                      src={@bounty.owner.avatar_url}
-                    />
-                  </span>
-                </div>
-                <div class="w-full z-10 flex gap-3 items-start xl:items-end">
-                  <p class="text-xs transition-colors text-muted-foreground group-hover:text-foreground/90 sm:text-xl text-left">
-                    <span class="font-semibold text-foreground/80 group-hover:text-foreground transition-colors">
-                      {@bounty.owner.name}
-                    </span>
-                    shared a
-                    <span class="font-bold font-display transition-colors text-cyan-400 group-hover:text-cyan-300">
-                      {Money.to_string!(@bounty.amount)} bounty
-                    </span>
-                  </p>
-                  <div class="ml-auto xl:ml-0 xl:mb-[2px] whitespace-nowrap text-xs text-muted-foreground sm:text-sm">
-                    <time datetime={@bounty.inserted_at}>
-                      {Algora.Util.time_ago(@bounty.inserted_at)}
-                    </time>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </.link>
-      </div>
-    </div>
-    """
-  end
-
-  defp event_item(%{type: :ats} = assigns) do
-    assigns = assign(assigns, :match, assigns.event.item.match)
-    assigns = assign(assigns, :data, assigns.event.item.event)
-
-    ~H"""
-    <div>
-      <div class="relative -ml-[2.75rem]">
-        <span
-          :if={!@last?}
-          class="absolute left-1 top-6 h-full w-0.5 block ml-[2.75rem] bg-muted-foreground/25"
-          aria-hidden="true"
-        >
-        </span>
-        <.link
-          rel="noopener"
-          target="_blank"
-          class="w-full group inline-flex"
-          href={"/#{@match.job_posting.user.handle}/home"}
-        >
-          <div class="w-full relative flex space-x-3">
-            <div class="w-full flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
-              <div class="w-full flex items-center gap-3">
-                <div class="flex -space-x-1 ring-8 ring-gray-950">
-                  <span class="relative shrink-0 overflow-hidden flex h-9 w-9 sm:h-12 sm:w-12 items-center justify-center rounded-xl ring-4 bg-gray-950 ring-black">
-                    <img
-                      class="aspect-square h-full w-full"
-                      alt={@match.job_posting.user.name}
-                      src={@match.job_posting.user.avatar_url}
-                    />
-                  </span>
-                  <span class="relative shrink-0 overflow-hidden flex h-9 w-9 sm:h-12 sm:w-12 items-center justify-center rounded-xl ring-4 bg-gray-950 ring-black">
-                    <img
-                      class="aspect-square h-full w-full"
-                      alt={@match.user.name}
-                      src={@match.user.avatar_url}
-                    />
-                  </span>
-                </div>
-
-                <div class="w-full z-10 flex gap-3 items-start xl:items-end">
-                  <p class="text-xs transition-colors text-muted-foreground group-hover:text-foreground/90 sm:text-xl text-left">
-                    <span class="font-semibold text-foreground/80 group-hover:text-foreground transition-colors">
-                      {@match.job_posting.user.name}
-                    </span>
-                    {Algora.Cloud.label_ats_event(@data["title"]) || " <> "}
-                    <span class="font-semibold text-foreground/80 group-hover:text-foreground transition-colors">
-                      {@match.user.name}
-                    </span>
-                  </p>
-                  <div class="ml-auto xl:ml-0 xl:mb-[2px] whitespace-nowrap text-xs text-muted-foreground sm:text-sm">
-                    <time datetime={@event.timestamp}>
-                      {Algora.Util.time_ago(@event.timestamp)}
-                    </time>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </.link>
-      </div>
-    </div>
-    """
-  end
-
   def event_card(assigns) do
     ~H"""
     <.link
@@ -1332,13 +1036,13 @@ defmodule AlgoraWeb.HomeLive do
         # Fetch language contributions for this user
         language_contributions_map =
           [user.id]
-          |> LanguageContributions.list_language_contributions_batch()
+          |> Algora.Cloud.list_language_contributions_batch()
           |> transform_language_contributions()
 
         # Fetch heatmap data for this user
         heatmaps_map =
           [user.id]
-          |> AlgoraCloud.Profiles.list_heatmaps()
+          |> Algora.Cloud.list_heatmaps()
           |> Map.new(fn heatmap -> {heatmap.user_id, heatmap.data} end)
 
         # Build interviews map
@@ -1431,15 +1135,6 @@ defmodule AlgoraWeb.HomeLive do
     Enum.reduce(interviews, %{}, fn interview, acc ->
       Map.put(acc, {interview.user_id, interview.job_posting_id}, interview)
     end)
-  end
-
-  defp placeholder_text do
-    """
-    - GitHub looks like a green carpet, red flag if wearing suit
-    - Great communication skills, can talk to customers
-    - Must be a shark, aggressive, has urgency and agency
-    - Has contributions to open source inference engines (like vLLM)
-    """
   end
 
   defp build_carousel_items(candidates_data) do

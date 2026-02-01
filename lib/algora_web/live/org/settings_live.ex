@@ -140,9 +140,7 @@ defmodule AlgoraWeb.Org.SettingsLive do
         </.card_content>
       </.card>
 
-      <.card :if={
-        @current_org.contract_signed || @current_org.handle in AlgoraCloud.Constants.presigned()
-      }>
+      <.card :if={@current_org.contract_signed || @current_org.handle in Algora.Cloud.presigned()}>
         <.card_header>
           <.card_title>Candidate preferences</.card_title>
         </.card_header>

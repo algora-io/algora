@@ -94,7 +94,7 @@ defmodule AlgoraWeb.OGImageController do
         |> Enum.reject(fn {_k, v} -> is_nil(v) end)
         |> Map.new()
 
-      AlgoraCloud.Events.create_origin_event("og_image_open", payload)
+      Algora.Cloud.create_origin_event("og_image_open", payload)
     end)
 
     object_path = Path.join(["og"] ++ path ++ ["og.png"])

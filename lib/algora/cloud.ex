@@ -25,6 +25,10 @@ defmodule Algora.Cloud do
     call(AlgoraCloud.Profiles, :list_heatmaps, [user_ids])
   end
 
+  def list_language_contributions_batch(user_ids) do
+    call(AlgoraCloud.Profiles, :list_language_contributions_batch, [user_ids])
+  end
+
   def sync_heatmap_by(opts \\ []) do
     call(AlgoraCloud.Profiles, :sync_heatmap_by, [opts])
   end
@@ -47,12 +51,12 @@ defmodule Algora.Cloud do
     call(AlgoraCloud.EmailScheduler, :schedule_email, [:job_drip, match.id])
   end
 
-  def notify_candidate_like(attrs) do
+  def notify_candidate_like(_attrs) do
     :ok
     # call(AlgoraCloud.Talent.Jobs.SendCandidateLikeEmail, :send, [attrs])
   end
 
-  def notify_company_like(match_id) do
+  def notify_company_like(_match_id) do
     :ok
     # call(AlgoraCloud.EmailScheduler, :schedule_email, [:company_like, match_id])
   end
@@ -63,6 +67,18 @@ defmodule Algora.Cloud do
 
   def create_welcome_task(attrs) do
     call(AlgoraCloud.AdminTasks, :create_welcome_task, [attrs])
+  end
+
+  def create_origin_event(event, attrs) do
+    call(AlgoraCloud.Events, :create_origin_event, [event, attrs])
+  end
+
+  def presigned do
+    call(AlgoraCloud.Constants, :presigned, [])
+  end
+
+  def candidate_card(assigns) do
+    call(AlgoraCloud.Components.CandidateCard, :candidate_card, [assigns])
   end
 
   def start do

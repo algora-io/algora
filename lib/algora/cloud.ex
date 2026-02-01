@@ -78,7 +78,16 @@ defmodule Algora.Cloud do
   end
 
   def candidate_card(assigns) do
-    call(AlgoraCloud.Components.CandidateCard, :candidate_card, [assigns], nil)
+    import Phoenix.Component
+
+    fallback = ~H"""
+    <img
+      src="/images/screenshots/candidates-page.png"
+      class="aspect-[1200/630] h-full w-full object-cover border-2 border-white/10 bg-cover rounded-xl overflow-hidden"
+    />
+    """
+
+    call(AlgoraCloud.Components.CandidateCard, :candidate_card, [assigns], fallback)
   end
 
   def start do

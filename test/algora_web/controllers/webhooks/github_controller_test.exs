@@ -1526,10 +1526,9 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
   defp mock_body(body \\ ""), do: "Lorem\r\nipsum\r\n dolor #{body} sit\r\namet"
 
   defp mock_user(user) do
-    %{
-      "id" => String.to_integer(user.provider_id),
-      "login" => user.provider_login
-    }
+    with {:ok, user} <- Algora.Support.GithubMock.get_user_by_username(nil, user.provider_login) do
+      user
+    end
   end
 
   defp mock_webhook(ctx) do

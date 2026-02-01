@@ -88,12 +88,12 @@ defmodule Algora.Support.GithubMock do
 
   @impl true
   def get_user(_access_token, id) do
-    {:ok, %{"id" => id, "login" => "user_#{random_id()}"}}
+    {:ok, %{"id" => id, "login" => "user_#{id}"}}
   end
 
   @impl true
   def get_user_by_username(_access_token, username) do
-    {:ok, %{"id" => random_id(), "login" => username}}
+    {:ok, %{"id" => :erlang.phash2(username, 1_000_000) + 1_000_000, "login" => username}}
   end
 
   @impl true

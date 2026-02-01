@@ -163,7 +163,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       assert Money.equal?(Repo.one(Bounty).amount, ~M[200]usd)
     end
 
-    test "adds to bounty amount when creating a new bounty comment", ctx do
+    test "overrides bounty amount when creating a new bounty comment", ctx do
       comment_id = :rand.uniform(1000)
 
       process_scenario!(ctx, [
@@ -189,7 +189,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
         }
       ])
 
-      assert Money.equal?(Repo.one(Bounty).amount, ~M[300]usd)
+      assert Money.equal?(Repo.one(Bounty).amount, ~M[200]usd)
     end
 
     test "editing GitHub comment with /bounty command preserves bounty visibility", ctx do

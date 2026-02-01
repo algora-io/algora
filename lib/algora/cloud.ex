@@ -2,53 +2,53 @@ defmodule Algora.Cloud do
   @moduledoc false
 
   def top_contributions(github_handles) do
-    call(AlgoraCloud, :top_contributions, [github_handles])
+    call(AlgoraCloud, :top_contributions, [github_handles], [])
   end
 
   def list_top_matches(opts \\ []) do
-    call(AlgoraCloud, :list_top_matches, [opts])
+    call(AlgoraCloud, :list_top_matches, [opts], [])
   end
 
   def list_top_stargazers(opts \\ []) do
-    call(AlgoraCloud, :list_top_stargazers, [opts])
+    call(AlgoraCloud, :list_top_stargazers, [opts], [])
   end
 
   def truncate_matches(org, matches) do
-    call(AlgoraCloud, :truncate_matches, [org, matches])
+    call(AlgoraCloud, :truncate_matches, [org, matches], matches)
   end
 
   def count_matches(job) do
-    call(AlgoraCloud, :count_matches, [job])
+    call(AlgoraCloud, :count_matches, [job], 0)
   end
 
   def list_heatmaps(user_ids) do
-    call(AlgoraCloud.Profiles, :list_heatmaps, [user_ids])
+    call(AlgoraCloud.Profiles, :list_heatmaps, [user_ids], [])
   end
 
   def list_language_contributions_batch(user_ids) do
-    call(AlgoraCloud.Profiles, :list_language_contributions_batch, [user_ids])
+    call(AlgoraCloud.Profiles, :list_language_contributions_batch, [user_ids], [])
   end
 
   def sync_heatmap_by(opts \\ []) do
-    call(AlgoraCloud.Profiles, :sync_heatmap_by, [opts])
+    call(AlgoraCloud.Profiles, :sync_heatmap_by, [opts], {:ok, nil})
   end
 
   def count_top_matches(opts \\ []) do
-    call(AlgoraCloud, :count_top_matches, [opts])
+    call(AlgoraCloud, :count_top_matches, [opts], 0)
   end
 
   def get_contribution_score(job, user, contributions_map) do
-    call(AlgoraCloud, :get_contribution_score, [job, user, contributions_map])
+    call(AlgoraCloud, :get_contribution_score, [job, user, contributions_map], {0, 0})
   end
 
   def get_job_offer(assigns) do
-    call(AlgoraCloud.JobLive, :offer, [assigns])
+    call(AlgoraCloud.JobLive, :offer, [assigns], nil)
   end
 
   def notify_match(attrs) do
     # call(AlgoraCloud.Talent.Jobs.SendJobMatchEmail, :send, [attrs])
     match = Algora.Repo.get_by(Algora.Matches.JobMatch, user_id: attrs.user_id, job_posting_id: attrs.job_posting_id)
-    call(AlgoraCloud.EmailScheduler, :schedule_email, [:job_drip, match.id])
+    call(AlgoraCloud.EmailScheduler, :schedule_email, [:job_drip, match.id], {:ok, :skipped})
   end
 
   def notify_candidate_like(_attrs) do
@@ -62,65 +62,52 @@ defmodule Algora.Cloud do
   end
 
   def create_admin_task(attrs) do
-    call(AlgoraCloud.AdminTasks, :create_admin_task, [attrs])
+    call(AlgoraCloud.AdminTasks, :create_admin_task, [attrs], {:ok, nil})
   end
 
   def create_welcome_task(attrs) do
-    call(AlgoraCloud.AdminTasks, :create_welcome_task, [attrs])
+    call(AlgoraCloud.AdminTasks, :create_welcome_task, [attrs], {:ok, nil})
   end
 
   def create_origin_event(event, attrs) do
-    call(AlgoraCloud.Events, :create_origin_event, [event, attrs])
+    call(AlgoraCloud.Events, :create_origin_event, [event, attrs], {:ok, nil})
   end
 
   def presigned do
-    call(AlgoraCloud.Constants, :presigned, [])
+    call(AlgoraCloud.Constants, :presigned, [], [])
   end
 
   def candidate_card(assigns) do
-    call(AlgoraCloud.Components.CandidateCard, :candidate_card, [assigns])
+    call(AlgoraCloud.Components.CandidateCard, :candidate_card, [assigns], nil)
   end
 
   def start do
-    call(AlgoraCloud, :start, [])
-  end
-
-  def alert(message, level \\ :info) do
-    call(AlgoraCloud, :alert, [message, level])
+    call(AlgoraCloud, :start, [], [])
   end
 
   def token! do
-    call(AlgoraCloud, :token!, [])
+    call(AlgoraCloud, :token!, [], nil)
   end
 
   def token do
-    call(AlgoraCloud, :token, [])
+    call(AlgoraCloud, :token, [], nil)
   end
 
   def filter_featured_txs(transactions) do
-    if :code.which(AlgoraCloud) == :non_existing do
-      transactions
-    else
-      apply(AlgoraCloud, :filter_featured_txs, [transactions])
-    end
+    call(AlgoraCloud, :filter_featured_txs, [transactions], transactions)
   end
 
   def ats_event_ids do
-    if :code.which(AlgoraCloud) == :non_existing do
-      []
-    else
-      apply(AlgoraCloud, :ats_event_ids, [])
-    end
+    call(AlgoraCloud, :ats_event_ids, [], [])
   end
 
   def label_ats_event(event) do
-    call(AlgoraCloud, :label_ats_event, [event])
+    call(AlgoraCloud, :label_ats_event, [event], nil)
   end
 
-  defp call(module, function, args) do
+  defp call(module, function, args, fallback) do
     if :code.which(module) == :non_existing do
-      # TODO: call algora API
-      nil
+      fallback
     else
       apply(module, function, args)
     end

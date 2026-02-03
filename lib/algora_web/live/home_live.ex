@@ -137,34 +137,40 @@ defmodule AlgoraWeb.HomeLive do
                     <p class="mt-2 text-[0.9rem]/[1.4rem] min-[412px]:text-base md:text-lg xl:text-lg 2xl:text-xl leading-6 font-medium text-foreground">
                       Connecting the most prolific open source maintainers & contributors with their next jobs
                     </p>
-                    <div class="flex items-center justify-start gap-3 lg:gap-12 overflow-x-auto scrollbar-thin py-4">
+                    <div class="grid grid-cols-3 place-items-center sm:grid-cols-6 gap-4 md:gap-5 lg:gap-0 py-4">
                       <img
                         src="/images/wordmarks/coderabbit.svg"
                         alt="CodeRabbit"
-                        class="h-5 sm:h-6 shrink-0 transition-all"
+                        class="h-6 md:h-7 transition-all"
                       />
                       <img
-                        src="/images/wordmarks/comfy.svg"
-                        alt="Comfy"
-                        class="h-3.5 sm:h-5 shrink-0 transition-all"
+                        src="/images/wordmarks/asi.svg"
+                        alt="Air Space Intelligence"
+                        class="h-7 md:h-9 transition-all"
                       />
                       <img
                         src="/images/wordmarks/lovable.svg"
                         alt="Lovable"
-                        class="h-3 sm:h-4 shrink-0 transition-all"
+                        class="h-3 md:h-4 transition-all"
                       />
-                      <div class="hidden min-[412px]:flex items-center transition-all">
-                        <img
-                          src="/images/wordmarks/firecrawl.svg"
-                          alt="Firecrawl"
-                          class="h-6 sm:h-7 shrink-0"
-                        />
+                      <img
+                        src="/images/wordmarks/comfy.svg"
+                        alt="Comfy"
+                        class="h-3.5 md:h-5 transition-all saturate-0"
+                      />
+                      <div class="flex items-center transition-all">
+                        <img src="/images/wordmarks/firecrawl.svg" alt="Firecrawl" class="h-6 md:h-7" />
                         <img
                           src="/images/wordmarks/firecrawl2.svg"
                           alt="Firecrawl2"
-                          class="h-3 sm:h-4 shrink-0"
+                          class="h-3 md:h-4"
                         />
                       </div>
+                      <img
+                        src="/images/wordmarks/textql.svg"
+                        alt="TextQL"
+                        class="h-4 md:h-5 transition-all"
+                      />
                     </div>
                     <div :if={length(@carousel_items) > 0} class="mt-4 w-full">
                       <div

@@ -324,7 +324,7 @@ defmodule AlgoraWeb.HomeLive do
                     <figure>
                       <blockquote class="mt-6 text-lg font-semibold text-white sm:text-xl/8">
                         <p>
-                          "Within one week of onboarding, we started interviewing qualified candidates interested to join CodeRabbit in San Francisco."
+                          "Within one week of onboarding, we started interviewing qualified candidates who joined CodeRabbit in San Francisco."
                         </p>
                       </blockquote>
                       <figcaption class="mt-6 text-base text-white dark:text-gray-200">

@@ -26,7 +26,7 @@ defmodule Algora.Cloud do
   end
 
   def list_language_contributions_batch(user_ids) do
-    call(AlgoraCloud.Profiles, :list_language_contributions_batch, [user_ids], [])
+    call(AlgoraCloud.LanguageContributions, :list_language_contributions_batch, [user_ids], [])
   end
 
   def sync_heatmap_by(opts \\ []) do

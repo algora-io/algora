@@ -75,6 +75,10 @@ defmodule AlgoraWeb.Endpoint do
     redirect_to_canonical_host(conn, "/challenges/clickhouse")
   end
 
+  defp canonical_host(%{host: "swift.algora.io"} = conn, _opts) do
+    redirect_to_canonical_host(conn, "/swift")
+  end
+
   defp canonical_host(%{host: host} = conn, _opts) do
     case String.split(host, ".") do
       [subdomain, "algora", "io"]

@@ -645,14 +645,14 @@ defmodule AlgoraWeb.SwiftBountiesLive do
   end
 
   defp assign_bounties(socket) do
-    bounties =
-      Bounties.list_bounties(
-        status: :open,
-        tech_stack: ["Swift"],
-        limit: 100
-      )
+    # bounties =
+    #   Bounties.list_bounties(
+    #     status: :open,
+    #     tech_stack: ["Swift"],
+    #     limit: 100
+    #   )
 
-    assign(socket, :bounties, bounties)
+    assign(socket, :bounties, [])
   end
 
   defp assign_active_repos(socket) do

@@ -13,7 +13,7 @@ config :algora,
   ecto_repos: [Algora.Repo],
   generators: [timestamp_type: :utc_datetime_usec],
   redirects: [
-    {"/tv", "https://tv.algora.io"},
+    {"/tv", "https://algora.io"},
     {"/discord", "https://discord.gg/9RXD2nqbnG"},
     {"/docs/bounties/payments", "/docs/payments"},
     {"/sdk", "https://github.com/algora-io/sdk"},

@@ -73,6 +73,8 @@ defmodule AlgoraWeb.Components.TechBadge do
   defp icon_url("scikit-learn"), do: "https://avatars.githubusercontent.com/u/365630?s=200&v=4"
   defp icon_url("apache beam"), do: "https://algora-console.t3.storage.dev/avatars/apache-beam.png"
   defp icon_url("mlflow"), do: "https://avatars.githubusercontent.com/u/39938107?s=200&v=4"
+  defp icon_url("shadcn"), do: "https://avatars.githubusercontent.com/u/139895814?s=200&v=4"
+  defp icon_url("jotai"), do: "https://avatars.githubusercontent.com/u/45790596?s=200&v=4"
   defp icon_url(tech), do: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/#{icon_path(tech)}"
 
   defp icon_path("aws"), do: "amazonwebservices/amazonwebservices-plain-wordmark.svg"
@@ -388,7 +390,9 @@ defmodule AlgoraWeb.Components.TechBadge do
       "Helm",
       "scikit-learn",
       "Apache Beam",
-      "MLflow"
+      "MLflow",
+      "Shadcn",
+      "Jotai"
     ]
   end
 end

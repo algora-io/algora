@@ -230,23 +230,23 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             <span class="text-xs text-muted-foreground font-medium">Trusted by</span>
             <div class="relative w-full">
               <div class="mt-1 flex items-center gap-12 overflow-x-auto scrollbar-thin pb-0">
-                <img src="/images/wordmarks/coderabbit.svg" alt="CodeRabbit" class="h-8 shrink-0" />
-                <img src="/images/wordmarks/comfy.svg" alt="Comfy" class="h-6 shrink-0" />
+                <img src="/images/wordmarks/coderabbit.svg" alt="CodeRabbit" class="h-9 shrink-0" />
+                <img src="/images/wordmarks/asi.svg" alt="Air Space Intelligence" class="h-12" />
                 <img src="/images/wordmarks/lovable.svg" alt="Lovable" class="h-6 shrink-0" />
-                <div class="flex items-center gap-1">
+                <img src="/images/wordmarks/comfy.svg" alt="Comfy" class="h-7 shrink-0 saturate-0" />
+                <div class="flex items-center gap-1 shrink-0">
                   <img src="/images/wordmarks/firecrawl.svg" alt="Firecrawl" class="h-10 shrink-0" />
                   <img src="/images/wordmarks/firecrawl2.svg" alt="Firecrawl2" class="h-6 shrink-0" />
                 </div>
-                <img src="/images/wordmarks/golem.png" alt="Golem" class="h-8 shrink-0" />
-                <img src="/images/wordmarks/calcom.png" alt="Cal.com" class="h-6 shrink-0" />
+                <img src="/images/wordmarks/textql.svg" alt="TextQL" class="h-7 transition-all" />
               </div>
             </div>
           </div>
         </div>
       </header>
 
-      <div class="flex-1 p-4 md:py-4 flex items-center justify-center overflow-hidden max-w-[88rem] w-full mx-auto">
-        <div class="w-full flex flex-col lg:flex-row gap-6 lg:gap-12 items-center px-2 lg:px-8">
+      <div class="flex-1 p-4 md:py-4 flex xitems-center justify-center overflow-hidden max-w-[88rem] w-full mx-auto">
+        <div class="w-full flex flex-col lg:flex-row gap-6 lg:gap-12 xitems-center px-2">
           <div class="shrink-0 w-full lg:w-[32%] text-left">
             <.form for={@form} phx-submit="submit" class="flex flex-col gap-4">
               <div>
@@ -393,7 +393,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           </div>
           <div
             :if={length(@candidates_data) > 0}
-            class="shrink-0 flex flex-col gap-3 w-full lg:w-[68%]"
+            class="shrink-0 flex flex-col gap-3 w-full lg:w-[68%] lg:pr-12"
           >
             <div id="candidate-carousel-org" phx-hook="CandidateCarousel" class="relative w-full">
               <%= for {candidate_data, index} <- Enum.with_index(@candidates_data) do %>

@@ -546,6 +546,7 @@ defmodule Algora.Accounts.User do
       :open_to_contract,
       :open_to_ic,
       :open_to_manager,
+      :open_to_new_role,
       :work_auth_us,
       :work_auth_eu,
       :phone_number,

@@ -82,7 +82,7 @@ defmodule AlgoraWeb.Endpoint do
   defp canonical_host(%{host: host} = conn, _opts) do
     case String.split(host, ".") do
       [subdomain, "algora", "io"]
-      when subdomain not in ["app", "console", "www", "sitemaps", "sitemap", "m", "api", "home"] ->
+      when subdomain not in ["app", "console", "www", "sitemaps", "sitemap", "m", "api", "home", "ai"] ->
         case Algora.Accounts.get_user_by_handle(subdomain) do
           nil ->
             redirect_to_canonical_host(conn, conn.request_path)

@@ -162,6 +162,9 @@ defmodule Algora.Accounts.User do
     field :work_auth_us, :boolean, default: false
     field :work_auth_eu, :boolean, default: false
 
+    # Security clearance
+    field :security_clearance, Ecto.Enum, values: [:active, :eligible, :not_eligible]
+
     # Resume
     field :resume_url, :string
 
@@ -549,6 +552,7 @@ defmodule Algora.Accounts.User do
       :open_to_new_role,
       :work_auth_us,
       :work_auth_eu,
+      :security_clearance,
       :phone_number,
       :resume_url,
       :earliest_start_date

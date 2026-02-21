@@ -39,6 +39,8 @@ defmodule Algora.Jobs.JobPosting do
     field :locations, {:array, :string}, default: []
     field :states, {:array, :string}, default: []
 
+    field :require_security_clearance, :boolean, default: false
+
     # Equity compensation details
     # Percentage-based equity (e.g., 0.25 for 0.25%)
     field :min_equity_pct, :decimal
@@ -89,7 +91,8 @@ defmodule Algora.Jobs.JobPosting do
       :min_equity_pct,
       :max_equity_pct,
       :min_equity,
-      :max_equity
+      :max_equity,
+      :require_security_clearance
     ])
     |> generate_id()
     |> validate_required([:url])

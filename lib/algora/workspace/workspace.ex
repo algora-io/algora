@@ -99,6 +99,7 @@ defmodule Algora.Workspace do
         where: r.name == ^repo,
         where: u.provider_login == ^owner,
         preload: [repository: {r, user: u}],
+        order_by: [asc: t.inserted_at],
         limit: 1
       )
     )

@@ -149,6 +149,7 @@ defmodule Algora.Accounts.User do
     field :open_to_relocate_ny, :boolean, default: false
     field :open_to_relocate_country, :boolean, default: false
     field :open_to_relocate_world, :boolean, default: false
+    field :open_to_relocate_local, :boolean, default: false
 
     # Commitment preferences
     field :open_to_fulltime, :boolean, default: false
@@ -545,6 +546,7 @@ defmodule Algora.Accounts.User do
       :open_to_relocate_ny,
       :open_to_relocate_country,
       :open_to_relocate_world,
+      :open_to_relocate_local,
       :open_to_fulltime,
       :open_to_contract,
       :open_to_ic,

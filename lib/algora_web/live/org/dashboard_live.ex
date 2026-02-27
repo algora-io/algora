@@ -236,6 +236,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                               </div>
                               <.link
                                 rel="noopener"
+                                target="_blank"
                                 class="group/issue inline-flex flex-col"
                                 href={Bounty.url(bounty)}
                               >

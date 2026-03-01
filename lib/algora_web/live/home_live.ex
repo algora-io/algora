@@ -810,11 +810,11 @@ defmodule AlgoraWeb.HomeLive do
   defp hires1 do
     [
       %{
-        company_name: "Comfy",
-        company_avatar: "https://avatars.githubusercontent.com/u/166579949?v=4",
-        person_name: "Gavin Li",
-        person_avatar: "https://avatars.githubusercontent.com/u/1113905?v=4",
-        person_title: "Staff Applied ML Engineer"
+        company_name: "CodeRabbit",
+        company_avatar: "https://avatars.githubusercontent.com/u/132028505?s=200&v=4",
+        person_name: "Erfan Al-Hossami",
+        person_avatar: "https://algora.io/storage/avatars/taisazero.jpeg",
+        person_title: "Applied AI Engineer"
       },
       %{
         company_name: "Trigger.dev (YC W23)",

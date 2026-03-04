@@ -12,7 +12,7 @@ defmodule AlgoraWeb.Components.Bounties do
     <div class="relative -mx-2 -mt-2 overflow-auto scrollbar-thin">
       <ul class="divide-y divide-border">
         <%= for bounty <- @bounties do %>
-          <.link href={Bounty.url(bounty)} class="block whitespace-nowrap hover:bg-muted/50">
+          <.link href={Bounty.url(bounty)} target="_blank" class="block whitespace-nowrap hover:bg-muted/50">
             <li class="flex items-center py-2 px-3">
               <div class="flex-shrink-0 mr-3">
                 <.avatar class="h-8 w-8">

@@ -34,6 +34,7 @@ defmodule Algora.Jobs do
         desc_nulls_last: max(i.inserted_at),
         desc: j.inserted_at
       )
+      |> maybe_filter_by_outbound(opts[:outbound_only])
       |> maybe_limit(opts[:limit])
 
     query =
@@ -127,6 +128,10 @@ defmodule Algora.Jobs do
   defp maybe_filter_by_tech_stack(query, tech_stack) do
     where(query, [j], fragment("? && ?", j.tech_stack, ^tech_stack))
   end
+
+  defp maybe_filter_by_outbound(query, nil), do: query
+  defp maybe_filter_by_outbound(query, false), do: query
+  defp maybe_filter_by_outbound(query, true), do: where(query, [j], j.outbound == true)
 
   defp maybe_limit(query, nil), do: query
   defp maybe_limit(query, limit), do: limit(query, ^limit)

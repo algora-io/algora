@@ -40,6 +40,7 @@ defmodule Algora.Jobs.JobPosting do
     field :states, {:array, :string}, default: []
 
     field :require_security_clearance, :boolean, default: false
+    field :outbound, :boolean, default: true
 
     # Equity compensation details
     # Percentage-based equity (e.g., 0.25 for 0.25%)

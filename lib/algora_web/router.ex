@@ -51,6 +51,12 @@ defmodule AlgoraWeb.Router do
   redirect("/textqllabs", "/textql", :permanent)
   redirect("/textqllabs/*path", "/textql/*path", :permanent)
 
+  redirect("/Comfy-Org", "/comfy", :permanent)
+  redirect("/Comfy-Org/*path", "/comfy/*path", :permanent)
+
+  redirect("/comfy-org", "/comfy", :permanent)
+  redirect("/comfy-org/*path", "/comfy/*path", :permanent)
+
   scope "/" do
     forward "/asset", AlgoraWeb.Plugs.RewriteAssetsPlug, upstream: :assets_url
     forward "/storage", AlgoraWeb.Plugs.RewriteStoragePlug, upstream: :storage_url

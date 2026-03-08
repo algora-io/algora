@@ -817,6 +817,13 @@ defmodule AlgoraWeb.HomeLive do
         person_title: "Applied AI Engineer"
       },
       %{
+        company_name: "Comfy",
+        company_avatar: "https://avatars.githubusercontent.com/u/166579949?v=4",
+        person_name: "Matt Miller",
+        person_avatar: "https://algora.io/storage/avatars/MillerMedia.jpeg",
+        person_title: "Backend Engineer"
+      },
+      %{
         company_name: "Trigger.dev (YC W23)",
         company_avatar: "https://github.com/triggerdotdev.png",
         person_name: "Nick",
@@ -829,13 +836,6 @@ defmodule AlgoraWeb.HomeLive do
         person_name: "Maxim S",
         person_avatar: "https://github.com/mschuwalow.png",
         person_title: "Lead Engineer"
-      },
-      %{
-        company_name: "Comfy",
-        company_avatar: "https://avatars.githubusercontent.com/u/166579949?v=4",
-        person_name: "David Aguilar",
-        person_avatar: "https://algora-console.t3.storageapi.dev/avatars/davvid.jpeg",
-        person_title: "Staff AI Cloud Infra Engineer"
       },
       %{
         company_name: "TraceMachina",

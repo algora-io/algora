@@ -80,7 +80,19 @@ defmodule AlgoraWeb.Endpoint do
   end
 
   defp canonical_host(%{host: host} = conn, _opts) do
-    case String.split(host, ".") do
+    case host |> String.split(".") |> Enum.map(&String.downcase/1) do
+      ["create", "algora", "io"] ->
+        redirect_to_canonical_host(conn, Path.join(["/anything/candidates"]))
+
+      ["lovablelabs", "algora", "io"] ->
+        redirect_to_canonical_host(conn, Path.join(["/lovable/candidates"]))
+
+      ["textqllabs", "algora", "io"] ->
+        redirect_to_canonical_host(conn, Path.join(["/textql/candidates"]))
+
+      ["comfy-org", "algora", "io"] ->
+        redirect_to_canonical_host(conn, Path.join(["/comfy/candidates"]))
+
       [subdomain, "algora", "io"]
       when subdomain not in ["app", "console", "www", "sitemaps", "sitemap", "m", "api", "home", "ai", "test"] ->
         case Algora.Accounts.get_user_by_handle(subdomain) do

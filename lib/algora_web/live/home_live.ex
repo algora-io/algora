@@ -621,9 +621,9 @@ defmodule AlgoraWeb.HomeLive do
                       loading="lazy"
                     />
                   </.link>
-                  <.link href="https://algora.io/comfy-org/jobs" target="_blank">
+                  <.link href="https://algora.io/comfy/jobs" target="_blank">
                     <img
-                      src="https://algora.io/og/comfy-org/jobs?cached"
+                      src="https://algora.io/og/comfy/jobs?cached"
                       alt="Comfy.org jobs"
                       class="object-cover aspect-[1200/630] rounded-xl border border-border bg-gray-800"
                       loading="lazy"

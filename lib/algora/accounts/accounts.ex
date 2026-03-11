@@ -461,29 +461,33 @@ defmodule Algora.Accounts do
   def auto_join_orgs(user) do
     domain = user.email |> String.split("@") |> List.last()
 
-    orgs =
-      Repo.all(
-        from o in User,
-          left_join: m in Member,
-          on: m.org_id == o.id and m.user_id == ^user.id,
-          where: o.domain == ^domain and is_nil(m.id)
-      )
+    if domain in ["github.com"] do
+      []
+    else
+      orgs =
+        Repo.all(
+          from o in User,
+            left_join: m in Member,
+            on: m.org_id == o.id and m.user_id == ^user.id,
+            where: o.domain == ^domain and is_nil(m.id)
+        )
 
-    Enum.each(orgs, fn org ->
-      case Organizations.create_member(org, user, :mod) do
-        {:ok, _member} ->
-          Algora.Activities.alert("#{user.email} joined #{org.name}", :info)
+      Enum.each(orgs, fn org ->
+        case Organizations.create_member(org, user, :mod) do
+          {:ok, _member} ->
+            Algora.Activities.alert("#{user.email} joined #{org.name}", :info)
 
-        {:error, _reason} ->
-          Algora.Activities.alert("#{user.email} failed to join #{org.name}", :error)
+          {:error, _reason} ->
+            Algora.Activities.alert("#{user.email} failed to join #{org.name}", :error)
+        end
+      end)
+
+      if org = List.first(orgs) do
+        update_settings(user, %{last_context: org.handle})
       end
-    end)
 
-    if org = List.first(orgs) do
-      update_settings(user, %{last_context: org.handle})
+      orgs
     end
-
-    orgs
   end
 
   def get_or_register_user(email, attr \\ %{}) do

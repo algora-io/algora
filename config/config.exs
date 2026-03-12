@@ -14,7 +14,7 @@ config :algora,
   generators: [timestamp_type: :utc_datetime_usec],
   redirects: [
     {"/tv", "https://algora.io"},
-    {"/discord", "https://discord.gg/9RXD2nqbnG"},
+    {"/discord", "https://discord.gg/algora"},
     {"/docs/bounties/payments", "/docs/payments"},
     {"/sdk", "https://github.com/algora-io/sdk"},
     {"/healthcare", "https://blog.algora.io/post/healthcare"},

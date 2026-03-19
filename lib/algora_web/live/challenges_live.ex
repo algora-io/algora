@@ -13,6 +13,24 @@ defmodule AlgoraWeb.ChallengesLive do
       <div class="flex flex-col gap-6 pt-16 md:grid md:grid-cols-3 md:pt-12">
         <.link
           class="group relative flex aspect-[1200/630] flex-1 rounded-2xl border-2 border-solid border-border bg-cover hover:no-underline"
+          style="background-image:url(/images/challenges/jules/og.png)"
+          navigate={~p"/challenges/jules"}
+        >
+        </.link>
+        <.link
+          class="group relative flex aspect-[1200/630] flex-1 rounded-2xl border-2 border-solid border-border bg-cover hover:no-underline"
+          style="background-image:url(/images/challenges/limbo/og.png)"
+          navigate={~p"/challenges/turso"}
+        >
+        </.link>
+        <.link
+          class="group relative flex aspect-[1200/630] flex-1 rounded-2xl border-2 border-solid border-border bg-cover hover:no-underline"
+          style="background-image:url(/images/challenges/atopile/og.png)"
+          navigate={~p"/challenges/atopile"}
+        >
+        </.link>
+        <.link
+          class="group relative flex aspect-[1200/630] flex-1 rounded-2xl border-2 border-solid border-border bg-cover hover:no-underline"
           style="background-image:url(/images/challenges/golem/og.png)"
           navigate={~p"/challenges/golem"}
         >

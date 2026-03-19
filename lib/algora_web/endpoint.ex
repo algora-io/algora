@@ -71,10 +71,6 @@ defmodule AlgoraWeb.Endpoint do
   defp canonical_host(%{host: "docs.algora.io"} = conn, _opts),
     do: redirect_to_canonical_host(conn, Path.join(["/docs", conn.request_path]))
 
-  defp canonical_host(%{host: "clickhouse.algora.io"} = conn, _opts) do
-    redirect_to_canonical_host(conn, "/challenges/clickhouse")
-  end
-
   defp canonical_host(%{host: "swift.algora.io"} = conn, _opts) do
     redirect_to_canonical_host(conn, "/swift")
   end
@@ -92,6 +88,12 @@ defmodule AlgoraWeb.Endpoint do
 
       ["comfy-org", "algora", "io"] ->
         redirect_to_canonical_host(conn, Path.join(["/comfy/candidates"]))
+
+      ["clickhouse", "algora", "io"] ->
+        redirect_to_canonical_host(conn, "/challenges/clickhouse")
+
+      ["jules", "algora", "io"] ->
+        redirect_to_canonical_host(conn, "/challenges/jules")
 
       [subdomain, "algora", "io"]
       when subdomain not in ["app", "console", "www", "sitemaps", "sitemap", "m", "api", "home", "ai", "test"] ->

@@ -8,7 +8,7 @@ defmodule AlgoraWeb.ChallengesLive do
   def render(assigns) do
     ~H"""
     <Header.header />
-    <div class="pt-24 mx-auto max-w-7xl px-6 lg:px-8">
+    <div class="pt-24 mx-auto max-w-7xl px-6 lg:px-8 pb-8">
       <h1 class="text-4xl font-bold font-display">Challenges</h1>
       <div class="flex flex-col gap-6 pt-16 md:grid md:grid-cols-3 md:pt-12">
         <.link

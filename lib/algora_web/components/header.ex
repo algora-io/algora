@@ -60,7 +60,7 @@ defmodule AlgoraWeb.Components.Header do
 
         <div class="w-full hidden lg:flex-1 lg:flex lg:justify-end gap-4">
           <.link
-            class="flex items-center justify-center text-sm text-foreground/80 hover:text-foreground"
+            class="hidden xl:flex items-center justify-center text-sm text-foreground/80 hover:text-foreground"
             href="tel:+16504202207"
           >
             <.icon name="tabler-phone" class="size-5 shrink-0" />

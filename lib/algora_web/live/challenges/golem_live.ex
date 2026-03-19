@@ -73,13 +73,16 @@ defmodule AlgoraWeb.Challenges.GolemLive do
                             CHALLENGE
                           </span>
                         </div>
-                        <div class="hidden pt-2 text-[3rem] font-black tracking-tighter md:block">
+                        <div class="hidden pt-2 text-[3rem] font-black tracking-tighter md:block font-display">
                           Win<!-- -->
-                          <span class="-mr-1 bg-gradient-to-r from-green-300 to-teal-400 bg-clip-text font-display font-bold text-transparent">
+                          <span class="bg-gradient-to-r from-green-300 to-teal-400 bg-clip-text font-bold text-transparent">
                             $15,000<!-- -->
                           </span>
-                          and land a fantastic 🦀<!-- -->
-                          <span class="-mr-1 bg-gradient-to-r from-orange-500 to-orange-400 bg-clip-text font-mono text-transparent">Rust<!-- --></span>job!
+                          + land a fantastic 🦀<!-- -->
+                          <span class="bg-gradient-to-r from-orange-500 to-orange-400 bg-clip-text font-bold text-transparent">
+                            Rust
+                          </span>
+                          job!
                         </div>
                         <div class="block pt-2 text-[1.5rem] font-black tracking-tighter md:hidden">
                           <div>

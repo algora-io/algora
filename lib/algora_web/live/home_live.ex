@@ -817,11 +817,18 @@ defmodule AlgoraWeb.HomeLive do
         person_title: "Applied AI Engineer"
       },
       %{
-        company_name: "Comfy",
+        company_name: "ComfyUI",
         company_avatar: "https://avatars.githubusercontent.com/u/166579949?v=4",
         person_name: "Matt Miller",
         person_avatar: "https://algora.io/storage/avatars/MillerMedia.jpeg",
         person_title: "Backend Engineer"
+      },
+      %{
+        company_name: "TextQL",
+        company_avatar: "https://algora.io/storage/avatars/textql.jpeg",
+        person_name: "Christian Lim",
+        person_avatar: "https://avatars.githubusercontent.com/u/2482353?v=4",
+        person_title: "Member of Technical Staff"
       },
       %{
         company_name: "Trigger.dev (YC W23)",
@@ -831,25 +838,18 @@ defmodule AlgoraWeb.HomeLive do
         person_title: "Founding Engineer"
       },
       %{
-        company_name: "Golem Cloud",
-        company_avatar: "https://github.com/golemcloud.png",
-        person_name: "Maxim S",
-        person_avatar: "https://github.com/mschuwalow.png",
-        person_title: "Lead Engineer"
-      },
-      %{
-        company_name: "TraceMachina",
-        company_avatar: "https://avatars.githubusercontent.com/u/144973251?s=200&v=4",
-        person_name: "Tom",
-        person_avatar: "https://avatars.githubusercontent.com/u/38532?v=4",
-        person_title: "Staff Software Engineer"
-      },
-      %{
         company_name: "Firecrawl (YC S22)",
         company_avatar: "https://github.com/mendableai.png",
         person_name: "Gergő Móricz",
         person_avatar: "https://github.com/mogery.png",
         person_title: "Software Engineer"
+      },
+      %{
+        company_name: "Golem Cloud",
+        company_avatar: "https://github.com/golemcloud.png",
+        person_name: "Maxim S",
+        person_avatar: "https://github.com/mschuwalow.png",
+        person_title: "Lead Engineer"
       }
     ]
   end

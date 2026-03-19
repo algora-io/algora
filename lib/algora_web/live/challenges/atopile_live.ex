@@ -295,8 +295,11 @@ defmodule AlgoraWeb.Challenges.AtopileLive do
                 <h2 class="flex justify-center text-4xl font-black leading-none tracking-tighter mix-blend-exclusion md:text-7xl">
                   Media
                 </h2>
-                <div class="mx-auto grid gap-6 px-6 sm:grid-cols-2 lg:px-8">
-                  <a class="block pt-6 md:pt-12" href="https://www.youtube.com/watch?v=7-Q0XVpfW3Y">
+                <div class="mx-auto grid gap-6 px-6 sm:grid-cols-1 lg:px-8">
+                  <a
+                    class="w-1/2 mx-auto block pt-6 md:pt-12"
+                    href="https://www.youtube.com/watch?v=R7oIhkbpC3w"
+                  >
                     <div class="relative z-30 mx-auto max-w-7xl">
                       <div class="relative mx-auto">
                         <div class="group/card h-full border border-white/10 bg-black md:gap-8 group relative flex-1 overflow-hidden rounded-xl bg-cover shadow-[0px_3.26536px_2.21381px_0px_rgba(69,_10,_10,_0.08),_0px_7.84712px_5.32008px_0px_rgba(69,_10,_10,_0.11),_0px_14.77543px_10.01724px_0px_rgba(69,_10,_10,_0.14),_0px_26.35684px_17.86905px_0px_rgba(69,_10,_10,_0.16),_0px_49.29758px_33.42209px_0px_rgba(69,_10,_10,_0.19),_0px_118px_80px_0px_rgba(69,_10,_10,_0.27)] ring-2 ring-red-500 hover:no-underline">
@@ -311,35 +314,10 @@ defmodule AlgoraWeb.Challenges.AtopileLive do
                             </div>
                             <div></div>
                           </div>
-                          <div class="relative flex aspect-[16/9] h-full w-full items-center justify-center text-balance bg-gray-950 text-center text-xl font-medium text-red-100 sm:text-2xl">
+                          <div class="relative flex aspect-[1280/720] h-full w-full items-center justify-center text-balance bg-gray-950 text-center text-xl font-medium text-red-100 sm:text-2xl">
                             <img
-                              src={~p"/images/challenges/atopile/thumbnail1.png"}
-                              alt="atopile product demo"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </a>
-                  <a class="block pt-6 md:pt-12" href="https://www.youtube.com/watch?v=glofO5vRMw8">
-                    <div class="relative z-30 mx-auto max-w-7xl">
-                      <div class="relative mx-auto">
-                        <div class="group/card h-full border border-white/10 bg-black md:gap-8 group relative flex-1 overflow-hidden rounded-xl bg-cover shadow-[0px_3.26536px_2.21381px_0px_rgba(69,_10,_10,_0.08),_0px_7.84712px_5.32008px_0px_rgba(69,_10,_10,_0.11),_0px_14.77543px_10.01724px_0px_rgba(69,_10,_10,_0.14),_0px_26.35684px_17.86905px_0px_rgba(69,_10,_10,_0.16),_0px_49.29758px_33.42209px_0px_rgba(69,_10,_10,_0.19),_0px_118px_80px_0px_rgba(69,_10,_10,_0.27)] ring-2 ring-red-500 hover:no-underline">
-                          <div class="grid h-6 grid-cols-[1fr_auto_1fr] overflow-hidden border-b border-gray-800 ">
-                            <div class="ml-2 flex items-center gap-1">
-                              <div class="h-2 w-2 rounded-full bg-red-400"></div>
-                              <div class="h-2 w-2 rounded-full bg-yellow-400"></div>
-                              <div class="h-2 w-2 rounded-full bg-green-400"></div>
-                            </div>
-                            <div class="flex items-center justify-center">
-                              <div class="text-xs text-gray-500">youtube.com</div>
-                            </div>
-                            <div></div>
-                          </div>
-                          <div class="relative flex aspect-[16/9] h-full w-full items-center justify-center text-balance bg-gray-950 text-center text-xl font-medium text-red-100 sm:text-2xl">
-                            <img
-                              src="https://i.ytimg.com/vi/glofO5vRMw8/maxresdefault.jpg"
-                              alt="1. Installing atopile"
+                              src="https://i.ytimg.com/vi/R7oIhkbpC3w/maxresdefault.jpg"
+                              alt="Autonomous Hardware Agents"
                             />
                           </div>
                         </div>

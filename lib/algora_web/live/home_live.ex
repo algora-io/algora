@@ -579,21 +579,12 @@ defmodule AlgoraWeb.HomeLive do
                                   {hire.person_title}
                                 </div>
                               </div>
-                              <%= if String.contains?(hire.company_name, "Permit.io") or String.contains?(hire.company_name, "Prefix.dev") or String.contains?(hire.company_name, "Twenty") or String.contains?(hire.company_name, "Comfy") do %>
-                                <.badge
-                                  variant="secondary"
-                                  class="absolute -top-2 -left-2 text-xs px-2 py-1 text-emerald-400 bg-emerald-950"
-                                >
-                                  Contract hire!
-                                </.badge>
-                              <% else %>
-                                <.badge
-                                  variant="secondary"
-                                  class="absolute -top-2 -left-2 text-xs px-2 py-1 text-emerald-400 bg-emerald-950"
-                                >
-                                  Full-time hire!
-                                </.badge>
-                              <% end %>
+                              <.badge
+                                variant="secondary"
+                                class="absolute -top-2 -left-2 text-xs px-2 py-1 text-emerald-400 bg-emerald-950"
+                              >
+                                Full-time hire!
+                              </.badge>
                             </div>
                           <% end %>
                         <% end %>

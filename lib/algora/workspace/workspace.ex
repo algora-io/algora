@@ -165,7 +165,7 @@ defmodule Algora.Workspace do
     insert_opts =
       if opts[:force] do
         [
-          on_conflict: {:replace, [:name, :description, :url, :stargazers_count, :topics, :updated_at]},
+          on_conflict: {:replace, [:name, :description, :url, :stargazers_count, :topics, :updated_at, :user_id]},
           conflict_target: [:provider, :provider_id]
         ]
       else

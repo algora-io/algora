@@ -5,257 +5,289 @@ defmodule AlgoraWeb.Components.Footer do
 
   import AlgoraWeb.CoreComponents
 
-  alias AlgoraWeb.Components.Logos
   alias AlgoraWeb.Constants
 
   attr :class, :string, default: nil
 
   def footer(assigns) do
     ~H"""
-    <footer aria-labelledby="footer-heading">
+    <footer aria-labelledby="footer-heading" class="relative overflow-hidden">
       <h2 id="footer-heading" class="sr-only">Footer</h2>
+
       <div class={
         classes([
-          "mx-auto max-w-7xl px-6 pb-6 lg:px-8",
+          "relative mx-auto max-w-7xl px-6 lg:px-8 border-t border-white/10 pt-16",
           @class
         ])
       }>
-        <%!-- <div class="border-t border-white/10 pt-16 sm:pt-24">
-          <div class="grid grid-cols-2 gap-x-12 gap-y-20 md:grid-cols-4">
-            <div>
-              <h3 class="text-base font-semibold leading-6 text-white">
-                <.link navigate={~p"/bounties"}>Bounties</.link>
+        <div>
+          <div class="grid grid-cols-2 gap-x-8 gap-y-12 sm:grid-cols-3 lg:grid-cols-5">
+            <%!-- Col 1: Company + phone numbers --%>
+            <div class="sm:col-span-1">
+              <h3 class="text-sm font-semibold uppercase tracking-wider text-white">
+                <.wordmark class="h-6 md:h-8 w-auto text-white" />
               </h3>
-              <ul role="list" class="mt-6 space-y-4">
+              <ul role="list" class="mt-6 space-y-3">
+                <li class="text-sm font-medium text-muted-foreground">
+                  Algora PBC © {Date.utc_today().year}
+                </li>
                 <li>
                   <.link
-                    class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    navigate={~p"/bounties/rust"}
+                    href="https://cal.com/ioannisflo"
+                    class="flex items-center text-sm text-muted-foreground hover:text-white transition-colors"
+                    rel="noopener"
                   >
-                    Rust
+                    <span class="tabler-calendar-clock size-3 md:size-4"></span>
+                    <span class="ml-1.5">Schedule a call</span>
                   </.link>
                 </li>
                 <li>
                   <.link
-                    class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    navigate={~p"/bounties/typescript"}
+                    href="tel:+16504202207"
+                    class="flex items-center text-sm text-muted-foreground hover:text-white transition-colors"
+                    target="_blank"
                   >
-                    TypeScript
+                    <span class="tabler-phone size-3 md:size-4"></span>
+                    <span class="font-bold ml-1 hidden md:inline">US</span>
+                    <span class="ml-1">+1 (650) 420-2207</span>
                   </.link>
                 </li>
                 <li>
                   <.link
-                    class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    navigate={~p"/bounties/scala"}
+                    href="tel:+306973184144"
+                    class="flex items-center text-sm text-muted-foreground hover:text-white transition-colors"
+                    target="_blank"
                   >
-                    Scala
-                  </.link>
-                </li>
-                <li>
-                  <.link
-                    class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    navigate={~p"/bounties/c,c++"}
-                  >
-                    C / C++
+                    <span class="tabler-phone size-3 md:size-4"></span>
+                    <span class="font-bold ml-1 hidden md:inline">EU</span>
+                    <span class="ml-1">+30 (697) 318-4144</span>
                   </.link>
                 </li>
               </ul>
             </div>
-            <div>
-              <h3 class="text-base font-semibold leading-6 text-white">Community</h3>
-              <ul role="list" class="mt-6 space-y-4">
+
+            <%!-- Col 2: Recruiting + customers --%>
+            <div class="sm:col-span-1">
+              <h3 class="text-sm font-semibold uppercase tracking-wider text-white">
+                Recruiting
+              </h3>
+              <ul role="list" class="mt-6 space-y-3">
                 <li>
                   <.link
-                    class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    navigate={~p"/projects"}
+                    class="text-sm text-muted-foreground hover:text-white transition-colors"
+                    href="/coderabbit/jobs"
+                    target="_blank"
                   >
-                    Projects
+                    CodeRabbit
                   </.link>
                 </li>
                 <li>
                   <.link
-                    class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    navigate={~p"/community"}
+                    class="text-sm text-muted-foreground hover:text-white transition-colors"
+                    href="/lovable/jobs"
+                    target="_blank"
                   >
-                    Community
+                    Lovable
                   </.link>
                 </li>
                 <li>
                   <.link
-                    class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    navigate={~p"/leaderboard"}
+                    class="text-sm text-muted-foreground hover:text-white transition-colors"
+                    href="/comfy/jobs"
+                    target="_blank"
                   >
-                    Leaderboard
+                    ComfyUI
                   </.link>
                 </li>
                 <li>
-                  <a
-                    class="text-base font-medium leading-6 text-gray-400 hover:text-white"
+                  <.link
+                    class="text-sm text-muted-foreground hover:text-white transition-colors"
+                    href="/firecrawl/jobs"
+                    target="_blank"
+                  >
+                    Firecrawl (YC S22)
+                  </.link>
+                </li>
+                <li>
+                  <.link
+                    class="text-sm text-muted-foreground hover:text-white transition-colors"
+                    href="/airspace-intelligence/jobs"
+                    target="_blank"
+                  >
+                    Air Space Intelligence
+                  </.link>
+                </li>
+                <li>
+                  <.link
+                    class="text-sm text-muted-foreground hover:text-white transition-colors"
+                    href="/textql/jobs"
+                    target="_blank"
+                  >
+                    TextQL
+                  </.link>
+                </li>
+              </ul>
+            </div>
+
+            <%!-- Col 3: Bounties --%>
+            <div class="sm:col-span-1">
+              <h3 class="text-sm font-semibold uppercase tracking-wider text-white">
+                Bounties
+              </h3>
+              <ul role="list" class="mt-6 space-y-3">
+                <li>
+                  <.link
+                    class="text-sm text-muted-foreground hover:text-white transition-colors"
+                    navigate={~p"/challenges/jules"}
+                  >
+                    Jules
+                  </.link>
+                </li>
+                <li>
+                  <.link
+                    class="text-sm text-muted-foreground hover:text-white transition-colors"
+                    navigate={~p"/challenges/turso"}
+                  >
+                    Turso
+                  </.link>
+                </li>
+                <li>
+                  <.link
+                    class="text-sm text-muted-foreground hover:text-white transition-colors"
+                    navigate={~p"/challenges/atopile"}
+                  >
+                    Atopile (YC W24)
+                  </.link>
+                </li>
+                <li>
+                  <.link
+                    class="text-sm text-muted-foreground hover:text-white transition-colors"
+                    navigate={~p"/challenges/golem"}
+                  >
+                    Golem Cloud
+                  </.link>
+                </li>
+                <li>
+                  <.link
+                    class="text-sm text-muted-foreground hover:text-white transition-colors"
+                    navigate={~p"/challenges/tsperf"}
+                  >
+                    TSPerf
+                  </.link>
+                </li>
+                <li>
+                  <.link
+                    class="text-sm text-muted-foreground hover:text-white transition-colors"
+                    navigate={~p"/challenges/prettier"}
+                  >
+                    Prettier
+                  </.link>
+                </li>
+              </ul>
+            </div>
+
+            <%!-- Col 4: Connect --%>
+            <div class="sm:col-span-1">
+              <h3 class="text-sm font-semibold uppercase tracking-wider text-white">
+                Community
+              </h3>
+              <ul role="list" class="mt-6 space-y-3">
+                <li>
+                  <.link
+                    class="text-sm text-muted-foreground hover:text-white transition-colors"
+                    href="https://www.youtube.com/watch?v=ZXz74ZewxwY&list=PLRIG8mKLBXFotOxF234rEIREidMRh98Hv&t=229s"
+                    rel="noopener"
+                    target="_blank"
+                  >
+                    OSS Founder Podcast
+                  </.link>
+                </li>
+                <li>
+                  <.link
+                    class="text-sm text-muted-foreground hover:text-white transition-colors"
+                    href={Constants.get(:github_url)}
+                    rel="noopener"
+                    target="_blank"
+                  >
+                    GitHub
+                  </.link>
+                </li>
+                <li>
+                  <.link
+                    class="text-sm text-muted-foreground hover:text-white transition-colors"
+                    href={Constants.get(:twitter_url)}
+                    rel="noopener"
+                    target="_blank"
+                  >
+                    X (Twitter)
+                  </.link>
+                </li>
+                <li>
+                  <.link
+                    class="text-sm text-muted-foreground hover:text-white transition-colors"
+                    href={Constants.get(:linkedin_url)}
+                    rel="noopener"
+                    target="_blank"
+                  >
+                    LinkedIn
+                  </.link>
+                </li>
+                <li>
+                  <.link
+                    class="text-sm text-muted-foreground hover:text-white transition-colors"
+                    href={Constants.get(:discord_url)}
+                    rel="noopener"
+                    target="_blank"
+                  >
+                    Discord
+                  </.link>
+                </li>
+                <li>
+                  <.link
+                    class="text-sm text-muted-foreground hover:text-white transition-colors"
                     href={Constants.get(:youtube_url)}
+                    rel="noopener"
+                    target="_blank"
                   >
-                    Open Source Founder Podcast
-                  </a>
+                    YouTube
+                  </.link>
                 </li>
               </ul>
             </div>
-            <div>
-              <h3 class="text-base font-semibold leading-6 text-white">Resources</h3>
-              <ul role="list" class="mt-6 space-y-4">
+
+            <%!-- Col 5: Legal --%>
+            <div class="sm:col-span-1">
+              <h3 class="text-sm font-semibold uppercase tracking-wider text-white">
+                Legal
+              </h3>
+              <ul role="list" class="mt-6 space-y-3">
                 <li>
-                  <a
-                    class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    href={Constants.get(:demo_url)}
-                  >
-                    Demo
-                  </a>
-                </li>
-                <li>
-                  <a
-                    class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    href={Constants.get(:docs_url)}
-                  >
-                    Docs
-                  </a>
-                </li>
-                <li>
-                  <a
-                    class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    href={Constants.get(:sdk_url)}
-                  >
-                    SDK
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h3 class="text-base font-semibold leading-6 text-white">Company</h3>
-              <ul role="list" class="mt-6 space-y-4">
-                <li>
-                  <a
-                    class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    href={Constants.get(:privacy_url)}
-                  >
-                    Privacy
-                  </a>
-                </li>
-                <li>
-                  <a
-                    class="text-base font-medium leading-6 text-gray-400 hover:text-white"
+                  <.link
+                    class="text-sm text-muted-foreground hover:text-white transition-colors"
                     href={Constants.get(:terms_url)}
                   >
-                    Terms
-                  </a>
+                    Terms of Service
+                  </.link>
                 </li>
                 <li>
-                  <a
-                    class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    href={Constants.get(:blog_url)}
+                  <.link
+                    class="text-sm text-muted-foreground hover:text-white transition-colors"
+                    href={Constants.get(:privacy_url)}
                   >
-                    Blog
-                  </a>
-                </li>
-                <li>
-                  <a
-                    class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    href={Constants.get(:contact_url)}
-                  >
-                    Talk to founders
-                  </a>
+                    Privacy Policy
+                  </.link>
                 </li>
               </ul>
             </div>
           </div>
-        </div> --%>
-        <div class={
-          classes([
-            "pt-6 border-t border-white/10 flex flex-col md:flex-row md:justify-between md:items-start gap-8"
-            # "mt-16 sm:mt-20 lg:mt-24"
-          ])
-        }>
-          <div class="flex gap-3 sm:gap-6 md:order-2">
-            <.link
-              class="rounded-xl border-2 border-gray-500 p-2 text-gray-400 transition-colors hover:border-gray-400 hover:text-gray-300 sm:p-3"
-              href={Constants.get(:discord_url)}
-              rel="noopener"
-              target="_blank"
-            >
-              <span class="sr-only">Discord</span>
-              <.icon name="tabler-brand-discord-filled" class="h-6 w-6 sm:h-8 sm:w-8" />
-            </.link>
-            <.link
-              class="rounded-xl border-2 border-gray-500 p-2 text-gray-400 transition-colors hover:border-gray-400 hover:text-gray-300 sm:p-3"
-              href={Constants.get(:twitter_url)}
-              rel="noopener"
-              target="_blank"
-            >
-              <span class="sr-only">X (formerly Twitter)</span>
-              <.icon name="tabler-brand-x" class="h-6 w-6 sm:h-8 sm:w-8" />
-            </.link>
-            <.link
-              class="rounded-xl border-2 border-gray-500 p-2 text-gray-400 transition-colors hover:border-gray-400 hover:text-gray-300 sm:p-3"
-              href={Constants.get(:github_url)}
-              rel="noopener"
-              target="_blank"
-            >
-              <span class="sr-only">GitHub</span>
-              <Logos.github class="h-6 w-6 sm:h-8 sm:w-8" />
-            </.link>
-            <.link
-              class="rounded-xl border-2 border-gray-500 p-2 text-gray-400 transition-colors hover:border-gray-400 hover:text-gray-300 sm:p-3"
-              href={Constants.get(:linkedin_url)}
-              rel="noopener"
-              target="_blank"
-            >
-              <span class="sr-only">LinkedIn</span>
-              <.icon name="tabler-brand-linkedin" class="h-6 w-6 sm:h-8 sm:w-8" />
-            </.link>
-            <.link
-              class="rounded-xl border-2 border-gray-500 p-2 text-gray-400 transition-colors hover:border-gray-400 hover:text-gray-300 sm:p-3"
-              href={Constants.get(:youtube_url)}
-              rel="noopener"
-              target="_blank"
-            >
-              <span class="sr-only">YouTube</span>
-              <.icon name="tabler-brand-youtube-filled" class="h-6 w-6 sm:h-8 sm:w-8" />
-            </.link>
-            <.link
-              class="rounded-xl border-2 border-gray-500 p-2 text-gray-400 transition-colors hover:border-gray-400 hover:text-gray-300 sm:p-3"
-              href={"mailto:" <> Constants.get(:email)}
-            >
-              <span class="sr-only">Email</span>
-              <.icon name="tabler-mail-filled" class="h-6 w-6 sm:h-8 sm:w-8" />
-            </.link>
-          </div>
+        </div>
 
-          <div class="flex flex-col gap-4 md:gap-2">
-            <div class="text-sm font-medium leading-5 text-gray-400 md:text-base">
-              © {Date.utc_today().year} Algora, Public Benefit Corporation
-            </div>
-
-            <div class="grid grid-cols-1 md:flex md:flex-row items-stretch gap-2 w-full md:w-auto">
-              <.link
-                class="w-full md:w-auto flex items-center rounded-lg border border-gray-500 py-2 pl-2 pr-3.5 text-xs text-foreground/90 hover:text-foreground transition-colors hover:border-gray-400"
-                href={AlgoraWeb.Constants.get(:calendar_url)}
-                rel="noopener"
-              >
-                <.icon name="tabler-calendar-clock" class="size-4" />
-                <span class="ml-1.5">Schedule a call</span>
-              </.link>
-              <.link
-                class="w-full md:w-auto flex items-center rounded-lg border border-gray-500 py-2 pl-2 pr-3.5 text-xs text-foreground/90 hover:text-foreground transition-colors hover:border-gray-400"
-                href="tel:+16504202207"
-              >
-                <.icon name="tabler-phone" class="size-4" /> <span class="font-bold ml-1">US</span>
-                <span class="ml-1">+1 (650) 420-2207</span>
-              </.link>
-              <.link
-                class="w-full md:w-auto flex items-center rounded-lg border border-gray-500 py-2 pl-2 pr-3.5 text-xs text-foreground/90 hover:text-foreground transition-colors hover:border-gray-400"
-                href="tel:+306973184144"
-              >
-                <.icon name="tabler-phone" class="size-4" /> <span class="font-bold ml-1">EU</span>
-                <span class="ml-1">+30 (697) 318-4144</span>
-              </.link>
-            </div>
+        <%!-- Full-width algora wordmark: gradient fades top-to-bottom, bottom clipped so page can't scroll to show full wordmark --%>
+        <div class="mt-4 sm:mt-8 md:mt-12 relative w-full left-1/2 -translate-x-1/2 h-[28vw] overflow-hidden pointer-events-none select-none">
+          <div
+            class="absolute inset-x-0 top-0 w-full min-h-[36vw]"
+            style={"background: linear-gradient(to bottom, rgba(161,161,170,0.2) 0%, rgba(113,113,122,0.08) 50%, transparent 100%); -webkit-mask-image: url(#{~p"/images/wordmarks/algora.svg"}); mask-image: url(#{~p"/images/wordmarks/algora.svg"}); -webkit-mask-size: 100% auto; mask-size: 100% auto; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; -webkit-mask-position: center top; mask-position: center top;"}
+          >
           </div>
         </div>
       </div>

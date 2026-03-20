@@ -413,7 +413,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         <div class="container mx-auto px-4">
           <div class="flex flex-col md:flex-row items-center justify-between gap-6">
             <div class="text-sm text-foreground/90 text-left md:text-left w-full md:w-auto">
-              © 2025 Algora PBC. All rights reserved.
+              © #{Date.utc_today().year} Algora PBC. All rights reserved.
             </div>
             <div class="grid grid-cols-1 md:flex md:flex-row items-stretch gap-2 w-full md:w-auto">
               <.link

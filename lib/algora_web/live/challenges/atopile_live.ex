@@ -532,28 +532,9 @@ defmodule AlgoraWeb.Challenges.AtopileLive do
           </div>
         </article>
       </main>
-      <footer aria-labelledby="footer-heading">
-        <h2 id="footer-heading" class="sr-only">Footer</h2>
-        <div class="mx-auto max-w-7xl px-6 pb-8 lg:px-8">
-          <div class="flex pt-8 border-white/10 flex-col gap-8 md:items-start md:justify-between md:flex-row border-t">
-            <div class="flex flex-col gap-4 md:gap-2">
-              <div class="text-sm font-medium leading-5 text-gray-400 md:text-base">
-                © 2025 Algora, Public Benefit Corporation
-              </div>
-
-              <div class="flex flex-col gap-2">
-                <a
-                  href="tel:+16504202207"
-                  class="flex w-max items-center gap-2 rounded-full border border-gray-700 py-2 pl-2 pr-3.5 text-xs text-muted-foreground hover:text-foreground transition-colors hover:border-gray-600"
-                >
-                  <span class="tabler-phone-filled size-4"></span>
-                  <span>+1 (650) 420-2207</span>
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <div class="bg-black mt-12 md:mt-28">
+        <AlgoraWeb.Components.Footer.footer class="pt-12 md:pt-28" />
+      </div>
     </div>
     """
   end

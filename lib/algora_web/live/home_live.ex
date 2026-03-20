@@ -130,7 +130,7 @@ defmodule AlgoraWeb.HomeLive do
               <div class="h-full mx-auto px-6 lg:px-8 flex flex-col items-center justify-center pt-20 lg:pt-24 2xl:pt-32 pb-12">
                 <div class="h-full mx-auto lg:mx-0 flex lg:max-w-none items-center justify-center text-center w-full">
                   <div class="w-full flex flex-col lg:items-start text-left lg:text-left">
-                    <h1 class="text-2xl min-[412px]:text-[1.75rem] sm:text-[2.5rem]/[3rem] md:text-[3.5rem]/[4rem] lg:text-[3rem]/[3.5rem] xl:text-[4rem]/[4.5rem] font-semibold tracking-tight text-foreground">
+                    <h1 class="text-2xl min-[412px]:text-[1.75rem] sm:text-[2.5rem]/[3rem] md:text-[3.5rem]/[4rem] lg:text-[3rem]/[3.5rem] xl:text-[4rem]/[4.5rem] font-black tracking-tight text-foreground font-display">
                       Open source <br class="hidden" />
                       <span class="text-emerald-400">tech recruiting</span>
                     </h1>

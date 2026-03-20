@@ -754,7 +754,7 @@ defmodule Algora.Accounts do
 
       For correspondence, please email the Algora founders at ioannis@algora.io and zafer@algora.io
 
-      © 2025 Algora PBC.
+      © #{Date.utc_today().year} Algora PBC.
       """)
 
     Algora.Mailer.deliver(email)
@@ -779,7 +779,7 @@ defmodule Algora.Accounts do
 
       For correspondence, please email the Algora founders at ioannis@algora.io and zafer@algora.io
 
-      © 2025 Algora PBC.
+      © #{Date.utc_today().year} Algora PBC.
       """)
 
     Algora.Mailer.deliver(email)

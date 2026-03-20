@@ -33,7 +33,14 @@ defmodule AlgoraWeb.Challenges.LimboLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="relative bg-background">
+    <style>
+      .dot-grid {
+        background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+        background-size: 28px 28px;
+      }
+    </style>
+
+    <div class="relative bg-background dot-grid">
       <div class="absolute top-0 z-10 w-full">
         <Header.header class="max-w-[100rem]" hide_banner />
       </div>
@@ -167,7 +174,14 @@ defmodule AlgoraWeb.Challenges.LimboLive do
                   </ul>
                 </div>
               </section>
-              <section :if={not Enum.empty?(@leaderboard)} class="mx-auto my-24 max-w-7xl md:my-36">
+              <section :if={not Enum.empty?(@leaderboard)} class="relative my-24 md:my-36">
+                <%!-- ambient orbs --%>
+                <div class="pointer-events-none absolute inset-0 z-0" aria-hidden="true">
+                  <div class="absolute -left-48 top-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-[#1ebba2]/5 blur-[90px]">
+                  </div>
+                  <div class="absolute -right-48 top-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-[#1ebba2]/5 blur-[90px]">
+                  </div>
+                </div>
                 <div class="relative z-50 mx-auto max-w-7xl px-6 pt-6 lg:px-8">
                   <h2 class="flex justify-center text-4xl font-black leading-none tracking-tighter mix-blend-exclusion md:text-7xl mb-8 md:mb-12">
                     Leaderboard
@@ -209,11 +223,19 @@ defmodule AlgoraWeb.Challenges.LimboLive do
                                 rel="noopener"
                                 class="flex items-center gap-3 hover:opacity-80 transition-opacity"
                               >
-                                <img
-                                  src={earner.avatar_url}
-                                  alt={User.handle(earner)}
-                                  class="h-10 w-10 rounded-full ring-2 ring-white/10"
-                                />
+                                <div class="relative shrink-0">
+                                  <img
+                                    src={earner.avatar_url}
+                                    alt={User.handle(earner)}
+                                    class="h-10 w-10 rounded-full ring-2 ring-white/10"
+                                  />
+                                  <img
+                                    :if={idx == 0}
+                                    src={~p"/images/crown.png"}
+                                    alt="Crown"
+                                    class="absolute -top-4 left-1/2 -translate-x-1/2 w-6 h-6 -rotate-12"
+                                  />
+                                </div>
                                 <div>
                                   <div class="font-medium text-white">
                                     {earner.name} {Algora.Misc.CountryEmojis.get(earner.country)}
@@ -245,15 +267,9 @@ defmodule AlgoraWeb.Challenges.LimboLive do
                                   <div class="text-sm text-gray-300 line-clamp-1">
                                     {ticket.title}
                                   </div>
-                                  <div class="text-xs text-gray-500 mt-0.5">
-                                    {Algora.Util.time_ago(tx.succeeded_at)}
-                                  </div>
                                 </.link>
                                 <div :if={is_nil(ticket.repository)} class="flex flex-col">
                                   <div class="text-sm text-gray-300 line-clamp-1">{ticket.title}</div>
-                                  <div class="text-xs text-gray-500 mt-0.5">
-                                    {Algora.Util.time_ago(tx.succeeded_at)}
-                                  </div>
                                 </div>
                               </td>
                               <td class="px-4 py-2.5 align-middle text-right">

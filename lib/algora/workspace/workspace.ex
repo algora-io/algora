@@ -124,19 +124,23 @@ defmodule Algora.Workspace do
     end
   end
 
-  def ensure_repository(token, owner, repo) do
-    repository_query =
-      from(r in Repository,
-        join: u in assoc(r, :user),
-        where: r.provider == "github",
-        where: r.name == ^repo,
-        where: u.provider_login == ^owner,
-        preload: [user: u]
-      )
+  def ensure_repository(token, owner, repo, opts \\ []) do
+    if opts[:force] do
+      create_repository_from_github(token, owner, repo, force: true)
+    else
+      repository_query =
+        from(r in Repository,
+          join: u in assoc(r, :user),
+          where: r.provider == "github",
+          where: r.name == ^repo,
+          where: u.provider_login == ^owner,
+          preload: [user: u]
+        )
 
-    case Repo.one(repository_query) do
-      %Repository{} = repository -> {:ok, repository}
-      nil -> create_repository_from_github(token, owner, repo)
+      case Repo.one(repository_query) do
+        %Repository{} = repository -> {:ok, repository}
+        nil -> create_repository_from_github(token, owner, repo)
+      end
     end
   end
 
@@ -157,11 +161,21 @@ defmodule Algora.Workspace do
     :ok
   end
 
-  def create_repository_from_github(token, owner, repo) do
+  def create_repository_from_github(token, owner, repo, opts \\ []) do
+    insert_opts =
+      if opts[:force] do
+        [
+          on_conflict: {:replace, [:name, :description, :url, :stargazers_count, :topics, :updated_at]},
+          conflict_target: [:provider, :provider_id]
+        ]
+      else
+        []
+      end
+
     with {:ok, repository} <- Github.get_repository(token, owner, repo),
          {:ok, user} <- ensure_user_by_repo(token, repository, owner),
          {:ok, user} <- sync_user(user, repository, owner, repo),
-         {:ok, repo} <- repository |> Repository.github_changeset(user) |> Repo.insert() do
+         {:ok, repo} <- repository |> Repository.github_changeset(user) |> Repo.insert(insert_opts) do
       {:ok, %{repo | user: user}}
     else
       {:error,

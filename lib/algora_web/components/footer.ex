@@ -283,7 +283,7 @@ defmodule AlgoraWeb.Components.Footer do
         </div>
 
         <%!-- Full-width algora wordmark: gradient fades top-to-bottom, bottom clipped so page can't scroll to show full wordmark --%>
-        <div class="mt-4 sm:mt-8 md:mt-12 relative w-full left-1/2 -translate-x-1/2 h-[28vw] overflow-hidden pointer-events-none select-none">
+        <div class="mt-12 relative w-full left-1/2 -translate-x-1/2 h-[28vw] overflow-hidden pointer-events-none select-none">
           <div
             class="absolute inset-x-0 top-0 w-full min-h-[36vw]"
             style={"background: linear-gradient(to bottom, rgba(161,161,170,0.2) 0%, rgba(113,113,122,0.08) 50%, transparent 100%); -webkit-mask-image: url(#{~p"/images/wordmarks/algora.svg"}); mask-image: url(#{~p"/images/wordmarks/algora.svg"}); -webkit-mask-size: 100% auto; mask-size: 100% auto; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; -webkit-mask-position: center top; mask-position: center top;"}

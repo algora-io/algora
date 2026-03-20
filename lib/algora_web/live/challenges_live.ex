@@ -28,9 +28,6 @@ defmodule AlgoraWeb.ChallengesLive do
           <h1 class="text-5xl font-black font-display tracking-tighter sm:text-6xl lg:text-7xl text-foreground">
             Challenges
           </h1>
-          <p class="mt-2 text-sm text-muted-foreground sm:text-base">
-            Build things that matter. Earn rewards.
-          </p>
         </div>
 
         <%!-- Active challenges --%>

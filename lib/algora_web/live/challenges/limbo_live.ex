@@ -2,15 +2,32 @@ defmodule AlgoraWeb.Challenges.LimboLive do
   @moduledoc false
   use AlgoraWeb, :live_view
 
+  alias Algora.Accounts
+  alias Algora.Accounts.User
+  alias Algora.Organizations
+  alias Algora.Payments
   alias AlgoraWeb.Components.Header
+
+  @org_handle "tursodatabase"
 
   @impl true
   def mount(_params, _session, socket) do
+    org = Organizations.get_org_by_handle!(@org_handle)
+    top_earners = Accounts.list_developers(org_id: org.id, earnings_gt: Money.zero(:USD))
+    transactions = Payments.list_hosted_transactions(org.id, limit: 500)
+    transactions_by_user = Enum.group_by(transactions, & &1.recipient.id)
+
+    leaderboard =
+      Enum.map(top_earners, fn earner ->
+        %{earner: earner, bounties: Map.get(transactions_by_user, earner.id, [])}
+      end)
+
     {:ok,
      socket
      |> assign(:page_title, "Turso Challenge")
      |> assign(:page_description, "Turso rewrote SQLite in Rust - find a bug to win $1,000!")
-     |> assign(:page_image, "#{AlgoraWeb.Endpoint.url()}/images/challenges/limbo/og.png")}
+     |> assign(:page_image, "#{AlgoraWeb.Endpoint.url()}/images/challenges/limbo/og.png")
+     |> assign(:leaderboard, leaderboard)}
   end
 
   @impl true
@@ -148,6 +165,108 @@ defmodule AlgoraWeb.Challenges.LimboLive do
                       </span>
                     </li>
                   </ul>
+                </div>
+              </section>
+              <section :if={not Enum.empty?(@leaderboard)} class="mx-auto my-24 max-w-7xl md:my-36">
+                <div class="relative z-50 mx-auto max-w-7xl px-6 pt-6 lg:px-8">
+                  <h2 class="flex justify-center text-4xl font-black leading-none tracking-tighter mix-blend-exclusion md:text-7xl mb-8 md:mb-12">
+                    Leaderboard
+                  </h2>
+                  <div class="overflow-hidden rounded-xl border border-white/15">
+                    <table class="w-full caption-bottom text-sm">
+                      <thead>
+                        <tr class="border-b border-white/15">
+                          <th
+                            scope="col"
+                            class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-400"
+                          >
+                            Rank
+                          </th>
+                          <th
+                            scope="col"
+                            class="px-4 py-3 pl-[4.25rem] text-left text-xs font-semibold uppercase tracking-wider text-gray-400"
+                          >
+                            Contributor
+                          </th>
+                          <th
+                            scope="col"
+                            class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-400"
+                          >
+                            Total Earned
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <%= for {%{earner: earner, bounties: bounties}, idx} <- Enum.with_index(@leaderboard) do %>
+                          <tr class="border-t border-white/10 bg-white/[2%] hover:bg-white/[4%] transition-colors">
+                            <td class="px-4 py-4 align-middle w-12">
+                              <div class="font-mono text-gray-400">#{idx + 1}</div>
+                            </td>
+                            <td class="px-4 py-4 align-middle">
+                              <.link
+                                href={"https://github.com/#{earner.provider_login}"}
+                                target="_blank"
+                                rel="noopener"
+                                class="flex items-center gap-3 hover:opacity-80 transition-opacity"
+                              >
+                                <img
+                                  src={earner.avatar_url}
+                                  alt={User.handle(earner)}
+                                  class="h-10 w-10 rounded-full ring-2 ring-white/10"
+                                />
+                                <div>
+                                  <div class="font-medium text-white">
+                                    {earner.name} {Algora.Misc.CountryEmojis.get(earner.country)}
+                                  </div>
+                                  <div class="text-sm text-gray-400">@{User.handle(earner)}</div>
+                                </div>
+                              </.link>
+                            </td>
+                            <td class="px-4 py-4 align-middle text-right">
+                              <div class="font-display font-bold text-[#4ff7d3]">
+                                {Money.to_string!(earner.total_earned)}
+                              </div>
+                            </td>
+                          </tr>
+                          <%= for %{transaction: tx, ticket: ticket} <- bounties do %>
+                            <tr class="border-t border-white/5 bg-black/30 hover:bg-black/40 transition-colors">
+                              <td class="px-4 py-2.5 align-middle"></td>
+                              <td class="px-4 py-2.5 align-middle pl-16">
+                                <.link
+                                  :if={ticket.repository}
+                                  href={"https://github.com/#{ticket.repository.user.provider_login}/#{ticket.repository.name}/issues/#{ticket.number}"}
+                                  target="_blank"
+                                  rel="noopener"
+                                  class="flex flex-col hover:opacity-80 transition-opacity"
+                                >
+                                  <div class="text-xs text-gray-500 mb-0.5">
+                                    {ticket.repository.user.provider_login}/{ticket.repository.name}
+                                  </div>
+                                  <div class="text-sm text-gray-300 line-clamp-1">
+                                    {ticket.title}
+                                  </div>
+                                  <div class="text-xs text-gray-500 mt-0.5">
+                                    {Algora.Util.time_ago(tx.succeeded_at)}
+                                  </div>
+                                </.link>
+                                <div :if={is_nil(ticket.repository)} class="flex flex-col">
+                                  <div class="text-sm text-gray-300 line-clamp-1">{ticket.title}</div>
+                                  <div class="text-xs text-gray-500 mt-0.5">
+                                    {Algora.Util.time_ago(tx.succeeded_at)}
+                                  </div>
+                                </div>
+                              </td>
+                              <td class="px-4 py-2.5 align-middle text-right">
+                                <div class="font-display text-sm font-medium text-muted-foreground">
+                                  {Money.to_string!(tx.net_amount)}
+                                </div>
+                              </td>
+                            </tr>
+                          <% end %>
+                        <% end %>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </section>
               <section class="mx-auto my-24 max-w-7xl md:my-36">

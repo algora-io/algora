@@ -104,79 +104,9 @@ defmodule AlgoraWeb.Challenges.LimboLive do
                   />
                 </div>
               </section>
-              <section class="md:mb-18 mb-12 xl:pt-20 2xl:pt-52">
-                <div class="relative z-50 mx-auto max-w-7xl px-6 pt-6 lg:px-8">
-                  <h2 class="flex justify-center text-4xl font-black leading-none tracking-tighter mix-blend-exclusion md:text-7xl">
-                    How to participate
-                  </h2>
-                  <p class="text-center mt-4 text-base font-medium text-gray-200">
-                    Got questions?
-                    <a
-                      target="_blank"
-                      class="font-semibold text-white underline"
-                      href="https://discord.gg/jgjmyYgHwB"
-                    >
-                      Join us on Discord!
-                    </a>
-                  </p>
-                  <ul class="mt-4 md:mt-8 space-y-4 md:space-y-2 mx-auto max-w-5xl">
-                    <li class="flex w-full items-start pt-2 text-left text-white">
-                      <.icon name="tabler-square-rounded-number-1" class="size-8 mr-2 shrink-0" />
-                      <span class="text-base font-medium leading-7">
-                        <a
-                          rel="noopener"
-                          target="_blank"
-                          class="font-semibold text-white underline inline-flex"
-                          href="https://github.com/tursodatabase/turso/blob/main/CONTRIBUTING.md"
-                        >
-                          Set up your development environment
-                        </a>
-                        and build the Turso CLI locally
-                      </span>
-                    </li>
-                    <li class="flex w-full items-start pt-2 text-left text-white">
-                      <.icon name="tabler-square-rounded-number-2" class="size-8 mr-2 shrink-0" />
-                      <span class="text-base font-medium leading-7">
-                        Explore the
-                        <a
-                          rel="noopener"
-                          target="_blank"
-                          class="font-semibold text-white underline inline-flex"
-                          href="https://github.com/tursodatabase/turso/tree/main/simulator"
-                        >
-                          simulator
-                        </a>
-                        directory to understand our Deterministic Simulation Testing framework
-                      </span>
-                    </li>
-                    <li class="flex w-full items-start pt-2 text-left text-white">
-                      <.icon name="tabler-square-rounded-number-3" class="size-8 mr-2 shrink-0" />
-                      <span class="text-base font-medium leading-7">
-                        Improve the Deterministic Simulator to expose a new data corruption bug that the simulator would not have been able to catch before. A data corruption bug is a bug in which the database loses data in a way that cannot be recovered by a future patch
-                      </span>
-                    </li>
-                    <li class="flex w-full items-start pt-2 text-left text-white">
-                      <.icon name="tabler-square-rounded-number-4" class="size-8 mr-2 shrink-0" />
-                      <span class="text-base font-medium leading-7">
-                        Submit a PR with the Deterministic Simulator improvements to catch the bug. If your PR is merged, you'll receive an
-                        <span class="font-display font-bold text-[#4ff7d3]">$800</span>
-                        reward. Note that only bugs present in the latest released version of Turso, in features that are enabled by default are eligible. This excludes experimental and gated features.
-                      </span>
-                    </li>
-                    <li class="flex w-full items-start pt-2 text-left text-white">
-                      <.icon name="tabler-square-rounded-number-5" class="size-8 mr-2 shrink-0" />
-                      <span class="text-base font-medium leading-7">
-                        Fix the identified bug for an additional
-                        <span class="font-display font-bold text-[#4ff7d3]">$200</span>
-                        reward
-                      </span>
-                    </li>
-                  </ul>
-                </div>
-              </section>
               <section
                 :if={not Enum.empty?(@leaderboard)}
-                class="relative my-24 md:my-36 overflow-hidden"
+                class="relative md:mb-18 mb-12 xl:pt-20 2xl:pt-52 overflow-hidden"
               >
                 <%!-- ambient orbs --%>
                 <div class="pointer-events-none absolute inset-0 z-0" aria-hidden="true">
@@ -286,6 +216,76 @@ defmodule AlgoraWeb.Challenges.LimboLive do
                       </tbody>
                     </table>
                   </div>
+                </div>
+              </section>
+              <section class="my-24 md:my-36">
+                <div class="relative z-50 mx-auto max-w-7xl px-6 pt-6 lg:px-8">
+                  <h2 class="flex justify-center text-4xl font-black leading-none tracking-tighter mix-blend-exclusion md:text-7xl">
+                    How to participate
+                  </h2>
+                  <p class="text-center mt-4 text-base font-medium text-gray-200">
+                    Got questions?
+                    <a
+                      target="_blank"
+                      class="font-semibold text-white underline"
+                      href="https://discord.gg/jgjmyYgHwB"
+                    >
+                      Join us on Discord!
+                    </a>
+                  </p>
+                  <ul class="mt-4 md:mt-8 space-y-4 md:space-y-2 mx-auto max-w-5xl">
+                    <li class="flex w-full items-start pt-2 text-left text-white">
+                      <.icon name="tabler-square-rounded-number-1" class="size-8 mr-2 shrink-0" />
+                      <span class="text-base font-medium leading-7">
+                        <a
+                          rel="noopener"
+                          target="_blank"
+                          class="font-semibold text-white underline inline-flex"
+                          href="https://github.com/tursodatabase/turso/blob/main/CONTRIBUTING.md"
+                        >
+                          Set up your development environment
+                        </a>
+                        and build the Turso CLI locally
+                      </span>
+                    </li>
+                    <li class="flex w-full items-start pt-2 text-left text-white">
+                      <.icon name="tabler-square-rounded-number-2" class="size-8 mr-2 shrink-0" />
+                      <span class="text-base font-medium leading-7">
+                        Explore the
+                        <a
+                          rel="noopener"
+                          target="_blank"
+                          class="font-semibold text-white underline inline-flex"
+                          href="https://github.com/tursodatabase/turso/tree/main/simulator"
+                        >
+                          simulator
+                        </a>
+                        directory to understand our Deterministic Simulation Testing framework
+                      </span>
+                    </li>
+                    <li class="flex w-full items-start pt-2 text-left text-white">
+                      <.icon name="tabler-square-rounded-number-3" class="size-8 mr-2 shrink-0" />
+                      <span class="text-base font-medium leading-7">
+                        Improve the Deterministic Simulator to expose a new data corruption bug that the simulator would not have been able to catch before. A data corruption bug is a bug in which the database loses data in a way that cannot be recovered by a future patch
+                      </span>
+                    </li>
+                    <li class="flex w-full items-start pt-2 text-left text-white">
+                      <.icon name="tabler-square-rounded-number-4" class="size-8 mr-2 shrink-0" />
+                      <span class="text-base font-medium leading-7">
+                        Submit a PR with the Deterministic Simulator improvements to catch the bug. If your PR is merged, you'll receive an
+                        <span class="font-display font-bold text-[#4ff7d3]">$800</span>
+                        reward. Note that only bugs present in the latest released version of Turso, in features that are enabled by default are eligible. This excludes experimental and gated features.
+                      </span>
+                    </li>
+                    <li class="flex w-full items-start pt-2 text-left text-white">
+                      <.icon name="tabler-square-rounded-number-5" class="size-8 mr-2 shrink-0" />
+                      <span class="text-base font-medium leading-7">
+                        Fix the identified bug for an additional
+                        <span class="font-display font-bold text-[#4ff7d3]">$200</span>
+                        reward
+                      </span>
+                    </li>
+                  </ul>
                 </div>
               </section>
               <section class="mx-auto my-24 max-w-7xl md:my-36">

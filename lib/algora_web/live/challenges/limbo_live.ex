@@ -177,9 +177,9 @@ defmodule AlgoraWeb.Challenges.LimboLive do
               <section :if={not Enum.empty?(@leaderboard)} class="relative my-24 md:my-36">
                 <%!-- ambient orbs --%>
                 <div class="pointer-events-none absolute inset-0 z-0" aria-hidden="true">
-                  <div class="absolute -left-48 top-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-[#1ebba2]/5 blur-[90px]">
+                  <div class="absolute -left-48 w-[500px] h-[500px] rounded-full bg-[#1ebba2]/5 blur-[90px]">
                   </div>
-                  <div class="absolute -right-48 top-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-[#1ebba2]/5 blur-[90px]">
+                  <div class="absolute -right-48 w-[500px] h-[500px] rounded-full bg-[#1ebba2]/5 blur-[90px]">
                   </div>
                 </div>
                 <div class="relative z-50 mx-auto max-w-7xl px-6 pt-6 lg:px-8">
@@ -233,7 +233,7 @@ defmodule AlgoraWeb.Challenges.LimboLive do
                                     :if={idx == 0}
                                     src={~p"/images/crown.png"}
                                     alt="Crown"
-                                    class="absolute -top-4 left-1/2 -translate-x-1/2 w-6 h-6 -rotate-12"
+                                    class="absolute -top-4 -ml-1 left-1/2 -translate-x-1/2 w-6 h-6 -rotate-12"
                                   />
                                 </div>
                                 <div>
@@ -253,20 +253,20 @@ defmodule AlgoraWeb.Challenges.LimboLive do
                           <%= for %{transaction: tx, ticket: ticket} <- bounties do %>
                             <tr class="border-t border-white/5 bg-black/30 hover:bg-black/40 transition-colors">
                               <td class="px-4 py-2.5 align-middle"></td>
-                              <td class="px-4 py-2.5 align-middle pl-16">
+                              <td class="px-4 py-2.5 align-middle pl-5">
                                 <.link
                                   :if={ticket.repository}
                                   href={"https://github.com/#{ticket.repository.user.provider_login}/#{ticket.repository.name}/issues/#{ticket.number}"}
                                   target="_blank"
                                   rel="noopener"
-                                  class="flex flex-col hover:opacity-80 transition-opacity"
+                                  class="hover:opacity-80 transition-opacity"
                                 >
-                                  <div class="text-xs text-gray-500 mb-0.5">
-                                    {ticket.repository.user.provider_login}/{ticket.repository.name}
-                                  </div>
-                                  <div class="text-sm text-gray-300 line-clamp-1">
+                                  <span class="text-sm text-gray-500">
+                                    #{ticket.number}
+                                  </span>
+                                  <span class="ml-1 text-sm text-gray-300">
                                     {ticket.title}
-                                  </div>
+                                  </span>
                                 </.link>
                                 <div :if={is_nil(ticket.repository)} class="flex flex-col">
                                   <div class="text-sm text-gray-300 line-clamp-1">{ticket.title}</div>

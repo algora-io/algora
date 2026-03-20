@@ -174,7 +174,10 @@ defmodule AlgoraWeb.Challenges.LimboLive do
                   </ul>
                 </div>
               </section>
-              <section :if={not Enum.empty?(@leaderboard)} class="relative my-24 md:my-36">
+              <section
+                :if={not Enum.empty?(@leaderboard)}
+                class="relative my-24 md:my-36 overflow-hidden"
+              >
                 <%!-- ambient orbs --%>
                 <div class="pointer-events-none absolute inset-0 z-0" aria-hidden="true">
                   <div class="absolute -left-48 w-[500px] h-[500px] rounded-full bg-[#1ebba2]/5 blur-[90px]">

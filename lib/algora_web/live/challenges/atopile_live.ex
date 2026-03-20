@@ -194,11 +194,11 @@ defmodule AlgoraWeb.Challenges.AtopileLive do
                   </ul>
                 </div>
               </section>
-              <section class="md:mb-18 mb-12 xl:pt-20 2xl:pt-52 relative">
+              <section class="md:mb-18 mb-12 xl:py-20 2xl:py-52 relative overflow-hidden">
                 <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                  <div class="absolute top-1/4 -left-48 w-[500px] h-[500px] rounded-full bg-[#f0551c]/5 blur-[90px]">
+                  <div class="absolute top-0 -left-48 w-[500px] h-[500px] rounded-full bg-[#f0551c]/5 blur-[90px]">
                   </div>
-                  <div class="absolute top-1/4 -right-48 w-[500px] h-[500px] rounded-full bg-[#f0551c]/5 blur-[90px]">
+                  <div class="absolute top-0 -right-48 w-[500px] h-[500px] rounded-full bg-[#f0551c]/5 blur-[90px]">
                   </div>
                 </div>
                 <div class="relative z-50 mx-auto max-w-7xl px-6 pt-6 lg:px-8">
@@ -330,7 +330,7 @@ defmodule AlgoraWeb.Challenges.AtopileLive do
                   </div>
                 </div>
               </section>
-              <section class="mx-auto my-24 max-w-7xl md:my-36">
+              <section class="mx-auto mb-24 max-w-7xl md:mb-36">
                 <h2 class="flex justify-center text-4xl font-black leading-none tracking-tighter mix-blend-exclusion md:text-7xl">
                   Media
                 </h2>

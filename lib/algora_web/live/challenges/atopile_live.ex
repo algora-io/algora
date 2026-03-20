@@ -26,7 +26,14 @@ defmodule AlgoraWeb.Challenges.AtopileLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="relative bg-background">
+    <style>
+      .dot-grid-atopile {
+        background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+        background-size: 28px 28px;
+      }
+    </style>
+
+    <div class="relative bg-background dot-grid-atopile">
       <div class="absolute top-0 z-10 w-full">
         <Header.header class="max-w-[100rem]" hide_banner />
       </div>
@@ -187,7 +194,13 @@ defmodule AlgoraWeb.Challenges.AtopileLive do
                   </ul>
                 </div>
               </section>
-              <section class="md:mb-18 mb-12 xl:pt-20 2xl:pt-52">
+              <section class="md:mb-18 mb-12 xl:pt-20 2xl:pt-52 relative">
+                <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+                  <div class="absolute top-1/4 -left-48 w-[500px] h-[500px] rounded-full bg-[#f0551c]/5 blur-[90px]">
+                  </div>
+                  <div class="absolute top-1/4 -right-48 w-[500px] h-[500px] rounded-full bg-[#f0551c]/5 blur-[90px]">
+                  </div>
+                </div>
                 <div class="relative z-50 mx-auto max-w-7xl px-6 pt-6 lg:px-8">
                   <h2 class="flex justify-center text-4xl font-black leading-none tracking-tighter mix-blend-exclusion md:text-7xl">
                     Example packages
@@ -203,8 +216,11 @@ defmodule AlgoraWeb.Challenges.AtopileLive do
                     </a>
                   </p>
                   <div class="mt-8 grid grid-cols-1 gap-6 md:grid-cols-3">
-                    <div class="group relative overflow-hidden rounded-xl bg-white/5 border border-white/10 p-6 transition-all hover:border-[#f0551c]/50 hover:bg-white/10">
-                      <div class="flex items-center justify-between mb-4">
+                    <div
+                      class="flex flex-col group relative overflow-hidden rounded-xl border border-[#f0551c]/30 p-6"
+                      style="background: radial-gradient(circle at right bottom, #f0551c18 0%, #2a0e05 40%, #0f0503 100%);"
+                    >
+                      <div class="flex items-center justify-between mb-4 relative z-10">
                         <h3 class="text-lg font-semibold">
                           <a
                             href="https://packages.atopile.io/packages/atopile/buttons/releases/latest"
@@ -219,21 +235,29 @@ defmodule AlgoraWeb.Challenges.AtopileLive do
                           v0.1.7
                         </span>
                       </div>
-                      <p class="text-sm text-gray-400 mb-4">
+                      <p class="text-sm text-gray-400 mb-4 relative z-10">
                         A collection of buttons for convenience
                       </p>
                       <a
                         href="https://github.com/atopile/packages"
                         target="_blank"
                         rel="noopener"
-                        class="flex items-center gap-2 text-xs text-[#f0551c] hover:text-[#ff6b33] transition-colors"
+                        class="mt-auto inline-flex items-center gap-2 text-xs text-[#f0551c] hover:text-[#ff6b33] transition-colors relative z-10"
                       >
                         <.icon name="github" class="size-4" />
                         <span>Repository</span>
                       </a>
+                      <div
+                        class="absolute inset-0 bg-cover bg-right opacity-[30%] transition-opacity mix-blend-overlay"
+                        style="background-image: url('/images/challenges/atopile/tmps18ne6vg.png');"
+                      >
+                      </div>
                     </div>
-                    <div class="group relative overflow-hidden rounded-xl bg-white/5 border border-white/10 p-6 transition-all hover:border-[#f0551c]/50 hover:bg-white/10">
-                      <div class="flex items-center justify-between mb-4">
+                    <div
+                      class="flex flex-col group relative overflow-hidden rounded-xl border border-[#f0551c]/30 p-6"
+                      style="background: radial-gradient(circle at right bottom, #f0551c18 0%, #2a0e05 40%, #0f0503 100%);"
+                    >
+                      <div class="flex items-center justify-between mb-4 relative z-10">
                         <h3 class="text-lg font-semibold">
                           <a
                             href="https://packages.atopile.io/packages/atopile/addressable-leds/releases/latest"
@@ -248,21 +272,29 @@ defmodule AlgoraWeb.Challenges.AtopileLive do
                           v0.2.2
                         </span>
                       </div>
-                      <p class="text-sm text-gray-400 mb-4">
+                      <p class="text-sm text-gray-400 mb-4 relative z-10">
                         SK6805 addressable RGB LEDs with integrated controller for creating colorful LED effects and...
                       </p>
                       <a
                         href="https://github.com/atopile/packages"
                         target="_blank"
                         rel="noopener"
-                        class="flex items-center gap-2 text-xs text-[#f0551c] hover:text-[#ff6b33] transition-colors"
+                        class="mt-auto inline-flex items-center gap-2 text-xs text-[#f0551c] hover:text-[#ff6b33] transition-colors relative z-10"
                       >
                         <.icon name="github" class="size-4" />
                         <span>Repository</span>
                       </a>
+                      <div
+                        class="absolute inset-0 bg-cover bg-right opacity-[30%] transition-opacity mix-blend-overlay"
+                        style="background-image: url('/images/challenges/atopile/tmps18ne6vg.png');"
+                      >
+                      </div>
                     </div>
-                    <div class="group relative overflow-hidden rounded-xl bg-white/5 border border-white/10 p-6 transition-all hover:border-[#f0551c]/50 hover:bg-white/10">
-                      <div class="flex items-center justify-between mb-4">
+                    <div
+                      class="flex flex-col group relative overflow-hidden rounded-xl border border-[#f0551c]/30 p-6"
+                      style="background: radial-gradient(circle at right bottom, #f0551c18 0%, #2a0e05 40%, #0f0503 100%);"
+                    >
+                      <div class="flex items-center justify-between mb-4 relative z-10">
                         <h3 class="text-lg font-semibold">
                           <a
                             href="https://packages.atopile.io/packages/atopile/indicator-leds/releases/latest"
@@ -277,16 +309,23 @@ defmodule AlgoraWeb.Challenges.AtopileLive do
                           v0.1.1
                         </span>
                       </div>
-                      <p class="text-sm text-gray-400 mb-4">Indicator LEDs for convenience</p>
+                      <p class="text-sm text-gray-400 mb-4 relative z-10">
+                        Indicator LEDs for convenience
+                      </p>
                       <a
                         href="https://github.com/atopile/packages"
                         target="_blank"
                         rel="noopener"
-                        class="flex items-center gap-2 text-xs text-[#f0551c] hover:text-[#ff6b33] transition-colors"
+                        class="mt-auto inline-flex items-center gap-2 text-xs text-[#f0551c] hover:text-[#ff6b33] transition-colors relative z-10"
                       >
                         <.icon name="github" class="size-4" />
                         <span>Repository</span>
                       </a>
+                      <div
+                        class="absolute inset-0 bg-cover bg-right opacity-[30%] transition-opacity mix-blend-overlay"
+                        style="background-image: url('/images/challenges/atopile/tmps18ne6vg.png');"
+                      >
+                      </div>
                     </div>
                   </div>
                 </div>

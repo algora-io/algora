@@ -63,55 +63,63 @@ defmodule AlgoraWeb.Endpoint do
   plug Plug.Session, @session_options
   plug AlgoraWeb.Router
 
+  # Subdomain aliases: subdomain → path prefix (overrides default routing)
+  @subdomain_aliases %{
+    "docs" => "/docs",
+    "swift" => "/swift",
+    "create" => "/anything",
+    "lovablelabs" => "/lovable",
+    "textqllabs" => "/textql",
+    "comfy-org" => "/comfy"
+  }
+
+  # Subdomains that redirect to /challenges/:subdomain
+  @challenge_subdomains ~w[clickhouse jules]
+
+  # Subdomains that should not trigger any special routing
+  @ignored_subdomains ~w[app console www sitemaps sitemap m api home ai test]
+
   # Legacy tRPC endpoint
   defp canonical_host(%{path_info: ["api", "trpc" | _]} = conn, _opts), do: conn
 
   defp canonical_host(%{path_info: ["health"]} = conn, _opts), do: conn
 
-  defp canonical_host(%{host: "docs.algora.io"} = conn, _opts),
-    do: redirect_to_canonical_host(conn, Path.join(["/docs", conn.request_path]))
+  defp canonical_host(%{host: host} = conn, _opts) do
+    subdomain =
+      host
+      |> String.split(".")
+      |> Enum.map(&String.downcase/1)
+      |> case do
+        [sub, "algora", "io"] -> sub
+        [sub, "localhost"] -> sub
+        _ -> nil
+      end
 
-  defp canonical_host(%{host: "swift.algora.io"} = conn, _opts) do
-    redirect_to_canonical_host(conn, "/swift")
+    path = subdomain && path_for_subdomain(subdomain, conn)
+
+    redirect_to_canonical_host(conn, path || conn.request_path)
   end
 
-  defp canonical_host(%{host: host} = conn, _opts) do
-    case host |> String.split(".") |> Enum.map(&String.downcase/1) do
-      ["create", "algora", "io"] ->
-        redirect_to_canonical_host(conn, Path.join(["/anything/candidates"]))
+  defp path_for_subdomain(sub, _conn) when sub in @ignored_subdomains, do: nil
 
-      ["lovablelabs", "algora", "io"] ->
-        redirect_to_canonical_host(conn, Path.join(["/lovable/candidates"]))
+  defp path_for_subdomain(sub, conn) when is_map_key(@subdomain_aliases, sub) do
+    Path.join([@subdomain_aliases[sub], conn.request_path])
+  end
 
-      ["textqllabs", "algora", "io"] ->
-        redirect_to_canonical_host(conn, Path.join(["/textql/candidates"]))
+  defp path_for_subdomain(sub, _conn) when sub in @challenge_subdomains do
+    "/challenges/#{sub}"
+  end
 
-      ["comfy-org", "algora", "io"] ->
-        redirect_to_canonical_host(conn, Path.join(["/comfy/candidates"]))
+  defp path_for_subdomain(sub, conn) do
+    case Algora.Accounts.get_user_by_handle(sub) do
+      nil ->
+        conn.request_path
 
-      ["clickhouse", "algora", "io"] ->
-        redirect_to_canonical_host(conn, "/challenges/clickhouse")
-
-      ["jules", "algora", "io"] ->
-        redirect_to_canonical_host(conn, "/challenges/jules")
-
-      [subdomain, "algora", "io"]
-      when subdomain not in ["app", "console", "www", "sitemaps", "sitemap", "m", "api", "home", "ai", "test"] ->
-        case Algora.Accounts.get_user_by_handle(subdomain) do
-          nil ->
-            redirect_to_canonical_host(conn, conn.request_path)
-
-          _user ->
-            Algora.Activities.alert("👀 Someone is viewing https://#{subdomain}.algora.io", :critical)
-            redirect_to_canonical_host(conn, Path.join(["/#{subdomain}/candidates"]))
-        end
-
-      _ ->
-        redirect_to_canonical_host(conn, conn.request_path)
+      _user ->
+        Algora.Activities.alert("👀 Someone is viewing https://#{sub}.algora.io", :critical)
+        "/#{sub}/candidates"
     end
   end
-
-  defp canonical_host(conn, _opts), do: redirect_to_canonical_host(conn, conn.request_path)
 
   defp redirect_to_canonical_host(conn, path) do
     :algora

@@ -154,7 +154,7 @@ defmodule Algora.Workspace do
     if opts[:force] do
       fetch_and_persist_maintainers(token, owner, repo)
     else
-      case list_repository_contributors(owner, repo) do
+      case list_maintainers(owner, repo) do
         [] -> fetch_and_persist_maintainers(token, owner, repo)
         contributors -> Enum.take(contributors, 10)
       end
@@ -162,10 +162,10 @@ defmodule Algora.Workspace do
   end
 
   defp fetch_and_persist_maintainers(token, owner, repo) do
-    with {:ok, repository} <- ensure_repository(token, owner, repo),
-         api_contributors <- fetch_maintainers(token, owner, repo) do
+    with {:ok, repository} <- ensure_repository(token, owner, repo) do
+      api_contributors = fetch_maintainers(token, owner, repo)
       Enum.each(api_contributors, &upsert_contributor_from_github(repository, &1))
-      list_repository_contributors(owner, repo) |> Enum.take(10)
+      owner |> list_maintainers(repo) |> Enum.take(10)
     end
   end
 
@@ -206,7 +206,7 @@ defmodule Algora.Workspace do
         last_contributions = contributors |> List.last() |> Map.get("contributions", 0)
 
         if length(contributors) < 100 or last_contributions < min_commits do
-          (acc ++ qualified) |> Enum.take(10)
+          Enum.take(acc ++ qualified, 10)
         else
           do_fetch_contributors(token, owner, repo, min_commits, page + 1, acc ++ qualified)
         end
@@ -215,9 +215,7 @@ defmodule Algora.Workspace do
         acc
 
       {:error, reason} ->
-        Logger.error(
-          "Failed to fetch contributors for #{owner}/#{repo} page #{page}: #{inspect(reason)}"
-        )
+        Logger.error("Failed to fetch contributors for #{owner}/#{repo} page #{page}: #{inspect(reason)}")
 
         acc
     end
@@ -688,6 +686,22 @@ defmodule Algora.Workspace do
         left_join: m in Member,
         on: m.user_id == u.id and m.org_id == r.user_id,
         where: is_nil(m.id),
+        select_merge: %{user: u},
+        order_by: [desc: c.contributions, asc: c.inserted_at, asc: c.id]
+      )
+    )
+  end
+
+  def list_maintainers(repo_owner, repo_name) do
+    Repo.all(
+      from(c in Contributor,
+        join: r in assoc(c, :repository),
+        where: r.provider == "github",
+        where: r.name == ^repo_name,
+        join: ro in assoc(r, :user),
+        where: ro.provider_login == ^repo_owner,
+        join: u in assoc(c, :user),
+        where: u.type != :bot,
         select_merge: %{user: u},
         order_by: [desc: c.contributions, asc: c.inserted_at, asc: c.id]
       )

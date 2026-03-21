@@ -106,8 +106,8 @@ defmodule AlgoraWeb.Endpoint do
     Path.join([@subdomain_aliases[sub], conn.request_path])
   end
 
-  defp path_for_subdomain(sub, _conn) when sub in @challenge_subdomains do
-    "/challenges/#{sub}"
+  defp path_for_subdomain(sub, conn) when sub in @challenge_subdomains do
+    Path.join(["/challenges/#{sub}", conn.request_path])
   end
 
   defp path_for_subdomain(sub, conn) do
@@ -117,7 +117,7 @@ defmodule AlgoraWeb.Endpoint do
 
       _user ->
         Algora.Activities.alert("👀 Someone is viewing https://#{sub}.algora.io", :critical)
-        "/#{sub}/candidates"
+        Path.join(["/#{sub}/candidates", conn.request_path])
     end
   end
 

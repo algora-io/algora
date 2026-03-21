@@ -145,13 +145,51 @@ defmodule Algora.Workspace do
   end
 
   @doc """
+  Returns up to 10 maintainers as `%Contributor{}` structs with `user` preloaded.
+
+  Checks the DB first; if no records exist, fetches from the GitHub API,
+  persists the results, then re-queries.
+  """
+  def ensure_maintainers(token, owner, repo, opts \\ []) do
+    if opts[:force] do
+      fetch_and_persist_maintainers(token, owner, repo)
+    else
+      case list_repository_contributors(owner, repo) do
+        [] -> fetch_and_persist_maintainers(token, owner, repo)
+        contributors -> Enum.take(contributors, 10)
+      end
+    end
+  end
+
+  defp fetch_and_persist_maintainers(token, owner, repo) do
+    with {:ok, repository} <- ensure_repository(token, owner, repo),
+         api_contributors <- fetch_maintainers(token, owner, repo) do
+      Enum.each(api_contributors, &upsert_contributor_from_github(repository, &1))
+      list_repository_contributors(owner, repo) |> Enum.take(10)
+    end
+  end
+
+  defp upsert_contributor_from_github(repository, contributor) do
+    with {:ok, user} <- ensure_user_by_contributor(contributor) do
+      %Contributor{}
+      |> Contributor.changeset(%{
+        contributions: contributor["contributions"],
+        repository_id: repository.id,
+        user_id: user.id
+      })
+      |> Repo.insert(
+        on_conflict: {:replace, [:contributions, :updated_at]},
+        conflict_target: [:repository_id, :user_id]
+      )
+    end
+  end
+
+  @doc """
   Fetches up to 10 contributors for a GitHub repo who have at least `min_commits` commits.
 
-  Paginates the GitHub contributors API and stops once no more contributors meet
-  the threshold. Returns a list of contributor maps with at least `"login"` and
-  `"contributions"` keys.
+  Paginates the GitHub contributors API and returns raw API maps.
   """
-  def fetch_repo_contributors(token, owner, repo, min_commits \\ 100) do
+  def fetch_maintainers(token, owner, repo, min_commits \\ 100) do
     do_fetch_contributors(token, owner, repo, min_commits, 1, [])
   end
 

@@ -144,6 +144,47 @@ defmodule Algora.Workspace do
     end
   end
 
+  @doc """
+  Fetches up to 10 contributors for a GitHub repo who have at least `min_commits` commits.
+
+  Paginates the GitHub contributors API and stops once no more contributors meet
+  the threshold. Returns a list of contributor maps with at least `"login"` and
+  `"contributions"` keys.
+  """
+  def fetch_repo_contributors(token, owner, repo, min_commits \\ 100) do
+    do_fetch_contributors(token, owner, repo, min_commits, 1, [])
+  end
+
+  defp do_fetch_contributors(token, owner, repo, min_commits, page, acc) do
+    path = "/repos/#{owner}/#{repo}/contributors?per_page=100&page=#{page}"
+
+    case Algora.Github.Client.fetch(token, path) do
+      {:ok, [first | _] = contributors} when is_list(contributors) and length(contributors) > 0 ->
+        qualified =
+          contributors
+          |> Enum.filter(&(&1["contributions"] >= min_commits))
+          |> then(&if(acc == [] and &1 == [], do: [first], else: &1))
+
+        last_contributions = contributors |> List.last() |> Map.get("contributions", 0)
+
+        if length(contributors) < 100 or last_contributions < min_commits do
+          (acc ++ qualified) |> Enum.take(10)
+        else
+          do_fetch_contributors(token, owner, repo, min_commits, page + 1, acc ++ qualified)
+        end
+
+      {:ok, _} ->
+        acc
+
+      {:error, reason} ->
+        Logger.error(
+          "Failed to fetch contributors for #{owner}/#{repo} page #{page}: #{inspect(reason)}"
+        )
+
+        acc
+    end
+  end
+
   def maybe_schedule_og_image_update(%Repository{} = repository) do
     one_day_ago = DateTime.add(DateTime.utc_now(), -1, :day)
 

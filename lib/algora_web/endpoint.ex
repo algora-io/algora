@@ -121,6 +121,24 @@ defmodule AlgoraWeb.Endpoint do
     end
   end
 
+  def origin(_ \\ nil)
+
+  def origin(nil) do
+    origin(AlgoraWeb.Endpoint.struct_url())
+  end
+
+  def origin(%URI{} = url) do
+    if url.port == URI.default_port(url.scheme) do
+      url.host
+    else
+      "#{url.host}:#{url.port}"
+    end
+  end
+
+  def struct_url_for(subdomain) when is_binary(subdomain) do
+    Map.update!(AlgoraWeb.Endpoint.struct_url(), :host, &"#{subdomain}.#{&1}")
+  end
+
   defp redirect_to_canonical_host(conn, path) do
     :algora
     |> Application.get_env(:canonical_host)

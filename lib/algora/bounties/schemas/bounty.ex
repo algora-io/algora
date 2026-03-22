@@ -1,133 +1,76 @@
-defmodule Algora.Bounties.Bounty do
-  @moduledoc false
-  use Algora.Schema
+defmodule Algora.Bounties.Schemas.Bounty do
+  use Ecto.Schema
+  import Ecto.Changeset
 
-  alias Algora.Accounts.User
-  alias Algora.Bounties.Bounty
-  alias Algora.Types.Money
+  alias Algora.Accounts.Schemas.User
+  alias Algora.Bounties.Schemas.Claim
 
-  @type visibility :: :community | :exclusive | :public
-  @type contract_type :: :bring_your_own | :marketplace
+  @primary_key {:id, :binary_id, autogenerate: true}
+  @foreign_key_type :binary_id
 
-  typed_schema "bounties" do
-    field :amount, Money
-    field :status, Ecto.Enum, values: [:open, :cancelled, :paid]
-    field :number, :integer, default: 0
-    field :autopay_disabled, :boolean, default: false
-    field :visibility, Ecto.Enum, values: [:community, :exclusive, :public], null: false, default: :community
-    field :contract_type, Ecto.Enum, values: [:bring_your_own, :marketplace]
-    field :shared_with, {:array, :string}, null: false, default: []
-    field :deadline, :utc_datetime_usec
-    field :hours_per_week, :integer
-    field :hourly_rate, Money
+  schema "bounties" do
+    field :title, :string
+    field :description, :string
+    field :reward_amount, :decimal
+    field :currency, :string, default: "USD"
+    field :status, Ecto.Enum, values: [:open, :claimed, :completed, :cancelled], default: :open
+    field :github_issue_url, :string
+    field :github_issue_number, :integer
+    field :github_repo_owner, :string
+    field :github_repo_name, :string
+    field :tags, {:array, :string}, default: []
+    field :expires_at, :naive_datetime
+    field :last_synced_at, :naive_datetime
 
-    belongs_to :ticket, Algora.Workspace.Ticket
-    belongs_to :owner, User
     belongs_to :creator, User
-    has_many :transactions, Algora.Payments.Transaction
-    has_many :activities, {"bounty_activities", Algora.Activities.Activity}, foreign_key: :assoc_id
+    has_many :claims, Claim, on_delete: :delete_all
 
-    timestamps()
+    timestamps(type: :naive_datetime_usec)
   end
 
-  def preload(id) do
-    from a in __MODULE__,
-      preload: [:ticket, :owner, :creator],
-      where: a.id == ^id
-  end
-
+  @doc false
   def changeset(bounty, attrs) do
     bounty
     |> cast(attrs, [
-      :amount,
-      :ticket_id,
-      :owner_id,
-      :creator_id,
-      :visibility,
-      :shared_with,
-      :hours_per_week,
-      :hourly_rate,
-      :contract_type,
-      :status
+      :title,
+      :description,
+      :reward_amount,
+      :currency,
+      :status,
+      :github_issue_url,
+      :github_issue_number,
+      :github_repo_owner,
+      :github_repo_name,
+      :tags,
+      :expires_at,
+      :last_synced_at,
+      :creator_id
     ])
-    |> validate_required([:amount, :ticket_id, :owner_id, :creator_id])
-    |> generate_id()
-    |> foreign_key_constraint(:ticket)
-    |> foreign_key_constraint(:owner)
-    |> foreign_key_constraint(:creator)
-    |> unique_constraint([:ticket_id, :owner_id, :number])
-    |> Algora.Validations.validate_money_positive(:amount)
+    |> validate_required([:title, :reward_amount, :creator_id])
+    |> validate_number(:reward_amount, greater_than: 0)
+    |> validate_inclusion(:currency, ["USD", "EUR", "GBP"])
+    |> validate_url_format(:github_issue_url)
+    |> unique_constraint(:github_issue_url)
   end
 
-  def settings_changeset(bounty, attrs) do
+  def sync_changeset(bounty, attrs) do
     bounty
-    |> cast(attrs, [:visibility, :shared_with, :deadline])
-    |> Algora.Validations.validate_date_in_future(:deadline)
-    |> validate_required([:visibility, :shared_with])
+    |> cast(attrs, [:status, :last_synced_at])
+    |> validate_required([:last_synced_at])
   end
 
-  def url(%{repository: %{name: name, owner: %{login: login}}, ticket: %{provider: "github", number: number}}) do
-    "https://github.com/#{login}/#{name}/issues/#{number}"
-  end
-
-  def url(%{id: id, owner: owner, repository: %{name: nil}}) do
-    "/#{owner.handle}/bounties/#{id}"
-  end
-
-  def url(%{ticket: %{url: url}}) do
-    url
-  end
-
-  def path(%{repository: %{name: nil}}) do
-    nil
-  end
-
-  def path(%{repository: %{name: name}, ticket: %{number: number}}) do
-    "#{name}##{number}"
-  end
-
-  # DEPRECATED
-  def path(%{ticket: %{provider: "github", url: url}}) do
-    Algora.Util.path_from_url(url)
-  end
-
-  def path(_bounty), do: nil
-
-  def full_path(%{repository: %{name: name, owner: %{login: login}}, ticket: %{number: number}}) do
-    "#{login}/#{name}##{number}"
-  end
-
-  def full_path(%{ticket: %{provider: "github", url: url}}) do
-    url
-    |> URI.parse()
-    |> then(& &1.path)
-    |> String.replace(~r/\/(issues|pull|discussions)\//, "#")
-  end
-
-  def order_by_most_recent(query \\ Bounty) do
-    from(b in query, order_by: [desc: b.inserted_at])
-  end
-
-  def limit(query \\ Bounty, limit) do
-    from(b in query, limit: ^limit)
-  end
-
-  def filter_by_tech_stack(query, []), do: query
-  def filter_by_tech_stack(query, nil), do: query
-
-  def filter_by_tech_stack(query, tech_stack) do
-    lowercase_tech_stack = Enum.map(tech_stack, &String.downcase/1)
-
-    from b in query,
-      join: o in assoc(b, :owner),
-      where: fragment("ARRAY(SELECT LOWER(unnest(?))) && ?", o.tech_stack, ^lowercase_tech_stack)
-  end
-
-  def create_changeset(bounty, attrs) do
-    bounty
-    |> cast(attrs, [:amount])
-    |> cast_assoc(:ticket)
-    |> validate_required([:amount])
-    |> validate_number(:amount, greater_than: 0)
+  defp validate_url_format(changeset, field) do
+    validate_change(changeset, field, fn _, url ->
+      case url do
+        nil -> []
+        "" -> []
+        url ->
+          if String.match?(url, ~r/^https:\/\/github\.com\/[^\/]+\/[^\/]+\/issues\/\d+$/) do
+            []
+          else
+            [{field, "must be a valid GitHub issue URL"}]
+          end
+      end
+    end)
   end
 end

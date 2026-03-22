@@ -144,28 +144,27 @@ defmodule Algora.Workspace do
     end
   end
 
-  @doc """
-  Returns up to 10 maintainers as `%Contributor{}` structs with `user` preloaded.
-
-  Checks the DB first; if no records exist, fetches from the GitHub API,
-  persists the results, then re-queries.
-  """
   def ensure_maintainers(token, owner, repo, opts \\ []) do
-    if opts[:force] do
-      fetch_and_persist_maintainers(token, owner, repo)
-    else
-      case list_maintainers(owner, repo) do
-        [] -> fetch_and_persist_maintainers(token, owner, repo)
-        contributors -> Enum.take(contributors, 10)
+    opts = Keyword.merge([limit: 10], opts)
+
+    contributors =
+      if opts[:force] do
+        fetch_and_persist_maintainers(token, owner, repo)
+      else
+        case list_maintainers(owner, repo) do
+          [] -> fetch_and_persist_maintainers(token, owner, repo)
+          contributors -> contributors
+        end
       end
-    end
+
+    Enum.take(contributors, opts[:limit])
   end
 
   defp fetch_and_persist_maintainers(token, owner, repo) do
     with {:ok, repository} <- ensure_repository(token, owner, repo) do
       api_contributors = fetch_maintainers(token, owner, repo)
       Enum.each(api_contributors, &upsert_contributor_from_github(repository, &1))
-      owner |> list_maintainers(repo) |> Enum.take(10)
+      list_maintainers(owner, repo)
     end
   end
 
@@ -184,40 +183,19 @@ defmodule Algora.Workspace do
     end
   end
 
-  @doc """
-  Fetches up to 10 contributors for a GitHub repo who have at least `min_commits` commits.
-
-  Paginates the GitHub contributors API and returns raw API maps.
-  """
-  def fetch_maintainers(token, owner, repo, min_commits \\ 100) do
-    do_fetch_contributors(token, owner, repo, min_commits, 1, [])
-  end
-
-  defp do_fetch_contributors(token, owner, repo, min_commits, page, acc) do
-    path = "/repos/#{owner}/#{repo}/contributors?per_page=100&page=#{page}"
+  def fetch_maintainers(token, owner, repo) do
+    path = "/repos/#{owner}/#{repo}/contributors?per_page=100&page=1"
 
     case Algora.Github.Client.fetch(token, path) do
-      {:ok, [first | _] = contributors} when is_list(contributors) and length(contributors) > 0 ->
-        qualified =
-          contributors
-          |> Enum.filter(&(&1["contributions"] >= min_commits))
-          |> then(&if(acc == [] and &1 == [], do: [first], else: &1))
-
-        last_contributions = contributors |> List.last() |> Map.get("contributions", 0)
-
-        if length(contributors) < 100 or last_contributions < min_commits do
-          Enum.take(acc ++ qualified, 10)
-        else
-          do_fetch_contributors(token, owner, repo, min_commits, page + 1, acc ++ qualified)
-        end
+      {:ok, contributors} when is_list(contributors) ->
+        contributors
 
       {:ok, _} ->
-        acc
+        []
 
       {:error, reason} ->
-        Logger.error("Failed to fetch contributors for #{owner}/#{repo} page #{page}: #{inspect(reason)}")
-
-        acc
+        Logger.error("Failed to fetch contributors for #{owner}/#{repo}: #{inspect(reason)}")
+        []
     end
   end
 

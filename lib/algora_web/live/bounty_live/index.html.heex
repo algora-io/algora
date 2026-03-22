@@ -1,0 +1,196 @@
+<div class="flex flex-col gap-6">
+  <div class="flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Bounties</h1>
+      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+        <%= length(@bounties) %>
+      </span>
+    </div>
+    
+    <%= if @current_user do %>
+      <.link
+        navigate={~p"/bounties/new"}
+        class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+      >
+        Create Bounty
+      </.link>
+    <% end %>
+  </div>
+
+  <!-- Filters Section -->
+  <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+    <div class="flex flex-wrap items-center gap-4">
+      <!-- Status Filter -->
+      <div class="flex items-center gap-2">
+        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Status:</label>
+        <select
+          phx-change="filter_status"
+          class="block w-32 px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-200"
+        >
+          <option value="all" selected={@status_filter == "all"}>All</option>
+          <option value="open" selected={@status_filter == "open"}>Open</option>
+          <option value="claimed" selected={@status_filter == "claimed"}>Claimed</option>
+          <option value="completed" selected={@status_filter == "completed"}>Completed</option>
+        </select>
+      </div>
+
+      <!-- Bounty Range Filter -->
+      <div class="flex items-center gap-2">
+        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Price Range:</label>
+        <div class="flex items-center gap-2">
+          <input
+            type="number"
+            placeholder="Min"
+            phx-change="filter_min_price"
+            value={@min_price}
+            min="0"
+            step="0.01"
+            class="block w-20 px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-200"
+          />
+          <span class="text-gray-500 dark:text-gray-400">-</span>
+          <input
+            type="number"
+            placeholder="Max"
+            phx-change="filter_max_price"
+            value={@max_price}
+            min="0"
+            step="0.01"
+            class="block w-20 px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-200"
+          />
+          <span class="text-xs text-gray-500 dark:text-gray-400">USD</span>
+        </div>
+      </div>
+
+      <!-- Sort Filter -->
+      <div class="flex items-center gap-2">
+        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Sort:</label>
+        <select
+          phx-change="sort_bounties"
+          class="block w-32 px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-200"
+        >
+          <option value="newest" selected={@sort_by == "newest"}>Newest</option>
+          <option value="oldest" selected={@sort_by == "oldest"}>Oldest</option>
+          <option value="highest" selected={@sort_by == "highest"}>Highest Price</option>
+          <option value="lowest" selected={@sort_by == "lowest"}>Lowest Price</option>
+        </select>
+      </div>
+
+      <!-- Clear Filters -->
+      <%= if @status_filter != "all" or @min_price or @max_price or @sort_by != "newest" do %>
+        <button
+          phx-click="clear_filters"
+          class="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+        >
+          Clear filters
+        </button>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Bounties Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <%= for bounty <- @bounties do %>
+      <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-shadow">
+        <div class="p-6">
+          <div class="flex items-start justify-between mb-3">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 line-clamp-2">
+              <.link
+                navigate={~p"/bounties/#{bounty.id}"}
+                class="hover:text-blue-600 dark:hover:text-blue-400"
+              >
+                <%= bounty.title %>
+              </.link>
+            </h3>
+            <span class={[
+              "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium",
+              case bounty.status do
+                :open -> "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                :claimed -> "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+                :completed -> "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                _ -> "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
+              end
+            ]}>
+              <%= String.capitalize(to_string(bounty.status)) %>
+            </span>
+          </div>
+
+          <p class="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-3">
+            <%= bounty.description %>
+          </p>
+
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-2xl font-bold text-green-600 dark:text-green-400">
+                $<%= :erlang.float_to_binary(bounty.amount / 1, decimals: 2) %>
+              </span>
+            </div>
+
+            <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+              <time datetime={bounty.inserted_at}>
+                <%= Calendar.strftime(bounty.inserted_at, "%b %d, %Y") %>
+              </time>
+            </div>
+          </div>
+
+          <%= if bounty.tags && length(bounty.tags) > 0 do %>
+            <div class="flex flex-wrap gap-1 mt-3">
+              <%= for tag <- Enum.take(bounty.tags, 3) do %>
+                <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                  <%= tag %>
+                </span>
+              <% end %>
+              <%= if length(bounty.tags) > 3 do %>
+                <span class="text-xs text-gray-500 dark:text-gray-400">
+                  +<%= length(bounty.tags) - 3 %> more
+                </span>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+
+        <div class="px-6 py-3 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600">
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-600 dark:text-gray-400">
+              By <%= bounty.creator.handle %>
+            </span>
+            
+            <.link
+              navigate={~p"/bounties/#{bounty.id}"}
+              class="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
+            >
+              View Details →
+            </.link>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <%= if Enum.empty?(@bounties) do %>
+    <div class="text-center py-12">
+      <div class="mx-auto h-12 w-12 text-gray-400">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+      </div>
+      <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No bounties found</h3>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        <%= if @status_filter != "all" or @min_price or @max_price do %>
+          Try adjusting your filters to see more results.
+        <% else %>
+          Get started by creating a new bounty.
+        <% end %>
+      </p>
+      <%= if @current_user and (@status_filter == "all" and not @min_price and not @max_price) do %>
+        <div class="mt-6">
+          <.link
+            navigate={~p"/bounties/new"}
+            class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+          >
+            Create your first bounty
+          </.link>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>

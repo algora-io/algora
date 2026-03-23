@@ -33,7 +33,7 @@ defmodule AlgoraWeb.Components.UI.Button do
       |> assign(:is_link, link?(assigns))
       |> assign(:common_classes, [
         "disabled:opacity-75 phx-submit-loading:opacity-75",
-        "inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50",
+        "inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50 disabled:cursor-not-allowed",
         variant(assigns),
         assigns.class
       ])

@@ -800,7 +800,7 @@ defmodule AlgoraWeb.CoreComponents do
       <select
         id={@id}
         name={@name}
-        class="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 shadow-sm focus:border-ring focus:outline-none focus:ring-ring sm:text-sm"
+        class="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 shadow-sm focus:border-ring focus:outline-none focus:ring-ring text-sm"
         multiple={@multiple}
         {@rest}
       >
@@ -823,7 +823,7 @@ defmodule AlgoraWeb.CoreComponents do
         class={
           classes([
             "min-h-[6rem] py-[7px] px-[11px] block w-full rounded-lg border-input bg-background resize-none",
-            "text-foreground focus:border-ring focus:outline-none focus:ring-4 focus:ring-ring/5 sm:text-sm sm:leading-6",
+            "text-foreground focus:border-ring focus:outline-none focus:ring-4 focus:ring-ring/5 text-sm sm:leading-6",
             "border-input focus:border-ring focus:ring-ring/5",
             @errors != [] &&
               "border-destructive placeholder-destructive-foreground/50 focus:border-destructive focus:ring-destructive/10",
@@ -854,7 +854,7 @@ defmodule AlgoraWeb.CoreComponents do
           class={
             classes([
               "py-[7px] px-[11px] block w-full rounded-lg border-input bg-background",
-              "text-foreground focus:outline-none focus:ring-1 sm:text-sm sm:leading-6",
+              "text-foreground focus:outline-none focus:ring-1 text-sm sm:leading-6",
               "border-input focus:border-ring focus:ring-ring",
               @errors != [] &&
                 "border-destructive placeholder-destructive-foreground/50 focus:border-destructive focus:ring-destructive/10",

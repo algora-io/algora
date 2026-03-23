@@ -96,6 +96,23 @@ defmodule Algora.Github.Client do
     data
   end
 
+  def fetch_with_headers(access_token, path) do
+    url = "https://api.github.com#{path}"
+    headers = [
+      {"Content-Type", "application/json"},
+      {"accept", "application/vnd.github.v3+json"}
+      | if(access_token, do: [{"Authorization", "Bearer #{access_token}"}], else: [])
+    ]
+
+    request = Finch.build("GET", url, headers, nil)
+
+    with {:ok, %Finch.Response{body: body, headers: resp_headers}} <-
+           Finch.request(request, Algora.Finch),
+         {:ok, decoded} <- Jason.decode(body) do
+      {:ok, decoded, resp_headers}
+    end
+  end
+
   def fetch(access_token, url, method \\ "GET", body \\ nil)
 
   def fetch(access_token, "https://api.github.com" <> path, method, body), do: fetch(access_token, path, method, body)

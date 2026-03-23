@@ -199,6 +199,94 @@ defmodule Algora.Workspace do
     end
   end
 
+  def fetch_contributors_count(token, owner, repo) do
+    path = "/repos/#{owner}/#{repo}/contributors?per_page=1&anon=1"
+
+    case Algora.Github.Client.fetch_with_headers(token, path) do
+      {:ok, _, headers} ->
+        link = List.keyfind(headers, "link", 0)
+
+        count =
+          case link do
+            {"link", value} ->
+              case Regex.run(~r/page=(\d+)>; rel="last"/, value) do
+                [_, n] -> String.to_integer(n)
+                _ -> 1
+              end
+
+            nil ->
+              1
+          end
+
+        {:ok, count}
+
+      {:error, reason} ->
+        Logger.error("Failed to fetch contributors count for #{owner}/#{repo}: #{inspect(reason)}")
+        {:error, reason}
+    end
+  end
+
+  def fetch_downloads_count(token, owner, repo) do
+    fetch_downloads_count_page(token, owner, repo, 1, 0)
+  end
+
+  defp fetch_downloads_count_page(token, owner, repo, page, acc) do
+    path = "/repos/#{owner}/#{repo}/releases?per_page=100&page=#{page}"
+
+    case Algora.Github.Client.fetch(token, path) do
+      {:ok, releases} when is_list(releases) and releases != [] ->
+        total =
+          Enum.reduce(releases, acc, fn release, sum ->
+            assets_total =
+              (release["assets"] || [])
+              |> Enum.reduce(0, fn asset, s -> s + (asset["download_count"] || 0) end)
+
+            sum + assets_total
+          end)
+
+        if length(releases) == 100 do
+          fetch_downloads_count_page(token, owner, repo, page + 1, total)
+        else
+          {:ok, total}
+        end
+
+      {:ok, _} ->
+        {:ok, acc}
+
+      {:error, reason} ->
+        Logger.error("Failed to fetch downloads for #{owner}/#{repo}: #{inspect(reason)}")
+        {:error, reason}
+    end
+  end
+
+  def fetch_dependents_count(owner, repo) do
+    url = "https://github.com/#{owner}/#{repo}/network/dependents"
+    headers = [{"User-Agent", "Mozilla/5.0"}]
+    request = Finch.build("GET", url, headers, nil)
+
+    with {:ok, %Finch.Response{body: body}} <- Finch.request(request, Algora.Finch),
+         [_, count_str] <-
+           Regex.run(
+             ~r/dependent_type=REPOSITORY">\s*<svg[^>]*>.*?<\/svg>\s*([\d,]+)\s*Repositories/s,
+             body
+           ) do
+      {:ok, count_str |> String.replace(",", "") |> String.to_integer()}
+    else
+      nil ->
+        {:error, "count not found in page"}
+
+      {:error, reason} ->
+        Logger.error("Failed to fetch dependents for #{owner}/#{repo}: #{inspect(reason)}")
+        {:error, reason}
+    end
+  end
+
+  def update_repository_counts(%Repository{} = repository, attrs) do
+    repository
+    |> cast(attrs, [:contributors_count, :downloads_count, :dependents_count])
+    |> Repo.update()
+  end
+
   def maybe_schedule_og_image_update(%Repository{} = repository) do
     one_day_ago = DateTime.add(DateTime.utc_now(), -1, :day)
 

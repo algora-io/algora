@@ -19,6 +19,9 @@ defmodule Algora.Workspace.Repository do
     field :og_image_url, :string, null: false
     field :og_image_updated_at, :utc_datetime_usec
     field :stargazers_count, :integer, null: false, default: 0
+    field :contributors_count, :integer
+    field :downloads_count, :integer
+    field :dependents_count, :integer
 
     has_many :tickets, Algora.Workspace.Ticket
     has_many :activities, {"repository_activities", Activity}, foreign_key: :assoc_id

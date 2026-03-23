@@ -66,18 +66,22 @@ defmodule AlgoraWeb.Endpoint do
   # Subdomain aliases: subdomain → path prefix (overrides default routing)
   @subdomain_aliases %{
     "docs" => "/docs",
-    "swift" => "/swift",
-    "create" => "/anything",
-    "lovablelabs" => "/lovable",
-    "textqllabs" => "/textql",
-    "comfy-org" => "/comfy"
+    "swift" => "/swift"
+  }
+
+  # Subdomain → org slug for /org/candidates routing
+  @candidate_aliases %{
+    "create" => "anything",
+    "lovablelabs" => "lovable",
+    "textqllabs" => "textql",
+    "comfy-org" => "comfy"
   }
 
   # Subdomains that redirect to /challenges/:subdomain
   @challenge_subdomains ~w[clickhouse jules]
 
   # Subdomains that should not trigger any special routing
-  @ignored_subdomains ~w[app console www sitemaps sitemap m api home ai test]
+  @ignored_subdomains ~w[app console www sitemaps sitemap m api home ai test tv]
 
   # Legacy tRPC endpoint
   defp canonical_host(%{path_info: ["api", "trpc" | _]} = conn, _opts), do: conn
@@ -104,6 +108,10 @@ defmodule AlgoraWeb.Endpoint do
 
   defp path_for_subdomain(sub, conn) when is_map_key(@subdomain_aliases, sub) do
     Path.join([@subdomain_aliases[sub], conn.request_path])
+  end
+
+  defp path_for_subdomain(sub, conn) when is_map_key(@candidate_aliases, sub) do
+    Path.join(["/#{@candidate_aliases[sub]}/candidates", conn.request_path])
   end
 
   defp path_for_subdomain(sub, conn) when sub in @challenge_subdomains do

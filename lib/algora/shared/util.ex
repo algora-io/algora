@@ -77,6 +77,9 @@ defmodule Algora.Util do
       n when n >= 1_000_000 ->
         "#{(n / 1_000_000) |> Float.round(1) |> trim_trailing_zero()}M"
 
+      n when n >= 100_000 ->
+        "#{round(n / 1_000)}k"
+
       n when n >= 1_000 ->
         "#{(n / 1_000) |> Float.round(1) |> trim_trailing_zero()}k"
 

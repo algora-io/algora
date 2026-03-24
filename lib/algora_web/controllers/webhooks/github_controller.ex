@@ -536,6 +536,47 @@ defmodule AlgoraWeb.Webhooks.GithubController do
   end
 
   defp execute_command(%Webhook{event_action: event_action, author: author, payload: payload}, {:claim, args})
+       when event_action in ["issue_comment.created", "issue_comment.edited"] do
+    source_ticket_ref = %{
+      owner: payload["repository"]["owner"]["login"],
+      repo: payload["repository"]["name"],
+      number: payload["issue"]["number"]
+    }
+
+    target_ticket_ref =
+      %{
+        owner: args[:ticket_ref][:owner] || source_ticket_ref.owner,
+        repo: args[:ticket_ref][:repo] || source_ticket_ref.repo,
+        number: args[:ticket_ref][:number]
+      }
+
+    with {:ok, token} <- Github.get_installation_token(payload["installation"]["id"]),
+         {:ok, user} <- Workspace.ensure_user(token, author["login"]),
+         {:ok, target_ticket} <-
+           Workspace.ensure_ticket(
+             token,
+             target_ticket_ref.owner,
+             target_ticket_ref.repo,
+             target_ticket_ref.number
+           ),
+         {:ok, claims} <-
+           Bounties.claim_bounty(
+             %{
+               user: user,
+               coauthor_provider_logins: (args[:splits] || []) |> Enum.map(& &1[:recipient]) |> Enum.uniq(),
+               target_ticket_ref: target_ticket_ref,
+               source_ticket_ref: source_ticket_ref,
+               status: :pending,
+               type: :review
+             },
+             installation_id: payload["installation"]["id"]
+           ) do
+      Bounties.try_refresh_bounty_response(token, target_ticket_ref, target_ticket)
+      {:ok, claims}
+    end
+  end
+
+  defp execute_command(%Webhook{event_action: event_action, author: author, payload: payload}, {:claim, args})
        when event_action in ["pull_request.opened", "pull_request.reopened", "pull_request.edited"] do
     source_ticket_ref = %{
       owner: payload["repository"]["owner"]["login"],

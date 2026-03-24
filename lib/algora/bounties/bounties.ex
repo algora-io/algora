@@ -1332,6 +1332,7 @@ defmodule Algora.Bounties do
     |> join(:left, [r: r], ro in assoc(r, :user), as: :ro)
     |> where([b], not is_nil(b.amount))
     |> where([b], b.status != :cancelled)
+    |> where([t: t], t.state == :open)
     |> apply_criteria(criteria)
   end
 

@@ -587,7 +587,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
       Bounties.list_bounties(
         owner_id: current_org.id,
         limit: page_size(),
-        status: :open,
+        status: current_status,
         current_user: socket.assigns[:current_user]
       )
 
@@ -681,7 +681,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
       Bounties.list_bounties(
         owner_id: current_org.id,
         limit: page_size(),
-        status: :open,
+        status: current_status,
         current_user: socket.assigns[:current_user]
       )
 

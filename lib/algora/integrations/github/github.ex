@@ -131,6 +131,10 @@ defmodule Algora.Github do
     do: client().delete_issue_comment(token, owner, repo, comment_id)
 
   @impl true
+  def list_issue_comments(token, owner, repo, number, opts \\ []),
+    do: client().list_issue_comments(token, owner, repo, number, opts)
+
+  @impl true
   def list_user_repositories(token, username, opts \\ []), do: client().list_user_repositories(token, username, opts)
 
   @impl true
@@ -140,6 +144,9 @@ defmodule Algora.Github do
   @impl true
   def list_repository_comments(token, owner, repo, opts \\ []),
     do: client().list_repository_comments(token, owner, repo, opts)
+
+  @impl true
+  def search_issues(token, query, opts \\ []), do: client().search_issues(token, query, opts)
 
   @impl true
   def list_repository_languages(token, owner, repo), do: client().list_repository_languages(token, owner, repo)

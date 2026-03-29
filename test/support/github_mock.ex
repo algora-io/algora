@@ -3,6 +3,14 @@ defmodule Algora.Support.GithubMock do
   @behaviour Algora.Github.Behaviour
 
   defp random_id(n \\ 1000), do: :rand.uniform(n)
+  defp override(name), do: Application.get_env(:algora, :github_mock_overrides, %{})[name]
+
+  defp maybe_override(name, args, fallback) do
+    case override(name) do
+      nil -> fallback.()
+      fun when is_function(fun) -> apply(fun, args)
+    end
+  end
 
   @impl true
   def get_delivery(id) do
@@ -21,15 +29,17 @@ defmodule Algora.Support.GithubMock do
 
   @impl true
   def get_issue(_access_token, owner, repo, number) do
-    {:ok,
-     %{
-       "id" => random_id(),
-       "title" => "title #{number}",
-       "body" => "body #{number}",
-       "number" => number,
-       "html_url" => "https://github.com/#{owner}/#{repo}/issues/#{number}",
-       "state" => "open"
-     }}
+    maybe_override(:get_issue, [_access_token, owner, repo, number], fn ->
+      {:ok,
+       %{
+         "id" => random_id(),
+         "title" => "title #{number}",
+         "body" => "body #{number}",
+         "number" => number,
+         "html_url" => "https://github.com/#{owner}/#{repo}/issues/#{number}",
+         "state" => "open"
+       }}
+    end)
   end
 
   @impl true
@@ -65,15 +75,19 @@ defmodule Algora.Support.GithubMock do
 
   @impl true
   def get_pull_request(_access_token, owner, repo, number) do
-    {:ok,
-     %{
-       "id" => random_id(),
-       "title" => "title #{number}",
-       "body" => "body #{number}",
-       "number" => number,
-       "html_url" => "https://github.com/#{owner}/#{repo}/pull/#{number}",
-       "state" => "open"
-     }}
+    maybe_override(:get_pull_request, [_access_token, owner, repo, number], fn ->
+      {:ok,
+       %{
+         "id" => random_id(),
+         "title" => "title #{number}",
+         "body" => "body #{number}",
+         "number" => number,
+         "html_url" => "https://github.com/#{owner}/#{repo}/pull/#{number}",
+         "state" => "open",
+         "merged_at" => nil,
+         "user" => %{"login" => "user_#{random_id()}"}
+       }}
+    end)
   end
 
   @impl true
@@ -93,7 +107,9 @@ defmodule Algora.Support.GithubMock do
 
   @impl true
   def get_user_by_username(_access_token, username) do
-    {:ok, %{"id" => :erlang.phash2(username, 1_000_000) + 1_000_000, "login" => username}}
+    maybe_override(:get_user_by_username, [_access_token, username], fn ->
+      {:ok, %{"id" => :erlang.phash2(username, 1_000_000) + 1_000_000, "login" => username}}
+    end)
   end
 
   @impl true
@@ -149,6 +165,13 @@ defmodule Algora.Support.GithubMock do
   end
 
   @impl true
+  def list_issue_comments(_access_token, owner, repo, number, opts \\ []) do
+    maybe_override(:list_issue_comments, [_access_token, owner, repo, number, opts], fn ->
+      {:ok, []}
+    end)
+  end
+
+  @impl true
   def list_user_repositories(_access_token, _username, _opts \\ []) do
     {:ok, []}
   end
@@ -161,6 +184,13 @@ defmodule Algora.Support.GithubMock do
   @impl true
   def list_repository_comments(_access_token, _owner, _repo, _opts \\ []) do
     {:ok, []}
+  end
+
+  @impl true
+  def search_issues(_access_token, query, opts \\ []) do
+    maybe_override(:search_issues, [_access_token, query, opts], fn ->
+      {:ok, %{"items" => []}}
+    end)
   end
 
   @impl true

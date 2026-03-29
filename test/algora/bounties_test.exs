@@ -10,8 +10,10 @@ defmodule Algora.BountiesTest do
   alias Algora.Activities.SendEmail
   alias Algora.Bounties
   alias Algora.Bounties.Bounty
+  alias Algora.Bounties.Jobs.SyncOrgBounties
   alias Algora.Payments.Transaction
   alias Algora.PSP
+  alias Algora.Workspace.Ticket
   alias Bounties.Tip
 
   setup do
@@ -673,6 +675,62 @@ defmodule Algora.BountiesTest do
     end
   end
 
+  describe "SyncOrgBounties" do
+    test "closes stale bounty tickets from GitHub state", %{owner: owner, repo: repo, ticket: ticket} do
+      insert!(:bounty, owner: owner, ticket: ticket, amount: ~M[100]usd)
+
+      with_github_mock_overrides(%{
+        get_issue: fn _token, _owner, _repo, number ->
+          {:ok,
+           %{
+             "id" => 1,
+             "title" => "title #{number}",
+             "body" => "body #{number}",
+             "number" => number,
+             "html_url" => "https://github.com/#{owner.provider_login}/#{repo.name}/issues/#{number}",
+             "state" => "closed"
+           }}
+        end
+      })
+
+      assert {:ok, _} = perform_job(SyncOrgBounties, %{"owner_id" => owner.id})
+      assert Repo.get!(Ticket, ticket.id).state == :closed
+    end
+
+    test "backfills claim records from matching pull requests", %{owner: owner, repo: repo, ticket: ticket} do
+      insert!(:bounty, owner: owner, ticket: ticket, amount: ~M[100]usd)
+      solver = "solver_sync"
+
+      with_github_mock_overrides(%{
+        search_issues: fn _token, _query, _opts ->
+          {:ok, %{"items" => [%{"number" => 77}]}}
+        end,
+        get_pull_request: fn _token, pull_owner, pull_repo, number ->
+          {:ok,
+           %{
+             "id" => 77,
+             "title" => "Fix bounty issue",
+             "body" => "/claim ##{ticket.number}",
+             "number" => number,
+             "html_url" => "https://github.com/#{pull_owner}/#{pull_repo}/pull/#{number}",
+             "state" => "open",
+             "merged_at" => nil,
+             "user" => %{"login" => solver}
+           }}
+        end,
+        get_user_by_username: fn _token, username ->
+          {:ok, %{"id" => 9_999, "login" => username}}
+        end
+      })
+
+      assert {:ok, _} = perform_job(SyncOrgBounties, %{"owner_id" => owner.id})
+
+      claims = Bounties.list_claims([ticket.id])
+      assert length(claims) == 1
+      assert hd(claims).user.provider_login == solver
+    end
+  end
+
   describe "generate_line_items/2" do
     test "uses owner's fee percentage for platform fee" do
       owner = insert!(:user, fee_pct: 5)
@@ -737,5 +795,14 @@ defmodule Algora.BountiesTest do
       payout = Enum.find(line_items, &(&1.type == :payout))
       assert payout.description == "repo#123"
     end
+  end
+
+  defp with_github_mock_overrides(overrides) do
+    previous = Application.get_env(:algora, :github_mock_overrides, %{})
+    Application.put_env(:algora, :github_mock_overrides, Map.merge(previous, overrides))
+
+    on_exit(fn ->
+      Application.put_env(:algora, :github_mock_overrides, previous)
+    end)
   end
 end

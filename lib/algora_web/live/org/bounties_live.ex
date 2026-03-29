@@ -8,6 +8,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
   alias Algora.Accounts.User
   alias Algora.Bounties
   alias Algora.Bounties.Bounty
+  alias Algora.Bounties.Jobs.SyncOrgBounties
   alias Algora.Github
   alias Algora.Markdown
   alias Algora.Payments
@@ -592,6 +593,12 @@ defmodule AlgoraWeb.Org.BountiesLive do
       )
 
     transactions = Payments.list_hosted_transactions(current_org.id, limit: page_size())
+
+    if connected?(socket) do
+      %{"owner_id" => current_org.id}
+      |> SyncOrgBounties.new()
+      |> Oban.insert()
+    end
 
     {:noreply,
      socket

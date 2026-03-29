@@ -279,6 +279,11 @@ defmodule Algora.Github.Client do
   end
 
   @impl true
+  def list_issue_comments(access_token, owner, repo, number, opts \\ []) do
+    fetch(access_token, "/repos/#{owner}/#{repo}/issues/#{number}/comments#{build_query(opts)}")
+  end
+
+  @impl true
   def list_user_repositories(access_token, username, opts \\ []) do
     fetch(access_token, "/users/#{username}/repos#{build_query(opts)}")
   end
@@ -291,6 +296,12 @@ defmodule Algora.Github.Client do
   @impl true
   def list_repository_comments(access_token, owner, repo, opts \\ []) do
     fetch(access_token, "/repos/#{owner}/#{repo}/issues/comments#{build_query(opts)}")
+  end
+
+  @impl true
+  def search_issues(access_token, query, opts \\ []) do
+    params = Keyword.merge([q: query], opts)
+    fetch(access_token, "/search/issues#{build_query(params)}")
   end
 
   @impl true

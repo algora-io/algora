@@ -40,6 +40,7 @@ defmodule Algora.Jobs.JobPosting do
     field :states, {:array, :string}, default: []
 
     field :require_security_clearance, :boolean, default: false
+    field :require_us_citizenship, :boolean, default: false
     field :outbound, :boolean, default: true
 
     # Equity compensation details
@@ -93,7 +94,8 @@ defmodule Algora.Jobs.JobPosting do
       :max_equity_pct,
       :min_equity,
       :max_equity,
-      :require_security_clearance
+      :require_security_clearance,
+      :require_us_citizenship
     ])
     |> generate_id()
     |> validate_required([:url])

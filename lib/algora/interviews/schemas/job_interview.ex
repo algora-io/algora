@@ -19,6 +19,7 @@ defmodule Algora.Interviews.JobInterview do
     field :company_feedback_token, :string
     field :candidate_feedback_token, :string
     field :willing_to_relocate, :boolean
+    field :open_to_inperson, :boolean
     field :work_auth_us, :boolean
     field :resume_url, :string
     field :earliest_start_date, :date
@@ -46,6 +47,7 @@ defmodule Algora.Interviews.JobInterview do
       :company_feedback_token,
       :candidate_feedback_token,
       :willing_to_relocate,
+      :open_to_inperson,
       :work_auth_us,
       :resume_url,
       :earliest_start_date,

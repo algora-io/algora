@@ -699,10 +699,63 @@ defmodule AlgoraWeb.Webhooks.GithubController do
                merged_at: Util.to_date!(github_ticket["merged_at"])
              )
              |> Repo.update() do
-          {:ok, _} -> :ok
+          {:ok, updated_ticket} -> 
+            # Sync bounty status when ticket state changes
+            sync_bounty_status_with_ticket(updated_ticket)
+            :ok
           {:error, reason} -> {:error, reason}
         end
     end
+  end
+
+  defp sync_bounty_status_with_ticket(ticket) do
+    # Find all open bounties for this ticket
+    bounties = 
+      Repo.all(
+        from b in Bounty,
+          where: b.ticket_id == ^ticket.id,
+          where: b.status == :open
+      )
+
+    # Update bounty status based on ticket state
+    case ticket.state do
+      :closed ->
+        # When a GitHub issue/PR is closed, mark associated bounties as cancelled
+        # This prevents misleading "0 claims, Open" display on org bounty pages
+        for bounty <- bounties do
+          bounty
+          |> change(status: :cancelled)
+          |> Repo.update()
+        end
+
+      :open ->
+        # When a GitHub issue/PR is reopened, reopen cancelled bounties
+        cancelled_bounties = 
+          Repo.all(
+            from b in Bounty,
+              where: b.ticket_id == ^ticket.id,
+              where: b.status == :cancelled
+          )
+        
+        for bounty <- cancelled_bounties do
+          bounty
+          |> change(status: :open)
+          |> Repo.update()
+        end
+
+      _ ->
+        # No action needed for other states
+        :ok
+    end
+    
+    # Trigger bounty cache refresh
+    Bounties.broadcast()
+    
+    :ok
+  rescue
+    error ->
+      Logger.error("Failed to sync bounty status: #{inspect(error)}")
+      :ok
   end
 
   defp handle_ticket_metadata_change(%Webhook{payload: payload} = webhook) do

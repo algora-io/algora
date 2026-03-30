@@ -1611,4 +1611,14 @@ defmodule Algora.Bounties do
       end
     end)
   end
+
+  @spec cancel_bounties_for_ticket(String.t()) :: :ok
+  def cancel_bounties_for_ticket(ticket_id) do
+    {count, _} =
+      from(b in Bounty, where: b.ticket_id == ^ticket_id, where: b.status == :open)
+      |> Repo.update_all(set: [status: :cancelled])
+
+    if count > 0, do: broadcast()
+    :ok
+  end
 end

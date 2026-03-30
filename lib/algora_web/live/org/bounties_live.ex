@@ -419,40 +419,44 @@ defmodule AlgoraWeb.Org.BountiesLive do
                  provider: "github",
                  connected_user_id: bounty.ticket.repository.user.id
                ),
-             {:ok, token} <- Github.get_installation_token(installation.provider_id),
-             {:ok, cr} <-
-               Workspace.fetch_command_response(bounty.ticket_id, :bounty),
-             {:ok, _} <-
+             {:ok, token} <- Github.get_installation_token(installation.provider_id) do
+             
+          case Workspace.fetch_command_response(bounty.ticket_id, :bounty) do
+            {:ok, cr} ->
                Github.delete_issue_comment(
                  token,
                  bounty.ticket.repository.user.provider_login,
                  bounty.ticket.repository.name,
                  cr.provider_response_id
-               ),
-             :ok <-
-               Workspace.remove_existing_amount_labels(
-                 token,
-                 bounty.ticket.repository.user.provider_login,
-                 bounty.ticket.repository.name,
-                 bounty.ticket.number
-               ),
-             {:ok, _} <-
-               Github.remove_label_from_issue(
-                 token,
-                 bounty.ticket.repository.user.provider_login,
-                 bounty.ticket.repository.name,
-                 bounty.ticket.number,
-                 "💎 Bounty"
-               ),
-             {:ok, _} <- Workspace.delete_command_response(cr.id),
-             {:ok, _bounty} <- Bounties.delete_bounty(bounty) do
-          {:noreply,
-           socket
-           |> put_flash(:info, "Bounty deleted successfully")
-           |> assign_bounties()}
-        else
+               )
+               Workspace.delete_command_response(cr.id)
+            _ -> :ok
+          end
+
+          Workspace.remove_existing_amount_labels(
+            token,
+            bounty.ticket.repository.user.provider_login,
+            bounty.ticket.repository.name,
+            bounty.ticket.number
+          )
+
+          Github.remove_label_from_issue(
+            token,
+            bounty.ticket.repository.user.provider_login,
+            bounty.ticket.repository.name,
+            bounty.ticket.number,
+            "💎 Bounty"
+          )
+        end
+
+        case Bounties.delete_bounty(bounty) do
+          {:ok, _bounty} ->
+            {:noreply,
+             socket
+             |> put_flash(:info, "Bounty deleted successfully")
+             |> assign_bounties()}
           {:error, _changeset} ->
-            {:noreply, put_flash(socket, :error, "Failed to delete bounty")}
+            {:noreply, put_flash(socket, :error, "Failed to delete bounty data")}
         end
 
       is_nil(socket.assigns.current_user) ->

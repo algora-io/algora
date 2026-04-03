@@ -100,8 +100,7 @@ defmodule AlgoraWeb.HomeLive do
          |> assign(:stats2, stats2)
          |> assign(:jobs_by_user, jobs_by_user)
          |> assign(:orgs_with_stats, orgs_with_stats)
-         |> assign(:hires1, hires1())
-         |> assign(:hires2, hires2())
+         |> assign(:hires, hires())
          |> assign(:show_challenge_drawer, false)
          |> assign(:challenge_form, to_form(ChallengeForm.changeset(%ChallengeForm{}, %{})))
          |> assign(:tech_stack, [])
@@ -490,7 +489,7 @@ defmodule AlgoraWeb.HomeLive do
                     </div>
                     <div class="max-w-[88rem]">
                       <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-                        <%= for hire <- @hires1 do %>
+                        <%= for hire <- @hires do %>
                           <%= if Map.get(hire, :special) do %>
                             <div class="relative flex-1 flex mb-12 max-w-md">
                               <div class="truncate flex items-center gap-2 sm:gap-3 p-4 sm:py-6 bg-gradient-to-br from-emerald-900/30 to-emerald-800/20 rounded-xl border-2 border-emerald-400/30 shadow-xl shadow-emerald-400/10 w-full">
@@ -544,7 +543,7 @@ defmodule AlgoraWeb.HomeLive do
                       </div>
 
                       <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-                        <%= for hire <- @hires1 do %>
+                        <%= for hire <- @hires do %>
                           <%= unless Map.get(hire, :special) do %>
                             <div class="relative flex items-center gap-2 sm:gap-3 p-4 sm:py-6 bg-card rounded-xl border shrink-0">
                               <img
@@ -798,7 +797,7 @@ defmodule AlgoraWeb.HomeLive do
     """
   end
 
-  defp hires1 do
+  defp hires do
     [
       %{
         company_name: "CodeRabbit",
@@ -841,100 +840,6 @@ defmodule AlgoraWeb.HomeLive do
         person_name: "Maxim S",
         person_avatar: "https://github.com/mschuwalow.png",
         person_title: "Lead Engineer"
-      }
-    ]
-  end
-
-  defp hires2 do
-    [
-      %{
-        company_name: "Cal.com",
-        company_avatar: "https://github.com/calcom.png",
-        person_name: "Efraín",
-        person_avatar: "https://github.com/roae.png",
-        person_title: "Software Engineer"
-      },
-      %{
-        company_name: "Hanko",
-        company_avatar: "https://avatars.githubusercontent.com/u/20222142?v=4",
-        person_name: "Ashutosh",
-        person_avatar: "https://algora-console.fly.storage.tigris.dev/avatars/Ashutosh-Bhadauriya.jpeg",
-        person_title: "Developer Advocate"
-      },
-      %{
-        company_name: "Tailcall",
-        company_avatar:
-          "https://algora.io/asset/storage/v1/object/public/images/org/cli0b0kdt0000mh0fngt4r4bk-1741007407053",
-        person_name: "Kiryl",
-        person_avatar: "https://algora.io/asset/storage/v1/object/public/images/user/clg4rtl2n0002jv0fg30lto6l",
-        person_title: "Founding Engineer"
-      },
-      %{
-        company_name: "Forge Code",
-        company_avatar: "https://avatars.githubusercontent.com/u/197551910?s=200&v=4",
-        person_name: "Sandipsinh",
-        person_avatar: "https://algora-console.fly.storage.tigris.dev/avatars/ssddOnTop.jpeg",
-        person_title: "Software Engineer"
-      },
-      %{
-        company_name: "Twenty (YC S22)",
-        company_avatar: "https://github.com/twentyhq.png",
-        person_name: "Neo",
-        person_avatar: "https://github.com/neo773.png",
-        person_title: "Software Engineer"
-      },
-      %{
-        company_name: "Tailcall",
-        company_avatar:
-          "https://algora.io/asset/storage/v1/object/public/images/org/cli0b0kdt0000mh0fngt4r4bk-1741007407053",
-        person_name: "Panagiotis",
-        person_avatar: "https://github.com/karatakis.png",
-        person_title: "Software Engineer"
-      },
-      %{
-        company_name: "TraceMachina",
-        company_avatar: "https://avatars.githubusercontent.com/u/144973251?s=200&v=4",
-        person_name: "Tom",
-        person_avatar: "https://avatars.githubusercontent.com/u/38532?v=4",
-        person_title: "Staff Software Engineer",
-        special: true
-      },
-      %{
-        company_name: "Activepieces (YC S22)",
-        company_avatar: "https://avatars.githubusercontent.com/u/99494700?s=48&v=4",
-        person_name: "David",
-        person_avatar: "https://avatars.githubusercontent.com/u/51977119?v=4",
-        person_title: "Software Engineer",
-        special: true
-      },
-      %{
-        company_name: "TraceMachina",
-        company_avatar: "https://avatars.githubusercontent.com/u/144973251?s=200&v=4",
-        person_name: "Aman",
-        person_avatar: "https://avatars.githubusercontent.com/u/53134669?v=4",
-        person_title: "Software Engineer",
-        special: true
-      },
-      %{
-        company_name: "Permit.io",
-        company_avatar: "https://github.com/permitio.png",
-        person_name: "David",
-        person_avatar: "https://github.com/daveads.png",
-        person_title: "Software Engineer"
-      },
-      %{
-        company_name: "Shuttle (YC S20)",
-        company_avatar: "https://app.algora.io/asset/storage/v1/object/public/images/org/shuttle.png",
-        person_name: "Jon",
-        person_avatar: "https://github.com/jonaro00.png",
-        person_title: "Software Engineer"
-      },
-      %{
-        company_name: "Prefix.dev",
-        company_avatar: "https://github.com/prefix-dev.png",
-        person_name: "Denizhan",
-        person_avatar: "https://algora-console.fly.storage.tigris.dev/avatars/zelosleone.jpeg",
-        person_title: "Software Engineer"
       }
     ]
   end

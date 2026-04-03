@@ -1,16 +1,18 @@
 <!-- PROJECT LOGO -->
 <p align="center">
   <a href="https://algora.io">
-    <img src="https://algora.io/images/og/home.png?v=2" alt="Homepage">
+    <img src="priv/static/images/banner.png" alt="Homepage">
   </a>
 
-  <h4 align="center">Hire the top 1% open source engineers</h4>
+  <h3 align="center">Algora</h4>
 
   <p align="center">
+    Hire the top 1% open source engineers.
     <br/>
+    <a href="https://algora.io"><strong>Learn more »</strong></a>
+    <br />
+    <br />
     <a href="https://algora.io">Website</a>
-    ·
-    <a href="https://algora.io/docs">Docs</a>
     ·
     <a href="https://algora.io/discord">Discord</a>
     ·
@@ -21,6 +23,10 @@
     <a href="https://github.com/algora-io/console/issues">Issues</a>
   </p>
 
+<p align="center">
+  <a href="https://github.com/algora-io/algora/actions"><img src="https://img.shields.io/github/check-runs/algora-io/algora/main" alt="Checks"></a>
+  <a href="https://github.com/algora-io/algora/blob/main/LICENSE"><img src="https://img.shields.io/github/license/algora-io/algora?color=blue" alt="License"></a>
+  <a href="https://news.ycombinator.com/item?id=35412226"><img src="https://img.shields.io/badge/Hacker%20News-%231-%23FF6600" alt="Hacker News"></a>
 </p>
 
 Algora connects **companies** and **developers** for full-time and contract work.
@@ -33,12 +39,12 @@ This codebase consists of the following:
 
 OSS communities and closed source teams can **self-host** or join **[Algora.io](https://algora.io)** to accomplish the following:
 
-| Use with your                | Benefit                                           |
-| ---------------------------- | ------------------------------------------------- |
-| **open source community**    | reward open source contributors & maintainers     |
-| **contractors**              | manage work and complete outcome based payments   |
-| **job candidates**           | collaborate on paid projects for interviews       |
-| **teammates**                | run an internal bounty program for fun and profit |
+| Use with your             | Benefit                                           |
+| ------------------------- | ------------------------------------------------- |
+| **open source community** | reward open source contributors & maintainers     |
+| **contractors**           | manage work and complete outcome based payments   |
+| **job candidates**        | collaborate on paid projects for interviews       |
+| **teammates**             | run an internal bounty program for fun and profit |
 
 **[Algora.io](https://algora.io)**, hosted by Algora Public Benefit Corporation, extends functionalities including:
 
@@ -48,12 +54,12 @@ OSS communities and closed source teams can **self-host** or join **[Algora.io](
 
 **[Algora.io](https://algora.io)** is a complete solution for sourcing, screening, interviewing & onboarding engineers to your team.
 
-| Hiring process               | Benefit                                           |
-| ---------------------------- | ------------------------------------------------- |
-| **sourcing**                 | publish jobs to 50K+ developers, access matches   |
-| **screening**                | auto screen job applicants for OSS contributions  |
-| **interviewing**             | trial your candidates using bounties & contracts  |
-| **onboarding**               | contribute-first hires are productive on day 1    |
+| Hiring process   | Benefit                                          |
+| ---------------- | ------------------------------------------------ |
+| **sourcing**     | publish jobs to 50K+ developers, access matches  |
+| **screening**    | auto screen job applicants for OSS contributions |
+| **interviewing** | trial your candidates using bounties & contracts |
+| **onboarding**   | contribute-first hires are productive on day 1   |
 
  <table>
 
@@ -143,6 +149,7 @@ OSS communities and closed source teams can **self-host** or join **[Algora.io](
 The easiest way to get up and running is to [install](https://docs.docker.com/get-docker/) and use Docker for running Postgres.
 
 Make sure Docker, Elixir, Erlang and Node.js are all installed on your development machine. You can install Elixir and Erlang/OTP with [ASDF](https://asdf-vm.com/) from the project root as follows:
+
 1. [Install ASDF](https://asdf-vm.com/guide/getting-started.html)
 2. `asdf plugin add erlang`
 3. `asdf plugin add elixir`

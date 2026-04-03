@@ -504,12 +504,19 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     end
   end
 
-  defp execute_command(%Webhook{event_action: event_action, author: author, payload: payload}, {:attempt, args})
-       when event_action in ["issue_comment.created", "issue_comment.edited"] do
+  defp execute_command(%Webhook{event_action: event_action, author: author, payload: payload} = webhook, {:attempt, args})
+       when event_action in [
+              "pull_request.opened",
+              "pull_request.reopened",
+              "pull_request.edited",
+              "issue_comment.created",
+              "issue_comment.edited"
+            ] do
+    github_ticket = get_github_ticket(webhook)
     source_ticket_ref = %{
       owner: payload["repository"]["owner"]["login"],
       repo: payload["repository"]["name"],
-      number: payload["issue"]["number"]
+      number: github_ticket["number"]
     }
 
     target_ticket_ref =
@@ -535,12 +542,19 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     end
   end
 
-  defp execute_command(%Webhook{event_action: event_action, author: author, payload: payload}, {:claim, args})
-       when event_action in ["pull_request.opened", "pull_request.reopened", "pull_request.edited"] do
+  defp execute_command(%Webhook{event_action: event_action, author: author, payload: payload} = webhook, {:claim, args})
+       when event_action in [
+              "pull_request.opened",
+              "pull_request.reopened",
+              "pull_request.edited",
+              "issue_comment.created",
+              "issue_comment.edited"
+            ] do
+    github_ticket = get_github_ticket(webhook)
     source_ticket_ref = %{
       owner: payload["repository"]["owner"]["login"],
       repo: payload["repository"]["name"],
-      number: payload["pull_request"]["number"]
+      number: github_ticket["number"]
     }
 
     target_ticket_ref =
@@ -566,8 +580,8 @@ defmodule AlgoraWeb.Webhooks.GithubController do
                coauthor_provider_logins: (args[:splits] || []) |> Enum.map(& &1[:recipient]) |> Enum.uniq(),
                target_ticket_ref: target_ticket_ref,
                source_ticket_ref: source_ticket_ref,
-               status: if(payload["pull_request"]["merged_at"], do: :approved, else: :pending),
-               type: :pull_request
+               status: if(github_ticket["merged_at"], do: :approved, else: :pending),
+               type: if(Map.has_key?(github_ticket, "pull_request") or webhook.event == "pull_request", do: :pull_request, else: :issue)
              },
              installation_id: payload["installation"]["id"]
            ) do
@@ -699,8 +713,15 @@ defmodule AlgoraWeb.Webhooks.GithubController do
                merged_at: Util.to_date!(github_ticket["merged_at"])
              )
              |> Repo.update() do
-          {:ok, _} -> :ok
-          {:error, reason} -> {:error, reason}
+          {:ok, updated_ticket} ->
+            if state == :closed do
+              Bounties.cancel_bounties_for_ticket(updated_ticket.id)
+            end
+            
+            :ok
+
+          {:error, reason} ->
+            {:error, reason}
         end
     end
   end

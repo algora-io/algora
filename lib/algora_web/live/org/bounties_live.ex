@@ -8,6 +8,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
   alias Algora.Accounts.User
   alias Algora.Bounties
   alias Algora.Bounties.Bounty
+  alias Algora.Bounties.Jobs.SyncBountyTickets
   alias Algora.Github
   alias Algora.Markdown
   alias Algora.Payments
@@ -592,6 +593,14 @@ defmodule AlgoraWeb.Org.BountiesLive do
       )
 
     transactions = Payments.list_hosted_transactions(current_org.id, limit: page_size())
+
+    # Enqueue a background sync to keep GitHub issue state fresh.
+    # Deduplicated: runs at most once per hour per org.
+    if connected?(socket) do
+      %{"owner_id" => current_org.id}
+      |> SyncBountyTickets.new()
+      |> Oban.insert()
+    end
 
     {:noreply,
      socket

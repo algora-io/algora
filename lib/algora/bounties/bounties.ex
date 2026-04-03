@@ -1360,7 +1360,8 @@ defmodule Algora.Bounties do
         title: t.title,
         number: t.number,
         url: t.url,
-        description: t.description
+        description: t.description,
+        state: t.state
       },
       repository: %{
         id: r.id,

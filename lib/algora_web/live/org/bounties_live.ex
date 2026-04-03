@@ -414,44 +414,53 @@ defmodule AlgoraWeb.Org.BountiesLive do
           |> Repo.get(bounty_id)
           |> Repo.preload([:owner, [ticket: [repository: :user]]])
 
+        # Attempt GitHub resource cleanup (best-effort: comment/labels may already be gone)
         with {:ok, installation} <-
                Workspace.fetch_installation_by(
                  provider: "github",
                  connected_user_id: bounty.ticket.repository.user.id
                ),
-             {:ok, token} <- Github.get_installation_token(installation.provider_id),
-             {:ok, cr} <-
-               Workspace.fetch_command_response(bounty.ticket_id, :bounty),
-             {:ok, _} <-
-               Github.delete_issue_comment(
-                 token,
-                 bounty.ticket.repository.user.provider_login,
-                 bounty.ticket.repository.name,
-                 cr.provider_response_id
-               ),
-             :ok <-
-               Workspace.remove_existing_amount_labels(
-                 token,
-                 bounty.ticket.repository.user.provider_login,
-                 bounty.ticket.repository.name,
-                 bounty.ticket.number
-               ),
-             {:ok, _} <-
-               Github.remove_label_from_issue(
-                 token,
-                 bounty.ticket.repository.user.provider_login,
-                 bounty.ticket.repository.name,
-                 bounty.ticket.number,
-                 "💎 Bounty"
-               ),
-             {:ok, _} <- Workspace.delete_command_response(cr.id),
-             {:ok, _bounty} <- Bounties.delete_bounty(bounty) do
-          {:noreply,
-           socket
-           |> put_flash(:info, "Bounty deleted successfully")
-           |> assign_bounties()}
-        else
-          {:error, _changeset} ->
+             {:ok, token} <- Github.get_installation_token(installation.provider_id) do
+          case Workspace.fetch_command_response(bounty.ticket_id, :bounty) do
+            {:ok, cr} ->
+              Github.delete_issue_comment(
+                token,
+                bounty.ticket.repository.user.provider_login,
+                bounty.ticket.repository.name,
+                cr.provider_response_id
+              )
+
+              Workspace.delete_command_response(cr.id)
+
+            _ ->
+              :ok
+          end
+
+          Workspace.remove_existing_amount_labels(
+            token,
+            bounty.ticket.repository.user.provider_login,
+            bounty.ticket.repository.name,
+            bounty.ticket.number
+          )
+
+          Github.remove_label_from_issue(
+            token,
+            bounty.ticket.repository.user.provider_login,
+            bounty.ticket.repository.name,
+            bounty.ticket.number,
+            "ð Bounty"
+          )
+        end
+
+        # Always attempt database deletion regardless of GitHub cleanup status
+        case Bounties.delete_bounty(bounty) do
+          {:ok, _bounty} ->
+            {:noreply,
+             socket
+             |> put_flash(:info, "Bounty deleted successfully")
+             |> assign_bounties()}
+
+          {:error, _} ->
             {:noreply, put_flash(socket, :error, "Failed to delete bounty")}
         end
 

@@ -25,20 +25,20 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     with :ok <- ensure_human_author(webhook),
          {:ok, commands} <- process_commands(webhook),
          :ok <- process_event(webhook, commands) do
-      Logger.debug("✅ #{inspect(webhook.event_action)}")
+      Logger.debug("â #{inspect(webhook.event_action)}")
       :ok
     else
       {:error, :bot_event} ->
         :ok
 
       {:error, reason} ->
-        Logger.error("❌ #{inspect(webhook.event_action)}: #{inspect(reason)}")
+        Logger.error("â #{inspect(webhook.event_action)}: #{inspect(reason)}")
         alert(webhook, {:error, reason})
         {:error, reason}
     end
   rescue
     error ->
-      Logger.error("❌ #{inspect(webhook.event_action)}: #{inspect(error)}")
+      Logger.error("â #{inspect(webhook.event_action)}: #{inspect(error)}")
       alert(webhook, {:error, error})
       {:error, error}
   end
@@ -262,7 +262,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
               primary_claim.target.repository.user.provider_login,
               primary_claim.target.repository.name,
               primary_claim.target.number,
-              "🎉 The pull request of #{names} has been merged. The bounty can be rewarded [here](#{Claim.reward_url(primary_claim)})" <>
+              "ð The pull request of #{names} has been merged. The bounty can be rewarded [here](#{Claim.reward_url(primary_claim)})" <>
                 if(sponsors_to_notify == "", do: "", else: "\n\ncc #{sponsors_to_notify}")
             )
           end
@@ -634,7 +634,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     Enum.reduce_while(commands, :ok, fn command, :ok ->
       case execute_command(webhook, command) do
         {:ok, _result} ->
-          Logger.debug("✅ #{inspect(command)}")
+          Logger.debug("â #{inspect(command)}")
           {:cont, :ok}
 
         error ->
@@ -699,9 +699,52 @@ defmodule AlgoraWeb.Webhooks.GithubController do
                merged_at: Util.to_date!(github_ticket["merged_at"])
              )
              |> Repo.update() do
-          {:ok, _} -> :ok
-          {:error, reason} -> {:error, reason}
+          {:ok, updated_ticket} ->
+            sync_bounty_status_with_ticket(updated_ticket)
+            :ok
+
+          {:error, reason} ->
+            {:error, reason}
         end
+    end
+  end
+
+  # Syncs bounty status when a GitHub issue/PR is closed or reopened.
+  # - Closed ticket: cancels all open bounties linked to it.
+  # - Reopened ticket: restores previously cancelled bounties to open.
+  # Errors are rescued so they never break the webhook flow.
+  defp sync_bounty_status_with_ticket(%{id: ticket_id, state: state}) do
+    try do
+      case state do
+        :closed ->
+          Repo.update_all(
+            from(b in Bounty,
+              where: b.ticket_id == ^ticket_id,
+              where: b.status == :open
+            ),
+            set: [status: :cancelled]
+          )
+
+          Bounties.broadcast()
+
+        :open ->
+          Repo.update_all(
+            from(b in Bounty,
+              where: b.ticket_id == ^ticket_id,
+              where: b.status == :cancelled
+            ),
+            set: [status: :open]
+          )
+
+          Bounties.broadcast()
+
+        _ ->
+          :ok
+      end
+    rescue
+      error ->
+        Logger.error("sync_bounty_status_with_ticket failed for ticket #{ticket_id}: #{inspect(error)}")
+        :ok
     end
   end
 

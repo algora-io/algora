@@ -125,11 +125,18 @@ defmodule AlgoraWeb.UserAuth do
       |> assign(:current_context, Accounts.get_last_context_user(user))
       |> assign(:all_contexts, Accounts.get_contexts(user))
 
+    # Fix: Ensure session is persisted before returning
+    # This prevents race condition where frontend checks session before cookie is set
+    conn =
+      conn
+      |> configure_session(renew: true)
+      |> clear_session()
+
     conn
-    |> renew_session()
     |> put_session(:user_id, user.id)
     |> put_session(:last_context, Accounts.last_context(user))
     |> put_session(:live_socket_id, "users_sessions:#{user.id}")
+    |> configure_session(persist: true)
   end
 
   defp renew_session(conn) do

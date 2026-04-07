@@ -15,7 +15,16 @@ defmodule Algora.Application do
         {NodeJS.Supervisor, [path: LiveSvelte.SSR.NodeJS.server_path(), pool_size: 4]},
         AlgoraWeb.Telemetry,
         Algora.Repo,
-        {Oban, Application.fetch_env!(:algora, Oban)},
+        {Oban,
+         :algora
+         |> Application.fetch_env!(Oban)
+         |> Keyword.put(:plugins, [
+           {Oban.Plugins.Cron,
+            timezone: "America/Los_Angeles",
+            crontab: [
+              {"0 3 * * *", Algora.Bounties.Jobs.SyncOpenBounties}
+            ]}
+         ])},
         {DNSCluster, query: Application.get_env(:algora, :dns_cluster_query) || :ignore},
         {Phoenix.PubSub, name: Algora.PubSub},
         # Start the Finch HTTP client for sending emails

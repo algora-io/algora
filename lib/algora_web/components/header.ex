@@ -7,8 +7,8 @@ defmodule AlgoraWeb.Components.Header do
 
   defp nav_links do
     [
-      %{name: "Explore", path: ~p"/platform"},
-      %{name: "Contact us", path: AlgoraWeb.Constants.get(:calendar_url), desktop_only: true}
+      # %{name: "Explore", path: ~p"/platform"},
+      # %{name: "Contact us", path: AlgoraWeb.Constants.get(:calendar_url), desktop_only: true}
     ]
   end
 

@@ -15,8 +15,6 @@ defmodule AlgoraWeb.HomeLive do
   alias AlgoraWeb.Components.Footer
   alias AlgoraWeb.Components.Header
   alias AlgoraWeb.Data.HomeCache
-  alias AlgoraWeb.Forms.ChallengeForm
-
   require Logger
 
   defmodule Form do
@@ -101,8 +99,6 @@ defmodule AlgoraWeb.HomeLive do
          |> assign(:jobs_by_user, jobs_by_user)
          |> assign(:orgs_with_stats, orgs_with_stats)
          |> assign(:hires, hires())
-         |> assign(:show_challenge_drawer, false)
-         |> assign(:challenge_form, to_form(ChallengeForm.changeset(%ChallengeForm{}, %{})))
          |> assign(:tech_stack, [])
          |> assign(:candidates_data, candidates_data)
          |> assign(:carousel_items, carousel_items)
@@ -672,10 +668,6 @@ defmodule AlgoraWeb.HomeLive do
     </div>
 
     <.modal_video_dialog />
-    <.challenge_drawer
-      show_challenge_drawer={@show_challenge_drawer}
-      challenge_form={@challenge_form}
-    />
     """
   end
 
@@ -724,33 +716,6 @@ defmodule AlgoraWeb.HomeLive do
       end
     else
       {:noreply, redirect(socket, external: Algora.Github.authorize_url(%{return_to: "/jobs"}))}
-    end
-  end
-
-  @impl true
-  def handle_event("show_challenge_drawer", _, socket) do
-    {:noreply, assign(socket, :show_challenge_drawer, true)}
-  end
-
-  @impl true
-  def handle_event("close_challenge_drawer", _, socket) do
-    {:noreply, assign(socket, :show_challenge_drawer, false)}
-  end
-
-  @impl true
-  def handle_event("submit_challenge", %{"challenge_form" => params}, socket) do
-    case ChallengeForm.changeset(%ChallengeForm{}, params) do
-      %{valid?: true} = changeset ->
-        data = Ecto.Changeset.apply_changes(changeset)
-        Algora.Activities.alert("New challenge submission from #{data.email}: #{data.description}", :critical)
-
-        {:noreply,
-         socket
-         |> assign(:show_challenge_drawer, false)
-         |> put_flash(:info, "Thank you for your submission! We'll be in touch soon.")}
-
-      %{valid?: false} = changeset ->
-        {:noreply, assign(socket, :challenge_form, to_form(changeset))}
     end
   end
 
@@ -842,47 +807,6 @@ defmodule AlgoraWeb.HomeLive do
         person_title: "Lead Engineer"
       }
     ]
-  end
-
-  defp challenge_drawer(assigns) do
-    ~H"""
-    <.drawer show={@show_challenge_drawer} on_cancel="close_challenge_drawer" direction="right">
-      <.drawer_header>
-        <.drawer_title>Submit Challenge</.drawer_title>
-        <.drawer_description>
-          Tell us about your coding challenge and we'll help you set it up.
-        </.drawer_description>
-      </.drawer_header>
-      <.drawer_content class="mt-4">
-        <.form for={@challenge_form} phx-submit="submit_challenge">
-          <div class="space-y-6 max-w-md">
-            <.input
-              field={@challenge_form[:email]}
-              label="Email"
-              type="email"
-              required
-              placeholder="your@email.com"
-            />
-            <.input
-              field={@challenge_form[:description]}
-              label="Challenge Description"
-              type="textarea"
-              required
-              placeholder="Describe your coding challenge..."
-            />
-            <div class="flex justify-end gap-4">
-              <.button variant="outline" type="button" phx-click="close_challenge_drawer">
-                Cancel
-              </.button>
-              <.button type="submit">
-                Submit
-              </.button>
-            </div>
-          </div>
-        </.form>
-      </.drawer_content>
-    </.drawer>
-    """
   end
 
   defp assign_events(socket) do

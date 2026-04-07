@@ -363,13 +363,6 @@ defmodule AlgoraWeb.SignInLive do
       },
       %{
         text:
-          "The majority of work is done by open source contributors, that's how it's built today. And that sort of helps us control our burn rate. You get paid if you get a pull request merged.",
-        author: "Tushar Mathur",
-        role: "Founder & CEO, Tailcall",
-        avatar: "https://avatars.githubusercontent.com/u/194482?v=4"
-      },
-      %{
-        text:
           "A GitHub issue is this atomic unit of a problem, and allowing you to put a cash bounty on it, to solve this specific problem, without any overhead, and make it available to any person, I find it very interesting.",
         author: "Jonny Burger",
         role: "Founder, Remotion",

@@ -138,14 +138,6 @@ defmodule AlgoraWeb.Components.Footer do
                 <li>
                   <.link
                     class="text-sm text-muted-foreground hover:text-white transition-colors"
-                    navigate={~p"/challenges/jules"}
-                  >
-                    Jules
-                  </.link>
-                </li>
-                <li>
-                  <.link
-                    class="text-sm text-muted-foreground hover:text-white transition-colors"
                     navigate={~p"/challenges/turso"}
                   >
                     Turso

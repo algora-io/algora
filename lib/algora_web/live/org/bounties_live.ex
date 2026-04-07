@@ -180,7 +180,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
                           phx-value-id={bounty.id}
                         >
                           <div class="flex cursor-pointer justify-center -space-x-3">
-                            <%= for {_group_id, claims} <- claim_groups do %>
+                            <%= for {_group_id, claims} <- Enum.take(claim_groups, 10) do %>
                               <div class="relative h-10 w-10 flex-shrink-0 rounded-full ring-4 ring-gray-800 group-hover:brightness-110">
                                 <img
                                   alt={User.handle(hd(claims).user)}

@@ -31,7 +31,8 @@ defmodule AlgoraWeb.Org.BountiesLive do
      socket
      |> assign(:show_edit_modal, false)
      |> assign(:editing_bounty, nil)
-     |> assign(:edit_form, to_form(edit_amount_changeset()))}
+     |> assign(:edit_form, to_form(edit_amount_changeset()))
+     |> assign(:expanded_bounties, MapSet.new())}
   end
 
   def render(assigns) do
@@ -173,7 +174,11 @@ defmodule AlgoraWeb.Org.BountiesLive do
                     </td>
                     <td class="[&:has([role=checkbox])]:pr-0 p-4 align-middle">
                       <%= if map_size(claim_groups) > 0 do %>
-                        <div class="group flex cursor-pointer flex-col items-center gap-1">
+                        <div
+                          class="group flex cursor-pointer flex-col items-center gap-1"
+                          phx-click="toggle-claims"
+                          phx-value-id={bounty.id}
+                        >
                           <div class="flex cursor-pointer justify-center -space-x-3">
                             <%= for {_group_id, claims} <- claim_groups do %>
                               <div class="relative h-10 w-10 flex-shrink-0 rounded-full ring-4 ring-gray-800 group-hover:brightness-110">
@@ -206,7 +211,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
                               stroke-width="2"
                               stroke-linecap="round"
                               stroke-linejoin="round"
-                              class="-mr-4 h-4 w-4 rotate-90 text-gray-400 group-hover:text-gray-300"
+                              class={"-mr-4 h-4 w-4 text-gray-400 group-hover:text-gray-300 transition-transform #{if MapSet.member?(@expanded_bounties, bounty.id), do: "-rotate-90", else: "rotate-90"}"}
                             >
                               <path d="M9 6l6 6l-6 6"></path>
                             </svg>
@@ -235,58 +240,60 @@ defmodule AlgoraWeb.Org.BountiesLive do
                       </div>
                     </td>
                   </tr>
-                  <%= for {_group_id, claims} <- claim_groups do %>
-                    <tr
-                      class="border-b border-white/15 bg-gray-950/50 transition-colors data-[state=selected]:bg-gray-100 hover:bg-gray-100/50 dark:data-[state=selected]:bg-gray-800 dark:hover:bg-gray-950/50"
-                      data-state="false"
-                    >
-                      <td class="[&:has([role=checkbox])]:pr-0 p-4 align-middle w-full">
-                        <div class="min-w-[250px]">
-                          <div class="flex items-center gap-3">
-                            <div class="flex -space-x-3">
-                              <%= for claim <- claims do %>
-                                <div class="relative h-10 w-10 flex-shrink-0 rounded-full ring-4 ring-background">
-                                  <img
-                                    alt={User.handle(claim.user)}
-                                    loading="lazy"
-                                    decoding="async"
-                                    class="rounded-full"
-                                    src={claim.user.avatar_url}
-                                    style="position: absolute; height: 100%; width: 100%; inset: 0px; color: transparent;"
-                                  />
+                  <%= if MapSet.member?(@expanded_bounties, bounty.id) do %>
+                    <%= for {_group_id, claims} <- claim_groups do %>
+                      <tr
+                        class="border-b border-white/15 bg-gray-950/50 transition-colors data-[state=selected]:bg-gray-100 hover:bg-gray-100/50 dark:data-[state=selected]:bg-gray-800 dark:hover:bg-gray-950/50"
+                        data-state="false"
+                      >
+                        <td class="[&:has([role=checkbox])]:pr-0 p-4 align-middle w-full">
+                          <div class="min-w-[250px]">
+                            <div class="flex items-center gap-3">
+                              <div class="flex -space-x-3">
+                                <%= for claim <- claims do %>
+                                  <div class="relative h-10 w-10 flex-shrink-0 rounded-full ring-4 ring-background">
+                                    <img
+                                      alt={User.handle(claim.user)}
+                                      loading="lazy"
+                                      decoding="async"
+                                      class="rounded-full"
+                                      src={claim.user.avatar_url}
+                                      style="position: absolute; height: 100%; width: 100%; inset: 0px; color: transparent;"
+                                    />
+                                  </div>
+                                <% end %>
+                              </div>
+                              <div>
+                                <div class="text-sm font-medium text-gray-200">
+                                  {claims
+                                  |> Enum.map(fn c -> User.handle(c.user) end)
+                                  |> Algora.Util.format_name_list()}
                                 </div>
-                              <% end %>
-                            </div>
-                            <div>
-                              <div class="text-sm font-medium text-gray-200">
-                                {claims
-                                |> Enum.map(fn c -> User.handle(c.user) end)
-                                |> Algora.Util.format_name_list()}
-                              </div>
-                              <div class="text-xs text-gray-400">
-                                {Algora.Util.time_ago(hd(claims).inserted_at)}
+                                <div class="text-xs text-gray-400">
+                                  {Algora.Util.time_ago(hd(claims).inserted_at)}
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      </td>
-                      <td class="[&:has([role=checkbox])]:pr-0 p-4 align-middle">
-                        <div class="min-w-[180px]">
-                          <div class="flex items-center justify-end gap-4">
-                            <.button
-                              :if={hd(claims).source}
-                              href={hd(claims).source.url}
-                              variant="secondary"
-                            >
-                              View
-                            </.button>
-                            <.button href={~p"/claims/#{hd(claims).group_id}"}>
-                              Reward
-                            </.button>
+                        </td>
+                        <td class="[&:has([role=checkbox])]:pr-0 p-4 align-middle">
+                          <div class="min-w-[180px]">
+                            <div class="flex items-center justify-end gap-4">
+                              <.button
+                                :if={hd(claims).source}
+                                href={hd(claims).source.url}
+                                variant="secondary"
+                              >
+                                View
+                              </.button>
+                              <.button href={~p"/claims/#{hd(claims).group_id}"}>
+                                Reward
+                              </.button>
+                            </div>
                           </div>
-                        </div>
-                      </td>
-                    </tr>
+                        </td>
+                      </tr>
+                    <% end %>
                   <% end %>
                 <% end %>
               </tbody>
@@ -573,6 +580,17 @@ defmodule AlgoraWeb.Org.BountiesLive do
      |> assign(:edit_form, to_form(edit_amount_changeset()))}
   end
 
+  def handle_event("toggle-claims", %{"id" => bounty_id}, socket) do
+    expanded =
+      if MapSet.member?(socket.assigns.expanded_bounties, bounty_id) do
+        MapSet.delete(socket.assigns.expanded_bounties, bounty_id)
+      else
+        MapSet.put(socket.assigns.expanded_bounties, bounty_id)
+      end
+
+    {:noreply, assign(socket, :expanded_bounties, expanded)}
+  end
+
   def handle_event(_event, _params, socket) do
     {:noreply, socket}
   end
@@ -600,7 +618,8 @@ defmodule AlgoraWeb.Org.BountiesLive do
      |> assign(:transaction_rows, to_transaction_rows(transactions))
      |> assign(:has_more_bounties, length(bounties) >= page_size())
      |> assign(:has_more_transactions, length(transactions) >= page_size())
-     |> assign(:stats, stats)}
+     |> assign(:stats, stats)
+     |> assign(:expanded_bounties, MapSet.new())}
   end
 
   defp to_bounty_rows(bounties) do

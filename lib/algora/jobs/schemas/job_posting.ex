@@ -43,6 +43,8 @@ defmodule Algora.Jobs.JobPosting do
     field :require_us_citizenship, :boolean, default: false
     field :outbound, :boolean, default: true
 
+    field :custom_question, :string
+
     # Equity compensation details
     # Percentage-based equity (e.g., 0.25 for 0.25%)
     field :min_equity_pct, :decimal
@@ -95,7 +97,8 @@ defmodule Algora.Jobs.JobPosting do
       :min_equity,
       :max_equity,
       :require_security_clearance,
-      :require_us_citizenship
+      :require_us_citizenship,
+      :custom_question
     ])
     |> generate_id()
     |> validate_required([:url])

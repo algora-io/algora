@@ -24,6 +24,7 @@ defmodule Algora.Interviews.JobInterview do
     field :resume_url, :string
     field :earliest_start_date, :date
     field :favorite_thing, :string
+    field :custom_question_answer, :string
 
     belongs_to :user, User
     belongs_to :job_posting, Algora.Jobs.JobPosting
@@ -51,7 +52,8 @@ defmodule Algora.Interviews.JobInterview do
       :work_auth_us,
       :resume_url,
       :earliest_start_date,
-      :favorite_thing
+      :favorite_thing,
+      :custom_question_answer
     ])
     |> validate_required([:user_id, :job_posting_id, :org_id, :status])
     |> validate_inclusion(:status, @interview_statuses)

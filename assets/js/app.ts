@@ -399,6 +399,32 @@ const Hooks = {
       });
     },
   },
+  ChatInput: {
+    mounted() {
+      const el = this.el as HTMLTextAreaElement;
+      const resize = () => {
+        el.style.height = "auto";
+        el.style.height = Math.min(el.scrollHeight, 200) + "px";
+      };
+      el.addEventListener("input", resize);
+
+      el.addEventListener("keydown", (e: KeyboardEvent) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          const form = el.closest("form");
+          if (form) form.requestSubmit();
+        }
+      });
+
+      this.handleEvent("clear-input", ({ selector }: { selector: string }) => {
+        const target = document.querySelector(selector) as HTMLTextAreaElement;
+        if (target) {
+          target.value = "";
+          target.style.height = "auto";
+        }
+      });
+    },
+  },
   DeriveDomain: {
     mounted() {
       const domainInput = (this.el.closest("form") || document).querySelector(

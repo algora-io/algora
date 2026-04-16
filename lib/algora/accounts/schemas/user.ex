@@ -171,6 +171,7 @@ defmodule Algora.Accounts.User do
 
     # Resume
     field :resume_url, :string
+    field :resume, :string
 
     # Phone number
     field :phone_number, :string
@@ -614,6 +615,10 @@ defmodule Algora.Accounts.User do
   def type_from_provider(:github, "Bot"), do: :bot
   def type_from_provider(:github, "Organization"), do: :organization
   def type_from_provider(:github, _), do: :individual
+
+  def resume_changeset(%User{} = user, params) do
+    cast(user, params, [:resume])
+  end
 
   def handle(%{handle: handle}) when is_binary(handle), do: handle
   def handle(%{provider_login: handle}), do: handle

@@ -239,6 +239,10 @@ defmodule Algora.Accounts do
     user |> User.hiring_changeset(attrs) |> Repo.update()
   end
 
+  def update_resume(%User{} = user, resume) do
+    user |> User.resume_changeset(%{resume: resume}) |> Repo.update()
+  end
+
   ## Database getters
 
   @doc """

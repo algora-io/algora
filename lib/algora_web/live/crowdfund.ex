@@ -437,7 +437,7 @@ defmodule AlgoraWeb.CrowdfundLive do
         {:noreply,
          socket
          |> assign(:pending_action, {event, unsigned_params})
-         |> push_event("open_popup", %{url: socket.assigns.oauth_url})}
+         |> redirect(external: socket.assigns.oauth_url)}
       end
     else
       {:noreply, assign(socket, :bounty_form, to_form(changeset))}
@@ -474,7 +474,7 @@ defmodule AlgoraWeb.CrowdfundLive do
         {:noreply,
          socket
          |> assign(:pending_action, {event, unsigned_params})
-         |> push_event("open_popup", %{url: socket.assigns.oauth_url})}
+         |> redirect(external: socket.assigns.oauth_url)}
       end
     else
       {:noreply, assign(socket, :tip_form, to_form(changeset))}

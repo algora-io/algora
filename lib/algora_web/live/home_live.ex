@@ -15,6 +15,7 @@ defmodule AlgoraWeb.HomeLive do
   alias AlgoraWeb.Components.Footer
   alias AlgoraWeb.Components.Header
   alias AlgoraWeb.Data.HomeCache
+
   require Logger
 
   defmodule Form do
@@ -965,8 +966,8 @@ defmodule AlgoraWeb.HomeLive do
 
   defp build_carousel_items(candidates_data) do
     job_pages = [
-      %{url: "https://algora.io/og/coderabbit/jobs", alt: "CodeRabbit jobs"},
-      %{url: "https://algora.io/og/lovable/jobs", alt: "Lovable jobs"}
+      # %{url: "https://algora.io/og/coderabbit/jobs", alt: "CodeRabbit jobs"},
+      # %{url: "https://algora.io/og/lovable/jobs", alt: "Lovable jobs"}
     ]
 
     # Cadence: Candidate, Candidate, Job page, Candidate, Candidate, Job page
@@ -977,7 +978,7 @@ defmodule AlgoraWeb.HomeLive do
       new_candidate_count = candidate_count + 1
 
       # After every 2 candidates, insert a job page
-      if rem(new_candidate_count, 2) == 0 do
+      if job_pages != [] and rem(new_candidate_count, 2) == 0 do
         job_page = Enum.at(job_pages, rem(job_page_index, length(job_pages)))
         {acc_with_candidate ++ [{:job_page, job_page}], new_candidate_count, job_page_index + 1}
       else

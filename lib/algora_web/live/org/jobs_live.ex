@@ -143,6 +143,11 @@ defmodule AlgoraWeb.Org.JobsLive do
                         <%= if job.id in ["b4sFSeJvb2rteUEX", "M9yTwVXFjvQM2WJf"] do %>
                           <.badge variant="success">Contract to Hire</.badge>
                         <% end %>
+                        <%= if @current_user && @current_user.is_admin do %>
+                          <.badge variant={if job.outbound, do: "success", else: "destructive"}>
+                            {if job.outbound, do: "Active Campaign", else: "Inactive Campaign"}
+                          </.badge>
+                        <% end %>
                       </div>
                       <div
                         :if={job.description}

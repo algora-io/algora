@@ -49,11 +49,6 @@ defmodule AlgoraWeb.ChallengesLive do
             href={~p"/challenges/turso"}
             status={:active}
           />
-          <.challenge_card
-            image="/images/challenges/atopile/og.png"
-            href={~p"/challenges/atopile"}
-            status={:active}
-          />
         </div>
 
         <%!-- Divider --%>

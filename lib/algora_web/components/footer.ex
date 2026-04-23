@@ -146,14 +146,6 @@ defmodule AlgoraWeb.Components.Footer do
                 <li>
                   <.link
                     class="text-sm text-muted-foreground hover:text-white transition-colors"
-                    navigate={~p"/challenges/atopile"}
-                  >
-                    Atopile (YC W24)
-                  </.link>
-                </li>
-                <li>
-                  <.link
-                    class="text-sm text-muted-foreground hover:text-white transition-colors"
                     navigate={~p"/challenges/golem"}
                   >
                     Golem Cloud

@@ -134,6 +134,8 @@ defmodule AlgoraWeb.User.ProfileLive do
                               <.link
                                 :if={ticket.repository}
                                 href={"https://github.com/#{ticket.repository.user.provider_login}/#{ticket.repository.name}/issues/#{ticket.number}"}
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 class="hover:underline"
                               >
                                 {ticket.repository.name}#{ticket.number}
@@ -141,6 +143,8 @@ defmodule AlgoraWeb.User.ProfileLive do
                               <.link
                                 :if={!ticket.repository && ticket.url}
                                 href={ticket.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 class="hover:underline"
                               >
                                 {Algora.Util.path_from_url(ticket.url)}

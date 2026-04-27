@@ -269,3 +269,11 @@ CLOUDFLARE_TUNNEL="local"
 ```
 
 If you're using another service, make sure to start the tunnel manually in another terminal.
+
+## 💰 Bounty Contribution
+
+- **Task:** [UI Bug] Unauthorized 'Edit' and 'Delete' buttons visible on /bounties page
+- **Reward:** $2500
+- **Source:** GitHub-Bounty
+- **Date:** 2026-04-28
+

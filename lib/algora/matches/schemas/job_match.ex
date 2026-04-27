@@ -23,6 +23,7 @@ defmodule Algora.Matches.JobMatch do
     field :dripped_at, :utc_datetime_usec
     field :locked, :boolean, default: false
     field :is_draft, :boolean, default: false
+    field :dropped, :boolean, default: false
     field :eval, :map
     field :provider_candidate_id, :string
     field :provider_application_id, :string
@@ -57,6 +58,7 @@ defmodule Algora.Matches.JobMatch do
       :dripped_at,
       :locked,
       :is_draft,
+      :dropped,
       :eval,
       :provider_candidate_id,
       :provider_application_id,

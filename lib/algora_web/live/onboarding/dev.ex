@@ -187,21 +187,29 @@ defmodule AlgoraWeb.Onboarding.DevLive do
 
   @impl true
   def handle_event("send_signup_code", %{"user" => %{"email" => email}}, socket) do
-    {secret, code} = AlgoraWeb.UserAuth.generate_totp()
+    rate_limit_key = socket.assigns.ip_address
 
-    changeset = User.signup_changeset(%User{}, %{})
+    case Algora.RateLimit.hit("send_otp:#{rate_limit_key}", to_timeout(minute: 1), 3) do
+      {:allow, _} ->
+        {secret, code} = AlgoraWeb.UserAuth.generate_totp()
 
-    case Algora.Accounts.deliver_totp_signup_email(email, code) do
-      {:ok, _id} ->
-        {:noreply,
-         socket
-         |> LocalStore.assign_cached(:secret, secret)
-         |> LocalStore.assign_cached(:email, email)
-         |> assign(:signup_form, to_form(changeset))}
+        changeset = User.signup_changeset(%User{}, %{})
 
-      {:error, reason} ->
-        Logger.error("Failed to send signup code to #{email}: #{inspect(reason)}")
-        {:noreply, put_flash(socket, :error, "We had trouble sending mail to #{email}. Please try again")}
+        case Algora.Accounts.deliver_totp_signup_email(email, code) do
+          {:ok, _id} ->
+            {:noreply,
+             socket
+             |> LocalStore.assign_cached(:secret, secret)
+             |> LocalStore.assign_cached(:email, email)
+             |> assign(:signup_form, to_form(changeset))}
+
+          {:error, reason} ->
+            Logger.error("Failed to send signup code to #{email}: #{inspect(reason)}")
+            {:noreply, put_flash(socket, :error, "We had trouble sending mail to #{email}. Please try again")}
+        end
+
+      {:deny, _} ->
+        {:noreply, put_flash(socket, :error, "Too many requests. Please try again later.")}
     end
   end
 

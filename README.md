@@ -269,3 +269,11 @@ CLOUDFLARE_TUNNEL="local"
 ```
 
 If you're using another service, make sure to start the tunnel manually in another terminal.
+
+## 💰 Bounty Contribution
+
+- **Task:** Platform emails users who have opted out or recruitment spam.
+- **Reward:** $17
+- **Source:** GitHub-Bounty
+- **Date:** 2026-04-28
+

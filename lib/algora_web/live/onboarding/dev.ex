@@ -97,6 +97,7 @@ defmodule AlgoraWeb.Onboarding.DevLive do
       class="w-screen h-screen fixed inset-0 bg-background z-[100]"
       phx-hook="LocalStateStore"
       id="onboarding-dev-page"
+      data-storage="localStorage"
     >
       <div class="flex items-center justify-center h-full">
         <svg

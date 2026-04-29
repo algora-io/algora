@@ -122,7 +122,7 @@ defmodule AlgoraWeb.Onboarding.DevLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen bg-card" phx-hook="LocalStateStore" id="onboarding-dev-page">
+    <div class="min-h-screen bg-card" phx-hook="LocalStateStore" id="onboarding-dev-page" data-storage="localStorage">
       <div class="flex flex-col lg:flex-row flex-1">
         <div class="flex-grow px-8 py-16">
           <div class="mx-auto max-w-3xl">

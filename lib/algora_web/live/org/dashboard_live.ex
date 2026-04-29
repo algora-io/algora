@@ -205,7 +205,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="lg:pr-96" id="org-dashboard" phx-hook="LocalStateStore">
+    <div class="lg:pr-96" id="org-dashboard" phx-hook="LocalStateStore" data-storage="localStorage">
       <div class="container mx-auto max-w-7xl space-y-8 xl:space-y-16 p-4 sm:p-6 lg:p-8">
         <.section :if={@payable_bounties != %{}}>
           <.card>

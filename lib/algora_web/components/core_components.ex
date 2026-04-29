@@ -671,7 +671,7 @@ defmodule AlgoraWeb.CoreComponents do
   attr :class, :string, default: nil, doc: "the class to apply to the form"
 
   attr :rest, :global,
-    include: ~w(autocomplete name rel action enctype method novalidate target),
+    include: ~w(autocomplete name rel action enctype method novalidate target phx-debounce),
     doc: "the arbitrary HTML attributes to apply to the form tag"
 
   slot :inner_block, required: true

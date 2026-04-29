@@ -98,6 +98,7 @@ defmodule Algora.Jobs.JobPosting do
       :max_equity,
       :require_security_clearance,
       :require_us_citizenship,
+      :outbound,
       :custom_question
     ])
     |> generate_id()

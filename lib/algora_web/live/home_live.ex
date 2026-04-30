@@ -75,7 +75,14 @@ defmodule AlgoraWeb.HomeLive do
     orgs_with_stats = HomeCache.get_orgs_with_stats()
 
     # Load candidate data
-    candidate_ids = ["qsQa7KN3Cq4PwGWG", "Y5JrLmNRvL7o3Bes", "EPYrDRS1ojkjqL9w", "Y1LQ896AbtT9Wjj1", "1ErYxMGNt6zTfjKS"]
+    candidate_ids = [
+      "h5afQBNkRKZc1y2d",
+      "qsQa7KN3Cq4PwGWG",
+      "Y5JrLmNRvL7o3Bes",
+      "EPYrDRS1ojkjqL9w",
+      "Y1LQ896AbtT9Wjj1",
+      "1ErYxMGNt6zTfjKS"
+    ]
 
     candidates_data =
       candidate_ids
@@ -105,6 +112,7 @@ defmodule AlgoraWeb.HomeLive do
           |> assign(:candidates_data, candidates_data)
           |> assign(:carousel_items, carousel_items)
           |> assign(:current_candidate_index, 0)
+          |> assign(:onboarding_started, onboarding_started?(params))
           |> assign(:liked_ids, [])
           |> assign(:disliked_ids, [])
           |> assign(:form, to_form(Form.changeset(%Form{}, %{tech_stack: []})))
@@ -115,6 +123,11 @@ defmodule AlgoraWeb.HomeLive do
         socket = if connected?(socket), do: LocalStore.subscribe(socket), else: socket
         {:ok, socket}
     end
+  end
+
+  @impl true
+  def handle_params(params, _uri, socket) do
+    {:noreply, assign(socket, :onboarding_started, onboarding_started?(params))}
   end
 
   @impl true
@@ -131,12 +144,18 @@ defmodule AlgoraWeb.HomeLive do
       <%= if @screenshot? do %>
         <div class="-mt-24" />
       <% else %>
-        <Header.header class="container fixed top-0 left-0 right-0 z-50 bg-black" />
+        <div
+          id="home-top-navbar"
+          phx-update="ignore"
+          class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 opacity-100 translate-y-0"
+        >
+          <Header.header class="container bg-black" />
+        </div>
       <% end %>
 
       <main class="bg-black relative">
         <%!-- Hero section --%>
-        <section class="min-h-screen flex flex-col">
+        <section :if={!@onboarding_started} class="min-h-screen flex flex-col">
           <div class="flex-1 mx-auto px-6 lg:px-8 flex flex-col items-start justify-center pt-20 lg:pt-24 2xl:pt-32 pb-4 w-full max-w-3xl">
             <%!-- Hero copy (unchanged) --%>
             <h1 class="text-2xl min-[412px]:text-[1.75rem] sm:text-[2.5rem]/[3rem] md:text-[3.5rem]/[4rem] lg:text-[3rem]/[3.5rem] xl:text-[4rem]/[4.5rem] font-black tracking-tight text-foreground font-display">
@@ -273,8 +292,10 @@ defmodule AlgoraWeb.HomeLive do
         </section>
 
         <%!-- Candidate section: tinder-style single card --%>
+        <% likes_reached_goal = onboarding_likes(@liked_ids) >= onboarding_likes_goal() %>
         <% current_candidate = Enum.at(@candidates_data, @current_candidate_index) %>
         <section
+          :if={!likes_reached_goal}
           id="candidate-section"
           phx-hook="TinderSection"
           class="relative min-h-screen px-4 sm:px-6 pt-4 pb-4"
@@ -296,41 +317,76 @@ defmodule AlgoraWeb.HomeLive do
           <% end %>
         </section>
 
-        <%!--
-        View your candidates form (commented out)
-        <div class="order-2 lg:sticky lg:top-0 lg:order-2 lg:col-start-2 lg:row-start-1 lg:self-start px-6 lg:px-0 pb-12 lg:pb-8 lg:pt-24 2xl:pt-32 overflow-y-auto lg:max-h-screen scrollbar-thin">
-          <div class="text-left">
+        <section :if={likes_reached_goal} class="relative min-h-screen px-4 sm:px-6 pt-12 pb-20">
+          <div class="mx-auto w-full max-w-3xl">
             <div class="rounded-xl bg-card text-card-foreground shadow-2xl border">
               <div class="p-6 lg:p-8">
                 <h2 class="text-2xl lg:text-3xl font-semibold leading-7 text-foreground">
-                  View your candidates
+                  Get your top candidates
                 </h2>
-                ...
+                <p class="mt-2 text-sm text-muted-foreground">
+                  Nice picks. Share your hiring needs and we will send curated matches.
+                </p>
+                <.form for={@form} phx-submit="submit" class="mt-6 flex flex-col gap-4">
+                  <div>
+                    <label class="block text-sm font-semibold text-foreground mb-2">
+                      Tech stack
+                    </label>
+                    <.TechStack
+                      tech={Ecto.Changeset.get_field(@form.source, :tech_stack) || []}
+                      socket={@socket}
+                      form="form"
+                      classes="-mt-2"
+                    />
+                  </div>
+                  <.input
+                    field={@form[:job_description]}
+                    type="textarea"
+                    label="Job description / careers URL"
+                    rows="3"
+                    class="resize-none"
+                    placeholder="Tell us about the role, requirements, ideal candidate..."
+                  />
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <.input
+                      field={@form[:comp_range]}
+                      type="text"
+                      label="Compensation"
+                      placeholder="$175k-$330k + equity"
+                    />
+                    <.input
+                      field={@form[:location]}
+                      type="text"
+                      label="Location"
+                      placeholder="San Francisco"
+                    />
+                  </div>
+                  <.input
+                    field={@form[:email]}
+                    type="email"
+                    label="Your work email"
+                    placeholder="you@company.com"
+                  />
+                  <.button class="w-full mt-2" type="submit">Receive your candidates</.button>
+                </.form>
               </div>
             </div>
           </div>
-        </div>
-
-        Hire with Confidence section (commented out)
-        <section class="relative isolate py-8 sm:py-20">
-          <div class="mx-auto px-6 lg:px-8 pt-24 xl:pt-0">
-            <h2 class="font-display text-[2rem] font-semibold tracking-tight text-foreground sm:text-6xl sm:mb-4 text-center sm:text-left">
-              Hire with Confidence
-            </h2>
-            ...
-          </div>
         </section>
-        --%>
       </main>
 
       <%!-- Tinder action buttons: fixed dock, shown when candidate section is in view --%>
       <div
+        :if={!likes_reached_goal}
         id="tinder-buttons"
+        phx-hook="TinderButtons"
         phx-update="ignore"
-        class="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-center gap-6 px-6 pb-8 pt-5 bg-gradient-to-t from-black via-black/80 to-transparent opacity-0 transition-opacity duration-500 pointer-events-none"
+        data-like-count={onboarding_likes(@liked_ids)}
+        data-like-goal={onboarding_likes_goal()}
+        class="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-center gap-3 px-4 sm:px-6 pb-6 sm:pb-8 pt-5 bg-gradient-to-t from-black via-black/80 to-transparent opacity-0 transition-opacity duration-500 pointer-events-none"
       >
         <button
-          class="pointer-events-auto flex flex-col items-center justify-center gap-2 w-36 py-4 rounded-2xl bg-red-950/60 border-2 border-red-500/50 hover:border-red-400 hover:bg-red-900/60 shadow-xl shadow-red-900/40 transition-all active:scale-95"
+          class="pointer-events-auto flex-1 max-w-56 flex flex-col items-center justify-center gap-2 py-4 rounded-2xl bg-red-950/60 border-2 border-red-500/50 hover:border-red-400 hover:bg-red-900/60 shadow-xl shadow-red-900/40 transition-all active:scale-95"
           phx-click="dislike_candidate"
           aria-label="Skip candidate"
         >
@@ -338,12 +394,58 @@ defmodule AlgoraWeb.HomeLive do
           <span class="text-sm font-semibold text-red-400 tracking-wide">Skip</span>
         </button>
         <button
-          class="pointer-events-auto flex flex-col items-center justify-center gap-2 w-36 py-4 rounded-2xl bg-emerald-950/60 border-2 border-emerald-500/50 hover:border-emerald-400 hover:bg-emerald-900/60 shadow-xl shadow-emerald-900/40 transition-all active:scale-95"
+          class="pointer-events-auto flex-1 max-w-56 flex flex-col items-center justify-center gap-2 py-4 rounded-2xl bg-emerald-950/60 border-2 border-emerald-500/50 hover:border-emerald-400 hover:bg-emerald-900/60 shadow-xl shadow-emerald-900/40 transition-all active:scale-95"
           phx-click="like_candidate"
           aria-label="Like candidate"
         >
-          <.icon name="tabler-heart" class="size-8 text-emerald-400" />
-          <span class="text-sm font-semibold text-emerald-400 tracking-wide">Like</span>
+          <% fill_pct = onboarding_fill_pct(@liked_ids) %>
+          <% curve_bottom_px = onboarding_curve_bottom_px(@liked_ids) %>
+          <div class="onboarding-heart-wrap">
+            <div class="onboarding-heart">
+              <div class="onboarding-heart-tank" style={"height: #{fill_pct}%;"}></div>
+              <svg
+                class="onboarding-heart-curve"
+                viewBox="0 24 150 28"
+                preserveAspectRatio="none"
+                shape-rendering="auto"
+                style={"bottom: #{curve_bottom_px}px;"}
+              >
+                <defs>
+                  <path
+                    id="onboarding-heart-gentle-wave"
+                    d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z"
+                  />
+                </defs>
+                <g>
+                  <use
+                    href="#onboarding-heart-gentle-wave"
+                    x="48"
+                    y="0"
+                    fill="rgba(16, 185, 129, 0.5)"
+                  />
+                  <use
+                    href="#onboarding-heart-gentle-wave"
+                    x="48"
+                    y="1"
+                    fill="rgba(52, 211, 153, 0.35)"
+                  />
+                  <use href="#onboarding-heart-gentle-wave" x="48" y="2" fill="rgba(5, 150, 105, 1)" />
+                </g>
+              </svg>
+            </div>
+            <svg class="onboarding-heart-clip-defs" aria-hidden="true">
+              <clipPath id="onboarding-heart-clip-path" clipPathUnits="objectBoundingBox">
+                <path d="M0.373,0.967 S0.616,0.866,0.768,0.644 S0.912,0.107,0.739,0 S0.373,0.108,0.373,0.108 S0.166,-0.113,0,-0.002 S-0.159,0.432,-0.021,0.644 S0.373,0.967,0.373,0.967">
+                </path>
+              </clipPath>
+            </svg>
+          </div>
+          <span
+            id="onboarding-heart-label"
+            class="text-sm font-semibold text-emerald-400 tracking-wide"
+          >
+            Like
+          </span>
         </button>
       </div>
     </div>
@@ -389,7 +491,25 @@ defmodule AlgoraWeb.HomeLive do
 
   @impl true
   def handle_event("restore_settings", token, socket) do
-    {:noreply, LocalStore.restore(socket, token)}
+    socket =
+      socket
+      |> LocalStore.restore(token)
+      |> assign(:liked_ids, [])
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("start_onboarding", _params, socket) do
+    if socket.assigns.onboarding_started do
+      {:noreply, socket}
+    else
+      {:noreply,
+       push_patch(assign(socket, :onboarding_started, true),
+         to: onboarding_path(socket),
+         replace: false
+       )}
+    end
   end
 
   @impl true
@@ -401,7 +521,7 @@ defmodule AlgoraWeb.HomeLive do
     socket =
       socket
       |> assign(:current_candidate_index, socket.assigns.current_candidate_index + 1)
-      |> LocalStore.assign_cached(:liked_ids, liked_ids)
+      |> assign(:liked_ids, liked_ids)
 
     {:noreply, socket}
   end
@@ -452,6 +572,39 @@ defmodule AlgoraWeb.HomeLive do
       end
 
     assign(socket, :user_applications, user_applications)
+  end
+
+  defp onboarding_started?(params) do
+    Map.get(params, "started") in ["1", "true"]
+  end
+
+  defp onboarding_path(socket) do
+    query =
+      if socket.assigns.screenshot? do
+        [started: "1", screenshot: "1"]
+      else
+        [started: "1"]
+      end
+
+    ~p"/?#{query}"
+  end
+
+  defp onboarding_likes_goal, do: 3
+
+  defp onboarding_likes(liked_ids) do
+    liked_ids
+    |> Enum.uniq()
+    |> length()
+    |> min(onboarding_likes_goal())
+  end
+
+  defp onboarding_fill_pct(liked_ids) do
+    trunc(onboarding_likes(liked_ids) / onboarding_likes_goal() * 100)
+  end
+
+  defp onboarding_curve_bottom_px(liked_ids) do
+    fill_pct = onboarding_fill_pct(liked_ids)
+    max(-10, trunc(fill_pct * 0.24) - 10)
   end
 
   def event_card(assigns) do

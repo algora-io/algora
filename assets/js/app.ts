@@ -25,9 +25,9 @@ declare global {
       type: K,
       listener: (
         this: Window,
-        ev: K extends keyof WindowEventMap ? WindowEventMap[K] : PhxEvent
+        ev: K extends keyof WindowEventMap ? WindowEventMap[K] : PhxEvent,
       ) => any,
-      options?: boolean | AddEventListenerOptions | undefined
+      options?: boolean | AddEventListenerOptions | undefined,
     ): void;
   }
 }
@@ -73,7 +73,7 @@ const Hooks = {
         liveSocket.execJS(this.el, this.el.getAttribute("phx-click"));
       this.timer = setTimeout(() => hide(), 5000);
       this.el.addEventListener("phx:hide-start", () =>
-        clearTimeout(this.timer)
+        clearTimeout(this.timer),
       );
       this.el.addEventListener("mouseover", () => {
         clearTimeout(this.timer);
@@ -104,7 +104,7 @@ const Hooks = {
     },
     mounted() {
       this.menuItemsContainer = document.querySelector(
-        `[aria-labelledby="${this.el.id}"]`
+        `[aria-labelledby="${this.el.id}"]`,
       );
       this.reset();
       this.handleKeyDown = (e) => this.onKeyDown(e);
@@ -128,7 +128,7 @@ const Hooks = {
         }
       });
       this.menuItemsContainer.addEventListener("phx:hide-start", () =>
-        this.reset()
+        this.reset(),
       );
     },
     activate(index, fallbackIndex) {
@@ -142,7 +142,7 @@ const Hooks = {
     },
     menuItems() {
       return Array.from(
-        this.menuItemsContainer.querySelectorAll("[role=menuitem]")
+        this.menuItemsContainer.querySelectorAll("[role=menuitem]"),
       );
     },
     onKeyDown(e) {
@@ -166,7 +166,7 @@ const Hooks = {
         this.deactivate(menuItems);
         this.activate(
           menuItems.indexOf(this.activeItem) - 1,
-          menuItems.length - 1
+          menuItems.length - 1,
         );
       } else if (e.key === "Tab") {
         e.preventDefault();
@@ -180,7 +180,7 @@ const Hooks = {
       const installButton = document.getElementById("pwa-install-button");
       const closeButton = document.getElementById("pwa-close-button");
       const instructionsMobile = document.getElementById(
-        "pwa-instructions-mobile"
+        "pwa-instructions-mobile",
       );
       if (
         !installPrompt ||
@@ -198,7 +198,7 @@ const Hooks = {
 
       const isMobile =
         /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-          navigator.userAgent
+          navigator.userAgent,
         );
 
       let promptShown = false;
@@ -227,7 +227,7 @@ const Hooks = {
             showPrompt();
           }
         },
-        { passive: true }
+        { passive: true },
       );
 
       window.addEventListener("beforeinstallprompt", (e) => {
@@ -428,7 +428,7 @@ const Hooks = {
   DeriveDomain: {
     mounted() {
       const domainInput = (this.el.closest("form") || document).querySelector(
-        "[data-domain-source]"
+        "[data-domain-source]",
       );
       let shouldDerive = true;
 
@@ -458,7 +458,7 @@ const Hooks = {
       const button = this.el;
       const container = document.getElementById("emoji-picker-container");
       const input = document.getElementById(
-        "message-input"
+        "message-input",
       ) as HTMLInputElement;
       const picker = container?.querySelector("emoji-picker");
       let isVisible = false;
@@ -488,7 +488,7 @@ const Hooks = {
         // Move cursor after emoji
         input.setSelectionRange(
           cursorPosition + emoji.length,
-          cursorPosition + emoji.length
+          cursorPosition + emoji.length,
         );
 
         // Hide picker after selection
@@ -536,12 +536,12 @@ const Hooks = {
           root: null, // viewport
           rootMargin: "0px 0px 400px 0px", // trigger when indicator is 400px from viewport
           threshold: 0.1,
-        }
+        },
       );
 
       // Look for the indicator inside this.el rather than document-wide
       const loadMoreIndicator = this.el.querySelector(
-        "[data-load-more-indicator]"
+        "[data-load-more-indicator]",
       );
       if (loadMoreIndicator) {
         this.observer.observe(loadMoreIndicator);
@@ -602,7 +602,7 @@ const Hooks = {
       this.el.addEventListener("keydown", (e) => {
         if (e.key == "Enter" && e.ctrlKey) {
           this.el.form.dispatchEvent(
-            new Event("submit", { bubbles: true, cancelable: true })
+            new Event("submit", { bubbles: true, cancelable: true }),
           );
         }
       });
@@ -613,7 +613,7 @@ const Hooks = {
       this.el.addEventListener("keydown", (e) => {
         if (e.key == "Enter") {
           this.el.form.dispatchEvent(
-            new Event("submit", { bubbles: true, cancelable: true })
+            new Event("submit", { bubbles: true, cancelable: true }),
           );
         }
       });
@@ -636,7 +636,7 @@ const Hooks = {
     mounted() {
       this.el.addEventListener("click", () => {
         const content = document.querySelector<HTMLElement>(
-          `#${this.el.dataset.contentId}`
+          `#${this.el.dataset.contentId}`,
         );
         if (!content) return;
 
@@ -761,12 +761,12 @@ const Hooks = {
           strength >= 80
             ? "text-emerald-500"
             : strength >= 60
-            ? "text-emerald-500"
-            : strength >= 40
-            ? "text-emerald-500"
-            : strength >= 20
-            ? "text-emerald-500"
-            : "text-gray-600"
+              ? "text-emerald-500"
+              : strength >= 40
+                ? "text-emerald-500"
+                : strength >= 20
+                  ? "text-emerald-500"
+                  : "text-gray-600"
         }`;
       };
 
@@ -976,30 +976,157 @@ const Hooks = {
   TinderSection: {
     mounted() {
       const buttons = document.getElementById("tinder-buttons");
+      const navbar = document.getElementById("home-top-navbar");
+      this.onboardingSent = false;
+      this.userInteracted = false;
+      this.sectionInView = false;
       if (!buttons) return;
+
+      const maybeStartOnboarding = () => {
+        const startedNow = new URLSearchParams(window.location.search).get(
+          "started",
+        );
+
+        if (
+          !this.onboardingSent &&
+          !startedNow &&
+          this.userInteracted &&
+          this.sectionInView
+        ) {
+          this.pushEvent("start_onboarding", {});
+          this.onboardingSent = true;
+        }
+      };
+
+      const onUserInteraction = () => {
+        this.userInteracted = true;
+        maybeStartOnboarding();
+      };
 
       const observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
+            this.sectionInView = entry.isIntersecting;
+
             if (entry.isIntersecting) {
               buttons.classList.remove("opacity-0", "pointer-events-none");
               buttons.classList.add("opacity-100");
+              navbar?.classList.remove("opacity-100", "translate-y-0");
+              navbar?.classList.add(
+                "opacity-0",
+                "-translate-y-full",
+                "pointer-events-none",
+              );
+              maybeStartOnboarding();
             } else {
               buttons.classList.remove("opacity-100");
               buttons.classList.add("opacity-0", "pointer-events-none");
+              navbar?.classList.remove(
+                "opacity-0",
+                "-translate-y-full",
+                "pointer-events-none",
+              );
+              navbar?.classList.add("opacity-100", "translate-y-0");
             }
           });
         },
-        { threshold: 0.2 }
+        { threshold: 0.95 },
       );
+
+      window.addEventListener("scroll", onUserInteraction, { passive: true });
+      window.addEventListener("wheel", onUserInteraction, { passive: true });
+      window.addEventListener("touchmove", onUserInteraction, {
+        passive: true,
+      });
 
       observer.observe(this.el);
       this.observer = observer;
+      this.onUserInteraction = onUserInteraction;
+    },
+    updated() {
+      const startedNow = new URLSearchParams(window.location.search).get(
+        "started",
+      );
+
+      if (!startedNow) {
+        this.onboardingSent = false;
+      }
     },
     destroyed() {
       if (this.observer) {
         (this.observer as IntersectionObserver).disconnect();
       }
+      const onUserInteraction = this.onUserInteraction as
+        | ((event: Event) => void)
+        | undefined;
+
+      if (onUserInteraction) {
+        window.removeEventListener("scroll", onUserInteraction);
+        window.removeEventListener("wheel", onUserInteraction);
+        window.removeEventListener("touchmove", onUserInteraction);
+      }
+    },
+  },
+  TinderButtons: {
+    mounted() {
+      this.previousLikeCount = Number(
+        this.el.getAttribute("data-like-count") || "0",
+      );
+      this.syncHeartProgress();
+    },
+    updated() {
+      const nextLikeCount = Number(
+        this.el.getAttribute("data-like-count") || "0",
+      );
+      const likeGoal = Number(this.el.getAttribute("data-like-goal") || "3");
+
+      if (Number.isNaN(nextLikeCount)) return;
+      if (nextLikeCount <= (this.previousLikeCount as number)) {
+        this.syncHeartProgress();
+        this.previousLikeCount = nextLikeCount;
+        return;
+      }
+
+      this.syncHeartProgress();
+      this.pumpHeart();
+      this.previousLikeCount = nextLikeCount;
+
+      // Guard against malformed goal values while keeping UI responsive.
+      if (Number.isNaN(likeGoal) || likeGoal <= 0) {
+        this.el.setAttribute("data-like-goal", "3");
+      }
+    },
+    syncHeartProgress() {
+      const likeCount = Number(this.el.getAttribute("data-like-count") || "0");
+      const likeGoal = Number(this.el.getAttribute("data-like-goal") || "3");
+      const goal = Number.isNaN(likeGoal) || likeGoal <= 0 ? 3 : likeGoal;
+      const clampedCount = Math.min(Math.max(likeCount, 0), goal);
+      const fillPct = Math.trunc((clampedCount / goal) * 100);
+      const curveBottomPx = Math.max(-10, Math.trunc(fillPct * 0.24) - 10);
+
+      const tank = this.el.querySelector(".onboarding-heart-tank");
+      if (tank instanceof HTMLElement) {
+        tank.style.height = `${fillPct}%`;
+      }
+
+      const curve = this.el.querySelector(".onboarding-heart-curve");
+      if (curve instanceof HTMLElement) {
+        curve.style.bottom = `${curveBottomPx}px`;
+      }
+
+      // const label = this.el.querySelector("#onboarding-heart-label");
+      // if (label instanceof HTMLElement) {
+      //   label.textContent = `Like`;
+      // }
+    },
+    pumpHeart() {
+      const heart = this.el.querySelector(".onboarding-heart");
+      if (!(heart instanceof HTMLElement)) return;
+
+      heart.classList.remove("is-pumping");
+      void heart.offsetWidth;
+      heart.classList.add("is-pumping");
+      setTimeout(() => heart.classList.remove("is-pumping"), 320);
     },
   },
 } satisfies Record<string, Partial<ViewHook> & Record<string, unknown>>;
@@ -1137,7 +1264,7 @@ window.addEventListener("phx:js-exec", ({ detail }) => {
 });
 
 window.addEventListener("js:exec", (e) =>
-  e.target[e.detail.call](...e.detail.args)
+  e.target[e.detail.call](...e.detail.args),
 );
 window.addEventListener("js:focus", (e) => {
   let parent = document.querySelector(e.detail.parent);
@@ -1164,7 +1291,7 @@ window.addEventListener("js:focus-closest", (e) => {
   Focus.attemptFocus((el as any).parent) || Focus.focusMain();
 });
 window.addEventListener("phx:remove-el", (e) =>
-  document.getElementById(e.detail.id)?.remove()
+  document.getElementById(e.detail.id)?.remove(),
 );
 
 // connect if there are any LiveViews on the page
@@ -1197,7 +1324,7 @@ window.addEventListener("phx:open_popup", (e: CustomEvent) => {
   const newWindow = window.open(
     url,
     "oauth",
-    `width=${width},height=${height},left=${left},top=${top},toolbar=0,scrollbars=1,status=1`
+    `width=${width},height=${height},left=${left},top=${top},toolbar=0,scrollbars=1,status=1`,
   );
 
   if (window.focus && newWindow) {

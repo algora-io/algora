@@ -330,3 +330,79 @@ emoji-picker {
   background: theme("colors.background");
   box-shadow: theme("boxShadow.lg");
 }
+
+.onboarding-heart-wrap {
+  --heart-dim-x: 32px;
+  --heart-dim-y: 28px;
+  --heart-curve-height: 12px;
+  perspective: 200px;
+  filter: drop-shadow(0px 6px 10px rgb(16 185 129 / 0.3));
+}
+
+.onboarding-heart {
+  @apply bg-emerald-800;
+  position: relative;
+  height: var(--heart-dim-y);
+  width: var(--heart-dim-x);
+  overflow: hidden;
+  clip-path: url(#onboarding-heart-clip-path);
+  transition: transform 280ms ease;
+}
+
+.onboarding-heart.is-pumping {
+  transform: translateZ(16px) scale(1.06);
+}
+
+.onboarding-heart-tank {
+  @apply bg-emerald-400;
+  position: absolute;
+  bottom: 0;
+  width: var(--heart-dim-x);
+  z-index: 5;
+  transition: height 400ms ease;
+}
+
+.onboarding-heart-curve {
+  position: absolute;
+  width: var(--heart-dim-x);
+  height: var(--heart-curve-height);
+  z-index: 6;
+  transition: bottom 400ms ease;
+}
+
+.onboarding-heart-curve use {
+  animation: onboarding-heart-wave 2s cubic-bezier(0.55, 0.5, 0.45, 0.5)
+    infinite;
+}
+
+.onboarding-heart-curve use:nth-child(1) {
+  animation-duration: 3s;
+}
+
+.onboarding-heart-curve use:nth-child(2) {
+  animation-duration: 4s;
+}
+
+.onboarding-heart-curve use:nth-child(3) {
+  animation-duration: 2s;
+}
+
+.onboarding-heart-clip-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
+#onboarding-heart-clip-path path {
+  transform: translate(0.11px, 0.03px);
+}
+
+@keyframes onboarding-heart-wave {
+  0% {
+    transform: translateX(-90px);
+  }
+
+  100% {
+    transform: translateX(85px);
+  }
+}

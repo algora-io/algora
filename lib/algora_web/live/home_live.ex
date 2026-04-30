@@ -115,6 +115,8 @@ defmodule AlgoraWeb.HomeLive do
           |> assign(:onboarding_started, onboarding_started?(params))
           |> assign(:liked_ids, [])
           |> assign(:disliked_ids, [])
+          |> assign(:show_onboarding_form, false)
+          |> assign(:transitioning_to_onboarding_form, false)
           |> assign(:form, to_form(Form.changeset(%Form{}, %{tech_stack: []})))
           |> assign_user_applications()
           |> assign_events()
@@ -292,83 +294,89 @@ defmodule AlgoraWeb.HomeLive do
         </section>
 
         <%!-- Candidate section: tinder-style single card --%>
-        <% likes_reached_goal = onboarding_likes(@liked_ids) >= onboarding_likes_goal() %>
+        <% likes_reached_goal = onboarding_goal_reached?(@liked_ids) %>
         <% current_candidate = Enum.at(@candidates_data, @current_candidate_index) %>
         <section
-          :if={!likes_reached_goal}
           id="candidate-section"
           phx-hook="TinderSection"
           class="relative min-h-screen px-4 sm:px-6 pt-4 pb-4"
         >
-          <%= if current_candidate do %>
-            <Algora.Cloud.candidate_card {Map.merge(current_candidate, %{
-              anonymize: true,
-              # root_class: "h-[calc(100svh-8rem)] max-h-[52rem]",
-              tech_stack: [],
-              hide_badges?: true,
-              hide_scrollbars?: true
-            })} />
-          <% else %>
-            <div class="flex flex-col items-center justify-center min-h-[60vh] gap-4 text-center">
-              <.icon name="tabler-check" class="size-12 text-emerald-400" />
-              <p class="text-lg font-semibold text-foreground">You've reviewed all candidates</p>
-              <p class="text-sm text-muted-foreground">Check back soon for more</p>
+          <div class="relative min-h-[60vh]">
+            <div class={["transition-opacity duration-700", if(@show_onboarding_form, do: "opacity-0 pointer-events-none", else: "opacity-100")]}>
+              <%= if current_candidate do %>
+                <Algora.Cloud.candidate_card {Map.merge(current_candidate, %{
+                  anonymize: true,
+                  # root_class: "h-[calc(100svh-8rem)] max-h-[52rem]",
+                  tech_stack: [],
+                  hide_badges?: true,
+                  hide_scrollbars?: true
+                })} />
+              <% else %>
+                <div class="flex flex-col items-center justify-center min-h-[60vh] gap-4 text-center">
+                  <.icon name="tabler-check" class="size-12 text-emerald-400" />
+                  <p class="text-lg font-semibold text-foreground">You've reviewed all candidates</p>
+                  <p class="text-sm text-muted-foreground">Check back soon for more</p>
+                </div>
+              <% end %>
             </div>
-          <% end %>
-        </section>
-
-        <section :if={likes_reached_goal} class="relative min-h-screen px-4 sm:px-6 pt-12 pb-20">
-          <div class="mx-auto w-full max-w-3xl">
-            <div class="rounded-xl bg-card text-card-foreground shadow-2xl border">
-              <div class="p-6 lg:p-8">
-                <h2 class="text-2xl lg:text-3xl font-semibold leading-7 text-foreground">
-                  Get your top candidates
-                </h2>
-                <p class="mt-2 text-sm text-muted-foreground">
-                  Nice picks. Share your hiring needs and we will send curated matches.
-                </p>
-                <.form for={@form} phx-submit="submit" class="mt-6 flex flex-col gap-4">
-                  <div>
-                    <label class="block text-sm font-semibold text-foreground mb-2">
-                      Tech stack
-                    </label>
-                    <.TechStack
-                      tech={Ecto.Changeset.get_field(@form.source, :tech_stack) || []}
-                      socket={@socket}
-                      form="form"
-                      classes="-mt-2"
-                    />
-                  </div>
-                  <.input
-                    field={@form[:job_description]}
-                    type="textarea"
-                    label="Job description / careers URL"
-                    rows="3"
-                    class="resize-none"
-                    placeholder="Tell us about the role, requirements, ideal candidate..."
-                  />
-                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div
+              :if={likes_reached_goal}
+              class={[
+                "absolute inset-0 flex items-center justify-center transition-opacity duration-700",
+                if(@show_onboarding_form, do: "opacity-100", else: "opacity-0 pointer-events-none")
+              ]}
+            >
+              <div class="w-full max-w-3xl text-card-foreground">
+                <div class="p-2 lg:p-4">
+                  <h2 class="text-2xl lg:text-3xl font-semibold leading-7 text-foreground">
+                    Get your top candidates
+                  </h2>
+                  <p class="mt-2 text-sm text-muted-foreground">
+                    Share your hiring needs.
+                  </p>
+                  <.form for={@form} phx-submit="submit" class="mt-8 flex flex-col gap-6">
+                    <div class="space-y-2">
+                      <label class="block text-sm font-semibold text-foreground mb-2">
+                        Tech stack
+                      </label>
+                      <.TechStack
+                        tech={Ecto.Changeset.get_field(@form.source, :tech_stack) || []}
+                        socket={@socket}
+                        form="form"
+                        classes="-mt-2"
+                      />
+                    </div>
                     <.input
-                      field={@form[:comp_range]}
-                      type="text"
-                      label="Compensation"
-                      placeholder="$175k-$330k + equity"
+                      field={@form[:job_description]}
+                      type="textarea"
+                      label="Job description / careers URL"
+                      rows="3"
+                      class="resize-none"
+                      placeholder="Tell us about the role, requirements, ideal candidate..."
                     />
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                      <.input
+                        field={@form[:comp_range]}
+                        type="text"
+                        label="Compensation"
+                        placeholder="$175k-$330k + equity"
+                      />
+                      <.input
+                        field={@form[:location]}
+                        type="text"
+                        label="Location"
+                        placeholder="San Francisco"
+                      />
+                    </div>
                     <.input
-                      field={@form[:location]}
-                      type="text"
-                      label="Location"
-                      placeholder="San Francisco"
+                      field={@form[:email]}
+                      type="email"
+                      label="Your work email"
+                      placeholder="you@company.com"
                     />
-                  </div>
-                  <.input
-                    field={@form[:email]}
-                    type="email"
-                    label="Your work email"
-                    placeholder="you@company.com"
-                  />
-                  <.button class="w-full mt-2" type="submit">Receive your candidates</.button>
-                </.form>
+                    <.button class="w-full mt-4" type="submit">Receive your candidates</.button>
+                  </.form>
+                </div>
               </div>
             </div>
           </div>
@@ -377,7 +385,7 @@ defmodule AlgoraWeb.HomeLive do
 
       <%!-- Tinder action buttons: fixed dock, shown when candidate section is in view --%>
       <div
-        :if={!likes_reached_goal}
+        :if={!@show_onboarding_form}
         id="tinder-buttons"
         phx-hook="TinderButtons"
         phx-update="ignore"
@@ -388,6 +396,7 @@ defmodule AlgoraWeb.HomeLive do
         <button
           class="pointer-events-auto flex-1 max-w-56 flex flex-col items-center justify-center gap-2 py-4 rounded-2xl bg-red-950/60 border-2 border-red-500/50 hover:border-red-400 hover:bg-red-900/60 shadow-xl shadow-red-900/40 transition-all active:scale-95"
           phx-click="dislike_candidate"
+          disabled={likes_reached_goal}
           aria-label="Skip candidate"
         >
           <.icon name="tabler-x" class="size-8 text-red-400" />
@@ -396,6 +405,7 @@ defmodule AlgoraWeb.HomeLive do
         <button
           class="pointer-events-auto flex-1 max-w-56 flex flex-col items-center justify-center gap-2 py-4 rounded-2xl bg-emerald-950/60 border-2 border-emerald-500/50 hover:border-emerald-400 hover:bg-emerald-900/60 shadow-xl shadow-emerald-900/40 transition-all active:scale-95"
           phx-click="like_candidate"
+          disabled={likes_reached_goal}
           aria-label="Like candidate"
         >
           <% fill_pct = onboarding_fill_pct(@liked_ids) %>
@@ -495,6 +505,8 @@ defmodule AlgoraWeb.HomeLive do
       socket
       |> LocalStore.restore(token)
       |> assign(:liked_ids, [])
+      |> assign(:show_onboarding_form, false)
+      |> assign(:transitioning_to_onboarding_form, false)
 
     {:noreply, socket}
   end
@@ -517,13 +529,21 @@ defmodule AlgoraWeb.HomeLive do
     current = Enum.at(socket.assigns.candidates_data, socket.assigns.current_candidate_index)
     user_id = current && current.candidate.match.user.id
     liked_ids = if user_id, do: [user_id | socket.assigns.liked_ids], else: socket.assigns.liked_ids
+    likes_reached_goal = onboarding_goal_reached?(liked_ids)
 
-    socket =
-      socket
-      |> assign(:current_candidate_index, socket.assigns.current_candidate_index + 1)
-      |> assign(:liked_ids, liked_ids)
+    socket = assign(socket, :liked_ids, liked_ids)
 
-    {:noreply, socket}
+    cond do
+      likes_reached_goal && socket.assigns.transitioning_to_onboarding_form ->
+        {:noreply, socket}
+
+      likes_reached_goal ->
+        Process.send_after(self(), :show_onboarding_form, 1000)
+        {:noreply, assign(socket, :transitioning_to_onboarding_form, true)}
+
+      true ->
+        {:noreply, assign(socket, :current_candidate_index, socket.assigns.current_candidate_index + 1)}
+    end
   end
 
   @impl true
@@ -559,6 +579,14 @@ defmodule AlgoraWeb.HomeLive do
     end
   end
 
+  @impl true
+  def handle_info(:show_onboarding_form, socket) do
+    {:noreply,
+     socket
+     |> assign(:show_onboarding_form, true)
+     |> assign(:transitioning_to_onboarding_form, false)}
+  end
+
   defp format_money(money), do: money |> Money.round(currency_digits: 0) |> Money.to_string!(no_fraction_if_integer: true)
 
   defp format_number(number), do: Number.Delimit.number_to_delimited(number, precision: 0)
@@ -590,6 +618,8 @@ defmodule AlgoraWeb.HomeLive do
   end
 
   defp onboarding_likes_goal, do: 3
+
+  defp onboarding_goal_reached?(liked_ids), do: onboarding_likes(liked_ids) >= onboarding_likes_goal()
 
   defp onboarding_likes(liked_ids) do
     liked_ids

@@ -58,9 +58,9 @@ defmodule AlgoraWeb.HomeLive do
     platform_stats = HomeCache.get_platform_stats()
 
     stats1 = [
-      %{label: "Full-time SWEs Hired", value: "30+"},
+      %{label: "Full-time Hires", value: "30+"},
       %{label: "1st Year Retention", value: "100%"},
-      %{label: "Happy Customers", value: "100+"}
+      %{label: "Time to Interview", value: "<1 wk"}
     ]
 
     stats2 = [
@@ -120,553 +120,215 @@ defmodule AlgoraWeb.HomeLive do
       <% end %>
 
       <main class="bg-black relative">
-        <div class="flex flex-col lg:grid lg:grid-cols-[1fr_28rem] lg:gap-2 md:gap-8 lg:max-w-[88rem] lg:w-full lg:mx-auto">
-          <div class="order-1 lg:order-1 lg:col-start-1 lg:min-w-[860px]">
-            <section class="relative isolate min-h-[calc(100vh)]">
-              <div class="h-full mx-auto px-6 lg:px-8 flex flex-col items-center justify-center pt-20 lg:pt-24 2xl:pt-32 pb-12">
-                <div class="h-full mx-auto lg:mx-0 flex lg:max-w-none items-center justify-center text-center w-full">
-                  <div class="w-full flex flex-col lg:items-start text-left lg:text-left">
-                    <h1 class="text-2xl min-[412px]:text-[1.75rem] sm:text-[2.5rem]/[3rem] md:text-[3.5rem]/[4rem] lg:text-[3rem]/[3.5rem] xl:text-[4rem]/[4.5rem] font-black tracking-tight text-foreground font-display">
-                      Open source <br class="hidden" />
-                      <span class="text-emerald-400">tech recruiting</span>
-                    </h1>
-                    <p class="mt-2 text-[0.9rem]/[1.4rem] min-[412px]:text-base md:text-lg xl:text-lg 2xl:text-xl leading-6 font-medium text-foreground">
-                      Connecting the most prolific open source maintainers & contributors with their next jobs
-                    </p>
-                    <div class="grid grid-cols-3 place-items-center sm:grid-cols-6 gap-4 md:gap-5 lg:gap-0 py-4">
-                      <img
-                        src="/images/wordmarks/coderabbit.svg"
-                        alt="CodeRabbit"
-                        class="h-6 md:h-7 transition-all"
-                      />
-                      <img
-                        src="/images/wordmarks/asi.svg"
-                        alt="Air Space Intelligence"
-                        class="h-7 md:h-9 transition-all"
-                      />
-                      <img
-                        src="/images/wordmarks/lovable.svg"
-                        alt="Lovable"
-                        class="h-3 md:h-4 transition-all"
-                      />
-                      <img
-                        src="/images/wordmarks/comfy.svg"
-                        alt="Comfy"
-                        class="h-3.5 md:h-5 transition-all saturate-0"
-                      />
-                      <div class="flex items-center transition-all">
-                        <img src="/images/wordmarks/firecrawl.svg" alt="Firecrawl" class="h-6 md:h-7" />
-                        <img
-                          src="/images/wordmarks/firecrawl2.svg"
-                          alt="Firecrawl2"
-                          class="h-3 md:h-4"
-                        />
-                      </div>
-                      <img
-                        src="/images/wordmarks/textql.svg"
-                        alt="TextQL"
-                        class="h-4 md:h-5 transition-all"
-                      />
+        <%!-- Hero section --%>
+        <section class="min-h-screen flex flex-col">
+          <div class="flex-1 mx-auto px-6 lg:px-8 flex flex-col items-start justify-center pt-20 lg:pt-24 2xl:pt-32 pb-4 w-full max-w-3xl">
+            <%!-- Hero copy (unchanged) --%>
+            <h1 class="text-2xl min-[412px]:text-[1.75rem] sm:text-[2.5rem]/[3rem] md:text-[3.5rem]/[4rem] lg:text-[3rem]/[3.5rem] xl:text-[4rem]/[4.5rem] font-black tracking-tight text-foreground font-display">
+              Open source <br class="hidden" />
+              <span class="text-emerald-400">tech recruiting</span>
+            </h1>
+            <p class="mt-2 text-[0.9rem]/[1.4rem] min-[412px]:text-base md:text-lg xl:text-lg 2xl:text-xl leading-6 font-medium text-foreground">
+              Connecting the most prolific open source maintainers & contributors with their next jobs
+            </p>
+            <%!--
+            <div class="grid grid-cols-3 place-items-center sm:grid-cols-6 gap-4 md:gap-5 lg:gap-0 py-4 w-full">
+              <img src="/images/wordmarks/coderabbit.svg" alt="CodeRabbit" class="h-6 md:h-7 transition-all" />
+              <img src="/images/wordmarks/asi.svg" alt="Air Space Intelligence" class="h-7 md:h-9 transition-all" />
+              <img src="/images/wordmarks/lovable.svg" alt="Lovable" class="h-3 md:h-4 transition-all" />
+              <img src="/images/wordmarks/comfy.svg" alt="Comfy" class="h-3.5 md:h-5 transition-all saturate-0" />
+              <div class="flex items-center transition-all">
+                <img src="/images/wordmarks/firecrawl.svg" alt="Firecrawl" class="h-6 md:h-7" />
+                <img src="/images/wordmarks/firecrawl2.svg" alt="Firecrawl2" class="h-3 md:h-4" />
+              </div>
+              <img src="/images/wordmarks/textql.svg" alt="TextQL" class="h-4 md:h-5 transition-all" />
+            </div>
+            --%>
+            <%!-- Hires: testimonial cards then metrics --%>
+            <div class="w-full space-y-6 sm:space-y-8 mt-10 sm:mt-14">
+              <%= for hire <- @hires do %>
+                <div class="relative">
+                  <div class="relative overflow-hidden rounded-xl border-2 border-white/30 shadow-xl shadow-white/10 bg-black">
+                    <img
+                      src={hire.bg_image}
+                      alt=""
+                      class="absolute inset-0 size-full object-cover object-top grayscale"
+                    />
+                    <div
+                      class="absolute inset-0 mix-blend-multiply"
+                      style={"background-color: #{hire.overlay_color}"}
+                    >
                     </div>
-                    <div :if={length(@carousel_items) > 0} class="mt-4 w-full">
-                      <div
-                        id="candidate-carousel-home"
-                        phx-hook="CandidateCarousel"
-                        class="relative w-full"
-                      >
-                        <%= for {item, index} <- Enum.with_index(@carousel_items) do %>
-                          <div
-                            data-carousel-item={index}
-                            class={"transition-opacity duration-500 #{if index == 0, do: "opacity-100", else: "opacity-0 absolute inset-0"}"}
-                          >
-                            <%= case item do %>
-                              <% {:candidate, candidate_data} -> %>
-                                <Algora.Cloud.candidate_card {Map.merge(candidate_data, %{anonymize: true, root_class: "h-[38rem] lg:h-[31rem]", tech_stack: [], hide_badges?: true, hide_scrollbars?: true})} />
-                              <% {:job_page, %{url: url, alt: alt}} -> %>
-                                <div class="h-[38rem] lg:h-[31rem] flex items-center justify-center bg-card rounded-xl border overflow-hidden">
-                                  <img
-                                    src={url}
-                                    alt={alt}
-                                    class="w-full h-full object-cover"
-                                    loading="lazy"
-                                  />
-                                </div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/30">
+                    </div>
+                    <div class="relative p-4 sm:p-5 min-h-[14rem] flex flex-col justify-center">
+                      <div class="flex items-center gap-3 mb-3">
+                        <img
+                          src={hire.person_avatar}
+                          alt={hire.person_name}
+                          class="size-9 sm:size-10 rounded-full ring-2 ring-white/50 shrink-0"
+                        />
+                        <.icon name="tabler-arrow-right" class="size-3.5 text-white/80 shrink-0" />
+                        <img
+                          src={hire.company_avatar}
+                          alt={hire.company_name}
+                          class="size-9 sm:size-10 rounded-full ring-2 ring-white/50 shrink-0"
+                        />
+                        <div class="min-w-0">
+                          <div class="text-sm font-semibold text-white/90 truncate">
+                            {hire.person_name} → {hire.company_name}
+                          </div>
+                          <div class="text-xs text-white/80">{hire.person_title}</div>
+                        </div>
+                      </div>
+                      <blockquote class="text-sm font-medium text-white/90 leading-relaxed">
+                        "{hire.testimonial}"
+                      </blockquote>
+                      <div class="mt-2 flex items-center gap-2">
+                        <span class="text-sm text-white/70 font-medium">
+                          {hire.testimonial_author}
+                        </span>
+                      </div>
+                      <div class="mt-3 pt-3 border-t border-white/10 space-y-3">
+                        <div class="flex items-center gap-2">
+                          <img
+                            src={hire.testimonial_logo}
+                            alt={hire.company_name}
+                            class={["opacity-70", hire.testimonial_logo_class]}
+                          />
+                          <p class="text-sm text-white/60 truncate">{hire.description}</p>
+                        </div>
+                        <div class="grid grid-cols-3">
+                          <div>
+                            <div class="text-lg sm:text-xl font-display font-semibold text-white/90">
+                              Series {hire.series}
+                            </div>
+                            <div class="text-xs text-white/50 mt-0.5">round</div>
+                          </div>
+                          <div>
+                            <%= if hire[:valuation] do %>
+                              <div class="text-lg sm:text-xl font-display font-semibold text-white/90">
+                                {hire.valuation}
+                              </div>
+                              <div class="text-xs text-white/50 mt-0.5">valuation</div>
                             <% end %>
                           </div>
-                        <% end %>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </section>
-          </div>
-
-          <div class="order-2 lg:sticky lg:top-0 lg:order-2 lg:col-start-2 lg:row-start-1 lg:self-start px-6 lg:px-0 pb-12 lg:pb-8 lg:pt-24 2xl:pt-32 overflow-y-auto lg:max-h-screen scrollbar-thin">
-            <div class="text-left">
-              <div class="rounded-xl bg-card text-card-foreground shadow-2xl border">
-                <div class="p-6 lg:p-8">
-                  <h2 class="text-2xl lg:text-3xl font-semibold leading-7 text-foreground">
-                    View your candidates
-                  </h2>
-                  <p class="pt-2 text-sm text-muted-foreground">
-                    Share <span class="hidden lg:inline">your</span>
-                    JD to receive your candidates within hours
-                  </p>
-
-                  <.form for={@form} phx-submit="submit" class="mt-6 flex flex-col gap-3">
-                    <div>
-                      <label class="block text-sm font-semibold text-foreground mb-2">
-                        Hire type
-                      </label>
-                      <div
-                        class="grid grid-cols-2 gap-4"
-                        phx-update="ignore"
-                        id="hire-type-radio-group"
-                      >
-                        <label class="group relative flex cursor-pointer rounded-lg px-3 py-2 shadow-sm focus:outline-none border bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10 border-input has-[:checked]:border-primary has-[:checked]:bg-primary/10">
-                          <input
-                            type="radio"
-                            class="sr-only"
-                            name={@form[:hire_type].name}
-                            value="full_time"
-                            checked={get_field(@form.source, :hire_type) == "full_time"}
-                          />
-                          <div class="flex items-center gap-3">
-                            <.icon name="tabler-briefcase" class="h-6 w-6 text-primary shrink-0" />
-                            <span class="text-sm text-foreground">
-                              Full-time
-                            </span>
-                          </div>
-                        </label>
-                        <label class="group relative flex cursor-pointer rounded-lg px-3 py-2 shadow-sm focus:outline-none border bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10 border-input has-[:checked]:border-primary has-[:checked]:bg-primary/10">
-                          <input
-                            type="radio"
-                            class="sr-only"
-                            name={@form[:hire_type].name}
-                            value="contract"
-                            checked={get_field(@form.source, :hire_type) == "contract"}
-                          />
-                          <div class="flex items-center gap-3">
-                            <.icon name="tabler-clock" class="h-6 w-6 text-primary shrink-0" />
-                            <span class="text-sm text-foreground">
-                              Contract
-                            </span>
-                          </div>
-                        </label>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label class="block text-sm font-semibold text-foreground mb-2">
-                        Tech stack
-                      </label>
-                      <.TechStack tech={@tech_stack} socket={@socket} form="form" classes="-mt-2" />
-                    </div>
-
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                      <.input
-                        field={@form[:location]}
-                        type="text"
-                        label="Location"
-                        placeholder="San Francisco"
-                      />
-                      <.input
-                        field={@form[:comp_range]}
-                        type="text"
-                        label="Compensation"
-                        placeholder="$175k-$330k + equity"
-                      />
-                    </div>
-
-                    <.input
-                      field={@form[:job_description]}
-                      type="textarea"
-                      label="Job description / careers URL"
-                      rows="3"
-                      placeholder="Tell us about the role, requirements, ideal candidate..."
-                    />
-
-                    <.input
-                      field={@form[:email]}
-                      type="email"
-                      label="Work email"
-                      placeholder="you@company.com"
-                    />
-                    <div class="flex flex-col gap-4">
-                      <.button class="w-full">Receive your candidates</.button>
-                    </div>
-                  </.form>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="order-3 lg:order-1 lg:col-start-1">
-            <div class="py-16 sm:py-24 relative">
-              <div class="">
-                <div class="z-10 relative overflow-hidden px-6 py-20 sm:px-10 sm:py-36 md:px-12 lg:px-20 dark:shadow-none dark:after:pointer-events-none dark:after:absolute dark:after:inset-0 dark:after:inset-ring dark:after:inset-ring-white/10 dark:after:sm:rounded-3xl">
-                  <img
-                    src="https://algora.io/storage/avatars/coderabbit/sam-hayes-85a0ba25.jpg"
-                    alt=""
-                    class="absolute inset-0 size-full object-cover object-top grayscale"
-                  />
-                  <div class="absolute inset-0 bg-orange-950/60 mix-blend-multiply"></div>
-                  <div class="absolute inset-0 bg-gradient-to-t from-transparent from-[97%] to-black">
-                  </div>
-                  <div class="absolute inset-0 bg-gradient-to-b from-transparent from-[97%] to-black">
-                  </div>
-                  <div class="absolute hidden lg:block inset-0 bg-gradient-to-r from-transparent from-[97%] to-black">
-                  </div>
-                  <div class="absolute hidden lg:block inset-0 bg-gradient-to-l from-transparent from-[97%] to-black">
-                  </div>
-
-                  <div class="relative mx-auto max-w-2xl lg:mx-0">
-                    <img src="/images/wordmarks/coderabbit.svg" alt="CodeRabbit" class="h-12 w-auto" />
-                    <figure>
-                      <blockquote class="mt-6 text-lg font-semibold text-white sm:text-xl/8">
-                        <p>
-                          "Within one week of onboarding, we started interviewing qualified candidates who joined CodeRabbit in San Francisco."
-                        </p>
-                      </blockquote>
-                      <figcaption class="mt-6 text-base text-white dark:text-gray-200">
-                        <div class="font-semibold">Sam Hayes</div>
-                        <div class="mt-1">Talent Acquisition Lead</div>
-                      </figcaption>
-                    </figure>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <section class="relative isolate py-8 sm:py-20">
-              <div class="mx-auto px-6 lg:px-8 pt-24 xl:pt-0">
-                <h2 class="font-display text-[2rem] font-semibold tracking-tight text-foreground sm:text-6xl sm:mb-4 text-center sm:text-left">
-                  Hire with Confidence
-                </h2>
-                <div class="flex flex-col">
-                  <div class="w-full space-y-4">
-                    <div class="mt-6 flex items-start lg:items-center gap-2 sm:gap-3">
-                      <.icon
-                        name="tabler-circle-number-1"
-                        class="w-6 h-6 sm:w-8 sm:h-8 text-foreground shrink-0"
-                      />
-                      <p class="text-foreground text-sm sm:text-lg font-medium">
-                        Share your JDs and receive handpicked candidates with the right skills and experience
-                      </p>
-                    </div>
-                    <div class="relative z-30 mx-auto">
-                      <div class="relative mx-auto">
-                        <div class="group/card h-full border-2 border-white/10 bg-muted md:gap-8 group relative flex-1 overflow-hidden rounded-xl bg-cover hover:no-underline">
-                          <div class="grid h-7 grid-cols-[1fr_auto_1fr] overflow-hidden border-b border-gray-800 ">
-                            <div class="ml-2 flex items-center gap-1">
-                              <div class="h-2.5 w-2.5 rounded-full bg-red-400"></div>
-                              <div class="h-2.5 w-2.5 rounded-full bg-yellow-400"></div>
-                              <div class="h-2.5 w-2.5 rounded-full bg-green-400"></div>
-                            </div>
-                            <div class="flex items-center justify-center gap-2">
-                              <img
-                                src={~p"/images/logo-192px.png"}
-                                alt="Algora"
-                                class="w-4 h-4 rounded"
-                              />
-                              <div class="text-xs text-foreground">
-                                algora.io<span class="text-foreground/70 hidden sm:inline">/candidates</span>
-                              </div>
-                            </div>
-                            <div></div>
-                          </div>
-                          <div class="relative flex aspect-[1200/630] h-full w-full items-center justify-center text-balance text-center text-xl font-medium text-red-100 sm:text-2xl">
-                            <img
-                              src={~p"/images/screenshots/candidates-page.png"}
-                              alt="Candidates page"
-                              class="w-full bg-[#121214] p-1"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="mt-12 w-full space-y-4">
-                    <div class="mt-6 flex items-start lg:items-center gap-2 sm:gap-3">
-                      <.icon
-                        name="tabler-circle-number-2"
-                        class="w-6 h-6 sm:w-8 sm:h-8 text-foreground shrink-0"
-                      />
-                      <p class="text-foreground text-sm sm:text-lg font-medium">
-                        Get notified in your inbox and Slack with candidates ready to interview
-                      </p>
-                    </div>
-
-                    <div class="relative z-30 mx-auto">
-                      <div class="relative mx-auto">
-                        <div class="group/card h-full border-2 border-white/10 bg-muted md:gap-8 group relative flex-1 overflow-hidden rounded-xl bg-cover hover:no-underline">
-                          <div class="grid h-7 grid-cols-[1fr_auto_1fr] overflow-hidden border-b border-gray-800 ">
-                            <div class="ml-2 flex items-center gap-1">
-                              <div class="h-2.5 w-2.5 rounded-full bg-red-400"></div>
-                              <div class="h-2.5 w-2.5 rounded-full bg-yellow-400"></div>
-                              <div class="h-2.5 w-2.5 rounded-full bg-green-400"></div>
-                            </div>
-                            <div class="flex items-center justify-center gap-2">
-                              <img
-                                src={~p"/images/logos/slack.svg"}
-                                alt="Slack"
-                                class="w-4 h-4 rounded"
-                              />
-                              <div class="text-xs text-foreground">
-                                app.slack.com<span class="text-foreground/70 hidden sm:inline">/client/T05UQ2UMHFX/C09FC54M0S3</span>
-                              </div>
-                            </div>
-                            <div></div>
-                          </div>
-                          <div class="relative flex aspect-[1008/561] h-full w-full items-center justify-center text-balance text-center text-xl font-medium text-red-100 sm:text-2xl">
-                            <img
-                              src={~p"/images/screenshots/candidate-drip.png"}
-                              alt="Candidate drip"
-                              class="w-full bg-[#121214] p-1"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="mt-12 w-full space-y-4">
-                    <div class="mt-6 flex items-start lg:items-center gap-2 sm:gap-3">
-                      <.icon
-                        name="tabler-circle-number-3"
-                        class="w-6 h-6 sm:w-8 sm:h-8 text-foreground shrink-0"
-                      />
-                      <p class="text-foreground text-sm sm:text-lg font-medium">
-                        Candidates are auto-added to your Ashby
-                      </p>
-                    </div>
-                    <div class="relative z-30 mx-auto">
-                      <div class="relative mx-auto">
-                        <div class="group/card h-full border-2 border-white/10 bg-muted md:gap-8 group relative flex-1 overflow-hidden rounded-xl bg-cover hover:no-underline">
-                          <div class="grid h-7 grid-cols-[1fr_auto_1fr] overflow-hidden border-b border-gray-800 ">
-                            <div class="ml-2 flex items-center gap-1">
-                              <div class="h-2.5 w-2.5 rounded-full bg-red-400"></div>
-                              <div class="h-2.5 w-2.5 rounded-full bg-yellow-400"></div>
-                              <div class="h-2.5 w-2.5 rounded-full bg-green-400"></div>
-                            </div>
-                            <div class="flex items-center justify-center gap-2">
-                              <img
-                                src={~p"/images/logos/ashby.png"}
-                                alt="Ashby"
-                                class="w-4 h-4 rounded"
-                              />
-                              <div class="text-xs text-foreground">
-                                app.ashbyhq.com<span class="text-foreground/70 hidden sm:inline">/candidates/pipeline/active</span>
-                              </div>
-                            </div>
-                            <div></div>
-                          </div>
-                          <div class="relative flex aspect-[816/414] h-full w-full items-center justify-center text-balance text-center text-xl font-medium text-red-100 sm:text-2xl">
-                            <img src={~p"/images/screenshots/ashby.png"} alt="Ashby" class="w-full" />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="pt-12 sm:pt-24 grid grid-cols-1 gap-12">
-                    <div class="max-w-[88rem] pt-2">
-                      <div class="grid grid-cols-3 gap-8 lg:gap-16">
-                        <%= for stat <- @stats1 do %>
                           <div>
-                            <div class="text-4xl font-bold font-display text-foreground">
-                              {stat.value}
+                            <div class="text-lg sm:text-xl font-display font-semibold text-white/90">
+                              {hire.raised}
                             </div>
-                            <div class="text-base text-muted-foreground mt-2">
-                              {stat.label}
-                            </div>
+                            <div class="text-xs text-white/50 mt-0.5">raised</div>
                           </div>
-                        <% end %>
-                      </div>
-                    </div>
-                    <div class="max-w-[88rem]">
-                      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-                        <%= for hire <- @hires do %>
-                          <%= if Map.get(hire, :special) do %>
-                            <div class="relative flex-1 flex mb-12 max-w-md">
-                              <div class="truncate flex items-center gap-2 sm:gap-3 p-4 sm:py-6 bg-gradient-to-br from-emerald-900/30 to-emerald-800/20 rounded-xl border-2 border-emerald-400/30 shadow-xl shadow-emerald-400/10 w-full">
-                                <img
-                                  src={hire.person_avatar}
-                                  alt={hire.person_name}
-                                  class="size-8 sm:size-12 rounded-full ring-2 ring-emerald-400/50"
-                                />
-                                <.icon
-                                  name="tabler-arrow-right"
-                                  class="size-3 sm:size-4 text-emerald-400 shrink-0"
-                                />
-                                <img
-                                  src={hire.company_avatar}
-                                  alt={hire.company_name}
-                                  class="size-8 sm:size-12 rounded-full ring-2 ring-emerald-400/50"
-                                />
-                                <div class="flex-1">
-                                  <div class="text-sm font-medium whitespace-nowrap text-emerald-100">
-                                    {hire.person_name}
-                                    <.icon name="tabler-arrow-right" class="size-3 text-emerald-400" /> {hire.company_name}
-                                  </div>
-                                  <div class="text-xs text-emerald-200/80 mt-1">
-                                    {hire.person_title}
-                                  </div>
-                                  <div :if={hire[:hire_date]} class="text-xs text-emerald-300/70 mt-1">
-                                    {hire.hire_date}
-                                  </div>
-                                </div>
-                              </div>
-                              <.badge
-                                variant="secondary"
-                                class="absolute -top-2 -left-2 text-xs px-2 sm:px-3 py-0.5 sm:py-1 text-black bg-gradient-to-r from-emerald-400 to-emerald-500 font-semibold shadow-lg"
-                              >
-                                <.icon
-                                  name="tabler-star-filled"
-                                  class="size-4 text-black mr-1 -ml-0.5"
-                                /> New hire!
-                              </.badge>
-
-                              <%= if String.contains?(hire.company_name, "YC") do %>
-                                <img
-                                  src={~p"/images/logos/yc.svg"}
-                                  alt="Y Combinator"
-                                  class="absolute -top-2 -right-2 size-6 opacity-90"
-                                />
-                              <% end %>
-                            </div>
-                          <% end %>
-                        <% end %>
-                      </div>
-
-                      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-                        <%= for hire <- @hires do %>
-                          <%= unless Map.get(hire, :special) do %>
-                            <div class="relative flex items-center gap-2 sm:gap-3 p-4 sm:py-6 bg-card rounded-xl border shrink-0">
-                              <img
-                                src={hire.person_avatar}
-                                alt={hire.person_name}
-                                class="size-8 sm:size-12 rounded-full"
-                              />
-                              <.icon
-                                name="tabler-arrow-right"
-                                class="size-3 sm:size-4 text-muted-foreground shrink-0"
-                              />
-                              <img
-                                src={hire.company_avatar}
-                                alt={hire.company_name}
-                                class="size-8 sm:size-12 rounded-full"
-                              />
-                              <div class="flex-1">
-                                <div class="text-sm font-medium whitespace-nowrap">
-                                  {hire.person_name}
-                                  <.icon name="tabler-arrow-right" class="size-3 text-foreground" /> {Algora.Util.compact_org_name(
-                                    hire.company_name
-                                  )}
-                                  <%= if String.contains?(hire.company_name, "YC") do %>
-                                    <img
-                                      src={~p"/images/logos/yc.svg"}
-                                      alt="Y Combinator"
-                                      class="size-4 opacity-90 inline-flex ml-1"
-                                    />
-                                  <% end %>
-                                </div>
-                                <div class="text-xs text-muted-foreground mt-1">
-                                  {hire.person_title}
-                                </div>
-                              </div>
-                              <.badge
-                                variant="secondary"
-                                class="absolute -top-2 -left-2 text-xs px-2 py-1 text-emerald-400 bg-emerald-950"
-                              >
-                                Full-time hire!
-                              </.badge>
-                            </div>
-                          <% end %>
-                        <% end %>
+                        </div>
                       </div>
                     </div>
                   </div>
+                  <.badge
+                    variant="secondary"
+                    class="absolute -top-2 -left-2 text-xs px-2 sm:px-3 py-0.5 text-black bg-gradient-to-r from-emerald-400 to-emerald-500 font-semibold shadow-lg"
+                  >
+                    <.icon name="tabler-star-filled" class="size-3.5 text-black mr-1 -ml-0.5" />
+                    New hire!
+                  </.badge>
                 </div>
+              <% end %>
+              <%!-- Metrics after hires --%>
+              <div class="grid grid-cols-3 gap-6 sm:gap-10 pt-2">
+                <%= for stat <- @stats1 do %>
+                  <div>
+                    <div class="text-3xl sm:text-4xl font-bold font-display text-foreground">
+                      {stat.value}
+                    </div>
+                    <div class="text-xs sm:text-sm text-muted-foreground mt-1">{stat.label}</div>
+                  </div>
+                <% end %>
               </div>
-            </section>
+            </div>
+          </div>
+          <%!-- Scroll arrow --%>
+          <div class="flex flex-col items-center gap-1 py-6 sm:py-8">
+            <span class="text-xs font-medium text-muted-foreground tracking-widest uppercase">
+              Scroll to get started
+            </span>
+            <div class="mt-2 flex flex-col items-center animate-bounce">
+              <.icon name="tabler-chevron-down" class="size-5 text-emerald-400" />
+              <.icon name="tabler-chevron-down" class="-mt-2 size-5 text-emerald-400/50" />
+            </div>
+          </div>
+        </section>
 
-            <%!-- <section class="relative isolate py-8 sm:py-20">
-              <div class="mx-auto max-w-[88rem] px-6 lg:px-8 pt-24 xl:pt-0">
-                <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-6xl mb-2 sm:mb-4">
-                  Publish jobs
+        <%!-- Candidate section: tinder-style single card --%>
+        <% first_candidate = List.first(@candidates_data) %>
+        <section
+          id="candidate-section"
+          phx-hook="TinderSection"
+          class="relative min-h-screen px-4 sm:px-6 pt-4 pb-32"
+        >
+          <%= if first_candidate do %>
+            <Algora.Cloud.candidate_card {Map.merge(first_candidate, %{
+              anonymize: true,
+              # root_class: "h-[calc(100svh-8rem)] max-h-[52rem]",
+              tech_stack: [],
+              hide_badges?: true,
+              hide_scrollbars?: true
+            })} />
+          <% end %>
+        </section>
+
+        <%!--
+        View your candidates form (commented out)
+        <div class="order-2 lg:sticky lg:top-0 lg:order-2 lg:col-start-2 lg:row-start-1 lg:self-start px-6 lg:px-0 pb-12 lg:pb-8 lg:pt-24 2xl:pt-32 overflow-y-auto lg:max-h-screen scrollbar-thin">
+          <div class="text-left">
+            <div class="rounded-xl bg-card text-card-foreground shadow-2xl border">
+              <div class="p-6 lg:p-8">
+                <h2 class="text-2xl lg:text-3xl font-semibold leading-7 text-foreground">
+                  View your candidates
                 </h2>
-                <p class="font-medium text-[15px] text-muted-foreground sm:text-xl mb-12 mx-auto">
-                  Reach top 1% users matching your tech, skills, seniority and location preferences
-                </p>
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                  <.link href="https://algora.io/coderabbit/jobs" target="_blank">
-                    <img
-                      src="https://algora.io/og/coderabbit/jobs?cached"
-                      alt="CodeRabbit jobs"
-                      class="object-cover aspect-[1200/630] rounded-xl border border-border bg-gray-800"
-                      loading="lazy"
-                    />
-                  </.link>
-                  <.link href="https://algora.io/comfy/jobs" target="_blank">
-                    <img
-                      src="https://algora.io/og/comfy/jobs?cached"
-                      alt="Comfy.org jobs"
-                      class="object-cover aspect-[1200/630] rounded-xl border border-border bg-gray-800"
-                      loading="lazy"
-                    />
-                  </.link>
-                  <.link href="https://algora.io/lovable/jobs" target="_blank">
-                    <img
-                      src="https://algora.io/og/lovable/jobs?cached"
-                      alt="Lovable jobs"
-                      class="object-cover aspect-[1200/630] rounded-xl border border-border bg-gray-800"
-                      loading="lazy"
-                    />
-                  </.link>
-                </div>
-                <div class="pt-9 sm:pt-18 text-center">
-                  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div>
-                      <div class="mb-2 mx-auto flex items-center justify-center h-12 w-12 bg-emerald-400/10 rounded-full">
-                        <.icon name="github" class="h-8 w-8 text-emerald-400" />
-                      </div>
-                      <h4 class="font-semibold text-foreground mb-1">Apply with GitHub</h4>
-                      <p class="text-sm text-foreground-light">
-                        Your Algora job board automatically screens and ranks applicants based on OSS contributions
-                      </p>
-                    </div>
-                    <div>
-                      <div class="mb-2 mx-auto flex items-center justify-center h-12 w-12 bg-emerald-400/10 rounded-full">
-                        <.icon name="tabler-speakerphone" class="h-8 w-8 text-emerald-400" />
-                      </div>
-                      <h4 class="font-semibold text-foreground mb-1">Massive Reach</h4>
-                      <p class="text-sm text-foreground-light">
-                        Reach 200K+ devs with unlimited job postings
-                      </p>
-                    </div>
-                    <div>
-                      <div class="mb-2 mx-auto flex items-center justify-center h-12 w-12 bg-emerald-400/10 rounded-full">
-                        <.icon name="tabler-plug-connected" class="h-8 w-8 text-emerald-400" />
-                      </div>
-                      <h4 class="font-semibold text-foreground mb-1">White-label</h4>
-                      <p class="text-sm text-foreground-light">
-                        Embed 1-click apply on your website<br />
-                        and add custom branding to your job board
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                ...
               </div>
-            </section> --%>
+            </div>
           </div>
         </div>
+
+        Hire with Confidence section (commented out)
+        <section class="relative isolate py-8 sm:py-20">
+          <div class="mx-auto px-6 lg:px-8 pt-24 xl:pt-0">
+            <h2 class="font-display text-[2rem] font-semibold tracking-tight text-foreground sm:text-6xl sm:mb-4 text-center sm:text-left">
+              Hire with Confidence
+            </h2>
+            ...
+          </div>
+        </section>
+        --%>
       </main>
+
+      <%!-- Tinder action buttons: fixed, shown when candidate section is in view --%>
+      <div
+        id="tinder-buttons"
+        class="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-center gap-10 pb-8 pt-6 bg-gradient-to-t from-black via-black/70 to-transparent opacity-0 transition-opacity duration-500 pointer-events-none"
+      >
+        <button
+          class="pointer-events-auto flex items-center justify-center size-16 rounded-full bg-card border-2 border-red-500/60 hover:border-red-500 hover:bg-red-500/10 shadow-lg shadow-red-500/20 transition-all active:scale-95"
+          phx-click="dislike_candidate"
+          aria-label="Skip candidate"
+        >
+          <.icon name="tabler-x" class="size-7 text-red-400" />
+        </button>
+        <button
+          class="pointer-events-auto flex items-center justify-center size-16 rounded-full bg-card border-2 border-emerald-500/60 hover:border-emerald-500 hover:bg-emerald-500/10 shadow-lg shadow-emerald-500/20 transition-all active:scale-95"
+          phx-click="like_candidate"
+          aria-label="Like candidate"
+        >
+          <.icon name="tabler-heart" class="size-7 text-emerald-400" />
+        </button>
+      </div>
     </div>
 
+    <%!--
     <div class="relative isolate overflow-hidden bg-gradient-to-br from-black to-background">
       <Footer.footer class="max-w-[88rem]" />
     </div>
+    --%>
 
     <.modal_video_dialog />
     """
@@ -699,6 +361,16 @@ defmodule AlgoraWeb.HomeLive do
   @impl true
   def handle_event("tech_stack_changed", %{"tech_stack" => tech_stack}, socket) do
     {:noreply, assign(socket, :tech_stack, tech_stack)}
+  end
+
+  @impl true
+  def handle_event("like_candidate", _params, socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("dislike_candidate", _params, socket) do
+    {:noreply, socket}
   end
 
   @impl true
@@ -766,46 +438,62 @@ defmodule AlgoraWeb.HomeLive do
   defp hires do
     [
       %{
+        special: true,
         company_name: "CodeRabbit",
         company_avatar: "https://avatars.githubusercontent.com/u/132028505?s=200&v=4",
-        person_name: "Erfan Al-Hossami",
+        person_name: "Erfan",
         person_avatar: "https://algora.io/storage/avatars/taisazero.jpeg",
-        person_title: "Applied AI Engineer"
+        person_title: "Applied AI Engineer",
+        bg_image: "https://algora.io/storage/avatars/coderabbit/sam-hayes-85a0ba25.jpg",
+        overlay_color: "rgba(67, 20, 7, 0.6)",
+        description: "AI code reviews",
+        series: "B",
+        raised: "$60M",
+        valuation: "$550M",
+        testimonial:
+          "Within one week of onboarding, we started interviewing qualified candidates who joined CodeRabbit in San Francisco.",
+        testimonial_author: "Sam Hayes · Talent Acquisition Lead",
+        testimonial_logo: "/images/wordmarks/coderabbit.svg",
+        testimonial_logo_class: "h-6"
       },
       %{
+        special: true,
         company_name: "ComfyUI",
         company_avatar: "https://avatars.githubusercontent.com/u/166579949?v=4",
-        person_name: "Matt Miller",
+        person_name: "Matt",
         person_avatar: "https://algora.io/storage/avatars/MillerMedia.jpeg",
-        person_title: "Backend Engineer"
+        person_title: "Backend Engineer",
+        bg_image: "https://pbs.twimg.com/profile_images/1987431529296109574/37rh5jdP_400x400.jpg",
+        overlay_color: "rgba(117, 125, 14, 0.65)",
+        description: "Open source OS for creative AI",
+        series: "B",
+        raised: "$30M",
+        valuation: "$500M",
+        testimonial:
+          "We needed someone who could hit the ground running in an open source-first environment. Algora found us exactly that — a developer already embedded in the ecosystem.",
+        testimonial_author: "Robin Huang · Cofounder",
+        testimonial_logo: "/images/wordmarks/comfy.svg",
+        testimonial_logo_class: "h-4"
       },
       %{
+        special: true,
         company_name: "TextQL",
         company_avatar: "https://algora.io/storage/avatars/textql.jpeg",
-        person_name: "Christian Lim",
+        person_name: "Christian",
         person_avatar: "https://avatars.githubusercontent.com/u/2482353?v=4",
-        person_title: "Member of Technical Staff"
-      },
-      %{
-        company_name: "Trigger.dev (YC W23)",
-        company_avatar: "https://github.com/triggerdotdev.png",
-        person_name: "Nick",
-        person_avatar: "https://trigger.dev/blog/authors/nick.png",
-        person_title: "Founding Engineer"
-      },
-      %{
-        company_name: "Firecrawl (YC S22)",
-        company_avatar: "https://github.com/mendableai.png",
-        person_name: "Gergő Móricz",
-        person_avatar: "https://github.com/mogery.png",
-        person_title: "Software Engineer"
-      },
-      %{
-        company_name: "Golem Cloud",
-        company_avatar: "https://github.com/golemcloud.png",
-        person_name: "Maxim S",
-        person_avatar: "https://github.com/mschuwalow.png",
-        person_title: "Lead Engineer"
+        person_title: "Member of Technical Staff",
+        bg_image:
+          "https://media.licdn.com/dms/image/v2/D4E03AQH4x-LiUVr6SA/profile-displayphoto-scale_400_400/B4EZlePKFtKYAg-/0/1758222656365?e=1779321600&v=beta&t=Vw_xCN6uxvuYBQ-tANlL1WmL2l_dcboo2jzKSqqrqF4",
+        overlay_color: "rgba(8, 69, 51, 0.75)",
+        description: "Agentic analytics for enterprises",
+        series: "A",
+        raised: "$17M",
+        valuation: nil,
+        testimonial:
+          "Algora's candidates came pre-vetted through their open source contributions. We hired someone we could verify before ever getting on a call.",
+        testimonial_author: "Mark Hay · Cofounder & CTO",
+        testimonial_logo: "/images/wordmarks/textql.svg",
+        testimonial_logo_class: "h-4"
       }
     ]
   end

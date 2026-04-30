@@ -973,6 +973,35 @@ const Hooks = {
       }
     },
   },
+  TinderSection: {
+    mounted() {
+      const buttons = document.getElementById("tinder-buttons");
+      if (!buttons) return;
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              buttons.classList.remove("opacity-0", "pointer-events-none");
+              buttons.classList.add("opacity-100");
+            } else {
+              buttons.classList.remove("opacity-100");
+              buttons.classList.add("opacity-0", "pointer-events-none");
+            }
+          });
+        },
+        { threshold: 0.2 }
+      );
+
+      observer.observe(this.el);
+      this.observer = observer;
+    },
+    destroyed() {
+      if (this.observer) {
+        (this.observer as IntersectionObserver).disconnect();
+      }
+    },
+  },
 } satisfies Record<string, Partial<ViewHook> & Record<string, unknown>>;
 
 // Accessible focus handling

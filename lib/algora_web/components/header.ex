@@ -176,12 +176,201 @@ defmodule AlgoraWeb.Components.Header do
                     <.icon name="tabler-star-filled" class="h-3 w-3 shrink-0" />
                   </span>
                 </.button>
-                <.button navigate={~p"/auth/signup"} class="w-full">
-                  Sign up
-                </.button>
-                <.button navigate={~p"/auth/login"} class="w-full" variant="secondary">
+                <.button navigate={~p"/auth/login"} class="w-full">
                   Sign in
                 </.button>
+              </div>
+              <div class="py-6 space-y-8">
+                <div>
+                  <h3 class="text-xs font-semibold uppercase tracking-wider text-foreground">
+                    Recruiting
+                  </h3>
+                  <ul role="list" class="mt-4 space-y-3">
+                    <li>
+                      <.link
+                        class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        href="/coderabbit/jobs"
+                        target="_blank"
+                      >
+                        CodeRabbit
+                      </.link>
+                    </li>
+                    <li>
+                      <.link
+                        class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        href="/lovable/jobs"
+                        target="_blank"
+                      >
+                        Lovable
+                      </.link>
+                    </li>
+                    <li>
+                      <.link
+                        class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        href="/comfy/jobs"
+                        target="_blank"
+                      >
+                        ComfyUI
+                      </.link>
+                    </li>
+                    <li>
+                      <.link
+                        class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        href="/firecrawl/jobs"
+                        target="_blank"
+                      >
+                        Firecrawl (YC S22)
+                      </.link>
+                    </li>
+                    <li>
+                      <.link
+                        class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        href="/airspace-intelligence/jobs"
+                        target="_blank"
+                      >
+                        Air Space Intelligence
+                      </.link>
+                    </li>
+                    <li>
+                      <.link
+                        class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        href="/textql/jobs"
+                        target="_blank"
+                      >
+                        TextQL
+                      </.link>
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 class="text-xs font-semibold uppercase tracking-wider text-foreground">
+                    Bounties
+                  </h3>
+                  <ul role="list" class="mt-4 space-y-3">
+                    <li>
+                      <.link
+                        class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        navigate={~p"/challenges/turso"}
+                      >
+                        Turso
+                      </.link>
+                    </li>
+                    <li>
+                      <.link
+                        class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        navigate={~p"/challenges/golem"}
+                      >
+                        Golem Cloud
+                      </.link>
+                    </li>
+                    <li>
+                      <.link
+                        class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        navigate={~p"/challenges/tsperf"}
+                      >
+                        TSPerf
+                      </.link>
+                    </li>
+                    <li>
+                      <.link
+                        class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        navigate={~p"/challenges/prettier"}
+                      >
+                        Prettier
+                      </.link>
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 class="text-xs font-semibold uppercase tracking-wider text-foreground">
+                    Community
+                  </h3>
+                  <ul role="list" class="mt-4 space-y-3">
+                    <li>
+                      <.link
+                        class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        href="https://www.youtube.com/watch?v=ZXz74ZewxwY&list=PLRIG8mKLBXFotOxF234rEIREidMRh98Hv&t=229s"
+                        rel="noopener"
+                        target="_blank"
+                      >
+                        OSS Founder Podcast
+                      </.link>
+                    </li>
+                    <li>
+                      <.link
+                        class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        href={AlgoraWeb.Constants.get(:github_url)}
+                        rel="noopener"
+                        target="_blank"
+                      >
+                        GitHub
+                      </.link>
+                    </li>
+                    <li>
+                      <.link
+                        class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        href={AlgoraWeb.Constants.get(:twitter_url)}
+                        rel="noopener"
+                        target="_blank"
+                      >
+                        X (Twitter)
+                      </.link>
+                    </li>
+                    <li>
+                      <.link
+                        class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        href={AlgoraWeb.Constants.get(:linkedin_url)}
+                        rel="noopener"
+                        target="_blank"
+                      >
+                        LinkedIn
+                      </.link>
+                    </li>
+                    <li>
+                      <.link
+                        class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        href={AlgoraWeb.Constants.get(:discord_url)}
+                        rel="noopener"
+                        target="_blank"
+                      >
+                        Discord
+                      </.link>
+                    </li>
+                    <li>
+                      <.link
+                        class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        href={AlgoraWeb.Constants.get(:youtube_url)}
+                        rel="noopener"
+                        target="_blank"
+                      >
+                        YouTube
+                      </.link>
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 class="text-xs font-semibold uppercase tracking-wider text-foreground">
+                    Legal
+                  </h3>
+                  <ul role="list" class="mt-4 space-y-3">
+                    <li>
+                      <.link
+                        class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        href={AlgoraWeb.Constants.get(:terms_url)}
+                      >
+                        Terms of Service
+                      </.link>
+                    </li>
+                    <li>
+                      <.link
+                        class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        href={AlgoraWeb.Constants.get(:privacy_url)}
+                      >
+                        Privacy Policy
+                      </.link>
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>

@@ -299,10 +299,13 @@ defmodule AlgoraWeb.HomeLive do
         <section
           id="candidate-section"
           phx-hook="TinderSection"
-          class="relative min-h-screen px-4 sm:px-6 pt-4 pb-4"
+          class="relative px-4 sm:px-6 pt-4 pb-0"
         >
-          <div class="relative min-h-[60vh]">
-            <div class={["transition-opacity duration-700", if(@show_onboarding_form, do: "opacity-0 pointer-events-none", else: "opacity-100")]}>
+          <div class="relative">
+            <div class={[
+              "transition-opacity duration-700",
+              if(@show_onboarding_form, do: "opacity-0 pointer-events-none", else: "opacity-100")
+            ]}>
               <%= if current_candidate do %>
                 <Algora.Cloud.candidate_card {Map.merge(current_candidate, %{
                   anonymize: true,
@@ -322,23 +325,29 @@ defmodule AlgoraWeb.HomeLive do
             <div
               :if={likes_reached_goal}
               class={[
-                "absolute inset-0 flex items-center justify-center transition-opacity duration-700",
+                "onboarding-form-overlay-scroll absolute inset-0 flex items-start justify-center overflow-y-auto transition-opacity duration-700",
                 if(@show_onboarding_form, do: "opacity-100", else: "opacity-0 pointer-events-none")
               ]}
             >
               <div class="w-full max-w-3xl text-card-foreground">
-                <div class="p-2 lg:p-4">
-                  <h2 class="text-2xl lg:text-3xl font-semibold leading-7 text-foreground">
+                <div class="px-2 sm:px-4 pb-2">
+                  <h2 class="text-2xl sm:text-3xl font-semibold leading-tight tracking-tight text-foreground">
                     Get your top candidates
                   </h2>
-                  <p class="mt-2 text-sm text-muted-foreground">
+                  <p class="mt-3 text-base text-muted-foreground">
                     Share your hiring needs.
                   </p>
-                  <.form for={@form} phx-submit="submit" class="mt-8 flex flex-col gap-6">
-                    <div class="space-y-2">
-                      <label class="block text-sm font-semibold text-foreground mb-2">
+                  <.form
+                    for={@form}
+                    id="onboarding-candidates-form"
+                    phx-submit="submit"
+                    class="mt-8 flex flex-col gap-8"
+                  >
+                    <%!--
+                    <div class="space-y-3">
+                      <div class="block text-lg sm:text-xl font-semibold leading-snug text-foreground">
                         Tech stack
-                      </label>
+                      </div>
                       <.TechStack
                         tech={Ecto.Changeset.get_field(@form.source, :tech_stack) || []}
                         socket={@socket}
@@ -346,35 +355,66 @@ defmodule AlgoraWeb.HomeLive do
                         classes="-mt-2"
                       />
                     </div>
-                    <.input
-                      field={@form[:job_description]}
-                      type="textarea"
-                      label="Job description / careers URL"
-                      rows="3"
-                      class="resize-none"
-                      placeholder="Tell us about the role, requirements, ideal candidate..."
-                    />
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    --%>
+                    <input type="hidden" name={@form[:tech_stack].name} value="[]" />
+                    <div>
+                      <label
+                        for={@form[:job_description].id}
+                        class="block text-lg sm:text-xl font-semibold leading-snug text-foreground mb-2"
+                      >
+                        Careers URL
+                      </label>
                       <.input
-                        field={@form[:comp_range]}
-                        type="text"
-                        label="Compensation"
-                        placeholder="$175k-$330k + equity"
-                      />
-                      <.input
-                        field={@form[:location]}
-                        type="text"
-                        label="Location"
-                        placeholder="San Francisco"
+                        field={@form[:job_description]}
+                        type="url"
+                        class="px-3 py-3 !text-base sm:!leading-7"
+                        placeholder="https://company.com/careers"
                       />
                     </div>
-                    <.input
-                      field={@form[:email]}
-                      type="email"
-                      label="Your work email"
-                      placeholder="you@company.com"
-                    />
-                    <.button class="w-full mt-4" type="submit">Receive your candidates</.button>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 gap-y-8">
+                      <div>
+                        <label
+                          for={@form[:comp_range].id}
+                          class="block text-lg sm:text-xl font-semibold leading-snug text-foreground mb-2"
+                        >
+                          Compensation
+                        </label>
+                        <.input
+                          field={@form[:comp_range]}
+                          type="text"
+                          placeholder="$175k-$330k + equity"
+                          class="px-3 py-3 !text-base sm:!leading-7"
+                        />
+                      </div>
+                      <div>
+                        <label
+                          for={@form[:location].id}
+                          class="block text-lg sm:text-xl font-semibold leading-snug text-foreground mb-2"
+                        >
+                          Location
+                        </label>
+                        <.input
+                          field={@form[:location]}
+                          type="text"
+                          placeholder="San Francisco"
+                          class="px-3 py-3 !text-base sm:!leading-7"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label
+                        for={@form[:email].id}
+                        class="block text-lg sm:text-xl font-semibold leading-snug text-foreground mb-2"
+                      >
+                        Your work email
+                      </label>
+                      <.input
+                        field={@form[:email]}
+                        type="email"
+                        placeholder="you@company.com"
+                        class="px-3 py-3 !text-base sm:!leading-7"
+                      />
+                    </div>
                   </.form>
                 </div>
               </div>
@@ -458,6 +498,24 @@ defmodule AlgoraWeb.HomeLive do
           </span>
         </button>
       </div>
+
+      <%!-- Onboarding form submit: fixed dock, same chrome as like/dislike --%>
+      <div
+        :if={@show_onboarding_form}
+        id="onboarding-form-submit-dock"
+        class="fixed bottom-0 left-0 right-0 z-40 flex items-stretch justify-center px-4 sm:px-6 pb-6 sm:pb-8 pt-5 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none"
+      >
+        <button
+          type="submit"
+          form="onboarding-candidates-form"
+          class="pointer-events-auto w-full flex flex-col items-center justify-center gap-2 py-4 rounded-2xl bg-emerald-950/60 border-2 border-emerald-500/50 hover:border-emerald-400 hover:bg-emerald-900/60 shadow-xl shadow-emerald-900/40 transition-all active:scale-95"
+        >
+          <.icon name="tabler-send" class="size-8 text-emerald-400" />
+          <span class="text-base font-semibold text-emerald-400 tracking-wide sm:text-lg">
+            Receive your candidates
+          </span>
+        </button>
+      </div>
     </div>
 
     <%!--
@@ -538,7 +596,7 @@ defmodule AlgoraWeb.HomeLive do
         {:noreply, socket}
 
       likes_reached_goal ->
-        Process.send_after(self(), :show_onboarding_form, 1000)
+        Process.send_after(self(), :show_onboarding_form, 300)
         {:noreply, assign(socket, :transitioning_to_onboarding_form, true)}
 
       true ->

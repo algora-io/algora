@@ -331,6 +331,16 @@ emoji-picker {
   box-shadow: theme("boxShadow.lg");
 }
 
+/* Home onboarding: keep overflow scroll but hide scrollbar UI */
+.onboarding-form-overlay-scroll {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.onboarding-form-overlay-scroll::-webkit-scrollbar {
+  display: none;
+}
+
 .onboarding-heart-wrap {
   --heart-dim-x: 32px;
   --heart-dim-y: 28px;

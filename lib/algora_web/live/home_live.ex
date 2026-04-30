@@ -15,6 +15,7 @@ defmodule AlgoraWeb.HomeLive do
   alias AlgoraWeb.Components.Footer
   alias AlgoraWeb.Components.Header
   alias AlgoraWeb.Data.HomeCache
+  alias AlgoraWeb.LocalStore
 
   require Logger
 
@@ -89,23 +90,30 @@ defmodule AlgoraWeb.HomeLive do
         {:ok, redirect(socket, to: AlgoraWeb.UserAuth.signed_in_path(user))}
 
       _ ->
-        {:ok,
-         socket
-         |> assign(:page_title, "Algora - Hire the top 1% open source engineers")
-         |> assign(:page_title_suffix, "")
-         |> assign(:page_image, "#{AlgoraWeb.Endpoint.url()}/images/og/home.png")
-         |> assign(:screenshot?, not is_nil(params["screenshot"]))
-         |> assign(:stats1, stats1)
-         |> assign(:stats2, stats2)
-         |> assign(:jobs_by_user, jobs_by_user)
-         |> assign(:orgs_with_stats, orgs_with_stats)
-         |> assign(:hires, hires())
-         |> assign(:tech_stack, [])
-         |> assign(:candidates_data, candidates_data)
-         |> assign(:carousel_items, carousel_items)
-         |> assign(:form, to_form(Form.changeset(%Form{}, %{tech_stack: []})))
-         |> assign_user_applications()
-         |> assign_events()}
+        socket =
+          socket
+          |> assign(:page_title, "Algora - Hire the top 1% open source engineers")
+          |> assign(:page_title_suffix, "")
+          |> assign(:page_image, "#{AlgoraWeb.Endpoint.url()}/images/og/home.png")
+          |> assign(:screenshot?, not is_nil(params["screenshot"]))
+          |> assign(:stats1, stats1)
+          |> assign(:stats2, stats2)
+          |> assign(:jobs_by_user, jobs_by_user)
+          |> assign(:orgs_with_stats, orgs_with_stats)
+          |> assign(:hires, hires())
+          |> assign(:tech_stack, [])
+          |> assign(:candidates_data, candidates_data)
+          |> assign(:carousel_items, carousel_items)
+          |> assign(:current_candidate_index, 0)
+          |> assign(:liked_ids, [])
+          |> assign(:disliked_ids, [])
+          |> assign(:form, to_form(Form.changeset(%Form{}, %{tech_stack: []})))
+          |> assign_user_applications()
+          |> assign_events()
+          |> LocalStore.init(key: __MODULE__)
+
+        socket = if connected?(socket), do: LocalStore.subscribe(socket), else: socket
+        {:ok, socket}
     end
   end
 
@@ -113,6 +121,13 @@ defmodule AlgoraWeb.HomeLive do
   def render(assigns) do
     ~H"""
     <div>
+      <div
+        id="local-state-store"
+        phx-hook="LocalStateStore"
+        data-storage="localStorage"
+        class="hidden"
+      >
+      </div>
       <%= if @screenshot? do %>
         <div class="-mt-24" />
       <% else %>
@@ -258,20 +273,26 @@ defmodule AlgoraWeb.HomeLive do
         </section>
 
         <%!-- Candidate section: tinder-style single card --%>
-        <% first_candidate = List.first(@candidates_data) %>
+        <% current_candidate = Enum.at(@candidates_data, @current_candidate_index) %>
         <section
           id="candidate-section"
           phx-hook="TinderSection"
-          class="relative min-h-screen px-4 sm:px-6 pt-4 pb-32"
+          class="relative min-h-screen px-4 sm:px-6 pt-4 pb-4"
         >
-          <%= if first_candidate do %>
-            <Algora.Cloud.candidate_card {Map.merge(first_candidate, %{
+          <%= if current_candidate do %>
+            <Algora.Cloud.candidate_card {Map.merge(current_candidate, %{
               anonymize: true,
               # root_class: "h-[calc(100svh-8rem)] max-h-[52rem]",
               tech_stack: [],
               hide_badges?: true,
               hide_scrollbars?: true
             })} />
+          <% else %>
+            <div class="flex flex-col items-center justify-center min-h-[60vh] gap-4 text-center">
+              <.icon name="tabler-check" class="size-12 text-emerald-400" />
+              <p class="text-lg font-semibold text-foreground">You've reviewed all candidates</p>
+              <p class="text-sm text-muted-foreground">Check back soon for more</p>
+            </div>
           <% end %>
         </section>
 
@@ -302,24 +323,27 @@ defmodule AlgoraWeb.HomeLive do
         --%>
       </main>
 
-      <%!-- Tinder action buttons: fixed, shown when candidate section is in view --%>
+      <%!-- Tinder action buttons: fixed dock, shown when candidate section is in view --%>
       <div
         id="tinder-buttons"
-        class="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-center gap-10 pb-8 pt-6 bg-gradient-to-t from-black via-black/70 to-transparent opacity-0 transition-opacity duration-500 pointer-events-none"
+        phx-update="ignore"
+        class="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-center gap-6 px-6 pb-8 pt-5 bg-gradient-to-t from-black via-black/80 to-transparent opacity-0 transition-opacity duration-500 pointer-events-none"
       >
         <button
-          class="pointer-events-auto flex items-center justify-center size-16 rounded-full bg-card border-2 border-red-500/60 hover:border-red-500 hover:bg-red-500/10 shadow-lg shadow-red-500/20 transition-all active:scale-95"
+          class="pointer-events-auto flex flex-col items-center justify-center gap-2 w-36 py-4 rounded-2xl bg-red-950/60 border-2 border-red-500/50 hover:border-red-400 hover:bg-red-900/60 shadow-xl shadow-red-900/40 transition-all active:scale-95"
           phx-click="dislike_candidate"
           aria-label="Skip candidate"
         >
-          <.icon name="tabler-x" class="size-7 text-red-400" />
+          <.icon name="tabler-x" class="size-8 text-red-400" />
+          <span class="text-sm font-semibold text-red-400 tracking-wide">Skip</span>
         </button>
         <button
-          class="pointer-events-auto flex items-center justify-center size-16 rounded-full bg-card border-2 border-emerald-500/60 hover:border-emerald-500 hover:bg-emerald-500/10 shadow-lg shadow-emerald-500/20 transition-all active:scale-95"
+          class="pointer-events-auto flex flex-col items-center justify-center gap-2 w-36 py-4 rounded-2xl bg-emerald-950/60 border-2 border-emerald-500/50 hover:border-emerald-400 hover:bg-emerald-900/60 shadow-xl shadow-emerald-900/40 transition-all active:scale-95"
           phx-click="like_candidate"
           aria-label="Like candidate"
         >
-          <.icon name="tabler-heart" class="size-7 text-emerald-400" />
+          <.icon name="tabler-heart" class="size-8 text-emerald-400" />
+          <span class="text-sm font-semibold text-emerald-400 tracking-wide">Like</span>
         </button>
       </div>
     </div>
@@ -364,12 +388,35 @@ defmodule AlgoraWeb.HomeLive do
   end
 
   @impl true
+  def handle_event("restore_settings", token, socket) do
+    {:noreply, LocalStore.restore(socket, token)}
+  end
+
+  @impl true
   def handle_event("like_candidate", _params, socket) do
+    current = Enum.at(socket.assigns.candidates_data, socket.assigns.current_candidate_index)
+    user_id = current && current.candidate.match.user.id
+    liked_ids = if user_id, do: [user_id | socket.assigns.liked_ids], else: socket.assigns.liked_ids
+
+    socket =
+      socket
+      |> assign(:current_candidate_index, socket.assigns.current_candidate_index + 1)
+      |> LocalStore.assign_cached(:liked_ids, liked_ids)
+
     {:noreply, socket}
   end
 
   @impl true
   def handle_event("dislike_candidate", _params, socket) do
+    current = Enum.at(socket.assigns.candidates_data, socket.assigns.current_candidate_index)
+    user_id = current && current.candidate.match.user.id
+    disliked_ids = if user_id, do: [user_id | socket.assigns.disliked_ids], else: socket.assigns.disliked_ids
+
+    socket =
+      socket
+      |> assign(:current_candidate_index, socket.assigns.current_candidate_index + 1)
+      |> LocalStore.assign_cached(:disliked_ids, disliked_ids)
+
     {:noreply, socket}
   end
 

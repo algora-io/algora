@@ -138,7 +138,7 @@ defmodule AlgoraWeb.HomeLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div>
+    <div class={unless @screenshot?, do: "lg:min-h-[100dvh] lg:flex lg:flex-col"}>
       <% likes_reached_goal = onboarding_goal_reached?(@liked_ids) %>
       <% deck_exhausted? = deck_exhausted?(@current_candidate_index, @candidates_data) %>
       <% present_onboarding_form_ui? =
@@ -164,17 +164,20 @@ defmodule AlgoraWeb.HomeLive do
         <div
           id="home-top-navbar"
           phx-update="ignore"
-          class="w-full bg-black overflow-hidden transition-all duration-300 ease-out max-h-40 opacity-100 translate-y-0"
+          class="w-full shrink-0 bg-black overflow-hidden transition-all duration-300 ease-out max-h-40 opacity-100 translate-y-0"
         >
           <Header.header overlay={false} class="max-w-7xl w-full bg-black" />
         </div>
       <% end %>
 
-      <main class="bg-black relative">
+      <main class={["bg-black relative", @screenshot? == false && "lg:flex-1 lg:min-h-0 lg:flex lg:flex-col"]}>
         <%!-- Hero section --%>
-        <section :if={!@onboarding_started} class="min-h-screen flex flex-col">
+        <section
+          :if={!@onboarding_started}
+          class="min-h-screen flex flex-col lg:min-h-0 lg:flex-1 lg:overflow-hidden"
+        >
           <div class="flex-1 w-full max-w-7xl mx-auto px-6 lg:px-8 flex flex-col min-h-0">
-            <div class="flex-1 flex flex-col items-start justify-center pt-6 lg:pt-8 2xl:pt-10 pb-4 w-full">
+            <div class="flex-1 flex flex-col items-start justify-center lg:justify-start pt-6 lg:pt-8 2xl:pt-10 pb-4 w-full min-h-0 lg:overflow-y-auto lg:overscroll-y-contain">
               <%!-- Hero copy (unchanged) --%>
               <h1 class="text-2xl min-[412px]:text-[1.75rem] sm:text-[2.5rem]/[3rem] md:text-[3.5rem]/[4rem] lg:text-[3rem]/[3.5rem] xl:text-[4rem]/[4.5rem] font-black tracking-tight text-foreground font-display">
                 Open source <br class="hidden" />
@@ -300,7 +303,7 @@ defmodule AlgoraWeb.HomeLive do
               </div>
             </div>
             <%!-- Scroll arrow --%>
-            <div class="flex flex-col items-center gap-1 py-6 sm:py-8">
+            <div class="flex shrink-0 flex-col items-center gap-1 py-6 sm:py-8 lg:py-4 lg:pb-6">
               <span class="text-xs font-medium text-muted-foreground tracking-widest uppercase">
                 Scroll to get started
               </span>
@@ -315,7 +318,22 @@ defmodule AlgoraWeb.HomeLive do
         <%!-- Candidate section: tinder-style single card --%>
         <% current_candidate = Enum.at(@candidates_data, @current_candidate_index) %>
         <section id="candidate-section" phx-hook="TinderSection" class="relative min-h-screen">
-          <div class="relative w-full max-w-7xl mx-auto px-6 lg:px-8 pb-0">
+          <div
+            :if={likes_reached_goal || deck_exhausted?}
+            class="pointer-events-none absolute inset-0 z-[5] overflow-hidden"
+            aria-hidden="true"
+          >
+            <div
+              class="absolute inset-0"
+              style="background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 28px 28px;"
+            >
+            </div>
+            <div class="motion-safe:animate-onboarding-orb-breathe absolute top-1/2 left-1/2 h-[min(180%,56rem)] w-[min(180%,56rem)] -translate-y-1/2 rounded-full bg-[#1ebba2]/10 blur-[100px] motion-reduce:animate-none">
+            </div>
+            <div class="motion-safe:animate-onboarding-orb-breathe absolute top-1/2 right-1/2 h-[min(180%,56rem)] w-[min(180%,56rem)] -translate-y-1/2 rounded-full bg-[#1ebba2]/10 blur-[100px] motion-reduce:animate-none">
+            </div>
+          </div>
+          <div class="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-8 pb-0">
             <div class={[
               "min-h-screen pt-4 transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)] motion-reduce:transition-opacity motion-reduce:duration-500",
               if(present_onboarding_form_ui?,
@@ -344,20 +362,6 @@ defmodule AlgoraWeb.HomeLive do
                 if(present_onboarding_form_ui?, do: "opacity-100", else: "opacity-0 pointer-events-none")
               ]}
             >
-              <div
-                class="pointer-events-none absolute inset-0 z-50 overflow-hidden"
-                aria-hidden="true"
-              >
-                <div
-                  class="absolute inset-0"
-                  style="background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 28px 28px;"
-                >
-                </div>
-                <div class="motion-safe:animate-onboarding-orb-breathe absolute top-1/2 left-1/2 h-[min(180%,56rem)] w-[min(180%,56rem)] -translate-y-1/2 rounded-full bg-[#1ebba2]/10 blur-[100px] motion-reduce:animate-none">
-                </div>
-                <div class="motion-safe:animate-onboarding-orb-breathe absolute top-1/2 right-1/2 h-[min(180%,56rem)] w-[min(180%,56rem)] -translate-y-1/2 rounded-full bg-[#1ebba2]/10 blur-[100px] motion-reduce:animate-none">
-                </div>
-              </div>
               <div class={[
                 "relative z-10 w-full max-w-3xl text-card-foreground px-4 sm:px-6 pt-4 pb-0 transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)] motion-reduce:transition-opacity motion-reduce:duration-300",
                 if(present_onboarding_form_ui?,

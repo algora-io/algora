@@ -167,16 +167,17 @@ defmodule AlgoraWeb.HomeLive do
       <main class="bg-black relative">
         <%!-- Hero section --%>
         <section :if={!@onboarding_started} class="min-h-screen flex flex-col">
-          <div class="flex-1 mx-auto px-6 lg:px-8 flex flex-col items-start justify-center pt-20 lg:pt-24 2xl:pt-32 pb-4 w-full max-w-4xl">
-            <%!-- Hero copy (unchanged) --%>
-            <h1 class="text-2xl min-[412px]:text-[1.75rem] sm:text-[2.5rem]/[3rem] md:text-[3.5rem]/[4rem] lg:text-[3rem]/[3.5rem] xl:text-[4rem]/[4.5rem] font-black tracking-tight text-foreground font-display">
-              Open source <br class="hidden" />
-              <span class="text-emerald-400">tech recruiting</span>
-            </h1>
-            <p class="mt-2 text-[0.9rem]/[1.4rem] min-[412px]:text-base md:text-lg xl:text-lg 2xl:text-xl leading-6 font-medium text-foreground">
-              Connecting the most prolific open source maintainers & contributors with their next jobs
-            </p>
-            <%!--
+          <div class="flex-1 w-full container mx-auto px-6 lg:px-8 flex flex-col min-h-0">
+            <div class="flex-1 flex flex-col items-start justify-center pt-20 lg:pt-24 2xl:pt-32 pb-4 w-full">
+              <%!-- Hero copy (unchanged) --%>
+              <h1 class="text-2xl min-[412px]:text-[1.75rem] sm:text-[2.5rem]/[3rem] md:text-[3.5rem]/[4rem] lg:text-[3rem]/[3.5rem] xl:text-[4rem]/[4.5rem] font-black tracking-tight text-foreground font-display">
+                Open source <br class="hidden" />
+                <span class="text-emerald-400">tech recruiting</span>
+              </h1>
+              <p class="mt-2 text-[0.9rem]/[1.4rem] min-[412px]:text-base md:text-lg xl:text-lg 2xl:text-xl leading-6 font-medium text-foreground">
+                Connecting the most prolific open source maintainers & contributors with their next jobs
+              </p>
+              <%!--
             <div class="grid grid-cols-3 place-items-center sm:grid-cols-6 gap-4 md:gap-5 lg:gap-0 py-4 w-full">
               <img src="/images/wordmarks/coderabbit.svg" alt="CodeRabbit" class="h-6 md:h-7 transition-all" />
               <img src="/images/wordmarks/asi.svg" alt="Air Space Intelligence" class="h-7 md:h-9 transition-all" />
@@ -189,104 +190,105 @@ defmodule AlgoraWeb.HomeLive do
               <img src="/images/wordmarks/textql.svg" alt="TextQL" class="h-4 md:h-5 transition-all" />
             </div>
             --%>
-            <%!-- Hires: testimonial cards then metrics --%>
-            <div class="w-full space-y-6 sm:space-y-8 mt-10 sm:mt-14">
-              <%= for hire <- @hires do %>
-                <div class="relative">
-                  <div class="relative overflow-hidden rounded-xl border-2 border-white/30 shadow-xl shadow-white/10 bg-black">
-                    <img
-                      src={hire.bg_image}
-                      alt=""
-                      class="absolute inset-0 size-full object-cover object-top grayscale"
-                    />
-                    <div
-                      class="absolute inset-0 mix-blend-multiply"
-                      style={"background-color: #{hire.overlay_color}"}
-                    >
-                    </div>
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/30">
-                    </div>
-                    <div class="relative p-4 sm:p-5 min-h-[14rem] flex flex-col justify-center">
-                      <div class="flex items-center gap-3 mb-3">
-                        <img
-                          src={hire.person_avatar}
-                          alt={hire.person_name}
-                          class="size-9 sm:size-10 rounded-full ring-2 ring-white/50 shrink-0"
-                        />
-                        <.icon name="tabler-arrow-right" class="size-3.5 text-white/80 shrink-0" />
-                        <img
-                          src={hire.company_avatar}
-                          alt={hire.company_name}
-                          class="size-9 sm:size-10 rounded-full ring-2 ring-white/50 shrink-0"
-                        />
-                        <div class="min-w-0">
-                          <div class="text-sm font-semibold text-white/90 truncate">
-                            {hire.person_name} → {hire.company_name}
-                          </div>
-                          <div class="text-xs text-white/80">{hire.person_title}</div>
-                        </div>
+              <%!-- Hires: testimonial cards then metrics --%>
+              <div class="w-full space-y-6 sm:space-y-8 mt-10 sm:mt-14">
+                <%= for hire <- @hires do %>
+                  <div class="relative">
+                    <div class="relative overflow-hidden rounded-xl border-2 border-white/30 shadow-xl shadow-white/10 bg-black">
+                      <img
+                        src={hire.bg_image}
+                        alt=""
+                        class="absolute inset-0 size-full object-cover object-top grayscale"
+                      />
+                      <div
+                        class="absolute inset-0 mix-blend-multiply"
+                        style={"background-color: #{hire.overlay_color}"}
+                      >
                       </div>
-                      <blockquote class="text-sm font-medium text-white/90 leading-relaxed">
-                        "{hire.testimonial}"
-                      </blockquote>
-                      <div class="mt-2 flex items-center gap-2">
-                        <span class="text-sm text-white/70 font-medium">
-                          {hire.testimonial_author}
-                        </span>
+                      <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/30">
                       </div>
-                      <div class="mt-3 pt-3 border-t border-white/10 space-y-3">
-                        <div class="flex items-center gap-2">
+                      <div class="relative p-4 sm:p-5 min-h-[14rem] flex flex-col justify-center">
+                        <div class="flex items-center gap-3 mb-3">
                           <img
-                            src={hire.testimonial_logo}
-                            alt={hire.company_name}
-                            class={["opacity-70", hire.testimonial_logo_class]}
+                            src={hire.person_avatar}
+                            alt={hire.person_name}
+                            class="size-9 sm:size-10 rounded-full ring-2 ring-white/50 shrink-0"
                           />
-                          <p class="text-sm text-white/60 truncate">{hire.description}</p>
+                          <.icon name="tabler-arrow-right" class="size-3.5 text-white/80 shrink-0" />
+                          <img
+                            src={hire.company_avatar}
+                            alt={hire.company_name}
+                            class="size-9 sm:size-10 rounded-full ring-2 ring-white/50 shrink-0"
+                          />
+                          <div class="min-w-0">
+                            <div class="text-sm font-semibold text-white/90 truncate">
+                              {hire.person_name} → {hire.company_name}
+                            </div>
+                            <div class="text-xs text-white/80">{hire.person_title}</div>
+                          </div>
                         </div>
-                        <div class="grid grid-cols-3">
-                          <div>
-                            <div class="text-lg sm:text-xl font-display font-semibold text-white/90">
-                              Series {hire.series}
-                            </div>
-                            <div class="text-xs text-white/50 mt-0.5">round</div>
+                        <blockquote class="text-sm font-medium text-white/90 leading-relaxed">
+                          "{hire.testimonial}"
+                        </blockquote>
+                        <div class="mt-2 flex items-center gap-2">
+                          <span class="text-sm text-white/70 font-medium">
+                            {hire.testimonial_author}
+                          </span>
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-white/10 space-y-3">
+                          <div class="flex items-center gap-2">
+                            <img
+                              src={hire.testimonial_logo}
+                              alt={hire.company_name}
+                              class={["opacity-70", hire.testimonial_logo_class]}
+                            />
+                            <p class="text-sm text-white/60 truncate">{hire.description}</p>
                           </div>
-                          <div>
-                            <%= if hire[:valuation] do %>
+                          <div class="grid grid-cols-3">
+                            <div>
                               <div class="text-lg sm:text-xl font-display font-semibold text-white/90">
-                                {hire.valuation}
+                                Series {hire.series}
                               </div>
-                              <div class="text-xs text-white/50 mt-0.5">valuation</div>
-                            <% end %>
-                          </div>
-                          <div>
-                            <div class="text-lg sm:text-xl font-display font-semibold text-white/90">
-                              {hire.raised}
+                              <div class="text-xs text-white/50 mt-0.5">round</div>
                             </div>
-                            <div class="text-xs text-white/50 mt-0.5">raised</div>
+                            <div>
+                              <%= if hire[:valuation] do %>
+                                <div class="text-lg sm:text-xl font-display font-semibold text-white/90">
+                                  {hire.valuation}
+                                </div>
+                                <div class="text-xs text-white/50 mt-0.5">valuation</div>
+                              <% end %>
+                            </div>
+                            <div>
+                              <div class="text-lg sm:text-xl font-display font-semibold text-white/90">
+                                {hire.raised}
+                              </div>
+                              <div class="text-xs text-white/50 mt-0.5">raised</div>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
+                    <.badge
+                      variant="secondary"
+                      class="absolute -top-2 -left-2 text-xs px-2 sm:px-3 py-0.5 text-gray-900 bg-gradient-to-r from-white to-gray-100 font-semibold shadow-lg border-gray-200/90"
+                    >
+                      <.icon name="tabler-star-filled" class="size-3.5 text-gray-800 mr-1 -ml-0.5" />
+                      New hire!
+                    </.badge>
                   </div>
-                  <.badge
-                    variant="secondary"
-                    class="absolute -top-2 -left-2 text-xs px-2 sm:px-3 py-0.5 text-black bg-gradient-to-r from-emerald-400 to-emerald-500 font-semibold shadow-lg"
-                  >
-                    <.icon name="tabler-star-filled" class="size-3.5 text-black mr-1 -ml-0.5" />
-                    New hire!
-                  </.badge>
-                </div>
-              <% end %>
+                <% end %>
+              </div>
             </div>
-          </div>
-          <%!-- Scroll arrow --%>
-          <div class="flex flex-col items-center gap-1 py-6 sm:py-8">
-            <span class="text-xs font-medium text-muted-foreground tracking-widest uppercase">
-              Scroll to get started
-            </span>
-            <div class="mt-2 flex flex-col items-center animate-bounce">
-              <.icon name="tabler-chevron-down" class="size-5 text-emerald-400" />
-              <.icon name="tabler-chevron-down" class="-mt-2 size-5 text-emerald-400/50" />
+            <%!-- Scroll arrow --%>
+            <div class="flex flex-col items-center gap-1 py-6 sm:py-8">
+              <span class="text-xs font-medium text-muted-foreground tracking-widest uppercase">
+                Scroll to get started
+              </span>
+              <div class="mt-2 flex flex-col items-center animate-bounce">
+                <.icon name="tabler-chevron-down" class="size-5 text-emerald-400" />
+                <.icon name="tabler-chevron-down" class="-mt-2 size-5 text-emerald-400/50" />
+              </div>
             </div>
           </div>
         </section>
@@ -295,7 +297,7 @@ defmodule AlgoraWeb.HomeLive do
         <% likes_reached_goal = onboarding_goal_reached?(@liked_ids) %>
         <% current_candidate = Enum.at(@candidates_data, @current_candidate_index) %>
         <section id="candidate-section" phx-hook="TinderSection" class="relative min-h-screen">
-          <div class="relative px-4 sm:px-6 pb-0">
+          <div class="relative w-full container mx-auto px-6 lg:px-8 pb-0">
             <div class={[
               "min-h-screen pt-4 transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)] motion-reduce:transition-opacity motion-reduce:duration-500",
               if(@show_onboarding_form,
@@ -483,90 +485,99 @@ defmodule AlgoraWeb.HomeLive do
         phx-update="ignore"
         data-like-count={onboarding_likes(@liked_ids)}
         data-like-goal={onboarding_likes_goal()}
-        class="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-center gap-3 px-4 sm:px-6 pb-6 sm:pb-8 pt-5 bg-gradient-to-t from-black via-black/80 to-transparent opacity-0 transition-opacity duration-500 pointer-events-none"
+        class="fixed bottom-0 left-0 right-0 z-40 px-6 lg:px-8 pb-6 sm:pb-8 pt-5 opacity-0 transition-opacity duration-500 pointer-events-none"
       >
-        <button
-          class="pointer-events-auto flex-1 max-w-56 flex flex-col items-center justify-center gap-2 py-4 rounded-2xl bg-red-950/60 border-2 border-red-500/50 hover:border-red-400 hover:bg-red-900/60 shadow-xl shadow-red-900/40 transition-[transform,box-shadow] duration-200 ease-out motion-safe:hover:scale-[1.02] motion-safe:active:scale-[0.97] disabled:opacity-60 disabled:pointer-events-none"
-          phx-click="dislike_candidate"
-          disabled={likes_reached_goal}
-          aria-label="Skip candidate"
-        >
-          <.icon name="tabler-x" class="size-8 text-red-400" />
-          <span class="text-sm font-semibold text-red-400 tracking-wide">Skip</span>
-        </button>
-        <button
-          class="pointer-events-auto flex-1 max-w-56 flex flex-col items-center justify-center gap-2 py-4 rounded-2xl bg-emerald-950/60 border-2 border-emerald-500/50 hover:border-emerald-400 hover:bg-emerald-900/60 shadow-xl shadow-emerald-900/40 transition-[transform,box-shadow] duration-200 ease-out motion-safe:hover:scale-[1.02] motion-safe:active:scale-[0.97] disabled:opacity-60 disabled:pointer-events-none"
-          phx-click="like_candidate"
-          disabled={likes_reached_goal}
-          aria-label="Like candidate"
-        >
-          <% fill_pct = onboarding_fill_pct(@liked_ids) %>
-          <% curve_bottom_px = onboarding_curve_bottom_px(@liked_ids) %>
-          <div class="onboarding-heart-wrap">
-            <div class="onboarding-heart">
-              <div class="onboarding-heart-tank" style={"height: #{fill_pct}%;"}></div>
-              <svg
-                class="onboarding-heart-curve"
-                viewBox="0 24 150 28"
-                preserveAspectRatio="none"
-                shape-rendering="auto"
-                style={"bottom: #{curve_bottom_px}px;"}
-              >
-                <defs>
-                  <path
-                    id="onboarding-heart-gentle-wave"
-                    d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z"
-                  />
-                </defs>
-                <g>
-                  <use
-                    href="#onboarding-heart-gentle-wave"
-                    x="48"
-                    y="0"
-                    fill="rgba(16, 185, 129, 0.5)"
-                  />
-                  <use
-                    href="#onboarding-heart-gentle-wave"
-                    x="48"
-                    y="1"
-                    fill="rgba(52, 211, 153, 0.35)"
-                  />
-                  <use href="#onboarding-heart-gentle-wave" x="48" y="2" fill="rgba(5, 150, 105, 1)" />
-                </g>
+        <div class="flex gap-3">
+          <button
+            class="pointer-events-auto flex-1 max-w-56 flex flex-col items-center justify-center gap-2 py-4 rounded-2xl bg-red-950/60 border-2 border-red-500/50 hover:border-red-400 hover:bg-red-900/60 shadow-xl shadow-red-900/40 transition-[transform,box-shadow] duration-200 ease-out motion-safe:hover:scale-[1.02] motion-safe:active:scale-[0.97] disabled:opacity-60 disabled:pointer-events-none"
+            phx-click="dislike_candidate"
+            disabled={likes_reached_goal}
+            aria-label="Skip candidate"
+          >
+            <.icon name="tabler-x" class="size-8 text-red-400" />
+            <span class="text-sm font-semibold text-red-400 tracking-wide">Skip</span>
+          </button>
+          <button
+            class="pointer-events-auto flex-1 max-w-56 flex flex-col items-center justify-center gap-2 py-4 rounded-2xl bg-emerald-950/60 border-2 border-emerald-500/50 hover:border-emerald-400 hover:bg-emerald-900/60 shadow-xl shadow-emerald-900/40 transition-[transform,box-shadow] duration-200 ease-out motion-safe:hover:scale-[1.02] motion-safe:active:scale-[0.97] disabled:opacity-60 disabled:pointer-events-none"
+            phx-click="like_candidate"
+            disabled={likes_reached_goal}
+            aria-label="Like candidate"
+          >
+            <% fill_pct = onboarding_fill_pct(@liked_ids) %>
+            <% curve_bottom_px = onboarding_curve_bottom_px(@liked_ids) %>
+            <div class="onboarding-heart-wrap">
+              <div class="onboarding-heart">
+                <div class="onboarding-heart-tank" style={"height: #{fill_pct}%;"}></div>
+                <svg
+                  class="onboarding-heart-curve"
+                  viewBox="0 24 150 28"
+                  preserveAspectRatio="none"
+                  shape-rendering="auto"
+                  style={"bottom: #{curve_bottom_px}px;"}
+                >
+                  <defs>
+                    <path
+                      id="onboarding-heart-gentle-wave"
+                      d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z"
+                    />
+                  </defs>
+                  <g>
+                    <use
+                      href="#onboarding-heart-gentle-wave"
+                      x="48"
+                      y="0"
+                      fill="rgba(16, 185, 129, 0.5)"
+                    />
+                    <use
+                      href="#onboarding-heart-gentle-wave"
+                      x="48"
+                      y="1"
+                      fill="rgba(52, 211, 153, 0.35)"
+                    />
+                    <use
+                      href="#onboarding-heart-gentle-wave"
+                      x="48"
+                      y="2"
+                      fill="rgba(5, 150, 105, 1)"
+                    />
+                  </g>
+                </svg>
+              </div>
+              <svg class="onboarding-heart-clip-defs" aria-hidden="true">
+                <clipPath id="onboarding-heart-clip-path" clipPathUnits="objectBoundingBox">
+                  <path d="M0.373,0.967 S0.616,0.866,0.768,0.644 S0.912,0.107,0.739,0 S0.373,0.108,0.373,0.108 S0.166,-0.113,0,-0.002 S-0.159,0.432,-0.021,0.644 S0.373,0.967,0.373,0.967">
+                  </path>
+                </clipPath>
               </svg>
             </div>
-            <svg class="onboarding-heart-clip-defs" aria-hidden="true">
-              <clipPath id="onboarding-heart-clip-path" clipPathUnits="objectBoundingBox">
-                <path d="M0.373,0.967 S0.616,0.866,0.768,0.644 S0.912,0.107,0.739,0 S0.373,0.108,0.373,0.108 S0.166,-0.113,0,-0.002 S-0.159,0.432,-0.021,0.644 S0.373,0.967,0.373,0.967">
-                </path>
-              </clipPath>
-            </svg>
-          </div>
-          <span
-            id="onboarding-heart-label"
-            class="text-sm font-semibold text-emerald-400 tracking-wide"
-          >
-            Like
-          </span>
-        </button>
+            <span
+              id="onboarding-heart-label"
+              class="text-sm font-semibold text-emerald-400 tracking-wide"
+            >
+              Like
+            </span>
+          </button>
+        </div>
       </div>
 
       <%!-- Onboarding form submit: fixed dock, same chrome as like/dislike --%>
       <div
         :if={@show_onboarding_form && !@onboarding_form_submitted}
         id="onboarding-form-submit-dock"
-        class="fixed bottom-0 left-0 right-0 z-40 flex items-stretch justify-center px-4 sm:px-6 pb-6 sm:pb-8 pt-5 pointer-events-none"
+        class="fixed bottom-0 left-0 right-0 z-40 px-6 lg:px-8 pb-6 sm:pb-8 pt-5 pointer-events-none"
       >
-        <button
-          type="submit"
-          form="onboarding-candidates-form"
-          class="pointer-events-auto w-full flex flex-row items-center justify-center gap-2 sm:gap-3 py-4 rounded-2xl bg-emerald-950/60 border-2 border-emerald-500/50 hover:border-emerald-400 hover:bg-emerald-900/60 shadow-xl shadow-emerald-900/40 transition-[transform,box-shadow] duration-200 ease-out motion-safe:hover:scale-[1.02] motion-safe:active:scale-[0.97]"
-        >
-          <.icon name="tabler-send" class="size-6 shrink-0 text-emerald-400 sm:size-7" />
-          <span class="text-base font-semibold text-emerald-400 tracking-wide sm:text-lg">
-            Receive your candidates
-          </span>
-        </button>
+        <div class="flex items-stretch justify-center">
+          <button
+            type="submit"
+            form="onboarding-candidates-form"
+            class="pointer-events-auto w-full flex flex-row items-center justify-center gap-2 sm:gap-3 py-4 rounded-2xl bg-emerald-950/60 border-2 border-emerald-500/50 hover:border-emerald-400 hover:bg-emerald-900/60 shadow-xl shadow-emerald-900/40 transition-[transform,box-shadow] duration-200 ease-out motion-safe:hover:scale-[1.02] motion-safe:active:scale-[0.97]"
+          >
+            <.icon name="tabler-send" class="size-6 shrink-0 text-emerald-400 sm:size-7" />
+            <span class="text-base font-semibold text-emerald-400 tracking-wide sm:text-lg">
+              Receive your candidates
+            </span>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -881,7 +892,7 @@ defmodule AlgoraWeb.HomeLive do
           "Algora's candidates came pre-vetted through their open source contributions. We hired someone we could verify before ever getting on a call.",
         testimonial_author: "Mark Hay · Cofounder & CTO",
         testimonial_logo: "/images/wordmarks/textql.svg",
-        testimonial_logo_class: "h-4"
+        testimonial_logo_class: "h-5"
       }
     ]
   end

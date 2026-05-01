@@ -538,14 +538,3 @@ emoji-picker {
     animation: none !important;
   }
 }
-
-/* Candidate card contributions strip (same math as jules_live marquee-left) */
-@keyframes candidate_card_repo_marquee {
-  0% {
-    transform: translateX(0);
-  }
-
-  100% {
-    transform: translateX(-50%);
-  }
-}

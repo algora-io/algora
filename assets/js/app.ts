@@ -1011,8 +1011,13 @@ const Hooks = {
             if (entry.isIntersecting) {
               buttons.classList.remove("opacity-0", "pointer-events-none");
               buttons.classList.add("opacity-100");
-              navbar?.classList.remove("opacity-100", "translate-y-0");
+              navbar?.classList.remove(
+                "max-h-40",
+                "opacity-100",
+                "translate-y-0",
+              );
               navbar?.classList.add(
+                "max-h-0",
                 "opacity-0",
                 "-translate-y-full",
                 "pointer-events-none",
@@ -1022,11 +1027,16 @@ const Hooks = {
               buttons.classList.remove("opacity-100");
               buttons.classList.add("opacity-0", "pointer-events-none");
               navbar?.classList.remove(
+                "max-h-0",
                 "opacity-0",
                 "-translate-y-full",
                 "pointer-events-none",
               );
-              navbar?.classList.add("opacity-100", "translate-y-0");
+              navbar?.classList.add(
+                "max-h-40",
+                "opacity-100",
+                "translate-y-0",
+              );
             }
           });
         },

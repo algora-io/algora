@@ -14,10 +14,11 @@ defmodule AlgoraWeb.Components.Header do
 
   attr :class, :string, default: nil
   attr :hide_banner, :boolean, default: false
+  attr :overlay, :boolean, default: true
 
   def header(assigns) do
     ~H"""
-    <header class="absolute inset-x-0 top-0 z-50">
+    <header class={if(@overlay, do: "absolute inset-x-0 top-0 z-50", else: "relative z-50 w-full")}>
       <%!-- <%= if !@hide_banner do %>
         <AlgoraWeb.Components.Banner.banner />
       <% end %> --%>

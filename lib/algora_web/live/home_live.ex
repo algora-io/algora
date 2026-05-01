@@ -139,6 +139,12 @@ defmodule AlgoraWeb.HomeLive do
   def render(assigns) do
     ~H"""
     <div>
+      <% likes_reached_goal = onboarding_goal_reached?(@liked_ids) %>
+      <% deck_exhausted? = deck_exhausted?(@current_candidate_index, @candidates_data) %>
+      <% present_onboarding_form_ui? =
+        @show_onboarding_form || deck_exhausted? || @onboarding_form_submitted %>
+      <% tinder_buttons_visible? =
+        !@show_onboarding_form && !deck_exhausted? && !@onboarding_form_submitted %>
       <div
         id="local-state-store"
         phx-hook="LocalStateStore"
@@ -158,9 +164,9 @@ defmodule AlgoraWeb.HomeLive do
         <div
           id="home-top-navbar"
           phx-update="ignore"
-          class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 opacity-100 translate-y-0"
+          class="w-full bg-black overflow-hidden transition-all duration-300 ease-out max-h-40 opacity-100 translate-y-0"
         >
-          <Header.header class="max-w-7xl w-full bg-black" />
+          <Header.header overlay={false} class="max-w-7xl w-full bg-black" />
         </div>
       <% end %>
 
@@ -168,7 +174,7 @@ defmodule AlgoraWeb.HomeLive do
         <%!-- Hero section --%>
         <section :if={!@onboarding_started} class="min-h-screen flex flex-col">
           <div class="flex-1 w-full max-w-7xl mx-auto px-6 lg:px-8 flex flex-col min-h-0">
-            <div class="flex-1 flex flex-col items-start justify-center pt-20 lg:pt-24 2xl:pt-32 pb-4 w-full">
+            <div class="flex-1 flex flex-col items-start justify-center pt-6 lg:pt-8 2xl:pt-10 pb-4 w-full">
               <%!-- Hero copy (unchanged) --%>
               <h1 class="text-2xl min-[412px]:text-[1.75rem] sm:text-[2.5rem]/[3rem] md:text-[3.5rem]/[4rem] lg:text-[3rem]/[3.5rem] xl:text-[4rem]/[4.5rem] font-black tracking-tight text-foreground font-display">
                 Open source <br class="hidden" />
@@ -204,21 +210,12 @@ defmodule AlgoraWeb.HomeLive do
                       <img
                         src={hire.bg_image}
                         alt=""
+                        style="object-position: 0% 0%;"
                         class={[
-                          "absolute pt-12 inset-0 size-full object-cover grayscale",
-                          if(hire.company_name == "CodeRabbit",
-                            do: "object-top",
-                            else: "object-center"
-                          )
+                          "absolute inset-0 size-full object-cover grayscale"
                         ]}
                       />
-                      <div class="absolute inset-x-0 h-9 top-12 bg-gradient-to-t from-transparent to-black">
-                      </div>
-                      <div
-                        class="absolute inset-x-0 h-9 top-12 bg-gradient-to-t from-transparent to-black"
-                        style={"--tw-gradient-to: #{hire.overlay_color}"}
-                      >
-                      </div>
+
                       <div
                         class="absolute inset-0 mix-blend-multiply"
                         style={"background-color: #{hire.overlay_color}"}
@@ -316,13 +313,12 @@ defmodule AlgoraWeb.HomeLive do
         </section>
 
         <%!-- Candidate section: tinder-style single card --%>
-        <% likes_reached_goal = onboarding_goal_reached?(@liked_ids) %>
         <% current_candidate = Enum.at(@candidates_data, @current_candidate_index) %>
         <section id="candidate-section" phx-hook="TinderSection" class="relative min-h-screen">
           <div class="relative w-full max-w-7xl mx-auto px-6 lg:px-8 pb-0">
             <div class={[
               "min-h-screen pt-4 transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)] motion-reduce:transition-opacity motion-reduce:duration-500",
-              if(@show_onboarding_form,
+              if(present_onboarding_form_ui?,
                 do:
                   "opacity-0 pointer-events-none motion-safe:translate-y-3 motion-safe:scale-[0.96] motion-reduce:translate-y-0 motion-reduce:scale-100",
                 else: "opacity-100 translate-y-0 scale-100"
@@ -337,19 +333,15 @@ defmodule AlgoraWeb.HomeLive do
                   hide_scrollbars?: true
                 })} />
               <% else %>
-                <div class="flex flex-col items-center justify-center min-h-[60vh] gap-4 text-center">
-                  <.icon name="tabler-check" class="size-12 text-emerald-400" />
-                  <p class="text-lg font-semibold text-foreground">You've reviewed all candidates</p>
-                  <p class="text-sm text-muted-foreground">Check back soon for more</p>
-                </div>
+                <div class="min-h-[60vh]" aria-hidden="true"></div>
               <% end %>
             </div>
             <div
-              :if={likes_reached_goal}
+              :if={likes_reached_goal || deck_exhausted?}
               class={[
                 "onboarding-form-overlay-scroll absolute inset-0 flex justify-center overflow-y-auto transition-opacity duration-700 ease-out",
                 if(@onboarding_form_submitted, do: "items-center", else: "items-start"),
-                if(@show_onboarding_form, do: "opacity-100", else: "opacity-0 pointer-events-none")
+                if(present_onboarding_form_ui?, do: "opacity-100", else: "opacity-0 pointer-events-none")
               ]}
             >
               <div
@@ -368,7 +360,7 @@ defmodule AlgoraWeb.HomeLive do
               </div>
               <div class={[
                 "relative z-10 w-full max-w-3xl text-card-foreground px-4 sm:px-6 pt-4 pb-0 transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)] motion-reduce:transition-opacity motion-reduce:duration-300",
-                if(@show_onboarding_form,
+                if(present_onboarding_form_ui?,
                   do: "opacity-100 motion-safe:translate-y-0 motion-safe:scale-100",
                   else:
                     "opacity-0 motion-safe:translate-y-6 motion-safe:scale-[0.97] motion-reduce:translate-y-0 motion-reduce:scale-100"
@@ -501,7 +493,7 @@ defmodule AlgoraWeb.HomeLive do
 
       <%!-- Tinder action buttons: fixed dock, shown when candidate section is in view --%>
       <div
-        :if={!@show_onboarding_form}
+        :if={tinder_buttons_visible?}
         id="tinder-buttons"
         phx-hook="TinderButtons"
         phx-update="ignore"
@@ -584,7 +576,7 @@ defmodule AlgoraWeb.HomeLive do
 
       <%!-- Onboarding form submit: fixed dock, same chrome as like/dislike --%>
       <div
-        :if={@show_onboarding_form && !@onboarding_form_submitted}
+        :if={present_onboarding_form_ui? && !@onboarding_form_submitted}
         id="onboarding-form-submit-dock"
         class="fixed bottom-0 left-0 right-0 z-40 px-6 lg:px-8 pb-6 sm:pb-8 pt-5 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none"
       >
@@ -810,6 +802,10 @@ defmodule AlgoraWeb.HomeLive do
 
   defp onboarding_likes_goal, do: 3
 
+  defp deck_exhausted?(index, candidates_data) when is_list(candidates_data) do
+    candidates_data != [] and match?(nil, Enum.at(candidates_data, index))
+  end
+
   defp onboarding_goal_reached?(liked_ids), do: onboarding_likes(liked_ids) >= onboarding_likes_goal()
 
   defp onboarding_likes(liked_ids) do
@@ -865,7 +861,7 @@ defmodule AlgoraWeb.HomeLive do
         person_name: "Erfan Al-Hossami",
         person_avatar: "https://algora.io/storage/avatars/taisazero.jpeg",
         person_title: "Applied AI Engineer",
-        bg_image: "https://algora.io/storage/avatars/coderabbit/sam-hayes-85a0ba25.jpg",
+        bg_image: "http://algora.io/storage/avatars/coderabbit/samhayes.jpeg",
         theme_color: "#F97316",
         overlay_color: "rgba(67, 20, 7, 0.6)",
         description: "AI code reviews",
@@ -894,7 +890,7 @@ defmodule AlgoraWeb.HomeLive do
         valuation: "$500M",
         testimonial:
           "To build AI for Hollywood, we need engineers with experience in creative media exactly like Matt. We're super happy to be working together.",
-        testimonial_author: "Robin Huang · Cofounder",
+        testimonial_author: "Robin Huang · Co-Founder",
         testimonial_logo: "/images/wordmarks/comfy.svg",
         testimonial_logo_class: "h-6"
       },
@@ -914,7 +910,7 @@ defmodule AlgoraWeb.HomeLive do
         valuation: nil,
         testimonial:
           "Our newest hire Christian spent 6 years at Google, taught at MIT and worked as a quant at Two Sigma. This is exactly the profile we asked.",
-        testimonial_author: "Ethan Ding · Cofounder & CEO",
+        testimonial_author: "Ethan Ding · Co-Founder & CEO",
         testimonial_logo: "/images/wordmarks/textql.svg",
         testimonial_logo_class: "h-5"
       }

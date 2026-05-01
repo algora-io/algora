@@ -173,7 +173,7 @@ defmodule AlgoraWeb.HomeLive do
         phx-update="ignore"
         class="relative z-10 w-full shrink-0 bg-black overflow-hidden transition-all duration-300 ease-out max-h-40 opacity-100 translate-y-0"
       >
-        <Header.header overlay={false} class="max-w-7xl w-full bg-black" />
+        <Header.header overlay={false} class="max-w-6xl w-full bg-black" />
       </div>
 
       <main class={[
@@ -186,7 +186,7 @@ defmodule AlgoraWeb.HomeLive do
           :if={!@onboarding_started}
           class="min-h-screen flex flex-col lg:min-h-0 lg:flex-1 lg:overflow-hidden"
         >
-          <div class="flex-1 w-full max-w-7xl mx-auto px-6 lg:px-8 flex flex-col min-h-0">
+          <div class="flex-1 w-full max-w-6xl mx-auto px-6 lg:px-8 flex flex-col min-h-0">
             <div class="flex-1 flex flex-col items-start justify-center lg:justify-start pt-6 lg:pt-8 2xl:pt-10 pb-4 w-full min-h-0 lg:overscroll-y-contain">
               <%!-- Hero copy (unchanged) --%>
               <h1 class="text-2xl min-[412px]:text-[1.75rem] sm:text-[2.5rem]/[3rem] md:text-[3.5rem]/[4rem] lg:text-[3rem]/[3.5rem] xl:text-[4rem]/[4.5rem] font-black tracking-tight text-foreground font-display">
@@ -210,10 +210,10 @@ defmodule AlgoraWeb.HomeLive do
             </div>
             --%>
               <%!-- Hires: testimonial cards then metrics --%>
-              <div class="w-full mt-10 sm:mt-14 grid grid-cols-1 gap-6 sm:gap-8 lg:grid-cols-3">
+              <div class="w-full mt-4 sm:mt-8 grid grid-cols-1 gap-6 sm:gap-8 lg:grid-cols-3">
                 <%= for hire <- @hires do %>
                   <div
-                    class="relative h-full min-h-[22rem]"
+                    class="relative h-full min-h-[26rem] sm:min-h-[30rem]"
                     style={"--hire-theme: #{hire.theme_color}"}
                   >
                     <div
@@ -334,7 +334,7 @@ defmodule AlgoraWeb.HomeLive do
             <div class="motion-safe:animate-onboarding-orb-breathe absolute top-1/2 right-1/2 w-[500px] h-[500px] -translate-y-1/2 rounded-full bg-[#1ebba2]/10 blur-[100px] motion-reduce:animate-none">
             </div>
           </div>
-          <div class="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-8 pb-0">
+          <div class="relative z-10 w-full max-w-6xl mx-auto px-6 lg:px-8 pb-0">
             <div class={[
               "min-h-screen pt-4 transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)] motion-reduce:transition-opacity motion-reduce:duration-500",
               if(present_onboarding_form_ui?,
@@ -432,7 +432,7 @@ defmodule AlgoraWeb.HomeLive do
                       </label>
                       <.input
                         field={@form[:job_description]}
-                        class="px-3 py-3 !text-base sm:!leading-7 bg-white/5"
+                        class="px-3 py-3 !text-sm !sm:text-base sm:!leading-7 bg-white/5"
                         placeholder="https://company.com/careers"
                       />
                     </div>
@@ -448,7 +448,7 @@ defmodule AlgoraWeb.HomeLive do
                           field={@form[:comp_range]}
                           type="text"
                           placeholder="$175k-$330k + equity"
-                          class="px-3 py-3 !text-base sm:!leading-7 bg-white/5"
+                          class="px-3 py-3 !text-sm !sm:text-base sm:!leading-7 bg-white/5"
                         />
                       </div>
                       <div>
@@ -462,7 +462,7 @@ defmodule AlgoraWeb.HomeLive do
                           field={@form[:location]}
                           type="text"
                           placeholder="San Francisco"
-                          class="px-3 py-3 !text-base sm:!leading-7 bg-white/5"
+                          class="px-3 py-3 !text-sm !sm:text-base sm:!leading-7 bg-white/5"
                         />
                       </div>
                     </div>
@@ -476,7 +476,7 @@ defmodule AlgoraWeb.HomeLive do
                       <.input
                         field={@form[:email]}
                         placeholder="you@company.com"
-                        class="px-3 py-3 !text-base sm:!leading-7 bg-white/5"
+                        class="px-3 py-3 !text-sm !sm:text-base sm:!leading-7 bg-white/5"
                       />
                     </div>
                     <%!-- <div class="grid grid-cols-3 gap-4 sm:gap-8 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-500 motion-safe:delay-[380ms]">
@@ -509,7 +509,7 @@ defmodule AlgoraWeb.HomeLive do
         data-like-goal={onboarding_likes_goal()}
         class="fixed bottom-0 left-0 right-0 z-40 px-6 lg:px-8 pb-6 sm:pb-8 pt-5 bg-gradient-to-t from-black via-black/80 to-transparent opacity-0 transition-opacity duration-500 pointer-events-none"
       >
-        <div class="mx-auto flex w-full max-w-7xl gap-3 sm:gap-4 px-6 lg:px-8">
+        <div class="mx-auto flex w-full max-w-6xl gap-3 sm:gap-4">
           <button
             class="pointer-events-auto flex flex-1 basis-0 flex-row items-center justify-center gap-2 rounded-2xl bg-red-950/60 border-2 border-red-500/50 hover:border-red-400 hover:bg-red-900/60 py-4 shadow-xl shadow-red-900/40 transition-[transform,box-shadow] duration-200 ease-out motion-safe:hover:scale-[1.02] motion-safe:active:scale-[0.97] disabled:opacity-60 disabled:pointer-events-none"
             phx-click="dislike_candidate"
@@ -588,7 +588,7 @@ defmodule AlgoraWeb.HomeLive do
         id="onboarding-form-submit-dock"
         class="fixed bottom-0 left-0 right-0 z-40 px-6 lg:px-8 pb-6 sm:pb-8 pt-5 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none"
       >
-        <div class="mx-auto flex w-full max-w-7xl gap-3 sm:gap-4 px-6 lg:px-8 items-stretch justify-center">
+        <div class="mx-auto flex w-full max-w-6xl gap-3 sm:gap-4 items-stretch justify-center">
           <button
             type="submit"
             form="onboarding-candidates-form"

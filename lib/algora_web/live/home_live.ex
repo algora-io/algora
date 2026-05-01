@@ -761,18 +761,18 @@ defmodule AlgoraWeb.HomeLive do
   end
 
   defp onboarding_started?(params) do
-    Map.get(params, "started") in ["1", "true"]
+    Map.has_key?(params, "go")
   end
 
   defp onboarding_path(socket) do
-    query =
+    suffix =
       if socket.assigns.screenshot? do
-        [started: "1", screenshot: "1"]
+        "?go&screenshot=1"
       else
-        [started: "1"]
+        "?go"
       end
 
-    ~p"/?#{query}"
+    ~p"/" <> suffix
   end
 
   defp onboarding_likes_goal, do: 3

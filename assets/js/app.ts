@@ -983,13 +983,13 @@ const Hooks = {
       if (!buttons) return;
 
       const maybeStartOnboarding = () => {
-        const startedNow = new URLSearchParams(window.location.search).get(
-          "started",
-        );
+        const onboardingInUrl = new URLSearchParams(
+          window.location.search,
+        ).has("go");
 
         if (
           !this.onboardingSent &&
-          !startedNow &&
+          !onboardingInUrl &&
           this.userInteracted &&
           this.sectionInView
         ) {
@@ -1044,11 +1044,11 @@ const Hooks = {
       this.onUserInteraction = onUserInteraction;
     },
     updated() {
-      const startedNow = new URLSearchParams(window.location.search).get(
-        "started",
-      );
+      const onboardingInUrl = new URLSearchParams(
+        window.location.search,
+      ).has("go");
 
-      if (!startedNow) {
+      if (!onboardingInUrl) {
         this.onboardingSent = false;
       }
     },

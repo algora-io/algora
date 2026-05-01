@@ -141,7 +141,7 @@ defmodule AlgoraWeb.HomeLive do
       >
         <div
           class="absolute inset-0"
-          style="background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 28px 28px;"
+          style="background-image: radial-gradient(circle, rgba(255,255,255,0.10) 1px, transparent 1px); background-size: 28px 28px;"
         >
         </div>
       </div>

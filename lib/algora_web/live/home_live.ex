@@ -224,14 +224,15 @@ defmodule AlgoraWeb.HomeLive do
                       class="relative h-full overflow-hidden rounded-xl border-2 border-white/30 shadow-xl shadow-white/10"
                       style={"background-color: #{hire.overlay_color}"}
                     >
-                      <img
-                        src={hire.bg_image}
-                        alt=""
-                        style="object-position: 0% 0%;"
-                        class={[
-                          "absolute inset-0 size-full object-cover grayscale"
-                        ]}
-                      />
+                      <div id={"hire-bg-#{hire.company_name}"} phx-update="ignore">
+                        <img
+                          src={hire.bg_image}
+                          alt=""
+                          style="object-position: 0% 0%;"
+                          class="absolute inset-0 size-full object-cover grayscale opacity-0 transition-opacity duration-700"
+                          onload="this.classList.remove('opacity-0')"
+                        />
+                      </div>
 
                       <div
                         class="absolute inset-0 mix-blend-multiply"
@@ -359,7 +360,8 @@ defmodule AlgoraWeb.HomeLive do
                   # root_class: "h-[calc(100svh-8rem)] max-h-[52rem]",
                   tech_stack: [],
                   hide_badges?: true,
-                  hide_scrollbars?: true
+                  hide_scrollbars?: true,
+                  hide_preferences?: true
                 })} />
               <% else %>
                 <div class="min-h-[60vh]" aria-hidden="true"></div>

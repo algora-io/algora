@@ -187,7 +187,7 @@ defmodule AlgoraWeb.HomeLive do
           class="min-h-screen flex flex-col lg:min-h-0 lg:flex-1 lg:overflow-hidden"
         >
           <div class="flex-1 w-full max-w-6xl mx-auto px-6 lg:px-8 flex flex-col min-h-0">
-            <div class="flex-1 flex flex-col items-start justify-center lg:justify-start pb-4 w-full min-h-0 lg:overscroll-y-contain">
+            <div class="flex-1 flex flex-col items-start justify-center lg:justify-start xl:pt-8 pb-4 w-full min-h-0 lg:overscroll-y-contain">
               <%!-- Hero copy (unchanged) --%>
               <h1 class="text-2xl min-[412px]:text-[1.75rem] sm:text-[2.5rem]/[3rem] md:text-[3.5rem]/[4rem] lg:text-[3rem]/[3.5rem] xl:text-[4rem]/[4.5rem] font-black tracking-tight text-foreground font-display">
                 Open source <br class="hidden" />
@@ -210,7 +210,7 @@ defmodule AlgoraWeb.HomeLive do
             </div>
             --%>
               <%!-- Hires: testimonial cards then metrics --%>
-              <div class="w-full mt-4 sm:mt-8 grid grid-cols-1 gap-6 sm:gap-8 lg:grid-cols-3">
+              <div class="w-full mt-4 sm:mt-8 grid grid-cols-1 gap-6 sm:gap-4 lg:grid-cols-3">
                 <%= for hire <- @hires do %>
                   <div
                     class="relative h-full min-h-[26rem] sm:min-h-[30rem]"

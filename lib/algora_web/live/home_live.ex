@@ -127,7 +127,9 @@ defmodule AlgoraWeb.HomeLive do
 
   @impl true
   def handle_params(params, _uri, socket) do
-    {:noreply, assign(socket, :onboarding_started, onboarding_started?(params))}
+    onboarding_started = onboarding_started?(params) || socket.assigns.onboarding_started
+
+    {:noreply, assign(socket, :onboarding_started, onboarding_started)}
   end
 
   @impl true
@@ -328,7 +330,12 @@ defmodule AlgoraWeb.HomeLive do
 
         <%!-- Candidate section: tinder-style single card --%>
         <% current_candidate = Enum.at(@candidates_data, @current_candidate_index) %>
-        <section id="candidate-section" phx-hook="TinderSection" class="relative min-h-screen">
+        <section
+          id="candidate-section"
+          phx-hook="TinderSection"
+          data-onboarding-started={to_string(@onboarding_started)}
+          class="relative min-h-screen"
+        >
           <div class="pointer-events-none absolute inset-0 z-[5] overflow-hidden" aria-hidden="true">
             <div class="motion-safe:animate-onboarding-orb-breathe absolute top-1/2 left-1/2 w-[500px] h-[500px] rounded-full bg-[#1ebba2]/10 blur-[100px] motion-reduce:animate-none">
             </div>
@@ -665,11 +672,7 @@ defmodule AlgoraWeb.HomeLive do
     if socket.assigns.onboarding_started do
       {:noreply, socket}
     else
-      {:noreply,
-       push_patch(assign(socket, :onboarding_started, true),
-         to: onboarding_path(socket),
-         replace: false
-       )}
+      {:noreply, assign(socket, :onboarding_started, true)}
     end
   end
 
@@ -802,17 +805,6 @@ defmodule AlgoraWeb.HomeLive do
 
   defp onboarding_started?(params) do
     Map.has_key?(params, "go")
-  end
-
-  defp onboarding_path(socket) do
-    suffix =
-      if socket.assigns.screenshot? do
-        "?go&screenshot=1"
-      else
-        "?go"
-      end
-
-    ~p"/" <> suffix
   end
 
   defp onboarding_likes_goal, do: 3

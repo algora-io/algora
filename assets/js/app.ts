@@ -982,23 +982,24 @@ const Hooks = {
       this.sectionInView = false;
       if (!buttons) return;
 
-      const onboardingInUrl = () =>
-        new URLSearchParams(window.location.search).has("go");
+      const onboardingActive = () =>
+        new URLSearchParams(window.location.search).has("go") ||
+        this.el.getAttribute("data-onboarding-started") === "true";
 
       const showTinderButtons = () => {
         buttons.classList.remove("opacity-0", "pointer-events-none");
         buttons.classList.add("opacity-100");
       };
 
-      // `?go` deep-link: show dock immediately (section may not yet hit the observer threshold).
-      if (onboardingInUrl()) {
+      // Deep-link `?go` or server already in onboarding: show dock immediately (section may not yet hit the observer threshold).
+      if (onboardingActive()) {
         showTinderButtons();
       }
 
       const maybeStartOnboarding = () => {
         if (
           !this.onboardingSent &&
-          !onboardingInUrl() &&
+          !onboardingActive() &&
           this.userInteracted &&
           this.sectionInView
         ) {
@@ -1062,20 +1063,21 @@ const Hooks = {
       this.onUserInteraction = onUserInteraction;
     },
     updated() {
-      const onboardingInUrl = new URLSearchParams(
-        window.location.search,
-      ).has("go");
+      const onboardingActive =
+        new URLSearchParams(window.location.search).has("go") ||
+        this.el.getAttribute("data-onboarding-started") === "true";
 
-      if (!onboardingInUrl) {
-        this.onboardingSent = false;
+      const buttons = document.getElementById("tinder-buttons");
+      if (onboardingActive) {
+        if (buttons) {
+          buttons.classList.remove("opacity-0", "pointer-events-none");
+          buttons.classList.add("opacity-100");
+        }
+        this.onboardingSent = true;
         return;
       }
 
-      const buttons = document.getElementById("tinder-buttons");
-      if (buttons) {
-        buttons.classList.remove("opacity-0", "pointer-events-none");
-        buttons.classList.add("opacity-100");
-      }
+      this.onboardingSent = false;
     },
     destroyed() {
       if (this.observer) {

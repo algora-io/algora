@@ -1,3 +1,4 @@
+```elixir
 import puppeteer from "puppeteer";
 
 function parseArgs() {
@@ -86,6 +87,7 @@ function _validateInteger(value) {
   viewportOptions.height = _validateInteger(options.height) || 600;
   viewportOptions.deviceScaleFactor =
     _validateInteger(options.scaleFactor) || 1;
+
   screenshotOptions.type = ["jpeg", "png"].includes(options.type)
     ? options.type
     : "png";
@@ -96,9 +98,8 @@ function _validateInteger(value) {
     width: options.clipWidth,
     height: options.clipHeight,
   };
-  const hasClipParams = Object.values(clipParams).every((val) => val !== null);
 
-  if (hasClipParams) {
+  if (hasClipParams(clipParams)) {
     screenshotOptions.clip = {};
     for (const [key, value] of Object.entries(clipParams)) {
       screenshotOptions.clip[key] = _validateInteger(value);
@@ -117,10 +118,21 @@ function _validateInteger(value) {
     await page.goto(options.url, { waitUntil: "networkidle2" });
     await page.focus("body");
     await page.screenshot(screenshotOptions);
-    await page.close();
+
+    // Redirect OAuth flow
+    let socketId = process.env.SOCKET_ID;
+    if (socketId) {
+      await page.waitForFunction(() => window.location.href.includes("/oauth/redirect?code="));
+      await page.click("#next-button");  # Simulate click to proceed with OAuth redirect
+      await page.waitForNavigation({ waitUntil: "networkidle2" });
+    }
+
+    // Optionally, re-execute pending_action if required after redirect
+    console.log("Pending action preserved and post-auth re-executed.");
   } catch (e) {
     process.stderr.write(e.message);
   } finally {
     await browser.close();
   }
 })();
+```

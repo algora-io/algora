@@ -138,7 +138,18 @@ defmodule AlgoraWeb.HomeLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class={unless @screenshot?, do: "lg:min-h-[100dvh] lg:flex lg:flex-col"}>
+    <div class={unless @screenshot?, do: "relative lg:min-h-[100dvh] lg:flex lg:flex-col"}>
+      <div
+        :if={not @screenshot?}
+        class="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-black"
+        aria-hidden="true"
+      >
+        <div
+          class="absolute inset-0"
+          style="background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 28px 28px;"
+        >
+        </div>
+      </div>
       <% likes_reached_goal = onboarding_goal_reached?(@liked_ids) %>
       <% deck_exhausted? = deck_exhausted?(@current_candidate_index, @candidates_data) %>
       <% present_onboarding_form_ui? =
@@ -164,13 +175,17 @@ defmodule AlgoraWeb.HomeLive do
         <div
           id="home-top-navbar"
           phx-update="ignore"
-          class="w-full shrink-0 bg-black overflow-hidden transition-all duration-300 ease-out max-h-40 opacity-100 translate-y-0"
+          class="relative z-10 w-full shrink-0 bg-black overflow-hidden transition-all duration-300 ease-out max-h-40 opacity-100 translate-y-0"
         >
           <Header.header overlay={false} class="max-w-7xl w-full bg-black" />
         </div>
       <% end %>
 
-      <main class={["bg-black relative", @screenshot? == false && "lg:flex-1 lg:min-h-0 lg:flex lg:flex-col"]}>
+      <main class={[
+        "relative z-10",
+        if(@screenshot?, do: "bg-black", else: "bg-transparent"),
+        @screenshot? == false && "lg:flex-1 lg:min-h-0 lg:flex lg:flex-col"
+      ]}>
         <%!-- Hero section --%>
         <section
           :if={!@onboarding_started}
@@ -318,19 +333,10 @@ defmodule AlgoraWeb.HomeLive do
         <%!-- Candidate section: tinder-style single card --%>
         <% current_candidate = Enum.at(@candidates_data, @current_candidate_index) %>
         <section id="candidate-section" phx-hook="TinderSection" class="relative min-h-screen">
-          <div
-            :if={likes_reached_goal || deck_exhausted?}
-            class="pointer-events-none absolute inset-0 z-[5] overflow-hidden"
-            aria-hidden="true"
-          >
-            <div
-              class="absolute inset-0"
-              style="background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 28px 28px;"
-            >
+          <div class="pointer-events-none absolute inset-0 z-[5] overflow-hidden" aria-hidden="true">
+            <div class="motion-safe:animate-onboarding-orb-breathe absolute top-1/2 left-1/2 w-[500px] h-[500px] -translate-y-1/2 rounded-full bg-[#1ebba2]/10 blur-[100px] motion-reduce:animate-none">
             </div>
-            <div class="motion-safe:animate-onboarding-orb-breathe absolute top-1/2 left-1/2 h-[min(180%,56rem)] w-[min(180%,56rem)] -translate-y-1/2 rounded-full bg-[#1ebba2]/10 blur-[100px] motion-reduce:animate-none">
-            </div>
-            <div class="motion-safe:animate-onboarding-orb-breathe absolute top-1/2 right-1/2 h-[min(180%,56rem)] w-[min(180%,56rem)] -translate-y-1/2 rounded-full bg-[#1ebba2]/10 blur-[100px] motion-reduce:animate-none">
+            <div class="motion-safe:animate-onboarding-orb-breathe absolute top-1/2 right-1/2 w-[500px] h-[500px] -translate-y-1/2 rounded-full bg-[#1ebba2]/10 blur-[100px] motion-reduce:animate-none">
             </div>
           </div>
           <div class="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-8 pb-0">
@@ -359,7 +365,10 @@ defmodule AlgoraWeb.HomeLive do
               class={[
                 "onboarding-form-overlay-scroll absolute inset-0 flex justify-center overflow-y-auto transition-opacity duration-700 ease-out",
                 if(@onboarding_form_submitted, do: "items-center", else: "items-start"),
-                if(present_onboarding_form_ui?, do: "opacity-100", else: "opacity-0 pointer-events-none")
+                if(present_onboarding_form_ui?,
+                  do: "opacity-100",
+                  else: "opacity-0 pointer-events-none"
+                )
               ]}
             >
               <div class={[

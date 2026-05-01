@@ -329,9 +329,9 @@ defmodule AlgoraWeb.HomeLive do
         <% current_candidate = Enum.at(@candidates_data, @current_candidate_index) %>
         <section id="candidate-section" phx-hook="TinderSection" class="relative min-h-screen">
           <div class="pointer-events-none absolute inset-0 z-[5] overflow-hidden" aria-hidden="true">
-            <div class="motion-safe:animate-onboarding-orb-breathe absolute top-1/2 left-1/2 w-[500px] h-[500px] -translate-y-1/2 rounded-full bg-[#1ebba2]/10 blur-[100px] motion-reduce:animate-none">
+            <div class="motion-safe:animate-onboarding-orb-breathe absolute top-1/2 left-1/2 w-[500px] h-[500px] rounded-full bg-[#1ebba2]/10 blur-[100px] motion-reduce:animate-none">
             </div>
-            <div class="motion-safe:animate-onboarding-orb-breathe absolute top-1/2 right-1/2 w-[500px] h-[500px] -translate-y-1/2 rounded-full bg-[#1ebba2]/10 blur-[100px] motion-reduce:animate-none">
+            <div class="motion-safe:animate-onboarding-orb-breathe absolute top-1/2 right-1/2 w-[500px] h-[500px] rounded-full bg-[#1ebba2]/10 blur-[100px] motion-reduce:animate-none">
             </div>
           </div>
           <div class="relative z-10 w-full max-w-6xl mx-auto px-6 lg:px-8 pb-0">
@@ -626,7 +626,13 @@ defmodule AlgoraWeb.HomeLive do
 
     case %Form{} |> Form.changeset(params) |> Ecto.Changeset.apply_action(:save) do
       {:ok, data} ->
-        Algora.Cloud.create_welcome_task(data)
+        welcome_attrs =
+          Map.merge(Map.from_struct(data), %{
+            liked_ids: home_onboarding_feedback_user_ids(socket.assigns.liked_ids),
+            disliked_ids: home_onboarding_feedback_user_ids(socket.assigns.disliked_ids)
+          })
+
+        Algora.Cloud.create_welcome_task(welcome_attrs)
 
         {:noreply, assign(socket, :onboarding_form_submitted, true)}
 
@@ -810,6 +816,12 @@ defmodule AlgoraWeb.HomeLive do
 
   defp onboarding_likes_goal, do: 3
 
+  defp home_onboarding_feedback_user_ids(ids) when is_list(ids) do
+    ids
+    |> Enum.reverse()
+    |> Enum.uniq()
+  end
+
   defp deck_exhausted?(index, candidates_data) when is_list(candidates_data) do
     candidates_data != [] and match?(nil, Enum.at(candidates_data, index))
   end
@@ -897,7 +909,7 @@ defmodule AlgoraWeb.HomeLive do
         raised: "$30M",
         valuation: "$500M",
         testimonial:
-          ~s(To build AI for Hollywood, we need engineers with experience in creative media exactly like <a href="https://www.linkedin.com/feed/update/urn:li:activity:7453498218417557504/" class="underline hover:text-white underline-offset-2" target="_blank" rel="noopener noreferrer">Matt</a>. We're super happy to be working together.),
+          ~s(To build AI for Hollywood, we need engineers with experience in creative media exactly like <a href="https://www.linkedin.com/feed/update/urn:li:activity:7453498218417557504/" class="underline hover:text-white underline-offset-2" target="_blank" rel="noopener noreferrer">Matt</a>. We're super happy to work together.),
         testimonial_html: true,
         testimonial_author: "Robin Huang · Co-Founder",
         testimonial_logo: "/images/wordmarks/comfy.svg",

@@ -110,6 +110,7 @@ defmodule AlgoraWeb.HomeLive do
           |> assign(:disliked_ids, [])
           |> assign(:show_onboarding_form, false)
           |> assign(:transitioning_to_onboarding_form, false)
+          |> assign(:onboarding_form_submitted, false)
           |> assign(:client_timezone, client_timezone)
           |> assign(
             :form,
@@ -336,101 +337,115 @@ defmodule AlgoraWeb.HomeLive do
                 </div>
               </div>
               <div class="relative z-10 w-full max-w-3xl text-card-foreground px-4 sm:px-6 pt-4 pb-0">
-                <h2 class="text-2xl sm:text-3xl font-semibold leading-tight tracking-tight text-foreground">
-                  Get your top candidates
-                </h2>
-                <p class="mt-3 text-base text-muted-foreground">
-                  You'll hear back from the Algora founders
-                </p>
-                <.form
-                  for={@form}
-                  id="onboarding-candidates-form"
-                  phx-submit="submit"
-                  class="mt-8 flex flex-col gap-8"
-                >
-                  <%!--
-                    <div class="space-y-3">
-                      <div class="block text-base sm:text-xl font-semibold leading-snug text-foreground">
-                        Tech stack
-                      </div>
-                      <.TechStack
-                        tech={Ecto.Changeset.get_field(@form.source, :tech_stack) || []}
-                        socket={@socket}
-                        form="form"
-                        classes="-mt-2"
-                      />
+                <%= if @onboarding_form_submitted do %>
+                  <div class="flex flex-col items-center text-center py-8 sm:py-12 pb-24 sm:pb-32">
+                    <div class="flex size-16 sm:size-20 items-center justify-center rounded-full bg-emerald-500/15 ring-2 ring-emerald-500/40 mb-6">
+                      <.icon name="tabler-mail-check" class="size-9 sm:size-11 text-emerald-400" />
                     </div>
-                    --%>
-                  <input type="hidden" name={@form[:tech_stack].name} value="[]" />
-                  <div>
-                    <label
-                      for={@form[:job_description].id}
-                      class="block text-base sm:text-xl font-semibold leading-snug text-foreground mb-2"
-                    >
-                      Careers URL
-                    </label>
-                    <.input
-                      field={@form[:job_description]}
-                      type="url"
-                      class="px-3 py-3 !text-base sm:!leading-7"
-                      placeholder="https://company.com/careers"
-                    />
+                    <h2 class="text-2xl sm:text-3xl font-semibold leading-tight tracking-tight text-foreground">
+                      You're all set
+                    </h2>
+                    <p class="mt-4 max-w-md text-base text-muted-foreground leading-relaxed">
+                      Thanks for reaching out. We'll review your details and get in touch soon.
+                    </p>
                   </div>
-                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 gap-y-8">
-                    <div>
-                      <label
-                        for={@form[:comp_range].id}
-                        class="block text-base sm:text-xl font-semibold leading-snug text-foreground mb-2"
-                      >
-                        Compensation
-                      </label>
-                      <.input
-                        field={@form[:comp_range]}
-                        type="text"
-                        placeholder="$175k-$330k + equity"
-                        class="px-3 py-3 !text-base sm:!leading-7"
-                      />
-                    </div>
-                    <div>
-                      <label
-                        for={@form[:location].id}
-                        class="block text-base sm:text-xl font-semibold leading-snug text-foreground mb-2"
-                      >
-                        Location
-                      </label>
-                      <.input
-                        field={@form[:location]}
-                        type="text"
-                        placeholder="San Francisco"
-                        class="px-3 py-3 !text-base sm:!leading-7"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label
-                      for={@form[:email].id}
-                      class="block text-base sm:text-xl font-semibold leading-snug text-foreground mb-2"
-                    >
-                      Your work email
-                    </label>
-                    <.input
-                      field={@form[:email]}
-                      type="email"
-                      placeholder="you@company.com"
-                      class="px-3 py-3 !text-base sm:!leading-7"
-                    />
-                  </div>
-                  <div class="grid grid-cols-3 gap-4 sm:gap-8">
-                    <%= for stat <- @stats1 do %>
-                      <div>
-                        <div class="text-2xl sm:text-3xl font-bold font-display text-foreground">
-                          {stat.value}
+                <% else %>
+                  <h2 class="text-2xl sm:text-3xl font-semibold leading-tight tracking-tight text-foreground">
+                    Get your top candidates
+                  </h2>
+                  <p class="mt-3 text-base text-muted-foreground">
+                    You'll hear back from the Algora founders
+                  </p>
+                  <.form
+                    for={@form}
+                    id="onboarding-candidates-form"
+                    phx-submit="submit"
+                    class="mt-8 flex flex-col gap-8"
+                  >
+                    <%!--
+                      <div class="space-y-3">
+                        <div class="block text-base sm:text-xl font-semibold leading-snug text-foreground">
+                          Tech stack
                         </div>
-                        <div class="text-xs sm:text-sm text-muted-foreground mt-1">{stat.label}</div>
+                        <.TechStack
+                          tech={Ecto.Changeset.get_field(@form.source, :tech_stack) || []}
+                          socket={@socket}
+                          form="form"
+                          classes="-mt-2"
+                        />
                       </div>
-                    <% end %>
-                  </div>
-                </.form>
+                      --%>
+                    <input type="hidden" name={@form[:tech_stack].name} value="[]" />
+                    <div>
+                      <label
+                        for={@form[:job_description].id}
+                        class="block text-base sm:text-xl font-semibold leading-snug text-foreground mb-2"
+                      >
+                        Careers URL
+                      </label>
+                      <.input
+                        field={@form[:job_description]}
+                        type="url"
+                        class="px-3 py-3 !text-base sm:!leading-7"
+                        placeholder="https://company.com/careers"
+                      />
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 gap-y-8">
+                      <div>
+                        <label
+                          for={@form[:comp_range].id}
+                          class="block text-base sm:text-xl font-semibold leading-snug text-foreground mb-2"
+                        >
+                          Compensation
+                        </label>
+                        <.input
+                          field={@form[:comp_range]}
+                          type="text"
+                          placeholder="$175k-$330k + equity"
+                          class="px-3 py-3 !text-base sm:!leading-7"
+                        />
+                      </div>
+                      <div>
+                        <label
+                          for={@form[:location].id}
+                          class="block text-base sm:text-xl font-semibold leading-snug text-foreground mb-2"
+                        >
+                          Location
+                        </label>
+                        <.input
+                          field={@form[:location]}
+                          type="text"
+                          placeholder="San Francisco"
+                          class="px-3 py-3 !text-base sm:!leading-7"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label
+                        for={@form[:email].id}
+                        class="block text-base sm:text-xl font-semibold leading-snug text-foreground mb-2"
+                      >
+                        Your work email
+                      </label>
+                      <.input
+                        field={@form[:email]}
+                        type="email"
+                        placeholder="you@company.com"
+                        class="px-3 py-3 !text-base sm:!leading-7"
+                      />
+                    </div>
+                    <div class="grid grid-cols-3 gap-4 sm:gap-8">
+                      <%= for stat <- @stats1 do %>
+                        <div>
+                          <div class="text-2xl sm:text-3xl font-bold font-display text-foreground">
+                            {stat.value}
+                          </div>
+                          <div class="text-xs sm:text-sm text-muted-foreground mt-1">{stat.label}</div>
+                        </div>
+                      <% end %>
+                    </div>
+                  </.form>
+                <% end %>
               </div>
             </div>
           </div>
@@ -515,7 +530,7 @@ defmodule AlgoraWeb.HomeLive do
 
       <%!-- Onboarding form submit: fixed dock, same chrome as like/dislike --%>
       <div
-        :if={@show_onboarding_form}
+        :if={@show_onboarding_form && !@onboarding_form_submitted}
         id="onboarding-form-submit-dock"
         class="fixed bottom-0 left-0 right-0 z-40 flex items-stretch justify-center px-4 sm:px-6 pb-6 sm:pb-8 pt-5 pointer-events-none"
       >
@@ -544,8 +559,6 @@ defmodule AlgoraWeb.HomeLive do
 
   @impl true
   def handle_event("submit", %{"form" => params}, socket) do
-    dbg(params)
-
     tech_stack =
       Jason.decode!(params["tech_stack"] || "[]") ++
         case String.trim(params["tech_stack_input"] || "") do
@@ -559,7 +572,7 @@ defmodule AlgoraWeb.HomeLive do
       {:ok, data} ->
         Algora.Cloud.create_welcome_task(data)
 
-        {:noreply, put_flash(socket, :info, "Thanks for submitting your JD, you'll hear back soon!")}
+        {:noreply, assign(socket, :onboarding_form_submitted, true)}
 
       {:error, changeset} ->
         {:noreply, assign(socket, form: to_form(changeset))}
@@ -579,6 +592,7 @@ defmodule AlgoraWeb.HomeLive do
       |> assign(:liked_ids, [])
       |> assign(:show_onboarding_form, false)
       |> assign(:transitioning_to_onboarding_form, false)
+      |> assign(:onboarding_form_submitted, false)
 
     {:noreply, socket}
   end

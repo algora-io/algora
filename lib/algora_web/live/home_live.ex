@@ -262,7 +262,7 @@ defmodule AlgoraWeb.HomeLive do
                               alt={hire.company_name}
                               class={["opacity-70", hire.testimonial_logo_class]}
                             />
-                            <p class="text-sm text-white/60 truncate">{hire.description}</p>
+                            <p class="text-sm text-white/80 truncate">{hire.description}</p>
                           </div>
                           <div class="grid grid-cols-3">
                             <div>
@@ -893,7 +893,7 @@ defmodule AlgoraWeb.HomeLive do
         raised: "$30M",
         valuation: "$500M",
         testimonial:
-          "We needed someone who could hit the ground running in an open source-first environment. Algora found us exactly that — a developer already embedded in the ecosystem.",
+          "To build AI for Hollywood, we need engineers with experience in creative media exactly like Matt. We're super happy to be working together.",
         testimonial_author: "Robin Huang · Cofounder",
         testimonial_logo: "/images/wordmarks/comfy.svg",
         testimonial_logo_class: "h-6"
@@ -905,8 +905,7 @@ defmodule AlgoraWeb.HomeLive do
         person_name: "Christian Lim",
         person_avatar: "https://avatars.githubusercontent.com/u/2482353?v=4",
         person_title: "Member of Technical Staff",
-        bg_image:
-          "https://media.licdn.com/dms/image/v2/D4E03AQH4x-LiUVr6SA/profile-displayphoto-scale_400_400/B4EZlePKFtKYAg-/0/1758222656365?e=1779321600&v=beta&t=Vw_xCN6uxvuYBQ-tANlL1WmL2l_dcboo2jzKSqqrqF4",
+        bg_image: "https://pbs.twimg.com/profile_images/2045171929271635969/hGL_ntz0_400x400.jpg",
         theme_color: "#2DD4BF",
         overlay_color: "rgba(8, 69, 51, 0.75)",
         description: "Agentic analytics for enterprises",
@@ -914,8 +913,8 @@ defmodule AlgoraWeb.HomeLive do
         raised: "$17M",
         valuation: nil,
         testimonial:
-          "Algora's candidates came pre-vetted through their open source contributions. We hired someone we could verify before ever getting on a call.",
-        testimonial_author: "Mark Hay · Cofounder & CTO",
+          "Our newest hire Christian spent 6 years at Google, taught at MIT and worked as a quant at Two Sigma. This is exactly the profile we asked.",
+        testimonial_author: "Ethan Ding · Cofounder & CEO",
         testimonial_logo: "/images/wordmarks/textql.svg",
         testimonial_logo_class: "h-5"
       }

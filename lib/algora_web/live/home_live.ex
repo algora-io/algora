@@ -12,6 +12,7 @@ defmodule AlgoraWeb.HomeLive do
   alias Algora.Matches
   alias Algora.Matches.JobMatch
   alias Algora.Payments
+  alias Algora.PSP.ConnectCountries
   alias AlgoraWeb.Components.Footer
   alias AlgoraWeb.Components.Header
   alias AlgoraWeb.Data.HomeCache
@@ -55,19 +56,10 @@ defmodule AlgoraWeb.HomeLive do
 
   @impl true
   def mount(params, _session, socket) do
-    # Get cached platform stats
-    platform_stats = HomeCache.get_platform_stats()
-
     stats1 = [
       %{label: "Full-time Hires", value: "30+"},
       %{label: "1st Year Retention", value: "100%"},
       %{label: "Time to Interview", value: "<1 wk"}
-    ]
-
-    stats2 = [
-      %{label: "Countries", value: format_number(platform_stats.total_countries)},
-      %{label: "Paid Out", value: format_money(platform_stats.total_paid_out)},
-      %{label: "Completed Bounties", value: format_number(platform_stats.completed_bounties_count)}
     ]
 
     # Get cached jobs and orgs data
@@ -97,6 +89,8 @@ defmodule AlgoraWeb.HomeLive do
         {:ok, redirect(socket, to: AlgoraWeb.UserAuth.signed_in_path(user))}
 
       _ ->
+        client_timezone = read_client_timezone(socket)
+
         socket =
           socket
           |> assign(:page_title, "Algora - Hire the top 1% open source engineers")
@@ -104,7 +98,6 @@ defmodule AlgoraWeb.HomeLive do
           |> assign(:page_image, "#{AlgoraWeb.Endpoint.url()}/images/og/home.png")
           |> assign(:screenshot?, not is_nil(params["screenshot"]))
           |> assign(:stats1, stats1)
-          |> assign(:stats2, stats2)
           |> assign(:jobs_by_user, jobs_by_user)
           |> assign(:orgs_with_stats, orgs_with_stats)
           |> assign(:hires, hires())
@@ -117,7 +110,16 @@ defmodule AlgoraWeb.HomeLive do
           |> assign(:disliked_ids, [])
           |> assign(:show_onboarding_form, false)
           |> assign(:transitioning_to_onboarding_form, false)
-          |> assign(:form, to_form(Form.changeset(%Form{}, %{tech_stack: []})))
+          |> assign(:client_timezone, client_timezone)
+          |> assign(
+            :form,
+            to_form(
+              Form.changeset(%Form{}, %{
+                tech_stack: [],
+                location: location_prefill(client_timezone, socket.assigns[:current_country])
+              })
+            )
+          )
           |> assign_user_applications()
           |> assign_events()
           |> LocalStore.init(key: __MODULE__)
@@ -143,6 +145,12 @@ defmodule AlgoraWeb.HomeLive do
         class="hidden"
       >
       </div>
+      <%!-- <div :if={not @screenshot?} class="container mx-auto max-w-5xl px-4 pt-16 sm:pt-20">
+        <.debug
+          class="max-h-80 text-xs text-foreground border border-white/10"
+          data={visitor_ipinfo_debug(@ipinfo, @current_country, @client_timezone)}
+        />
+      </div> --%>
       <%= if @screenshot? do %>
         <div class="-mt-24" />
       <% else %>
@@ -158,7 +166,7 @@ defmodule AlgoraWeb.HomeLive do
       <main class="bg-black relative">
         <%!-- Hero section --%>
         <section :if={!@onboarding_started} class="min-h-screen flex flex-col">
-          <div class="flex-1 mx-auto px-6 lg:px-8 flex flex-col items-start justify-center pt-20 lg:pt-24 2xl:pt-32 pb-4 w-full max-w-3xl">
+          <div class="flex-1 mx-auto px-6 lg:px-8 flex flex-col items-start justify-center pt-20 lg:pt-24 2xl:pt-32 pb-4 w-full max-w-4xl">
             <%!-- Hero copy (unchanged) --%>
             <h1 class="text-2xl min-[412px]:text-[1.75rem] sm:text-[2.5rem]/[3rem] md:text-[3.5rem]/[4rem] lg:text-[3rem]/[3.5rem] xl:text-[4rem]/[4.5rem] font-black tracking-tight text-foreground font-display">
               Open source <br class="hidden" />
@@ -268,17 +276,6 @@ defmodule AlgoraWeb.HomeLive do
                   </.badge>
                 </div>
               <% end %>
-              <%!-- Metrics after hires --%>
-              <div class="grid grid-cols-3 gap-6 sm:gap-10 pt-2">
-                <%= for stat <- @stats1 do %>
-                  <div>
-                    <div class="text-3xl sm:text-4xl font-bold font-display text-foreground">
-                      {stat.value}
-                    </div>
-                    <div class="text-xs sm:text-sm text-muted-foreground mt-1">{stat.label}</div>
-                  </div>
-                <% end %>
-              </div>
             </div>
           </div>
           <%!-- Scroll arrow --%>
@@ -296,14 +293,10 @@ defmodule AlgoraWeb.HomeLive do
         <%!-- Candidate section: tinder-style single card --%>
         <% likes_reached_goal = onboarding_goal_reached?(@liked_ids) %>
         <% current_candidate = Enum.at(@candidates_data, @current_candidate_index) %>
-        <section
-          id="candidate-section"
-          phx-hook="TinderSection"
-          class="relative px-4 sm:px-6 pt-4 pb-0"
-        >
-          <div class="relative">
+        <section id="candidate-section" phx-hook="TinderSection" class="relative min-h-screen">
+          <div class="relative px-4 sm:px-6 pb-0">
             <div class={[
-              "transition-opacity duration-700",
+              "transition-opacity duration-700 min-h-screen pt-4",
               if(@show_onboarding_form, do: "opacity-0 pointer-events-none", else: "opacity-100")
             ]}>
               <%= if current_candidate do %>
@@ -329,23 +322,35 @@ defmodule AlgoraWeb.HomeLive do
                 if(@show_onboarding_form, do: "opacity-100", else: "opacity-0 pointer-events-none")
               ]}
             >
-              <div class="w-full max-w-3xl text-card-foreground">
-                <div class="px-2 sm:px-4 pb-2">
-                  <h2 class="text-2xl sm:text-3xl font-semibold leading-tight tracking-tight text-foreground">
-                    Get your top candidates
-                  </h2>
-                  <p class="mt-3 text-base text-muted-foreground">
-                    Share your hiring needs.
-                  </p>
-                  <.form
-                    for={@form}
-                    id="onboarding-candidates-form"
-                    phx-submit="submit"
-                    class="mt-8 flex flex-col gap-8"
-                  >
-                    <%!--
+              <%!-- Full-bleed dot grid + ambient orbs (LimboLive-style) --%>
+              <div
+                class="pointer-events-none absolute inset-0 z-50 overflow-hidden"
+                aria-hidden="true"
+              >
+                <div
+                  class="absolute inset-0"
+                  style="background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 28px 28px;"
+                >
+                </div>
+                <div class="absolute top-1/2 left-1/2 h-[min(180%,56rem)] w-[min(180%,56rem)] -translate-y-1/2 rounded-full bg-[#1ebba2]/5 blur-[100px]">
+                </div>
+              </div>
+              <div class="relative z-10 w-full max-w-3xl text-card-foreground px-4 sm:px-6 pt-4 pb-0">
+                <h2 class="text-2xl sm:text-3xl font-semibold leading-tight tracking-tight text-foreground">
+                  Get your top candidates
+                </h2>
+                <p class="mt-3 text-base text-muted-foreground">
+                  You'll hear back from the Algora founders
+                </p>
+                <.form
+                  for={@form}
+                  id="onboarding-candidates-form"
+                  phx-submit="submit"
+                  class="mt-8 flex flex-col gap-8"
+                >
+                  <%!--
                     <div class="space-y-3">
-                      <div class="block text-lg sm:text-xl font-semibold leading-snug text-foreground">
+                      <div class="block text-base sm:text-xl font-semibold leading-snug text-foreground">
                         Tech stack
                       </div>
                       <.TechStack
@@ -356,67 +361,76 @@ defmodule AlgoraWeb.HomeLive do
                       />
                     </div>
                     --%>
-                    <input type="hidden" name={@form[:tech_stack].name} value="[]" />
+                  <input type="hidden" name={@form[:tech_stack].name} value="[]" />
+                  <div>
+                    <label
+                      for={@form[:job_description].id}
+                      class="block text-base sm:text-xl font-semibold leading-snug text-foreground mb-2"
+                    >
+                      Careers URL
+                    </label>
+                    <.input
+                      field={@form[:job_description]}
+                      type="url"
+                      class="px-3 py-3 !text-base sm:!leading-7"
+                      placeholder="https://company.com/careers"
+                    />
+                  </div>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 gap-y-8">
                     <div>
                       <label
-                        for={@form[:job_description].id}
-                        class="block text-lg sm:text-xl font-semibold leading-snug text-foreground mb-2"
+                        for={@form[:comp_range].id}
+                        class="block text-base sm:text-xl font-semibold leading-snug text-foreground mb-2"
                       >
-                        Careers URL
+                        Compensation
                       </label>
                       <.input
-                        field={@form[:job_description]}
-                        type="url"
-                        class="px-3 py-3 !text-base sm:!leading-7"
-                        placeholder="https://company.com/careers"
-                      />
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 gap-y-8">
-                      <div>
-                        <label
-                          for={@form[:comp_range].id}
-                          class="block text-lg sm:text-xl font-semibold leading-snug text-foreground mb-2"
-                        >
-                          Compensation
-                        </label>
-                        <.input
-                          field={@form[:comp_range]}
-                          type="text"
-                          placeholder="$175k-$330k + equity"
-                          class="px-3 py-3 !text-base sm:!leading-7"
-                        />
-                      </div>
-                      <div>
-                        <label
-                          for={@form[:location].id}
-                          class="block text-lg sm:text-xl font-semibold leading-snug text-foreground mb-2"
-                        >
-                          Location
-                        </label>
-                        <.input
-                          field={@form[:location]}
-                          type="text"
-                          placeholder="San Francisco"
-                          class="px-3 py-3 !text-base sm:!leading-7"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label
-                        for={@form[:email].id}
-                        class="block text-lg sm:text-xl font-semibold leading-snug text-foreground mb-2"
-                      >
-                        Your work email
-                      </label>
-                      <.input
-                        field={@form[:email]}
-                        type="email"
-                        placeholder="you@company.com"
+                        field={@form[:comp_range]}
+                        type="text"
+                        placeholder="$175k-$330k + equity"
                         class="px-3 py-3 !text-base sm:!leading-7"
                       />
                     </div>
-                  </.form>
-                </div>
+                    <div>
+                      <label
+                        for={@form[:location].id}
+                        class="block text-base sm:text-xl font-semibold leading-snug text-foreground mb-2"
+                      >
+                        Location
+                      </label>
+                      <.input
+                        field={@form[:location]}
+                        type="text"
+                        placeholder="San Francisco"
+                        class="px-3 py-3 !text-base sm:!leading-7"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label
+                      for={@form[:email].id}
+                      class="block text-base sm:text-xl font-semibold leading-snug text-foreground mb-2"
+                    >
+                      Your work email
+                    </label>
+                    <.input
+                      field={@form[:email]}
+                      type="email"
+                      placeholder="you@company.com"
+                      class="px-3 py-3 !text-base sm:!leading-7"
+                    />
+                  </div>
+                  <div class="grid grid-cols-3 gap-4 sm:gap-8">
+                    <%= for stat <- @stats1 do %>
+                      <div>
+                        <div class="text-2xl sm:text-3xl font-bold font-display text-foreground">
+                          {stat.value}
+                        </div>
+                        <div class="text-xs sm:text-sm text-muted-foreground mt-1">{stat.label}</div>
+                      </div>
+                    <% end %>
+                  </div>
+                </.form>
               </div>
             </div>
           </div>
@@ -503,14 +517,14 @@ defmodule AlgoraWeb.HomeLive do
       <div
         :if={@show_onboarding_form}
         id="onboarding-form-submit-dock"
-        class="fixed bottom-0 left-0 right-0 z-40 flex items-stretch justify-center px-4 sm:px-6 pb-6 sm:pb-8 pt-5 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none"
+        class="fixed bottom-0 left-0 right-0 z-40 flex items-stretch justify-center px-4 sm:px-6 pb-6 sm:pb-8 pt-5 pointer-events-none"
       >
         <button
           type="submit"
           form="onboarding-candidates-form"
-          class="pointer-events-auto w-full flex flex-col items-center justify-center gap-2 py-4 rounded-2xl bg-emerald-950/60 border-2 border-emerald-500/50 hover:border-emerald-400 hover:bg-emerald-900/60 shadow-xl shadow-emerald-900/40 transition-all active:scale-95"
+          class="pointer-events-auto w-full flex flex-row items-center justify-center gap-2 sm:gap-3 py-4 rounded-2xl bg-emerald-950/60 border-2 border-emerald-500/50 hover:border-emerald-400 hover:bg-emerald-900/60 shadow-xl shadow-emerald-900/40 transition-all active:scale-95"
         >
-          <.icon name="tabler-send" class="size-8 text-emerald-400" />
+          <.icon name="tabler-send" class="size-6 shrink-0 text-emerald-400 sm:size-7" />
           <span class="text-base font-semibold text-emerald-400 tracking-wide sm:text-lg">
             Receive your candidates
           </span>
@@ -645,9 +659,58 @@ defmodule AlgoraWeb.HomeLive do
      |> assign(:transitioning_to_onboarding_form, false)}
   end
 
-  defp format_money(money), do: money |> Money.round(currency_digits: 0) |> Money.to_string!(no_fraction_if_integer: true)
+  # Session stores lowercase ISO code from AlgoraWeb.Analytics (IPinfo Lite). Prefer a readable
+  # country name; ConnectCountries covers Stripe-supported codes (fallback: uppercase code).
+  defp location_prefill(client_timezone, country_code) do
+    us? =
+      is_binary(country_code) and String.downcase(String.trim(country_code)) == "us"
 
-  defp format_number(number), do: Number.Delimit.number_to_delimited(number, precision: 0)
+    cond do
+      us? and client_timezone == "America/Los_Angeles" ->
+        "San Francisco"
+
+      us? and client_timezone == "America/New_York" ->
+        "New York"
+
+      us? and is_binary(client_timezone) and String.starts_with?(client_timezone, "America/") ->
+        "United States"
+
+      true ->
+        location_prefill_from_country(country_code)
+    end
+  end
+
+  defp location_prefill_from_country(nil), do: ""
+
+  defp location_prefill_from_country(code) when is_binary(code) do
+    code
+    |> String.trim()
+    |> case do
+      "" -> ""
+      c -> ConnectCountries.from_code(String.upcase(c))
+    end
+  end
+
+  defp visitor_ipinfo_debug(nil, current_country, client_timezone) do
+    %{
+      "note" =>
+        "No ipinfo in session yet (e.g. session from before this payload was stored). current_country from session:",
+      "current_country" => current_country,
+      "client_timezone" => client_timezone
+    }
+  end
+
+  defp visitor_ipinfo_debug(data, _current_country, client_timezone) when is_map(data) do
+    Map.put(data, "client_timezone", client_timezone)
+  end
+
+  # Same IANA zone as Timezone.svelte / assets/js/liveSocket `params.timezone`.
+  defp read_client_timezone(socket) do
+    case get_connect_params(socket) do
+      %{"timezone" => tz} when is_binary(tz) and tz != "" -> tz
+      _ -> nil
+    end
+  end
 
   defp assign_user_applications(socket) do
     user_applications =
@@ -742,7 +805,7 @@ defmodule AlgoraWeb.HomeLive do
           "Within one week of onboarding, we started interviewing qualified candidates who joined CodeRabbit in San Francisco.",
         testimonial_author: "Sam Hayes · Talent Acquisition Lead",
         testimonial_logo: "/images/wordmarks/coderabbit.svg",
-        testimonial_logo_class: "h-6"
+        testimonial_logo_class: "h-8"
       },
       %{
         special: true,
@@ -761,7 +824,7 @@ defmodule AlgoraWeb.HomeLive do
           "We needed someone who could hit the ground running in an open source-first environment. Algora found us exactly that — a developer already embedded in the ecosystem.",
         testimonial_author: "Robin Huang · Cofounder",
         testimonial_logo: "/images/wordmarks/comfy.svg",
-        testimonial_logo_class: "h-4"
+        testimonial_logo_class: "h-6"
       },
       %{
         special: true,

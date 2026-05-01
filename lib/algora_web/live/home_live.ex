@@ -150,7 +150,8 @@ defmodule AlgoraWeb.HomeLive do
       <% present_onboarding_form_ui? =
         @show_onboarding_form || deck_exhausted? || @onboarding_form_submitted %>
       <% tinder_buttons_visible? =
-        !@show_onboarding_form && !deck_exhausted? && !@onboarding_form_submitted %>
+        @onboarding_started ||
+          (!@show_onboarding_form && !deck_exhausted? && !@onboarding_form_submitted) %>
       <div
         id="local-state-store"
         phx-hook="LocalStateStore"

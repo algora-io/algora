@@ -982,14 +982,23 @@ const Hooks = {
       this.sectionInView = false;
       if (!buttons) return;
 
-      const maybeStartOnboarding = () => {
-        const onboardingInUrl = new URLSearchParams(
-          window.location.search,
-        ).has("go");
+      const onboardingInUrl = () =>
+        new URLSearchParams(window.location.search).has("go");
 
+      const showTinderButtons = () => {
+        buttons.classList.remove("opacity-0", "pointer-events-none");
+        buttons.classList.add("opacity-100");
+      };
+
+      // `?go` deep-link: show dock immediately (section may not yet hit the observer threshold).
+      if (onboardingInUrl()) {
+        showTinderButtons();
+      }
+
+      const maybeStartOnboarding = () => {
         if (
           !this.onboardingSent &&
-          !onboardingInUrl &&
+          !onboardingInUrl() &&
           this.userInteracted &&
           this.sectionInView
         ) {
@@ -1009,8 +1018,7 @@ const Hooks = {
             this.sectionInView = entry.isIntersecting;
 
             if (entry.isIntersecting) {
-              buttons.classList.remove("opacity-0", "pointer-events-none");
-              buttons.classList.add("opacity-100");
+              showTinderButtons();
               navbar?.classList.remove(
                 "max-h-40",
                 "opacity-100",
@@ -1024,8 +1032,8 @@ const Hooks = {
               );
               maybeStartOnboarding();
             } else {
-              buttons.classList.remove("opacity-100");
-              buttons.classList.add("opacity-0", "pointer-events-none");
+              // Only reveal the dock when the section is nearly in view; never hide it on
+              // scroll-away so Skip/Like stay reachable.
               navbar?.classList.remove(
                 "max-h-0",
                 "opacity-0",
@@ -1060,6 +1068,13 @@ const Hooks = {
 
       if (!onboardingInUrl) {
         this.onboardingSent = false;
+        return;
+      }
+
+      const buttons = document.getElementById("tinder-buttons");
+      if (buttons) {
+        buttons.classList.remove("opacity-0", "pointer-events-none");
+        buttons.classList.add("opacity-100");
       }
     },
     destroyed() {

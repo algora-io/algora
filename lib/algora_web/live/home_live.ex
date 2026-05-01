@@ -193,7 +193,10 @@ defmodule AlgoraWeb.HomeLive do
               <%!-- Hires: testimonial cards then metrics --%>
               <div class="w-full mt-10 sm:mt-14 grid grid-cols-1 gap-6 sm:gap-8 lg:grid-cols-3">
                 <%= for hire <- @hires do %>
-                  <div class="relative h-full min-h-[22rem]">
+                  <div
+                    class="relative h-full min-h-[22rem]"
+                    style={"--hire-theme: #{hire.theme_color}"}
+                  >
                     <div
                       class="relative h-full overflow-hidden rounded-xl border-2 border-white/30 shadow-xl shadow-white/10"
                       style={"background-color: #{hire.overlay_color}"}
@@ -201,12 +204,13 @@ defmodule AlgoraWeb.HomeLive do
                       <img
                         src={hire.bg_image}
                         alt=""
-                        class={
-                          [
-                            "absolute pt-12 inset-0 size-full object-cover grayscale",
-                            if(hire.company_name == "CodeRabbit", do: "object-top", else: "object-center")
-                          ]
-                        }
+                        class={[
+                          "absolute pt-12 inset-0 size-full object-cover grayscale",
+                          if(hire.company_name == "CodeRabbit",
+                            do: "object-top",
+                            else: "object-center"
+                          )
+                        ]}
                       />
                       <div class="absolute inset-x-0 h-9 top-12 bg-gradient-to-t from-transparent to-black">
                       </div>
@@ -227,13 +231,13 @@ defmodule AlgoraWeb.HomeLive do
                           <img
                             src={hire.person_avatar}
                             alt={hire.person_name}
-                            class="size-9 sm:size-10 rounded-full ring-2 ring-white/50 shrink-0"
+                            class="size-9 sm:size-10 rounded-full ring-2 ring-[color:var(--hire-theme)] shrink-0"
                           />
                           <.icon name="tabler-arrow-right" class="size-3.5 text-white/80 shrink-0" />
                           <img
                             src={hire.company_avatar}
                             alt={hire.company_name}
-                            class="size-9 sm:size-10 rounded-full ring-2 ring-white/50 shrink-0"
+                            class="size-9 sm:size-10 rounded-full ring-2 ring-[color:var(--hire-theme)] shrink-0"
                           />
                           <div class="min-w-0">
                             <div class="text-sm font-semibold text-white/90 truncate">
@@ -287,10 +291,12 @@ defmodule AlgoraWeb.HomeLive do
                     </div>
                     <.badge
                       variant="secondary"
-                      class="absolute -top-2 -left-2 text-xs px-2 sm:px-3 py-0.5 text-gray-900 bg-gradient-to-r from-white to-gray-100 font-semibold shadow-lg border-gray-200/90"
+                      class="absolute -top-2 -left-2 text-xs px-2 sm:px-3 py-0.5 font-semibold shadow-lg border-2 border-[color:var(--hire-theme)] text-white/80 !bg-[color-mix(in_srgb,var(--hire-theme)_26%,black)]"
                     >
-                      <.icon name="tabler-star-filled" class="size-3.5 text-gray-800 mr-1 -ml-0.5" />
-                      New hire!
+                      <.icon
+                        name="tabler-star-filled"
+                        class="size-3.5 text-[color:var(--hire-theme)] mr-1 -ml-0.5"
+                      /> New hire!
                     </.badge>
                   </div>
                 <% end %>
@@ -860,6 +866,7 @@ defmodule AlgoraWeb.HomeLive do
         person_avatar: "https://algora.io/storage/avatars/taisazero.jpeg",
         person_title: "Applied AI Engineer",
         bg_image: "https://algora.io/storage/avatars/coderabbit/sam-hayes-85a0ba25.jpg",
+        theme_color: "#F97316",
         overlay_color: "rgba(67, 20, 7, 0.6)",
         description: "AI code reviews",
         series: "B",
@@ -879,6 +886,7 @@ defmodule AlgoraWeb.HomeLive do
         person_avatar: "https://algora.io/storage/avatars/MillerMedia.jpeg",
         person_title: "Backend Engineer",
         bg_image: "https://pbs.twimg.com/profile_images/1987431529296109574/37rh5jdP_400x400.jpg",
+        theme_color: "#BEF264",
         overlay_color: "rgba(117, 125, 14, 0.65)",
         description: "Open source OS for creative AI",
         series: "B",
@@ -899,6 +907,7 @@ defmodule AlgoraWeb.HomeLive do
         person_title: "Member of Technical Staff",
         bg_image:
           "https://media.licdn.com/dms/image/v2/D4E03AQH4x-LiUVr6SA/profile-displayphoto-scale_400_400/B4EZlePKFtKYAg-/0/1758222656365?e=1779321600&v=beta&t=Vw_xCN6uxvuYBQ-tANlL1WmL2l_dcboo2jzKSqqrqF4",
+        theme_color: "#2DD4BF",
         overlay_color: "rgba(8, 69, 51, 0.75)",
         description: "Agentic analytics for enterprises",
         series: "A",

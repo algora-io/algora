@@ -372,7 +372,7 @@ defmodule AlgoraWeb.HomeLive do
               ]}
             >
               <div class={[
-                "relative z-10 w-full text-card-foreground px-4 sm:px-6 pt-4 pb-0 transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)] motion-reduce:transition-opacity motion-reduce:duration-300",
+                "relative z-10 w-full text-card-foreground px-4 sm:px-6 pt-4 sm:pt-8 pb-0 transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)] motion-reduce:transition-opacity motion-reduce:duration-300",
                 if(present_onboarding_form_ui?,
                   do: "opacity-100 motion-safe:translate-y-0 motion-safe:scale-100",
                   else:
@@ -516,16 +516,16 @@ defmodule AlgoraWeb.HomeLive do
       >
         <div class="mx-auto flex w-full max-w-7xl gap-3 sm:gap-4 px-6 lg:px-8">
           <button
-            class="pointer-events-auto flex flex-1 basis-0 flex-col items-center justify-center gap-2 rounded-2xl bg-red-950/60 border-2 border-red-500/50 hover:border-red-400 hover:bg-red-900/60 py-4 shadow-xl shadow-red-900/40 transition-[transform,box-shadow] duration-200 ease-out motion-safe:hover:scale-[1.02] motion-safe:active:scale-[0.97] disabled:opacity-60 disabled:pointer-events-none"
+            class="pointer-events-auto flex flex-1 basis-0 flex-row items-center justify-center gap-2 rounded-2xl bg-red-950/60 border-2 border-red-500/50 hover:border-red-400 hover:bg-red-900/60 py-4 shadow-xl shadow-red-900/40 transition-[transform,box-shadow] duration-200 ease-out motion-safe:hover:scale-[1.02] motion-safe:active:scale-[0.97] disabled:opacity-60 disabled:pointer-events-none"
             phx-click="dislike_candidate"
             disabled={likes_reached_goal}
             aria-label="Skip candidate"
           >
-            <.icon name="tabler-x" class="size-8 text-red-400" />
+            <.icon name="tabler-x" class="size-7 shrink-0 text-red-400 sm:size-8" />
             <span class="text-sm font-semibold text-red-400 tracking-wide">Skip</span>
           </button>
           <button
-            class="pointer-events-auto flex flex-1 basis-0 flex-col items-center justify-center gap-2 rounded-2xl bg-emerald-950/60 border-2 border-emerald-500/50 hover:border-emerald-400 hover:bg-emerald-900/60 py-4 shadow-xl shadow-emerald-900/40 transition-[transform,box-shadow] duration-200 ease-out motion-safe:hover:scale-[1.02] motion-safe:active:scale-[0.97] disabled:opacity-60 disabled:pointer-events-none"
+            class="pointer-events-auto flex flex-1 basis-0 flex-row items-center justify-center gap-3 rounded-2xl bg-emerald-950/60 border-2 border-emerald-500/50 hover:border-emerald-400 hover:bg-emerald-900/60 py-4 shadow-xl shadow-emerald-900/40 transition-[transform,box-shadow] duration-200 ease-out motion-safe:hover:scale-[1.02] motion-safe:active:scale-[0.97] disabled:opacity-60 disabled:pointer-events-none"
             phx-click="like_candidate"
             disabled={likes_reached_goal}
             aria-label="Like candidate"

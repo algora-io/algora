@@ -160,14 +160,14 @@ defmodule AlgoraWeb.HomeLive do
           phx-update="ignore"
           class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 opacity-100 translate-y-0"
         >
-          <Header.header class="container bg-black" />
+          <Header.header class="max-w-7xl w-full bg-black" />
         </div>
       <% end %>
 
       <main class="bg-black relative">
         <%!-- Hero section --%>
         <section :if={!@onboarding_started} class="min-h-screen flex flex-col">
-          <div class="flex-1 w-full container mx-auto px-6 lg:px-8 flex flex-col min-h-0">
+          <div class="flex-1 w-full max-w-7xl mx-auto px-6 lg:px-8 flex flex-col min-h-0">
             <div class="flex-1 flex flex-col items-start justify-center pt-20 lg:pt-24 2xl:pt-32 pb-4 w-full">
               <%!-- Hero copy (unchanged) --%>
               <h1 class="text-2xl min-[412px]:text-[1.75rem] sm:text-[2.5rem]/[3rem] md:text-[3.5rem]/[4rem] lg:text-[3rem]/[3.5rem] xl:text-[4rem]/[4.5rem] font-black tracking-tight text-foreground font-display">
@@ -297,7 +297,7 @@ defmodule AlgoraWeb.HomeLive do
         <% likes_reached_goal = onboarding_goal_reached?(@liked_ids) %>
         <% current_candidate = Enum.at(@candidates_data, @current_candidate_index) %>
         <section id="candidate-section" phx-hook="TinderSection" class="relative min-h-screen">
-          <div class="relative w-full container mx-auto px-6 lg:px-8 pb-0">
+          <div class="relative w-full max-w-7xl mx-auto px-6 lg:px-8 pb-0">
             <div class={[
               "min-h-screen pt-4 transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)] motion-reduce:transition-opacity motion-reduce:duration-500",
               if(@show_onboarding_form,

@@ -217,7 +217,7 @@ defmodule AlgoraWeb.HomeLive do
               <div class="w-full mt-4 sm:mt-8 grid grid-cols-1 gap-6 sm:gap-4 lg:grid-cols-3">
                 <%= for hire <- @hires do %>
                   <div
-                    class="relative h-full min-h-[22rem] sm:min-h-[30rem]"
+                    class="relative h-full min-h-[20rem] sm:min-h-[30rem]"
                     style={"--hire-theme: #{hire.theme_color}"}
                   >
                     <div
@@ -891,7 +891,7 @@ defmodule AlgoraWeb.HomeLive do
           "Within one week of onboarding, we started interviewing qualified candidates who joined CodeRabbit in San Francisco.",
         testimonial_author: "Sam Hayes · Talent Acquisition Lead",
         testimonial_logo: "/images/wordmarks/coderabbit.svg",
-        testimonial_logo_class: "h-8"
+        testimonial_logo_class: "h-7 md:h-8"
       },
       %{
         special: true,
@@ -915,7 +915,7 @@ defmodule AlgoraWeb.HomeLive do
         testimonial_html: true,
         testimonial_author: "Robin Huang · Co-Founder",
         testimonial_logo: "/images/wordmarks/comfy.svg",
-        testimonial_logo_class: "h-6"
+        testimonial_logo_class: "h-5 md:h-6"
       },
       %{
         special: true,
@@ -939,7 +939,7 @@ defmodule AlgoraWeb.HomeLive do
         testimonial_html: true,
         testimonial_author: "Ethan Ding · Co-Founder & CEO",
         testimonial_logo: "/images/wordmarks/textql.svg",
-        testimonial_logo_class: "h-5"
+        testimonial_logo_class: "h-4 md:h-5"
       }
     ]
   end
@@ -1027,7 +1027,7 @@ defmodule AlgoraWeb.HomeLive do
           current_org: match.job_posting.user,
           anonymize: false,
           base_anonymize: false,
-          screenshot?: true,
+          screenshot?: false,
           fullscreen?: false,
           current_user: nil,
           current_user_role: nil,

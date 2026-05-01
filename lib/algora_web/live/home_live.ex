@@ -187,7 +187,7 @@ defmodule AlgoraWeb.HomeLive do
           class="min-h-screen flex flex-col lg:min-h-0 lg:flex-1 lg:overflow-hidden"
         >
           <div class="flex-1 w-full max-w-6xl mx-auto px-6 lg:px-8 flex flex-col min-h-0">
-            <div class="flex-1 flex flex-col items-center justify-center lg:justify-start pb-4 w-full min-h-0 lg:overscroll-y-contain">
+            <div class="flex-1 flex flex-col lg:items-center justify-center lg:justify-start pb-4 w-full min-h-0 lg:overscroll-y-contain">
               <%!-- Hero copy (unchanged) --%>
               <h1 class="text-2xl min-[412px]:text-[1.75rem] sm:text-[2.5rem]/[3rem] md:text-[3.5rem]/[4rem] lg:text-[3rem]/[3.5rem] xl:text-[5rem]/[5.5rem] font-black tracking-tight text-foreground font-display">
                 Open source <br class="hidden" />

@@ -257,7 +257,7 @@ defmodule AlgoraWeb.HomeLive do
                           </div>
                         </div>
                         <blockquote class="text-sm font-medium text-white/90 leading-relaxed">
-                          "{hire.testimonial}"
+                          "{hire_testimonial_markup(hire)}"
                         </blockquote>
                         <div class="mt-2 flex items-center gap-2">
                           <span class="text-sm text-white/70 font-medium">
@@ -897,7 +897,8 @@ defmodule AlgoraWeb.HomeLive do
         raised: "$30M",
         valuation: "$500M",
         testimonial:
-          "To build AI for Hollywood, we need engineers with experience in creative media exactly like Matt. We're super happy to be working together.",
+          ~s(To build AI for Hollywood, we need engineers with experience in creative media exactly like <a href="https://www.linkedin.com/feed/update/urn:li:activity:7453498218417557504/" class="underline hover:text-white underline-offset-2" target="_blank" rel="noopener noreferrer">Matt</a>. We're super happy to be working together.),
+        testimonial_html: true,
         testimonial_author: "Robin Huang · Co-Founder",
         testimonial_logo: "/images/wordmarks/comfy.svg",
         testimonial_logo_class: "h-6"
@@ -917,13 +918,17 @@ defmodule AlgoraWeb.HomeLive do
         raised: "$17M",
         valuation: nil,
         testimonial:
-          "Our newest hire Christian spent 6 years at Google, taught at MIT and worked as a quant at Two Sigma. This is exactly the profile we asked.",
+          ~s(Our newest hire <a href="https://www.linkedin.com/posts/theethanding_trade-alert-textql-has-signed-former-activity-7434276471830904832-fGHZ?utm_source=share&utm_medium=member_desktop&rcm=ACoAAB4_M5IB8eXlIdyyQIJr1-gfNJj8jwIuXoQ" class="underline hover:text-white underline-offset-2" target="_blank" rel="noopener noreferrer">Christian</a> spent 6 years at Google, taught at MIT and worked as a quant at Two Sigma. This is exactly the profile we asked.),
+        testimonial_html: true,
         testimonial_author: "Ethan Ding · Co-Founder & CEO",
         testimonial_logo: "/images/wordmarks/textql.svg",
         testimonial_logo_class: "h-5"
       }
     ]
   end
+
+  defp hire_testimonial_markup(%{testimonial_html: true} = hire), do: Phoenix.HTML.raw(hire.testimonial)
+  defp hire_testimonial_markup(hire), do: hire.testimonial
 
   defp assign_events(socket) do
     transactions = Payments.list_featured_transactions()

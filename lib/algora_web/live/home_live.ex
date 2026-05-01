@@ -13,6 +13,7 @@ defmodule AlgoraWeb.HomeLive do
   alias Algora.Matches.JobMatch
   alias Algora.Payments
   alias Algora.PSP.ConnectCountries
+  alias Algora.Settings
   alias AlgoraWeb.Components.Footer
   alias AlgoraWeb.Components.Header
   alias AlgoraWeb.Data.HomeCache
@@ -66,15 +67,9 @@ defmodule AlgoraWeb.HomeLive do
     jobs_by_user = HomeCache.get_jobs_by_user()
     orgs_with_stats = HomeCache.get_orgs_with_stats()
 
-    # Load candidate data
-    candidate_ids = [
-      "h5afQBNkRKZc1y2d",
-      "qsQa7KN3Cq4PwGWG",
-      "Y5JrLmNRvL7o3Bes",
-      "EPYrDRS1ojkjqL9w",
-      "Y1LQ896AbtT9Wjj1",
-      "1ErYxMGNt6zTfjKS"
-    ]
+    # Load candidate data (override via Settings.home_carousel_candidates)
+    candidate_ids =
+      Settings.get_home_carousel_candidate_ids()
 
     candidates_data =
       candidate_ids
@@ -192,7 +187,7 @@ defmodule AlgoraWeb.HomeLive do
           class="min-h-screen flex flex-col lg:min-h-0 lg:flex-1 lg:overflow-hidden"
         >
           <div class="flex-1 w-full max-w-7xl mx-auto px-6 lg:px-8 flex flex-col min-h-0">
-            <div class="flex-1 flex flex-col items-start justify-center lg:justify-start pt-6 lg:pt-8 2xl:pt-10 pb-4 w-full min-h-0 lg:overflow-y-auto lg:overscroll-y-contain">
+            <div class="flex-1 flex flex-col items-start justify-center lg:justify-start pt-6 lg:pt-8 2xl:pt-10 pb-4 w-full min-h-0 lg:overscroll-y-contain">
               <%!-- Hero copy (unchanged) --%>
               <h1 class="text-2xl min-[412px]:text-[1.75rem] sm:text-[2.5rem]/[3rem] md:text-[3.5rem]/[4rem] lg:text-[3rem]/[3.5rem] xl:text-[4rem]/[4.5rem] font-black tracking-tight text-foreground font-display">
                 Open source <br class="hidden" />

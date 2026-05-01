@@ -125,11 +125,30 @@ module.exports = {
           "0%": { transform: "rotate(0deg) scale(10)" },
           "100%": { transform: "rotate(-360deg) scale(10)" },
         },
+        "onboarding-line-in": {
+          from: { opacity: "0", transform: "translateY(12px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+        "onboarding-success-icon": {
+          "0%": { opacity: "0", transform: "scale(0.5)" },
+          "65%": { opacity: "1", transform: "scale(1.1)" },
+          "100%": { opacity: "1", transform: "scale(1)" },
+        },
+        "onboarding-orb-breathe": {
+          "0%, 100%": { opacity: "0.72" },
+          "50%": { opacity: "1" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         rotate: "rotate 10s linear infinite",
+        "onboarding-line-in":
+          "onboarding-line-in 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both",
+        "onboarding-success-icon":
+          "onboarding-success-icon 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) both",
+        "onboarding-orb-breathe":
+          "onboarding-orb-breathe 5s ease-in-out infinite",
       },
       typography: {
         DEFAULT: {

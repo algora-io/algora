@@ -297,8 +297,12 @@ defmodule AlgoraWeb.HomeLive do
         <section id="candidate-section" phx-hook="TinderSection" class="relative min-h-screen">
           <div class="relative px-4 sm:px-6 pb-0">
             <div class={[
-              "transition-opacity duration-700 min-h-screen pt-4",
-              if(@show_onboarding_form, do: "opacity-0 pointer-events-none", else: "opacity-100")
+              "min-h-screen pt-4 transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)] motion-reduce:transition-opacity motion-reduce:duration-500",
+              if(@show_onboarding_form,
+                do:
+                  "opacity-0 pointer-events-none motion-safe:translate-y-3 motion-safe:scale-[0.96] motion-reduce:translate-y-0 motion-reduce:scale-100",
+                else: "opacity-100 translate-y-0 scale-100"
+              )
             ]}>
               <%= if current_candidate do %>
                 <Algora.Cloud.candidate_card {Map.merge(current_candidate, %{
@@ -319,11 +323,11 @@ defmodule AlgoraWeb.HomeLive do
             <div
               :if={likes_reached_goal}
               class={[
-                "onboarding-form-overlay-scroll absolute inset-0 flex items-start justify-center overflow-y-auto transition-opacity duration-700",
+                "onboarding-form-overlay-scroll absolute inset-0 flex justify-center overflow-y-auto transition-opacity duration-700 ease-out",
+                if(@onboarding_form_submitted, do: "items-center", else: "items-start"),
                 if(@show_onboarding_form, do: "opacity-100", else: "opacity-0 pointer-events-none")
               ]}
             >
-              <%!-- Full-bleed dot grid + ambient orbs (LimboLive-style) --%>
               <div
                 class="pointer-events-none absolute inset-0 z-50 overflow-hidden"
                 aria-hidden="true"
@@ -333,34 +337,53 @@ defmodule AlgoraWeb.HomeLive do
                   style="background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 28px 28px;"
                 >
                 </div>
-                <div class="absolute top-1/2 left-1/2 h-[min(180%,56rem)] w-[min(180%,56rem)] -translate-y-1/2 rounded-full bg-[#1ebba2]/5 blur-[100px]">
+                <div class="motion-safe:animate-onboarding-orb-breathe absolute top-1/2 left-1/2 h-[min(180%,56rem)] w-[min(180%,56rem)] -translate-y-1/2 rounded-full bg-[#1ebba2]/10 blur-[100px] motion-reduce:animate-none">
+                </div>
+                <div class="motion-safe:animate-onboarding-orb-breathe absolute top-1/2 right-1/2 h-[min(180%,56rem)] w-[min(180%,56rem)] -translate-y-1/2 rounded-full bg-[#1ebba2]/10 blur-[100px] motion-reduce:animate-none">
                 </div>
               </div>
-              <div class="relative z-10 w-full max-w-3xl text-card-foreground px-4 sm:px-6 pt-4 pb-0">
+              <div class={[
+                "relative z-10 w-full max-w-3xl text-card-foreground px-4 sm:px-6 pt-4 pb-0 transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)] motion-reduce:transition-opacity motion-reduce:duration-300",
+                if(@show_onboarding_form,
+                  do: "opacity-100 motion-safe:translate-y-0 motion-safe:scale-100",
+                  else:
+                    "opacity-0 motion-safe:translate-y-6 motion-safe:scale-[0.97] motion-reduce:translate-y-0 motion-reduce:scale-100"
+                )
+              ]}>
                 <%= if @onboarding_form_submitted do %>
-                  <div class="flex flex-col items-center text-center py-8 sm:py-12 pb-24 sm:pb-32">
-                    <div class="flex size-16 sm:size-20 items-center justify-center rounded-full bg-emerald-500/15 ring-2 ring-emerald-500/40 mb-6">
-                      <.icon name="tabler-mail-check" class="size-9 sm:size-11 text-emerald-400" />
+                  <div class="relative flex w-full flex-col items-center justify-center text-center py-12 sm:py-16">
+                    <div class="home-onboarding-sparks z-0" aria-hidden="true">
+                      <span />
+                      <span />
+                      <span />
+                      <span />
+                      <span />
+                      <span />
+                      <span />
+                      <span />
                     </div>
-                    <h2 class="text-2xl sm:text-3xl font-semibold leading-tight tracking-tight text-foreground">
+                    <div class="relative z-10 flex size-16 sm:size-20 items-center justify-center rounded-full bg-emerald-500/15 ring-2 ring-emerald-500/40 mb-6 motion-safe:animate-onboarding-success-icon motion-reduce:animate-none">
+                      <.icon name="tabler-check" class="size-9 sm:size-11 text-emerald-400" />
+                    </div>
+                    <h2 class="relative z-10 text-2xl sm:text-3xl font-semibold leading-tight tracking-tight text-foreground motion-safe:animate-onboarding-line-in motion-safe:delay-100 motion-reduce:animate-none">
                       You're all set
                     </h2>
-                    <p class="mt-4 max-w-md text-base text-muted-foreground leading-relaxed">
-                      Thanks for reaching out. We'll review your details and get in touch soon.
+                    <p class="relative z-10 mt-2 max-w-md text-base text-muted-foreground leading-relaxed motion-safe:animate-onboarding-line-in motion-safe:delay-200 motion-reduce:animate-none">
+                      Thanks for reaching out, we'll get in touch soon!
                     </p>
                   </div>
                 <% else %>
-                  <h2 class="text-2xl sm:text-3xl font-semibold leading-tight tracking-tight text-foreground">
+                  <h2 class="text-2xl sm:text-3xl font-semibold leading-tight tracking-tight text-foreground motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 motion-safe:duration-500">
                     Get your top candidates
                   </h2>
-                  <p class="mt-3 text-base text-muted-foreground">
+                  <p class="mt-3 text-base text-muted-foreground motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-3 motion-safe:duration-500 motion-safe:delay-75">
                     You'll hear back from the Algora founders
                   </p>
                   <.form
                     for={@form}
                     id="onboarding-candidates-form"
                     phx-submit="submit"
-                    class="mt-8 flex flex-col gap-8"
+                    class="mt-8 flex flex-col gap-8 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-3 motion-safe:duration-500 motion-safe:delay-150"
                   >
                     <%!--
                       <div class="space-y-3">
@@ -376,7 +399,7 @@ defmodule AlgoraWeb.HomeLive do
                       </div>
                       --%>
                     <input type="hidden" name={@form[:tech_stack].name} value="[]" />
-                    <div>
+                    <div class="motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-500 motion-safe:delay-200">
                       <label
                         for={@form[:job_description].id}
                         class="block text-base sm:text-xl font-semibold leading-snug text-foreground mb-2"
@@ -385,12 +408,11 @@ defmodule AlgoraWeb.HomeLive do
                       </label>
                       <.input
                         field={@form[:job_description]}
-                        type="url"
                         class="px-3 py-3 !text-base sm:!leading-7"
                         placeholder="https://company.com/careers"
                       />
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 gap-y-8">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 gap-y-8 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-500 motion-safe:delay-[260ms]">
                       <div>
                         <label
                           for={@form[:comp_range].id}
@@ -420,7 +442,7 @@ defmodule AlgoraWeb.HomeLive do
                         />
                       </div>
                     </div>
-                    <div>
+                    <div class="motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-500 motion-safe:delay-[320ms]">
                       <label
                         for={@form[:email].id}
                         class="block text-base sm:text-xl font-semibold leading-snug text-foreground mb-2"
@@ -429,21 +451,22 @@ defmodule AlgoraWeb.HomeLive do
                       </label>
                       <.input
                         field={@form[:email]}
-                        type="email"
                         placeholder="you@company.com"
                         class="px-3 py-3 !text-base sm:!leading-7"
                       />
                     </div>
-                    <div class="grid grid-cols-3 gap-4 sm:gap-8">
+                    <%!-- <div class="grid grid-cols-3 gap-4 sm:gap-8 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-500 motion-safe:delay-[380ms]">
                       <%= for stat <- @stats1 do %>
                         <div>
                           <div class="text-2xl sm:text-3xl font-bold font-display text-foreground">
                             {stat.value}
                           </div>
-                          <div class="text-xs sm:text-sm text-muted-foreground mt-1">{stat.label}</div>
+                          <div class="text-xs sm:text-sm text-muted-foreground mt-1">
+                            {stat.label}
+                          </div>
                         </div>
                       <% end %>
-                    </div>
+                    </div> --%>
                   </.form>
                 <% end %>
               </div>
@@ -463,7 +486,7 @@ defmodule AlgoraWeb.HomeLive do
         class="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-center gap-3 px-4 sm:px-6 pb-6 sm:pb-8 pt-5 bg-gradient-to-t from-black via-black/80 to-transparent opacity-0 transition-opacity duration-500 pointer-events-none"
       >
         <button
-          class="pointer-events-auto flex-1 max-w-56 flex flex-col items-center justify-center gap-2 py-4 rounded-2xl bg-red-950/60 border-2 border-red-500/50 hover:border-red-400 hover:bg-red-900/60 shadow-xl shadow-red-900/40 transition-all active:scale-95"
+          class="pointer-events-auto flex-1 max-w-56 flex flex-col items-center justify-center gap-2 py-4 rounded-2xl bg-red-950/60 border-2 border-red-500/50 hover:border-red-400 hover:bg-red-900/60 shadow-xl shadow-red-900/40 transition-[transform,box-shadow] duration-200 ease-out motion-safe:hover:scale-[1.02] motion-safe:active:scale-[0.97] disabled:opacity-60 disabled:pointer-events-none"
           phx-click="dislike_candidate"
           disabled={likes_reached_goal}
           aria-label="Skip candidate"
@@ -472,7 +495,7 @@ defmodule AlgoraWeb.HomeLive do
           <span class="text-sm font-semibold text-red-400 tracking-wide">Skip</span>
         </button>
         <button
-          class="pointer-events-auto flex-1 max-w-56 flex flex-col items-center justify-center gap-2 py-4 rounded-2xl bg-emerald-950/60 border-2 border-emerald-500/50 hover:border-emerald-400 hover:bg-emerald-900/60 shadow-xl shadow-emerald-900/40 transition-all active:scale-95"
+          class="pointer-events-auto flex-1 max-w-56 flex flex-col items-center justify-center gap-2 py-4 rounded-2xl bg-emerald-950/60 border-2 border-emerald-500/50 hover:border-emerald-400 hover:bg-emerald-900/60 shadow-xl shadow-emerald-900/40 transition-[transform,box-shadow] duration-200 ease-out motion-safe:hover:scale-[1.02] motion-safe:active:scale-[0.97] disabled:opacity-60 disabled:pointer-events-none"
           phx-click="like_candidate"
           disabled={likes_reached_goal}
           aria-label="Like candidate"
@@ -537,7 +560,7 @@ defmodule AlgoraWeb.HomeLive do
         <button
           type="submit"
           form="onboarding-candidates-form"
-          class="pointer-events-auto w-full flex flex-row items-center justify-center gap-2 sm:gap-3 py-4 rounded-2xl bg-emerald-950/60 border-2 border-emerald-500/50 hover:border-emerald-400 hover:bg-emerald-900/60 shadow-xl shadow-emerald-900/40 transition-all active:scale-95"
+          class="pointer-events-auto w-full flex flex-row items-center justify-center gap-2 sm:gap-3 py-4 rounded-2xl bg-emerald-950/60 border-2 border-emerald-500/50 hover:border-emerald-400 hover:bg-emerald-900/60 shadow-xl shadow-emerald-900/40 transition-[transform,box-shadow] duration-200 ease-out motion-safe:hover:scale-[1.02] motion-safe:active:scale-[0.97]"
         >
           <.icon name="tabler-send" class="size-6 shrink-0 text-emerald-400 sm:size-7" />
           <span class="text-base font-semibold text-emerald-400 tracking-wide sm:text-lg">
@@ -624,7 +647,7 @@ defmodule AlgoraWeb.HomeLive do
         {:noreply, socket}
 
       likes_reached_goal ->
-        Process.send_after(self(), :show_onboarding_form, 300)
+        Process.send_after(self(), :show_onboarding_form, 450)
         {:noreply, assign(socket, :transitioning_to_onboarding_form, true)}
 
       true ->

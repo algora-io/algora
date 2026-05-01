@@ -1089,6 +1089,9 @@ const Hooks = {
 
       this.syncHeartProgress();
       this.pumpHeart();
+      if (nextLikeCount >= likeGoal) {
+        this.celebrateGoal();
+      }
       this.previousLikeCount = nextLikeCount;
 
       // Guard against malformed goal values while keeping UI responsive.
@@ -1127,6 +1130,15 @@ const Hooks = {
       void heart.offsetWidth;
       heart.classList.add("is-pumping");
       setTimeout(() => heart.classList.remove("is-pumping"), 320);
+    },
+    celebrateGoal() {
+      const wrap = this.el.querySelector(".onboarding-heart-wrap");
+      if (!(wrap instanceof HTMLElement)) return;
+
+      wrap.classList.remove("is-goal-celebrate");
+      void wrap.offsetWidth;
+      wrap.classList.add("is-goal-celebrate");
+      setTimeout(() => wrap.classList.remove("is-goal-celebrate"), 920);
     },
   },
 } satisfies Record<string, Partial<ViewHook> & Record<string, unknown>>;

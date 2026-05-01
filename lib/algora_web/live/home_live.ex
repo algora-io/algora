@@ -191,15 +191,30 @@ defmodule AlgoraWeb.HomeLive do
             </div>
             --%>
               <%!-- Hires: testimonial cards then metrics --%>
-              <div class="w-full space-y-6 sm:space-y-8 mt-10 sm:mt-14">
+              <div class="w-full mt-10 sm:mt-14 grid grid-cols-1 gap-6 sm:gap-8 lg:grid-cols-3">
                 <%= for hire <- @hires do %>
-                  <div class="relative">
-                    <div class="relative overflow-hidden rounded-xl border-2 border-white/30 shadow-xl shadow-white/10 bg-black">
+                  <div class="relative h-full min-h-[22rem]">
+                    <div
+                      class="relative h-full overflow-hidden rounded-xl border-2 border-white/30 shadow-xl shadow-white/10"
+                      style={"background-color: #{hire.overlay_color}"}
+                    >
                       <img
                         src={hire.bg_image}
                         alt=""
-                        class="absolute inset-0 size-full object-cover object-top grayscale"
+                        class={
+                          [
+                            "absolute pt-12 inset-0 size-full object-cover grayscale",
+                            if(hire.company_name == "CodeRabbit", do: "object-top", else: "object-center")
+                          ]
+                        }
                       />
+                      <div class="absolute inset-x-0 h-9 top-12 bg-gradient-to-t from-transparent to-black">
+                      </div>
+                      <div
+                        class="absolute inset-x-0 h-9 top-12 bg-gradient-to-t from-transparent to-black"
+                        style={"--tw-gradient-to: #{hire.overlay_color}"}
+                      >
+                      </div>
                       <div
                         class="absolute inset-0 mix-blend-multiply"
                         style={"background-color: #{hire.overlay_color}"}
@@ -207,7 +222,7 @@ defmodule AlgoraWeb.HomeLive do
                       </div>
                       <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/30">
                       </div>
-                      <div class="relative p-4 sm:p-5 min-h-[14rem] flex flex-col justify-center">
+                      <div class="relative h-full p-4 sm:p-5 min-h-[14rem] flex flex-col justify-center">
                         <div class="flex items-center gap-3 mb-3">
                           <img
                             src={hire.person_avatar}
@@ -222,7 +237,7 @@ defmodule AlgoraWeb.HomeLive do
                           />
                           <div class="min-w-0">
                             <div class="text-sm font-semibold text-white/90 truncate">
-                              {hire.person_name} → {hire.company_name}
+                              {hire.person_name}
                             </div>
                             <div class="text-xs text-white/80">{hire.person_title}</div>
                           </div>
@@ -235,7 +250,8 @@ defmodule AlgoraWeb.HomeLive do
                             {hire.testimonial_author}
                           </span>
                         </div>
-                        <div class="mt-3 pt-3 border-t border-white/10 space-y-3">
+                        <div class="mt-3"></div>
+                        <div class="mt-auto pt-3 border-t border-white/10 space-y-3">
                           <div class="flex items-center gap-2">
                             <img
                               src={hire.testimonial_logo}
@@ -485,11 +501,11 @@ defmodule AlgoraWeb.HomeLive do
         phx-update="ignore"
         data-like-count={onboarding_likes(@liked_ids)}
         data-like-goal={onboarding_likes_goal()}
-        class="fixed bottom-0 left-0 right-0 z-40 px-6 lg:px-8 pb-6 sm:pb-8 pt-5 opacity-0 transition-opacity duration-500 pointer-events-none"
+        class="fixed bottom-0 left-0 right-0 z-40 px-6 lg:px-8 pb-6 sm:pb-8 pt-5 bg-gradient-to-t from-black via-black/80 to-transparent opacity-0 transition-opacity duration-500 pointer-events-none"
       >
-        <div class="flex gap-3">
+        <div class="mx-auto flex w-full max-w-7xl gap-3 sm:gap-4 px-6 lg:px-8">
           <button
-            class="pointer-events-auto flex-1 max-w-56 flex flex-col items-center justify-center gap-2 py-4 rounded-2xl bg-red-950/60 border-2 border-red-500/50 hover:border-red-400 hover:bg-red-900/60 shadow-xl shadow-red-900/40 transition-[transform,box-shadow] duration-200 ease-out motion-safe:hover:scale-[1.02] motion-safe:active:scale-[0.97] disabled:opacity-60 disabled:pointer-events-none"
+            class="pointer-events-auto flex flex-1 basis-0 flex-col items-center justify-center gap-2 rounded-2xl bg-red-950/60 border-2 border-red-500/50 hover:border-red-400 hover:bg-red-900/60 py-4 shadow-xl shadow-red-900/40 transition-[transform,box-shadow] duration-200 ease-out motion-safe:hover:scale-[1.02] motion-safe:active:scale-[0.97] disabled:opacity-60 disabled:pointer-events-none"
             phx-click="dislike_candidate"
             disabled={likes_reached_goal}
             aria-label="Skip candidate"
@@ -498,7 +514,7 @@ defmodule AlgoraWeb.HomeLive do
             <span class="text-sm font-semibold text-red-400 tracking-wide">Skip</span>
           </button>
           <button
-            class="pointer-events-auto flex-1 max-w-56 flex flex-col items-center justify-center gap-2 py-4 rounded-2xl bg-emerald-950/60 border-2 border-emerald-500/50 hover:border-emerald-400 hover:bg-emerald-900/60 shadow-xl shadow-emerald-900/40 transition-[transform,box-shadow] duration-200 ease-out motion-safe:hover:scale-[1.02] motion-safe:active:scale-[0.97] disabled:opacity-60 disabled:pointer-events-none"
+            class="pointer-events-auto flex flex-1 basis-0 flex-col items-center justify-center gap-2 rounded-2xl bg-emerald-950/60 border-2 border-emerald-500/50 hover:border-emerald-400 hover:bg-emerald-900/60 py-4 shadow-xl shadow-emerald-900/40 transition-[transform,box-shadow] duration-200 ease-out motion-safe:hover:scale-[1.02] motion-safe:active:scale-[0.97] disabled:opacity-60 disabled:pointer-events-none"
             phx-click="like_candidate"
             disabled={likes_reached_goal}
             aria-label="Like candidate"
@@ -564,13 +580,13 @@ defmodule AlgoraWeb.HomeLive do
       <div
         :if={@show_onboarding_form && !@onboarding_form_submitted}
         id="onboarding-form-submit-dock"
-        class="fixed bottom-0 left-0 right-0 z-40 px-6 lg:px-8 pb-6 sm:pb-8 pt-5 pointer-events-none"
+        class="fixed bottom-0 left-0 right-0 z-40 px-6 lg:px-8 pb-6 sm:pb-8 pt-5 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none"
       >
-        <div class="flex items-stretch justify-center">
+        <div class="mx-auto flex w-full max-w-7xl items-stretch justify-center">
           <button
             type="submit"
             form="onboarding-candidates-form"
-            class="pointer-events-auto w-full flex flex-row items-center justify-center gap-2 sm:gap-3 py-4 rounded-2xl bg-emerald-950/60 border-2 border-emerald-500/50 hover:border-emerald-400 hover:bg-emerald-900/60 shadow-xl shadow-emerald-900/40 transition-[transform,box-shadow] duration-200 ease-out motion-safe:hover:scale-[1.02] motion-safe:active:scale-[0.97]"
+            class="pointer-events-auto flex w-full flex-row items-center justify-center gap-2 rounded-2xl bg-emerald-950/60 border-2 border-emerald-500/50 hover:border-emerald-400 hover:bg-emerald-900/60 py-4 shadow-xl shadow-emerald-900/40 transition-[transform,box-shadow] duration-200 ease-out motion-safe:hover:scale-[1.02] motion-safe:active:scale-[0.97] sm:gap-3"
           >
             <.icon name="tabler-send" class="size-6 shrink-0 text-emerald-400 sm:size-7" />
             <span class="text-base font-semibold text-emerald-400 tracking-wide sm:text-lg">
@@ -840,7 +856,7 @@ defmodule AlgoraWeb.HomeLive do
         special: true,
         company_name: "CodeRabbit",
         company_avatar: "https://avatars.githubusercontent.com/u/132028505?s=200&v=4",
-        person_name: "Erfan",
+        person_name: "Erfan Al-Hossami",
         person_avatar: "https://algora.io/storage/avatars/taisazero.jpeg",
         person_title: "Applied AI Engineer",
         bg_image: "https://algora.io/storage/avatars/coderabbit/sam-hayes-85a0ba25.jpg",
@@ -859,7 +875,7 @@ defmodule AlgoraWeb.HomeLive do
         special: true,
         company_name: "ComfyUI",
         company_avatar: "https://avatars.githubusercontent.com/u/166579949?v=4",
-        person_name: "Matt",
+        person_name: "Matt Miller",
         person_avatar: "https://algora.io/storage/avatars/MillerMedia.jpeg",
         person_title: "Backend Engineer",
         bg_image: "https://pbs.twimg.com/profile_images/1987431529296109574/37rh5jdP_400x400.jpg",
@@ -878,7 +894,7 @@ defmodule AlgoraWeb.HomeLive do
         special: true,
         company_name: "TextQL",
         company_avatar: "https://algora.io/storage/avatars/textql.jpeg",
-        person_name: "Christian",
+        person_name: "Christian Lim",
         person_avatar: "https://avatars.githubusercontent.com/u/2482353?v=4",
         person_title: "Member of Technical Staff",
         bg_image:

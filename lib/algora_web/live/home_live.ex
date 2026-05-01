@@ -367,7 +367,7 @@ defmodule AlgoraWeb.HomeLive do
               ]}
             >
               <div class={[
-                "relative z-10 w-full text-card-foreground px-4 sm:px-6 pt-4 sm:pt-8 pb-0 transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)] motion-reduce:transition-opacity motion-reduce:duration-300",
+                "relative z-10 w-full text-card-foreground px-6 lg:px-8 pt-4 sm:pt-8 pb-0 transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)] motion-reduce:transition-opacity motion-reduce:duration-300",
                 if(present_onboarding_form_ui?,
                   do: "opacity-100 motion-safe:translate-y-0 motion-safe:scale-100",
                   else:
@@ -507,9 +507,9 @@ defmodule AlgoraWeb.HomeLive do
         phx-update="ignore"
         data-like-count={onboarding_likes(@liked_ids)}
         data-like-goal={onboarding_likes_goal()}
-        class="fixed bottom-0 left-0 right-0 z-40 px-6 lg:px-8 pb-6 sm:pb-8 pt-5 bg-gradient-to-t from-black via-black/80 to-transparent opacity-0 transition-opacity duration-500 pointer-events-none"
+        class="fixed bottom-0 left-0 right-0 z-40 pb-6 sm:pb-8 pt-5 bg-gradient-to-t from-black via-black/80 to-transparent opacity-0 transition-opacity duration-500 pointer-events-none"
       >
-        <div class="mx-auto flex w-full max-w-6xl gap-3 sm:gap-4">
+        <div class="mx-auto flex w-full max-w-6xl gap-3 sm:gap-4 px-6 lg:px-8">
           <button
             class="pointer-events-auto flex flex-1 basis-0 flex-row items-center justify-center gap-2 rounded-2xl bg-red-950/60 border-2 border-red-500/50 hover:border-red-400 hover:bg-red-900/60 py-4 shadow-xl shadow-red-900/40 transition-[transform,box-shadow] duration-200 ease-out motion-safe:hover:scale-[1.02] motion-safe:active:scale-[0.97] disabled:opacity-60 disabled:pointer-events-none"
             phx-click="dislike_candidate"
@@ -586,9 +586,9 @@ defmodule AlgoraWeb.HomeLive do
       <div
         :if={present_onboarding_form_ui? && !@onboarding_form_submitted}
         id="onboarding-form-submit-dock"
-        class="fixed bottom-0 left-0 right-0 z-40 px-6 lg:px-8 pb-6 sm:pb-8 pt-5 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none"
+        class="fixed bottom-0 left-0 right-0 z-40 pb-6 sm:pb-8 pt-5 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none"
       >
-        <div class="mx-auto flex w-full max-w-6xl gap-3 sm:gap-4 items-stretch justify-center">
+        <div class="mx-auto flex w-full max-w-6xl gap-3 sm:gap-4 px-6 lg:px-8 items-stretch justify-center">
           <button
             type="submit"
             form="onboarding-candidates-form"

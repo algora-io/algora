@@ -305,7 +305,9 @@ defmodule AlgoraWeb.HomeLive do
                     </div>
                     <.badge
                       variant="secondary"
-                      class="absolute -top-2 -left-2 text-xs px-2 sm:px-3 py-0.5 font-semibold shadow-lg border-2 border-[color:var(--hire-theme)] text-white/80 !bg-[color-mix(in_srgb,var(--hire-theme)_26%,black)]"
+                      style="background-color: color-mix(in srgb, var(--hire-theme) 10%, rgba(0, 0, 0, 100%))"
+                      +
+                      class="absolute -top-2 -left-2 text-xs px-2 sm:px-3 py-0.5 font-semibold shadow-lg border-2 border-[var(--hire-theme)] text-white/80"
                     >
                       <.icon
                         name="tabler-star-filled"

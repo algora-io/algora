@@ -1211,6 +1211,29 @@ const Hooks = {
           return;
         }
 
+        /* Like: update heart immediately so fill/pump are not gated on exitMs + round-trip. */
+        if (action === "like") {
+          const likeGoal = Number(this.el.getAttribute("data-like-goal") || "3");
+          const goal = Number.isNaN(likeGoal) || likeGoal <= 0 ? 3 : likeGoal;
+          const fromAttr = Number(this.el.getAttribute("data-like-count") || "0");
+          const prevTracked = this.previousLikeCount as number;
+          const base = Number.isNaN(fromAttr) ? 0 : fromAttr;
+          const tracked = Number.isNaN(prevTracked) ? 0 : prevTracked;
+          const cur = Math.max(base, tracked);
+          const next = Math.min(cur + 1, goal);
+          const fillPct = Math.trunc((next / goal) * 100);
+          const curveBottomPx = Math.max(-10, Math.trunc(fillPct * 0.24) - 10);
+          const tank = this.el.querySelector(".onboarding-heart-tank");
+          const curve = this.el.querySelector(".onboarding-heart-curve");
+          if (tank instanceof HTMLElement) tank.style.height = `${fillPct}%`;
+          if (curve instanceof HTMLElement) curve.style.bottom = `${curveBottomPx}px`;
+          this.pumpHeart();
+          this.previousLikeCount = next;
+          if (next >= goal) {
+            this.celebrateGoal();
+          }
+        }
+
         hook.swipeLock = true;
         hook.syncSwipeDisabled?.();
 

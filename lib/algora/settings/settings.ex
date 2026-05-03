@@ -292,6 +292,17 @@ defmodule Algora.Settings do
     set("featured_transactions", %{"ids" => ids})
   end
 
+  def get_home_carousel_candidate_ids do
+    case get("home_carousel_candidates") do
+      %{"ids" => ids} when is_list(ids) -> ids
+      _ -> nil
+    end
+  end
+
+  def set_home_carousel_candidate_ids(ids) when is_list(ids) do
+    set("home_carousel_candidates", %{"ids" => ids})
+  end
+
   def get_wire_details do
     case get("wire_details") do
       %{"details" => details} when is_map(details) -> details

@@ -105,7 +105,8 @@ defmodule AlgoraWeb.Router do
       live "/user/installations", User.InstallationsLive, :index
     end
 
-    live_session :home, on_mount: [{AlgoraWeb.UserAuth, :current_user}] do
+    live_session :home,
+      on_mount: [{AlgoraWeb.Analytics, :current_country}, {AlgoraWeb.UserAuth, :current_user}] do
       live "/", HomeLive
     end
 

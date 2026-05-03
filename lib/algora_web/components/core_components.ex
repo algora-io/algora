@@ -1304,6 +1304,9 @@ defmodule AlgoraWeb.CoreComponents do
     """
   end
 
+  attr :class, :string, default: nil
+  attr :data, :any, required: true
+
   defp link?(assigns) do
     Enum.any?([assigns[:href], assigns[:navigate], assigns[:patch]])
   end

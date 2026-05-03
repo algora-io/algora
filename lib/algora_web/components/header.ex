@@ -14,10 +14,11 @@ defmodule AlgoraWeb.Components.Header do
 
   attr :class, :string, default: nil
   attr :hide_banner, :boolean, default: false
+  attr :overlay, :boolean, default: true
 
   def header(assigns) do
     ~H"""
-    <header class="absolute inset-x-0 top-0 z-50">
+    <header class={if(@overlay, do: "absolute inset-x-0 top-0 z-50", else: "relative z-50 w-full")}>
       <%!-- <%= if !@hide_banner do %>
         <AlgoraWeb.Components.Banner.banner />
       <% end %> --%>
@@ -46,7 +47,7 @@ defmodule AlgoraWeb.Components.Header do
           </button>
         </div>
         <!-- Desktop nav -->
-        <div class="hidden lg:flex-1 lg:flex lg:justify-center gap-2 mx-auto">
+        <div :if={nav_links() != []} class="hidden lg:flex-1 lg:flex lg:justify-center gap-2 mx-auto">
           <%= for link <- nav_links() do %>
             <.button
               navigate={link.path}
@@ -60,7 +61,7 @@ defmodule AlgoraWeb.Components.Header do
 
         <div class="w-full hidden lg:flex-1 lg:flex lg:justify-end gap-4">
           <.link
-            class="hidden xl:flex items-center justify-center text-sm text-foreground/80 hover:text-foreground"
+            class="flex items-center justify-center text-sm text-foreground/80 hover:text-foreground"
             href="tel:+16504202207"
           >
             <.icon name="tabler-phone" class="size-5 shrink-0" />
@@ -176,12 +177,201 @@ defmodule AlgoraWeb.Components.Header do
                     <.icon name="tabler-star-filled" class="h-3 w-3 shrink-0" />
                   </span>
                 </.button>
-                <.button navigate={~p"/auth/signup"} class="w-full">
-                  Sign up
-                </.button>
-                <.button navigate={~p"/auth/login"} class="w-full" variant="secondary">
+                <.button navigate={~p"/auth/login"} class="w-full">
                   Sign in
                 </.button>
+              </div>
+              <div class="py-6 space-y-8">
+                <div>
+                  <h3 class="text-xs font-semibold uppercase tracking-wider text-foreground">
+                    Recruiting
+                  </h3>
+                  <ul role="list" class="mt-4 space-y-3">
+                    <li>
+                      <.link
+                        class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        href="/coderabbit/jobs"
+                        target="_blank"
+                      >
+                        CodeRabbit
+                      </.link>
+                    </li>
+                    <li>
+                      <.link
+                        class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        href="/lovable/jobs"
+                        target="_blank"
+                      >
+                        Lovable
+                      </.link>
+                    </li>
+                    <li>
+                      <.link
+                        class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        href="/comfy/jobs"
+                        target="_blank"
+                      >
+                        ComfyUI
+                      </.link>
+                    </li>
+                    <li>
+                      <.link
+                        class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        href="/firecrawl/jobs"
+                        target="_blank"
+                      >
+                        Firecrawl (YC S22)
+                      </.link>
+                    </li>
+                    <li>
+                      <.link
+                        class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        href="/airspace-intelligence/jobs"
+                        target="_blank"
+                      >
+                        Air Space Intelligence
+                      </.link>
+                    </li>
+                    <li>
+                      <.link
+                        class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        href="/textql/jobs"
+                        target="_blank"
+                      >
+                        TextQL
+                      </.link>
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 class="text-xs font-semibold uppercase tracking-wider text-foreground">
+                    Bounties
+                  </h3>
+                  <ul role="list" class="mt-4 space-y-3">
+                    <li>
+                      <.link
+                        class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        navigate={~p"/challenges/turso"}
+                      >
+                        Turso
+                      </.link>
+                    </li>
+                    <li>
+                      <.link
+                        class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        navigate={~p"/challenges/golem"}
+                      >
+                        Golem Cloud
+                      </.link>
+                    </li>
+                    <li>
+                      <.link
+                        class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        navigate={~p"/challenges/tsperf"}
+                      >
+                        TSPerf
+                      </.link>
+                    </li>
+                    <li>
+                      <.link
+                        class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        navigate={~p"/challenges/prettier"}
+                      >
+                        Prettier
+                      </.link>
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 class="text-xs font-semibold uppercase tracking-wider text-foreground">
+                    Community
+                  </h3>
+                  <ul role="list" class="mt-4 space-y-3">
+                    <li>
+                      <.link
+                        class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        href="https://www.youtube.com/watch?v=ZXz74ZewxwY&list=PLRIG8mKLBXFotOxF234rEIREidMRh98Hv&t=229s"
+                        rel="noopener"
+                        target="_blank"
+                      >
+                        OSS Founder Podcast
+                      </.link>
+                    </li>
+                    <li>
+                      <.link
+                        class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        href={AlgoraWeb.Constants.get(:github_url)}
+                        rel="noopener"
+                        target="_blank"
+                      >
+                        GitHub
+                      </.link>
+                    </li>
+                    <li>
+                      <.link
+                        class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        href={AlgoraWeb.Constants.get(:twitter_url)}
+                        rel="noopener"
+                        target="_blank"
+                      >
+                        X (Twitter)
+                      </.link>
+                    </li>
+                    <li>
+                      <.link
+                        class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        href={AlgoraWeb.Constants.get(:linkedin_url)}
+                        rel="noopener"
+                        target="_blank"
+                      >
+                        LinkedIn
+                      </.link>
+                    </li>
+                    <li>
+                      <.link
+                        class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        href={AlgoraWeb.Constants.get(:discord_url)}
+                        rel="noopener"
+                        target="_blank"
+                      >
+                        Discord
+                      </.link>
+                    </li>
+                    <li>
+                      <.link
+                        class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        href={AlgoraWeb.Constants.get(:youtube_url)}
+                        rel="noopener"
+                        target="_blank"
+                      >
+                        YouTube
+                      </.link>
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 class="text-xs font-semibold uppercase tracking-wider text-foreground">
+                    Legal
+                  </h3>
+                  <ul role="list" class="mt-4 space-y-3">
+                    <li>
+                      <.link
+                        class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        href={AlgoraWeb.Constants.get(:terms_url)}
+                      >
+                        Terms of Service
+                      </.link>
+                    </li>
+                    <li>
+                      <.link
+                        class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        href={AlgoraWeb.Constants.get(:privacy_url)}
+                      >
+                        Privacy Policy
+                      </.link>
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>

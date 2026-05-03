@@ -13,8 +13,8 @@
     </.live_title>
 
     <%= if assigns[:page_title] do %>
-      <meta name="twitter:title" content={"#{assigns[:page_title]} | #{Algora.config([:title])}"} />
-      <meta property="og:title" content={"#{assigns[:page_title]} | #{Algora.config([:title])}"} />
+      <meta name="twitter:title" content={"#{assigns[:page_title]}"} />
+      <meta property="og:title" content={"#{assigns[:page_title]}"} />
     <% else %>
       <meta name="twitter:title" content={Algora.config([:title])} />
       <meta property="og:title" content={Algora.config([:title])} />

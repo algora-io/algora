@@ -520,11 +520,13 @@ emoji-picker {
   }
 }
 
-/* Full-card swipe stage: border via box-shadow on wrap, transform exit, gap, fade-in */
+/* Full-card swipe stage: border via box-shadow on wrap; vertical translation only (no rotate/scale) */
 .home-candidate-stage {
   position: relative;
   border-radius: 1rem;
-  transform-origin: 50% 45%;
+  transform-origin: 50% 50%;
+  transform: translate3d(0, 0, 0);
+  rotate: 0deg;
   will-change: transform, opacity;
 }
 
@@ -542,7 +544,7 @@ emoji-picker {
 
 .home-candidate-between {
   opacity: 0;
-  transform: scale(0.94) translateY(12px);
+  transform: translate3d(0, 16px, 0) rotate(0deg);
   pointer-events: none;
 }
 
@@ -550,14 +552,14 @@ emoji-picker {
   0% {
     opacity: 1;
     filter: brightness(1);
-    transform: scale(1) rotate(0deg);
+    transform: translate3d(0, 0, 0) rotate(0deg);
     box-shadow: none;
   }
 
   42% {
     opacity: 1;
     filter: brightness(1.06);
-    transform: scale(1.03) rotate(-0.8deg);
+    transform: translate3d(0, -8px, 0) rotate(0deg);
     /* Single thick inner frame + soft outer glow (no second hard outline ring). */
     box-shadow:
       0 0 56px rgb(16 185 129 / 0.32),
@@ -567,7 +569,7 @@ emoji-picker {
   100% {
     opacity: 0;
     filter: brightness(1);
-    transform: scale(0.88) rotate(4deg) translateY(22px);
+    transform: translate3d(0, 28px, 0) rotate(0deg);
     box-shadow:
       0 0 72px rgb(16 185 129 / 0.08),
       inset 0 0 0 2px rgb(52 211 153 / 0);
@@ -578,14 +580,14 @@ emoji-picker {
   0% {
     opacity: 1;
     filter: brightness(1);
-    transform: scale(1) rotate(0deg);
+    transform: translate3d(0, 0, 0) rotate(0deg);
     box-shadow: none;
   }
 
   38% {
     opacity: 1;
     filter: brightness(0.92);
-    transform: scale(1.03) rotate(1.8deg);
+    transform: translate3d(0, -6px, 0) rotate(0deg);
     box-shadow:
       0 0 52px rgb(239 68 68 / 0.38),
       inset 0 0 0 6px rgb(248 113 113 / 0.92);
@@ -593,7 +595,7 @@ emoji-picker {
 
   100% {
     opacity: 0;
-    transform: scale(0.86) rotate(-5deg) translateY(26px) translateX(-10px);
+    transform: translate3d(0, 32px, 0) rotate(0deg);
     box-shadow:
       0 0 64px rgb(239 68 68 / 0.06),
       inset 0 0 0 2px rgb(248 113 113 / 0);
@@ -603,13 +605,11 @@ emoji-picker {
 @keyframes home-candidate-enter {
   from {
     opacity: 0;
-    transform: translateY(22px) scale(0.93);
-    filter: blur(3px);
+    transform: translate3d(0, 22px, 0) rotate(0deg);
   }
 
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
-    filter: blur(0);
+    transform: translate3d(0, 0, 0) rotate(0deg);
   }
 }

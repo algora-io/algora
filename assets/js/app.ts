@@ -1147,10 +1147,10 @@ const Hooks = {
         };
         const wrap = document.getElementById("home-candidate-card-wrap");
         const gapMs = Number(
-            this.el.getAttribute("data-swipe-gap-ms") || "240",
+            this.el.getAttribute("data-swipe-gap-ms") || "80",
           );
           const enterMs = Number(
-            this.el.getAttribute("data-swipe-enter-ms") || "580",
+            this.el.getAttribute("data-swipe-enter-ms") || "280",
           );
           const prev = hook.preSwipeCandidateIndex;
           hook.preSwipeCandidateIndex = undefined;
@@ -1197,7 +1197,7 @@ const Hooks = {
         };
         const wrap = document.getElementById("home-candidate-card-wrap");
         const exitMs = Number(
-          this.el.getAttribute("data-swipe-exit-ms") || "720",
+          this.el.getAttribute("data-swipe-exit-ms") || "900",
         );
 
         if (!wrap) {

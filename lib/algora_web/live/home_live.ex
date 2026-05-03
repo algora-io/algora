@@ -528,9 +528,9 @@ defmodule AlgoraWeb.HomeLive do
         data-like-count={onboarding_likes(@liked_ids)}
         data-like-goal={onboarding_likes_goal()}
         data-likes-blocked={to_string(likes_reached_goal)}
-        data-swipe-exit-ms="720"
-        data-swipe-gap-ms="240"
-        data-swipe-enter-ms="580"
+        data-swipe-exit-ms="900"
+        data-swipe-gap-ms="80"
+        data-swipe-enter-ms="280"
         class="fixed bottom-0 left-0 right-0 z-40 pb-6 sm:pb-8 pt-5 bg-gradient-to-t from-black via-black/80 to-transparent opacity-0 transition-opacity duration-500 pointer-events-none"
       >
         <div class="mx-auto flex w-full max-w-6xl gap-3 sm:gap-4 px-6 lg:px-8">

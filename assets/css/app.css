@@ -528,15 +528,15 @@ emoji-picker {
 }
 
 .home-candidate-exit.home-candidate-exit--like {
-  animation: home-candidate-exit-like 720ms cubic-bezier(0.33, 0, 0.2, 1) forwards;
+  animation: home-candidate-exit-like 900ms cubic-bezier(0.33, 0, 0.2, 1) forwards;
 }
 
 .home-candidate-exit.home-candidate-exit--skip {
-  animation: home-candidate-exit-skip 720ms cubic-bezier(0.33, 0, 0.22, 1) forwards;
+  animation: home-candidate-exit-skip 900ms cubic-bezier(0.33, 0, 0.22, 1) forwards;
 }
 
 .home-candidate-enter {
-  animation: home-candidate-enter 580ms cubic-bezier(0.22, 0.82, 0.28, 1) forwards;
+  animation: home-candidate-enter 280ms cubic-bezier(0.22, 0.88, 0.32, 1) forwards;
 }
 
 .home-candidate-between {

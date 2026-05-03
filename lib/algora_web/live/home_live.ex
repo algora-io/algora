@@ -191,13 +191,13 @@ defmodule AlgoraWeb.HomeLive do
           class="min-h-screen flex flex-col lg:min-h-0 lg:flex-1 lg:overflow-hidden"
         >
           <div class="flex-1 w-full max-w-6xl mx-auto px-6 lg:px-8 flex flex-col min-h-0">
-            <div class="flex-1 flex flex-col lg:items-center justify-center lg:justify-start pb-4 w-full min-h-0 lg:overscroll-y-contain">
+            <div class="flex-1 flex flex-col justify-center lg:justify-start pb-4 w-full min-h-0 lg:overscroll-y-contain">
               <%!-- Hero copy (unchanged) --%>
-              <h1 class="text-2xl min-[412px]:text-[1.75rem] sm:text-[2.5rem]/[3rem] md:text-[3.5rem]/[4rem] lg:text-[3rem]/[3.5rem] xl:text-[5rem]/[5.5rem] font-black tracking-tight text-foreground font-display">
+              <h1 class="text-2xl min-[412px]:text-[1.75rem] sm:text-[2.5rem]/[3rem] md:text-[3.5rem]/[4rem] lg:text-[5.2rem]/[5.5rem] xl:text-[5.2rem]/[5.7rem] font-black tracking-tight text-foreground font-display">
                 Open source <br class="hidden" />
                 <span class="text-emerald-400">tech recruiting</span>
               </h1>
-              <p class="mt-2 text-[0.9rem]/[1.4rem] min-[412px]:text-base md:text-lg xl:text-lg 2xl:text-2xl leading-6 font-medium text-foreground">
+              <p class="mt-2 xl:mt-4 text-[0.9rem]/[1.4rem] min-[412px]:text-base md:text-lg lg:text-[1.65rem]/[2.0rem] xl:text-[1.65rem]/[2.15rem] leading-6 font-medium text-foreground">
                 Connecting the most prolific open source maintainers & contributors with their next jobs
               </p>
               <%!--
@@ -214,10 +214,10 @@ defmodule AlgoraWeb.HomeLive do
             </div>
             --%>
               <%!-- Hires: testimonial cards then metrics --%>
-              <div class="w-full mt-4 sm:mt-8 grid grid-cols-1 gap-6 sm:gap-4 lg:grid-cols-3">
+              <div class="w-full mt-4 lg:mt-8 xl:mt-10 grid grid-cols-1 gap-6 sm:gap-4 lg:grid-cols-3">
                 <%= for hire <- @hires do %>
                   <div
-                    class="relative h-full min-h-[20rem] sm:min-h-[30rem]"
+                    class="relative h-full min-h-[20rem] sm:min-h-[28rem]"
                     style={"--hire-theme: #{hire.theme_color}"}
                   >
                     <div
@@ -321,13 +321,13 @@ defmodule AlgoraWeb.HomeLive do
               </div>
             </div>
             <%!-- Scroll arrow --%>
-            <div class="flex shrink-0 flex-col items-center gap-1 py-6 sm:py-8 lg:py-4 lg:pb-6">
+            <div class="flex shrink-0 flex-col items-center gap-1 py-6 sm:py-8 lg:py-2 xl:py-4 lg:pb-6">
               <span class="text-xs font-medium text-muted-foreground tracking-widest uppercase">
                 Scroll to get started
               </span>
-              <div class="mt-2 flex flex-col items-center animate-bounce">
-                <.icon name="tabler-chevron-down" class="size-5 text-emerald-400" />
-                <.icon name="tabler-chevron-down" class="-mt-2 size-5 text-emerald-400/50" />
+              <div class="mt-1 flex flex-col items-center animate-bounce">
+                <.icon name="tabler-chevron-down" class="size-5 text-muted-foreground" />
+                <.icon name="tabler-chevron-down" class="-mt-2 size-5 text-muted-foreground/50" />
               </div>
             </div>
           </div>
@@ -390,8 +390,7 @@ defmodule AlgoraWeb.HomeLive do
                 "relative z-10 w-full text-card-foreground px-6 lg:px-8 pt-4 sm:pt-8 pb-0 transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)]",
                 if(present_onboarding_form_ui?,
                   do: "opacity-100 translate-y-0 scale-100",
-                  else:
-                    "opacity-0 translate-y-6 scale-[0.97]"
+                  else: "opacity-0 translate-y-6 scale-[0.97]"
                 )
               ]}>
                 <%= if @onboarding_form_submitted do %>

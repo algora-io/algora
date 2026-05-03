@@ -349,11 +349,10 @@ defmodule AlgoraWeb.HomeLive do
           </div>
           <div class="relative z-10 w-full max-w-6xl mx-auto px-6 lg:px-8 pb-0">
             <div class={[
-              "min-h-screen pt-4 transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)]",
+              "min-h-screen pt-4 transition-opacity duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)]",
               if(present_onboarding_form_ui?,
-                do:
-                  "opacity-0 pointer-events-none translate-y-3 scale-[0.96]",
-                else: "opacity-100 translate-y-0 scale-100"
+                do: "opacity-0 pointer-events-none",
+                else: "opacity-100"
               )
             ]}>
               <%= if current_candidate do %>
@@ -364,7 +363,8 @@ defmodule AlgoraWeb.HomeLive do
                 >
                   <Algora.Cloud.candidate_card {Map.merge(current_candidate, %{
                     anonymize: true,
-                    # root_class: "h-[calc(100svh-8rem)] max-h-[52rem]",
+                    root_class:
+                      "!h-[min(52rem,calc(100dvh-9rem))] !max-h-[min(52rem,calc(100dvh-9rem))]",
                     tech_stack: [],
                     hide_badges?: true,
                     hide_scrollbars?: true,
@@ -528,9 +528,9 @@ defmodule AlgoraWeb.HomeLive do
         data-like-count={onboarding_likes(@liked_ids)}
         data-like-goal={onboarding_likes_goal()}
         data-likes-blocked={to_string(likes_reached_goal)}
-        data-swipe-exit-ms="540"
-        data-swipe-gap-ms="170"
-        data-swipe-enter-ms="450"
+        data-swipe-exit-ms="720"
+        data-swipe-gap-ms="240"
+        data-swipe-enter-ms="580"
         class="fixed bottom-0 left-0 right-0 z-40 pb-6 sm:pb-8 pt-5 bg-gradient-to-t from-black via-black/80 to-transparent opacity-0 transition-opacity duration-500 pointer-events-none"
       >
         <div class="mx-auto flex w-full max-w-6xl gap-3 sm:gap-4 px-6 lg:px-8">

@@ -520,31 +520,27 @@ emoji-picker {
   }
 }
 
-/* Full-card swipe stage: border via box-shadow on wrap; vertical translation only (no rotate/scale) */
+/* Full-card swipe: softer emerald / red rim glow on exit; opacity + shadow + brightness only */
 .home-candidate-stage {
   position: relative;
   border-radius: 1rem;
-  transform-origin: 50% 50%;
-  transform: translate3d(0, 0, 0);
-  rotate: 0deg;
-  will-change: transform, opacity;
+  will-change: opacity, box-shadow, filter;
 }
 
 .home-candidate-exit.home-candidate-exit--like {
-  animation: home-candidate-exit-like 540ms cubic-bezier(0.36, 0, 0.2, 1) forwards;
+  animation: home-candidate-exit-like 720ms cubic-bezier(0.33, 0, 0.2, 1) forwards;
 }
 
 .home-candidate-exit.home-candidate-exit--skip {
-  animation: home-candidate-exit-skip 540ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: home-candidate-exit-skip 720ms cubic-bezier(0.33, 0, 0.22, 1) forwards;
 }
 
 .home-candidate-enter {
-  animation: home-candidate-enter 450ms cubic-bezier(0.2, 0.85, 0.24, 1) forwards;
+  animation: home-candidate-enter 580ms cubic-bezier(0.22, 0.82, 0.28, 1) forwards;
 }
 
 .home-candidate-between {
   opacity: 0;
-  transform: translate3d(0, 16px, 0) rotate(0deg);
   pointer-events: none;
 }
 
@@ -552,27 +548,23 @@ emoji-picker {
   0% {
     opacity: 1;
     filter: brightness(1);
-    transform: translate3d(0, 0, 0) rotate(0deg);
     box-shadow: none;
   }
 
   42% {
     opacity: 1;
-    filter: brightness(1.06);
-    transform: translate3d(0, -8px, 0) rotate(0deg);
-    /* Single thick inner frame + soft outer glow (no second hard outline ring). */
+    filter: brightness(1.025);
     box-shadow:
-      0 0 56px rgb(16 185 129 / 0.32),
-      inset 0 0 0 6px rgb(52 211 153 / 0.88);
+      0 0 40px hsl(var(--success-500) / 0.18),
+      inset 0 0 0 3px hsl(var(--success-400) / 0.48);
   }
 
   100% {
     opacity: 0;
     filter: brightness(1);
-    transform: translate3d(0, 28px, 0) rotate(0deg);
     box-shadow:
-      0 0 72px rgb(16 185 129 / 0.08),
-      inset 0 0 0 2px rgb(52 211 153 / 0);
+      0 0 48px hsl(var(--success-500) / 0.04),
+      inset 0 0 0 1px hsl(var(--success-400) / 0);
   }
 }
 
@@ -580,36 +572,32 @@ emoji-picker {
   0% {
     opacity: 1;
     filter: brightness(1);
-    transform: translate3d(0, 0, 0) rotate(0deg);
     box-shadow: none;
   }
 
   38% {
     opacity: 1;
-    filter: brightness(0.92);
-    transform: translate3d(0, -6px, 0) rotate(0deg);
+    filter: brightness(0.97);
     box-shadow:
-      0 0 52px rgb(239 68 68 / 0.38),
-      inset 0 0 0 6px rgb(248 113 113 / 0.92);
+      0 0 40px rgb(239 68 68 / 0.2),
+      inset 0 0 0 3px rgb(248 113 113 / 0.46);
   }
 
   100% {
     opacity: 0;
-    transform: translate3d(0, 32px, 0) rotate(0deg);
+    filter: brightness(1);
     box-shadow:
-      0 0 64px rgb(239 68 68 / 0.06),
-      inset 0 0 0 2px rgb(248 113 113 / 0);
+      0 0 48px rgb(239 68 68 / 0.035),
+      inset 0 0 0 1px rgb(248 113 113 / 0);
   }
 }
 
 @keyframes home-candidate-enter {
   from {
     opacity: 0;
-    transform: translate3d(0, 22px, 0) rotate(0deg);
   }
 
   to {
     opacity: 1;
-    transform: translate3d(0, 0, 0) rotate(0deg);
   }
 }

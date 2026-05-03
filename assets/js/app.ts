@@ -1147,10 +1147,10 @@ const Hooks = {
         };
         const wrap = document.getElementById("home-candidate-card-wrap");
         const gapMs = Number(
-            this.el.getAttribute("data-swipe-gap-ms") || "170",
+            this.el.getAttribute("data-swipe-gap-ms") || "240",
           );
           const enterMs = Number(
-            this.el.getAttribute("data-swipe-enter-ms") || "450",
+            this.el.getAttribute("data-swipe-enter-ms") || "580",
           );
           const prev = hook.preSwipeCandidateIndex;
           hook.preSwipeCandidateIndex = undefined;
@@ -1174,10 +1174,10 @@ const Hooks = {
               wrap.classList.remove("home-candidate-between");
               void wrap.offsetWidth;
               wrap.classList.add("home-candidate-enter");
+              hook.swipeLock = false;
+              hook.syncSwipeDisabled?.();
               window.setTimeout(() => {
                 wrap.classList.remove("home-candidate-enter");
-                hook.swipeLock = false;
-                hook.syncSwipeDisabled?.();
               }, enterMs);
             }, gapMs);
           } else {
@@ -1197,7 +1197,7 @@ const Hooks = {
         };
         const wrap = document.getElementById("home-candidate-card-wrap");
         const exitMs = Number(
-          this.el.getAttribute("data-swipe-exit-ms") || "540",
+          this.el.getAttribute("data-swipe-exit-ms") || "720",
         );
 
         if (!wrap) {

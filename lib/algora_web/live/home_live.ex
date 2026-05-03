@@ -239,7 +239,9 @@ defmodule AlgoraWeb.HomeLive do
                         style={"background-color: #{hire.overlay_color}"}
                       >
                       </div>
-                      <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/30">
+                      <div class="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-black to-transparent">
+                      </div>
+                      <div class="absolute inset-x-0 top-0 h-64 bg-gradient-to-b from-black to-transparent">
                       </div>
                       <div class="relative h-full p-4 sm:p-5 min-h-[14rem] flex flex-col justify-center">
                         <div class="flex items-center gap-3 mb-3">
@@ -936,7 +938,7 @@ defmodule AlgoraWeb.HomeLive do
         raised: "$17M",
         valuation: nil,
         testimonial:
-          ~s(Our newest hire <a href="https://www.linkedin.com/posts/theethanding_trade-alert-textql-has-signed-former-activity-7434276471830904832-fGHZ?utm_source=share&utm_medium=member_desktop&rcm=ACoAAB4_M5IB8eXlIdyyQIJr1-gfNJj8jwIuXoQ" class="underline hover:text-white underline-offset-2" target="_blank" rel="noopener noreferrer">Christian</a> spent 6 years at Google, taught at MIT and worked as a quant at Two Sigma. This is exactly the profile we asked.),
+          ~s(Our new hire <a href="https://www.linkedin.com/posts/theethanding_trade-alert-textql-has-signed-former-activity-7434276471830904832-fGHZ?utm_source=share&utm_medium=member_desktop&rcm=ACoAAB4_M5IB8eXlIdyyQIJr1-gfNJj8jwIuXoQ" class="underline hover:text-white underline-offset-2" target="_blank" rel="noopener noreferrer">Christian</a> spent 6 years at Google, taught at MIT and worked as a quant at Two Sigma. That's exactly the profile we wanted.),
         testimonial_html: true,
         testimonial_author: "Ethan Ding · Co-Founder & CEO",
         testimonial_logo: "/images/wordmarks/textql.svg",

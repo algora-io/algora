@@ -417,11 +417,8 @@ emoji-picker {
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .onboarding-heart-wrap.is-goal-celebrate {
-    animation: onboarding-heart-goal-celebrate 0.9s cubic-bezier(0.34, 1.56, 0.64, 1)
-      both;
-  }
+.onboarding-heart-wrap.is-goal-celebrate {
+  animation: onboarding-heart-goal-celebrate 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
 @keyframes onboarding-heart-goal-celebrate {
@@ -441,12 +438,6 @@ emoji-picker {
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .home-onboarding-sparks span {
-    animation: home-onboarding-spark-rise 1.15s ease-out forwards;
-  }
-}
-
 .home-onboarding-sparks {
   position: absolute;
   inset: 0 0 35% 0;
@@ -463,6 +454,7 @@ emoji-picker {
   background: rgb(52 211 153 / 0.95);
   box-shadow: 0 0 10px rgb(16 185 129 / 0.8);
   opacity: 0;
+  animation: home-onboarding-spark-rise 1.15s ease-out forwards;
 }
 
 .home-onboarding-sparks span:nth-child(1) {
@@ -528,13 +520,96 @@ emoji-picker {
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .home-onboarding-sparks span {
-    animation: none !important;
-    opacity: 0 !important;
+/* Full-card swipe stage: border via box-shadow on wrap, transform exit, gap, fade-in */
+.home-candidate-stage {
+  position: relative;
+  border-radius: 1rem;
+  transform-origin: 50% 45%;
+  will-change: transform, opacity;
+}
+
+.home-candidate-exit.home-candidate-exit--like {
+  animation: home-candidate-exit-like 540ms cubic-bezier(0.36, 0, 0.2, 1) forwards;
+}
+
+.home-candidate-exit.home-candidate-exit--skip {
+  animation: home-candidate-exit-skip 540ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.home-candidate-enter {
+  animation: home-candidate-enter 450ms cubic-bezier(0.2, 0.85, 0.24, 1) forwards;
+}
+
+.home-candidate-between {
+  opacity: 0;
+  transform: scale(0.94) translateY(12px);
+  pointer-events: none;
+}
+
+@keyframes home-candidate-exit-like {
+  0% {
+    opacity: 1;
+    filter: brightness(1);
+    transform: scale(1) rotate(0deg);
+    box-shadow: none;
   }
 
-  .onboarding-heart-wrap.is-goal-celebrate {
-    animation: none !important;
+  42% {
+    opacity: 1;
+    filter: brightness(1.06);
+    transform: scale(1.03) rotate(-0.8deg);
+    /* Single thick inner frame + soft outer glow (no second hard outline ring). */
+    box-shadow:
+      0 0 56px rgb(16 185 129 / 0.32),
+      inset 0 0 0 6px rgb(52 211 153 / 0.88);
+  }
+
+  100% {
+    opacity: 0;
+    filter: brightness(1);
+    transform: scale(0.88) rotate(4deg) translateY(22px);
+    box-shadow:
+      0 0 72px rgb(16 185 129 / 0.08),
+      inset 0 0 0 2px rgb(52 211 153 / 0);
+  }
+}
+
+@keyframes home-candidate-exit-skip {
+  0% {
+    opacity: 1;
+    filter: brightness(1);
+    transform: scale(1) rotate(0deg);
+    box-shadow: none;
+  }
+
+  38% {
+    opacity: 1;
+    filter: brightness(0.92);
+    transform: scale(1.03) rotate(1.8deg);
+    box-shadow:
+      0 0 52px rgb(239 68 68 / 0.38),
+      inset 0 0 0 6px rgb(248 113 113 / 0.92);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0.86) rotate(-5deg) translateY(26px) translateX(-10px);
+    box-shadow:
+      0 0 64px rgb(239 68 68 / 0.06),
+      inset 0 0 0 2px rgb(248 113 113 / 0);
+  }
+}
+
+@keyframes home-candidate-enter {
+  from {
+    opacity: 0;
+    transform: translateY(22px) scale(0.93);
+    filter: blur(3px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
   }
 }

@@ -41,6 +41,16 @@ let execJS = (selector, attr) => {
     .forEach((el) => liveSocket.execJS(el, el.getAttribute(attr)));
 };
 
+function stripHomeCandidateSwipeClasses(el: HTMLElement) {
+  el.classList.remove(
+    "home-candidate-exit",
+    "home-candidate-exit--like",
+    "home-candidate-exit--skip",
+    "home-candidate-between",
+    "home-candidate-enter",
+  );
+}
+
 const Hooks = {
   Capture: {
     mounted() {
@@ -1092,12 +1102,157 @@ const Hooks = {
   },
   TinderButtons: {
     mounted() {
+      (this as { swipeLock?: boolean }).swipeLock = false;
+      (this as { preSwipeCandidateIndex?: number }).preSwipeCandidateIndex =
+        undefined;
+      (this as { boundSwipeClick?: (e: MouseEvent) => void }).boundSwipeClick =
+        (e: MouseEvent) => {
+          const raw = (e.target as Element | null)?.closest(
+            "[data-home-swipe]",
+          );
+          if (!(raw instanceof HTMLButtonElement) || raw.disabled) return;
+          const action = raw.getAttribute("data-home-swipe");
+          if (action !== "like" && action !== "skip") return;
+          e.preventDefault();
+          const self = this as typeof this & {
+            swipeLock?: boolean;
+            runSwipe?: (a: "like" | "skip") => void;
+          };
+          if (self.swipeLock) return;
+          self.runSwipe?.(action);
+        };
+      this.el.addEventListener(
+        "click",
+        (this as { boundSwipeClick?: (e: MouseEvent) => void })
+          .boundSwipeClick!,
+      );
+
+      (this as { syncSwipeDisabled?: () => void }).syncSwipeDisabled = () => {
+        const busy =
+          (this as { swipeLock?: boolean }).swipeLock === true;
+        const blocked =
+          this.el.getAttribute("data-likes-blocked") === "true";
+        for (const node of this.el.querySelectorAll("[data-home-swipe]")) {
+          if (node instanceof HTMLButtonElement) {
+            node.disabled = blocked || busy;
+          }
+        }
+      };
+
+      (this as { runEnterAfterSwipe?: () => void }).runEnterAfterSwipe = () => {
+        const hook = this as typeof this & {
+          swipeLock?: boolean;
+          preSwipeCandidateIndex?: number;
+          syncSwipeDisabled?: () => void;
+        };
+        const wrap = document.getElementById("home-candidate-card-wrap");
+        const gapMs = Number(
+            this.el.getAttribute("data-swipe-gap-ms") || "170",
+          );
+          const enterMs = Number(
+            this.el.getAttribute("data-swipe-enter-ms") || "450",
+          );
+          const prev = hook.preSwipeCandidateIndex;
+          hook.preSwipeCandidateIndex = undefined;
+
+          if (!wrap) {
+            hook.swipeLock = false;
+            hook.syncSwipeDisabled?.();
+            return;
+          }
+
+          stripHomeCandidateSwipeClasses(wrap);
+          void wrap.offsetWidth;
+
+          const nextIdx = Number(
+            (wrap as HTMLElement).dataset.candidateIndex || "NaN",
+          );
+
+          if (prev !== undefined && prev !== nextIdx) {
+            wrap.classList.add("home-candidate-between");
+            window.setTimeout(() => {
+              wrap.classList.remove("home-candidate-between");
+              void wrap.offsetWidth;
+              wrap.classList.add("home-candidate-enter");
+              window.setTimeout(() => {
+                wrap.classList.remove("home-candidate-enter");
+                hook.swipeLock = false;
+                hook.syncSwipeDisabled?.();
+              }, enterMs);
+            }, gapMs);
+          } else {
+            hook.swipeLock = false;
+            hook.syncSwipeDisabled?.();
+          }
+        };
+
+      (this as { runSwipe?: (action: "like" | "skip") => void }).runSwipe = (
+        action: "like" | "skip",
+      ) => {
+        const hook = this as typeof this & {
+          swipeLock?: boolean;
+          preSwipeCandidateIndex?: number;
+          syncSwipeDisabled?: () => void;
+          runEnterAfterSwipe?: () => void;
+        };
+        const wrap = document.getElementById("home-candidate-card-wrap");
+        const exitMs = Number(
+          this.el.getAttribute("data-swipe-exit-ms") || "540",
+        );
+
+        if (!wrap) {
+          this.pushEvent(
+            action === "like" ? "like_candidate" : "dislike_candidate",
+            {},
+            () => {
+              hook.runEnterAfterSwipe?.();
+            },
+          );
+          return;
+        }
+
+        hook.swipeLock = true;
+        hook.syncSwipeDisabled?.();
+
+        hook.preSwipeCandidateIndex = Number(
+          (wrap as HTMLElement).dataset.candidateIndex || "NaN",
+        );
+        stripHomeCandidateSwipeClasses(wrap);
+        void wrap.offsetWidth;
+
+        const exitKind =
+          action === "like"
+            ? "home-candidate-exit--like"
+            : "home-candidate-exit--skip";
+        wrap.classList.add("home-candidate-exit", exitKind);
+
+        window.setTimeout(() => {
+          this.pushEvent(
+            action === "like" ? "like_candidate" : "dislike_candidate",
+            {},
+            () => {
+              hook.runEnterAfterSwipe?.();
+            },
+          );
+        }, exitMs);
+      };
+
       this.previousLikeCount = Number(
         this.el.getAttribute("data-like-count") || "0",
       );
+      (this as { syncSwipeDisabled?: () => void }).syncSwipeDisabled?.();
       this.syncHeartProgress();
     },
+    destroyed() {
+      const fn = (this as { boundSwipeClick?: (e: MouseEvent) => void })
+        .boundSwipeClick;
+      if (fn) {
+        this.el.removeEventListener("click", fn);
+      }
+    },
     updated() {
+      (this as { syncSwipeDisabled?: () => void }).syncSwipeDisabled?.();
+
       const nextLikeCount = Number(
         this.el.getAttribute("data-like-count") || "0",
       );
@@ -1117,7 +1272,6 @@ const Hooks = {
       }
       this.previousLikeCount = nextLikeCount;
 
-      // Guard against malformed goal values while keeping UI responsive.
       if (Number.isNaN(likeGoal) || likeGoal <= 0) {
         this.el.setAttribute("data-like-goal", "3");
       }

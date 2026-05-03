@@ -100,7 +100,6 @@ defmodule AlgoraWeb.HomeLive do
           |> assign(:candidates_data, candidates_data)
           |> assign(:carousel_items, carousel_items)
           |> assign(:current_candidate_index, 0)
-          |> assign(:candidate_transition, :idle)
           |> assign(:onboarding_started, onboarding_started?(params))
           |> assign(:liked_ids, [])
           |> assign(:disliked_ids, [])
@@ -149,7 +148,6 @@ defmodule AlgoraWeb.HomeLive do
         </div>
       </div>
       <% likes_reached_goal = onboarding_goal_reached?(@liked_ids) %>
-      <% swipe_busy? = @candidate_transition != :idle %>
       <% deck_exhausted? = deck_exhausted?(@current_candidate_index, @candidates_data) %>
       <% present_onboarding_form_ui? =
         @show_onboarding_form || deck_exhausted? || @onboarding_form_submitted %>
@@ -358,25 +356,12 @@ defmodule AlgoraWeb.HomeLive do
                 else: "opacity-100 translate-y-0 scale-100"
               )
             ]}>
-              <% card_stage_class =
-                case @candidate_transition do
-                  {:exiting, :like} ->
-                    "home-candidate-stage home-candidate-exit home-candidate-exit--like"
-
-                  {:exiting, :skip} ->
-                    "home-candidate-stage home-candidate-exit home-candidate-exit--skip"
-
-                  :between ->
-                    "home-candidate-stage home-candidate-between"
-
-                  :entering ->
-                    "home-candidate-stage home-candidate-enter"
-
-                  :idle ->
-                    "home-candidate-stage"
-                end %>
               <%= if current_candidate do %>
-                <div id="home-candidate-card-wrap" class={card_stage_class}>
+                <div
+                  id="home-candidate-card-wrap"
+                  class="home-candidate-stage"
+                  data-candidate-index={@current_candidate_index}
+                >
                   <Algora.Cloud.candidate_card {Map.merge(current_candidate, %{
                     anonymize: true,
                     # root_class: "h-[calc(100svh-8rem)] max-h-[52rem]",
@@ -542,22 +527,28 @@ defmodule AlgoraWeb.HomeLive do
         phx-update="ignore"
         data-like-count={onboarding_likes(@liked_ids)}
         data-like-goal={onboarding_likes_goal()}
+        data-likes-blocked={to_string(likes_reached_goal)}
+        data-swipe-exit-ms="540"
+        data-swipe-gap-ms="170"
+        data-swipe-enter-ms="450"
         class="fixed bottom-0 left-0 right-0 z-40 pb-6 sm:pb-8 pt-5 bg-gradient-to-t from-black via-black/80 to-transparent opacity-0 transition-opacity duration-500 pointer-events-none"
       >
         <div class="mx-auto flex w-full max-w-6xl gap-3 sm:gap-4 px-6 lg:px-8">
           <button
+            type="button"
             class="pointer-events-auto flex flex-1 basis-0 flex-row items-center justify-center gap-2 rounded-2xl bg-red-950/60 border-2 border-red-500/50 hover:border-red-400 hover:bg-red-900/60 py-4 shadow-xl shadow-red-900/40 transition-[transform,box-shadow] duration-200 ease-out motion-safe:hover:scale-[1.02] motion-safe:active:scale-[0.97] disabled:opacity-60 disabled:pointer-events-none"
-            phx-click="dislike_candidate"
-            disabled={likes_reached_goal || swipe_busy?}
+            data-home-swipe="skip"
+            disabled={likes_reached_goal}
             aria-label="Skip candidate"
           >
             <.icon name="tabler-x" class="size-7 shrink-0 text-red-400 sm:size-8" />
             <span class="text-sm font-semibold text-red-400 tracking-wide">Skip</span>
           </button>
           <button
+            type="button"
             class="pointer-events-auto flex flex-1 basis-0 flex-row items-center justify-center gap-3 rounded-2xl bg-emerald-950/60 border-2 border-emerald-500/50 hover:border-emerald-400 hover:bg-emerald-900/60 py-4 shadow-xl shadow-emerald-900/40 transition-[transform,box-shadow] duration-200 ease-out motion-safe:hover:scale-[1.02] motion-safe:active:scale-[0.97] disabled:opacity-60 disabled:pointer-events-none"
-            phx-click="like_candidate"
-            disabled={likes_reached_goal || swipe_busy?}
+            data-home-swipe="like"
+            disabled={likes_reached_goal}
             aria-label="Like candidate"
           >
             <% fill_pct = onboarding_fill_pct(@liked_ids) %>
@@ -687,7 +678,6 @@ defmodule AlgoraWeb.HomeLive do
       socket
       |> LocalStore.restore(token)
       |> assign(:liked_ids, [])
-      |> assign(:candidate_transition, :idle)
       |> assign(:show_onboarding_form, false)
       |> assign(:transitioning_to_onboarding_form, false)
       |> assign(:onboarding_form_submitted, false)
@@ -706,62 +696,38 @@ defmodule AlgoraWeb.HomeLive do
 
   @impl true
   def handle_event("like_candidate", _params, socket) do
-    if socket.assigns.candidate_transition != :idle do
-      {:noreply, socket}
-    else
-      current = Enum.at(socket.assigns.candidates_data, socket.assigns.current_candidate_index)
-      user_id = current && current.candidate.match.user.id
-      liked_ids = if user_id, do: [user_id | socket.assigns.liked_ids], else: socket.assigns.liked_ids
-      likes_reached_goal = onboarding_goal_reached?(liked_ids)
+    current = Enum.at(socket.assigns.candidates_data, socket.assigns.current_candidate_index)
+    user_id = current && current.candidate.match.user.id
+    liked_ids = if user_id, do: [user_id | socket.assigns.liked_ids], else: socket.assigns.liked_ids
+    likes_reached_goal = onboarding_goal_reached?(liked_ids)
 
-      socket = assign(socket, :liked_ids, liked_ids)
+    socket = assign(socket, :liked_ids, liked_ids)
 
-      cond do
-        likes_reached_goal && socket.assigns.transitioning_to_onboarding_form ->
-          {:noreply, socket}
+    cond do
+      likes_reached_goal && socket.assigns.transitioning_to_onboarding_form ->
+        {:noreply, socket}
 
-        likes_reached_goal ->
-          Process.send_after(self(), :show_onboarding_form, 450)
-          {:noreply, assign(socket, :transitioning_to_onboarding_form, true)}
+      likes_reached_goal ->
+        Process.send_after(self(), :show_onboarding_form, 450)
+        {:noreply, assign(socket, :transitioning_to_onboarding_form, true)}
 
-        true ->
-          socket =
-            socket
-            |> assign(:candidate_transition, {:exiting, :like})
-
-          Process.send_after(
-            self(),
-            {:candidate_swipe_advance, :like},
-            candidate_swipe_exit_ms()
-          )
-
-          {:noreply, socket}
-      end
+      true ->
+        {:noreply, assign(socket, :current_candidate_index, socket.assigns.current_candidate_index + 1)}
     end
   end
 
   @impl true
   def handle_event("dislike_candidate", _params, socket) do
-    if socket.assigns.candidate_transition != :idle do
-      {:noreply, socket}
-    else
-      current = Enum.at(socket.assigns.candidates_data, socket.assigns.current_candidate_index)
-      user_id = current && current.candidate.match.user.id
-      disliked_ids = if user_id, do: [user_id | socket.assigns.disliked_ids], else: socket.assigns.disliked_ids
+    current = Enum.at(socket.assigns.candidates_data, socket.assigns.current_candidate_index)
+    user_id = current && current.candidate.match.user.id
+    disliked_ids = if user_id, do: [user_id | socket.assigns.disliked_ids], else: socket.assigns.disliked_ids
 
-      socket =
-        socket
-        |> assign(:candidate_transition, {:exiting, :skip})
-        |> LocalStore.assign_cached(:disliked_ids, disliked_ids)
+    socket =
+      socket
+      |> assign(:current_candidate_index, socket.assigns.current_candidate_index + 1)
+      |> LocalStore.assign_cached(:disliked_ids, disliked_ids)
 
-      Process.send_after(
-        self(),
-        {:candidate_swipe_advance, :skip},
-        candidate_swipe_exit_ms()
-      )
-
-      {:noreply, socket}
-    end
+    {:noreply, socket}
   end
 
   @impl true
@@ -789,49 +755,6 @@ defmodule AlgoraWeb.HomeLive do
      socket
      |> assign(:show_onboarding_form, true)
      |> assign(:transitioning_to_onboarding_form, false)}
-  end
-
-  @impl true
-  def handle_info({:candidate_swipe_advance, kind}, socket) do
-    case socket.assigns.candidate_transition do
-      {:exiting, ^kind} ->
-        next_index = socket.assigns.current_candidate_index + 1
-        next_card = Enum.at(socket.assigns.candidates_data, next_index)
-
-        socket = assign(socket, :current_candidate_index, next_index)
-
-        if next_card do
-          socket = assign(socket, :candidate_transition, :between)
-          Process.send_after(self(), :candidate_swipe_reveal, candidate_swipe_gap_ms())
-          {:noreply, socket}
-        else
-          {:noreply, assign(socket, :candidate_transition, :idle)}
-        end
-
-      _ ->
-        {:noreply, socket}
-    end
-  end
-
-  @impl true
-  def handle_info(:candidate_swipe_reveal, socket) do
-    case socket.assigns.candidate_transition do
-      :between ->
-        socket = assign(socket, :candidate_transition, :entering)
-        Process.send_after(self(), :candidate_swipe_done, candidate_swipe_enter_ms())
-        {:noreply, socket}
-
-      _ ->
-        {:noreply, socket}
-    end
-  end
-
-  @impl true
-  def handle_info(:candidate_swipe_done, socket) do
-    case socket.assigns.candidate_transition do
-      :entering -> {:noreply, assign(socket, :candidate_transition, :idle)}
-      _ -> {:noreply, socket}
-    end
   end
 
   # Session stores lowercase ISO code from AlgoraWeb.Analytics (IPinfo Lite). Prefer a readable
@@ -913,10 +836,6 @@ defmodule AlgoraWeb.HomeLive do
   defp deck_exhausted?(index, candidates_data) when is_list(candidates_data) do
     candidates_data != [] and match?(nil, Enum.at(candidates_data, index))
   end
-
-  defp candidate_swipe_exit_ms, do: 540
-  defp candidate_swipe_gap_ms, do: 170
-  defp candidate_swipe_enter_ms, do: 450
 
   defp onboarding_goal_reached?(liked_ids), do: onboarding_likes(liked_ids) >= onboarding_likes_goal()
 

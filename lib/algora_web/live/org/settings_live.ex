@@ -286,7 +286,7 @@ defmodule AlgoraWeb.Org.SettingsLive do
      else
        socket
        |> assign(:pending_action, {event, unsigned_params})
-       |> push_event("open_popup", %{url: socket.assigns.oauth_url})
+       |> redirect(external: socket.assigns.oauth_url)
      end}
   end
 

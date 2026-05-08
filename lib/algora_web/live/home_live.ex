@@ -156,7 +156,7 @@ defmodule AlgoraWeb.HomeLive do
           :if={!@onboarding_started}
           id="home-hero-section"
           phx-update="ignore"
-          class="min-h-screen flex flex-col lg:min-h-0 lg:flex-1 lg:overflow-hidden transition-opacity duration-500"
+          class="flex flex-col lg:min-h-0 lg:flex-1 lg:overflow-hidden transition-opacity duration-500"
         >
           <div
             :if={not @screenshot? and !@onboarding_started}
@@ -298,7 +298,7 @@ defmodule AlgoraWeb.HomeLive do
           id="candidate-section"
           phx-hook="TinderSection"
           data-onboarding-started={to_string(@onboarding_started)}
-          class="relative min-h-screen"
+          class="relative min-h-[100svh]"
         >
           <div class="pointer-events-none absolute inset-0 z-[5] overflow-hidden" aria-hidden="true">
             <div class="animate-onboarding-orb-breathe absolute top-1/2 left-1/2 w-[500px] h-[500px] rounded-full bg-[#1ebba2]/10 blur-[100px]">
@@ -313,7 +313,7 @@ defmodule AlgoraWeb.HomeLive do
                 "pt-4 transition-opacity duration-400 ease-out",
                 if(@onboarding_form_submitted,
                   do: "hidden",
-                  else: "min-h-screen"
+                  else: "min-h-[100svh]"
                 ),
                 if(@form_revealed,
                   do: "opacity-0 pointer-events-none",
@@ -341,8 +341,7 @@ defmodule AlgoraWeb.HomeLive do
                     >
                       <Algora.Cloud.candidate_card {Map.merge(candidate, %{
                         anonymize: true,
-                        root_class:
-                          "max-h-[calc(100dvh-132px)]",
+                        root_class: "max-h-[calc(100dvh-132px)]",
                         tech_stack: [],
                         hide_badges?: true,
                         hide_scrollbars?: true,
@@ -606,7 +605,7 @@ defmodule AlgoraWeb.HomeLive do
         data-swipe-gap-ms="40"
         data-swipe-enter-ms="200"
         data-onboarding-started={to_string(@onboarding_started)}
-        class="fixed bottom-0 left-0 right-0 z-40 pb-6 sm:pb-8 pt-5 bg-gradient-to-t from-black via-black/80 to-transparent opacity-0 transition-opacity duration-300 pointer-events-none"
+        class="fixed bottom-0 left-0 right-0 z-40 pb-6 sm:pb-8 pt-5 bg-transparent opacity-0 transition-opacity duration-300 pointer-events-none"
       >
         <div class="mx-auto flex w-full max-w-6xl gap-3 sm:gap-4 px-6 lg:px-8">
           <button

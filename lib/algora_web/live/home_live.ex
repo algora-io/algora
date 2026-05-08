@@ -310,7 +310,11 @@ defmodule AlgoraWeb.HomeLive do
             <div
               id="home-candidate-fade"
               class={[
-                "min-h-screen pt-4 transition-opacity duration-400 ease-out",
+                "pt-4 transition-opacity duration-400 ease-out",
+                if(@onboarding_form_submitted,
+                  do: "hidden",
+                  else: "min-h-screen"
+                ),
                 if(@form_revealed,
                   do: "opacity-0 pointer-events-none",
                   else: "opacity-100"
@@ -352,7 +356,12 @@ defmodule AlgoraWeb.HomeLive do
             <div
               id="home-onboarding-form-overlay"
               class={[
-                "onboarding-form-overlay-scroll absolute inset-0 flex items-start justify-center overflow-y-auto transition-opacity duration-400 ease-out",
+                "transition-opacity duration-400 ease-out",
+                if(@onboarding_form_submitted,
+                  do: "relative w-full opacity-100",
+                  else:
+                    "onboarding-form-overlay-scroll absolute inset-0 flex items-start justify-center overflow-y-auto"
+                ),
                 if(@form_revealed, do: "opacity-100", else: "opacity-0 pointer-events-none")
               ]}
             >
@@ -381,107 +390,124 @@ defmodule AlgoraWeb.HomeLive do
                       Thanks for reaching out, we'll get in touch soon!
                     </p>
                   </div>
-                  <div class="w-full mt-8 flex flex-col gap-12 text-left pb-32">
-                    <div class="w-full space-y-4">
-                      <div class="flex items-start lg:items-center gap-2 sm:gap-3">
-                        <.icon
-                          name="tabler-circle-number-1"
-                          class="w-6 h-6 sm:w-8 sm:h-8 text-foreground shrink-0"
-                        />
-                        <p class="text-foreground text-sm sm:text-lg font-medium">
-                          Share your JDs and receive handpicked candidates with the right skills and experience
-                        </p>
-                      </div>
-                      <div class="relative z-30 mx-auto">
-                        <div class="group/card h-full border-2 border-white/10 bg-muted group relative flex-1 overflow-hidden rounded-xl">
-                          <div class="grid h-7 grid-cols-[1fr_auto_1fr] overflow-hidden border-b border-gray-800">
-                            <div class="ml-2 flex items-center gap-1">
-                              <div class="h-2.5 w-2.5 rounded-full bg-red-400"></div>
-                              <div class="h-2.5 w-2.5 rounded-full bg-yellow-400"></div>
-                              <div class="h-2.5 w-2.5 rounded-full bg-green-400"></div>
-                            </div>
-                            <div class="flex items-center justify-center gap-2">
-                              <img src={~p"/images/logo-192px.png"} alt="Algora" class="w-4 h-4 rounded" />
-                              <div class="text-xs text-foreground">
-                                algora.io<span class="text-foreground/70 hidden sm:inline">/candidates</span>
+                  <div class="w-full mt-12 max-w-2xl mx-auto flex flex-col text-left pb-16">
+                    <h3 class="text-xl sm:text-2xl font-semibold tracking-tight text-foreground text-center">
+                      How it works
+                    </h3>
+                    <div class="space-y-12 mt-4">
+                      <div class="w-full space-y-4">
+                        <div class="flex items-start gap-2 sm:gap-3">
+                          <.icon
+                            name="tabler-circle-number-1"
+                            class="w-6 h-6 text-foreground shrink-0"
+                          />
+                          <p class="text-foreground text-sm sm:text-base font-medium">
+                            Share your JDs and receive handpicked candidates with the right skills and experience
+                          </p>
+                        </div>
+                        <div class="relative z-30 mx-auto">
+                          <div class="group/card h-full border-2 border-white/10 bg-muted group relative flex-1 overflow-hidden rounded-xl">
+                            <div class="grid h-7 grid-cols-[1fr_auto_1fr] overflow-hidden border-b border-gray-800">
+                              <div class="ml-2 flex items-center gap-1">
+                                <div class="h-2.5 w-2.5 rounded-full bg-red-400"></div>
+                                <div class="h-2.5 w-2.5 rounded-full bg-yellow-400"></div>
+                                <div class="h-2.5 w-2.5 rounded-full bg-green-400"></div>
                               </div>
+                              <div class="flex items-center justify-center gap-2">
+                                <img
+                                  src={~p"/images/logo-192px.png"}
+                                  alt="Algora"
+                                  class="w-4 h-4 rounded"
+                                />
+                                <div class="text-xs text-foreground">
+                                  algora.io<span class="text-foreground/70 hidden sm:inline">/candidates</span>
+                                </div>
+                              </div>
+                              <div></div>
                             </div>
-                            <div></div>
-                          </div>
-                          <div class="relative flex aspect-[1200/630] h-full w-full items-center justify-center">
-                            <img
-                              src={~p"/images/screenshots/candidates-page.png"}
-                              alt="Candidates page"
-                              class="w-full bg-[#121214] p-1"
-                            />
+                            <div class="relative flex aspect-[1200/630] h-full w-full items-center justify-center">
+                              <img
+                                src={~p"/images/screenshots/candidates-page.png"}
+                                alt="Candidates page"
+                                class="w-full bg-[#121214] p-1"
+                              />
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                    <div class="w-full space-y-4">
-                      <div class="flex items-start lg:items-center gap-2 sm:gap-3">
-                        <.icon
-                          name="tabler-circle-number-2"
-                          class="w-6 h-6 sm:w-8 sm:h-8 text-foreground shrink-0"
-                        />
-                        <p class="text-foreground text-sm sm:text-lg font-medium">
-                          Get notified in your inbox and Slack with candidates ready to interview
-                        </p>
-                      </div>
-                      <div class="relative z-30 mx-auto">
-                        <div class="group/card h-full border-2 border-white/10 bg-muted group relative flex-1 overflow-hidden rounded-xl">
-                          <div class="grid h-7 grid-cols-[1fr_auto_1fr] overflow-hidden border-b border-gray-800">
-                            <div class="ml-2 flex items-center gap-1">
-                              <div class="h-2.5 w-2.5 rounded-full bg-red-400"></div>
-                              <div class="h-2.5 w-2.5 rounded-full bg-yellow-400"></div>
-                              <div class="h-2.5 w-2.5 rounded-full bg-green-400"></div>
-                            </div>
-                            <div class="flex items-center justify-center gap-2">
-                              <img src={~p"/images/logos/slack.svg"} alt="Slack" class="w-4 h-4 rounded" />
-                              <div class="text-xs text-foreground">
-                                app.slack.com<span class="text-foreground/70 hidden sm:inline">/client/T05UQ2UMHFX/C09FC54M0S3</span>
+                      <div class="w-full space-y-4">
+                        <div class="flex items-start gap-2 sm:gap-3">
+                          <.icon
+                            name="tabler-circle-number-2"
+                            class="w-6 h-6 text-foreground shrink-0"
+                          />
+                          <p class="text-foreground text-sm sm:text-base font-medium">
+                            Get notified in your inbox and Slack with candidates ready to interview
+                          </p>
+                        </div>
+                        <div class="relative z-30 mx-auto">
+                          <div class="group/card h-full border-2 border-white/10 bg-muted group relative flex-1 overflow-hidden rounded-xl">
+                            <div class="grid h-7 grid-cols-[1fr_auto_1fr] overflow-hidden border-b border-gray-800">
+                              <div class="ml-2 flex items-center gap-1">
+                                <div class="h-2.5 w-2.5 rounded-full bg-red-400"></div>
+                                <div class="h-2.5 w-2.5 rounded-full bg-yellow-400"></div>
+                                <div class="h-2.5 w-2.5 rounded-full bg-green-400"></div>
                               </div>
+                              <div class="flex items-center justify-center gap-2">
+                                <img
+                                  src={~p"/images/logos/slack.svg"}
+                                  alt="Slack"
+                                  class="w-4 h-4 rounded"
+                                />
+                                <div class="text-xs text-foreground">
+                                  app.slack.com<span class="text-foreground/70 hidden sm:inline">/client/T05UQ2UMHFX/C09FC54M0S3</span>
+                                </div>
+                              </div>
+                              <div></div>
                             </div>
-                            <div></div>
-                          </div>
-                          <div class="relative flex aspect-[1008/561] h-full w-full items-center justify-center">
-                            <img
-                              src={~p"/images/screenshots/candidate-drip.png"}
-                              alt="Candidate drip"
-                              class="w-full bg-[#121214] p-1"
-                            />
+                            <div class="relative flex aspect-[1008/561] h-full w-full items-center justify-center">
+                              <img
+                                src={~p"/images/screenshots/candidate-drip.png"}
+                                alt="Candidate drip"
+                                class="w-full bg-[#121214] p-1"
+                              />
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                    <div class="w-full space-y-4">
-                      <div class="flex items-start lg:items-center gap-2 sm:gap-3">
-                        <.icon
-                          name="tabler-circle-number-3"
-                          class="w-6 h-6 sm:w-8 sm:h-8 text-foreground shrink-0"
-                        />
-                        <p class="text-foreground text-sm sm:text-lg font-medium">
-                          Candidates are auto-added to your Ashby
-                        </p>
-                      </div>
-                      <div class="relative z-30 mx-auto">
-                        <div class="group/card h-full border-2 border-white/10 bg-muted group relative flex-1 overflow-hidden rounded-xl">
-                          <div class="grid h-7 grid-cols-[1fr_auto_1fr] overflow-hidden border-b border-gray-800">
-                            <div class="ml-2 flex items-center gap-1">
-                              <div class="h-2.5 w-2.5 rounded-full bg-red-400"></div>
-                              <div class="h-2.5 w-2.5 rounded-full bg-yellow-400"></div>
-                              <div class="h-2.5 w-2.5 rounded-full bg-green-400"></div>
-                            </div>
-                            <div class="flex items-center justify-center gap-2">
-                              <img src={~p"/images/logos/ashby.png"} alt="Ashby" class="w-4 h-4 rounded" />
-                              <div class="text-xs text-foreground">
-                                app.ashbyhq.com<span class="text-foreground/70 hidden sm:inline">/candidates/pipeline/active</span>
+                      <div class="w-full space-y-4">
+                        <div class="flex items-start gap-2 sm:gap-3">
+                          <.icon
+                            name="tabler-circle-number-3"
+                            class="w-6 h-6 text-foreground shrink-0"
+                          />
+                          <p class="text-foreground text-sm sm:text-base font-medium">
+                            Candidates are auto-added to your Ashby
+                          </p>
+                        </div>
+                        <div class="relative z-30 mx-auto">
+                          <div class="group/card h-full border-2 border-white/10 bg-muted group relative flex-1 overflow-hidden rounded-xl">
+                            <div class="grid h-7 grid-cols-[1fr_auto_1fr] overflow-hidden border-b border-gray-800">
+                              <div class="ml-2 flex items-center gap-1">
+                                <div class="h-2.5 w-2.5 rounded-full bg-red-400"></div>
+                                <div class="h-2.5 w-2.5 rounded-full bg-yellow-400"></div>
+                                <div class="h-2.5 w-2.5 rounded-full bg-green-400"></div>
                               </div>
+                              <div class="flex items-center justify-center gap-2">
+                                <img
+                                  src={~p"/images/logos/ashby.png"}
+                                  alt="Ashby"
+                                  class="w-4 h-4 rounded"
+                                />
+                                <div class="text-xs text-foreground">
+                                  app.ashbyhq.com<span class="text-foreground/70 hidden sm:inline">/candidates/pipeline/active</span>
+                                </div>
+                              </div>
+                              <div></div>
                             </div>
-                            <div></div>
-                          </div>
-                          <div class="relative flex aspect-[816/414] h-full w-full items-center justify-center">
-                            <img src={~p"/images/screenshots/ashby.png"} alt="Ashby" class="w-full" />
+                            <div class="relative flex aspect-[816/414] h-full w-full items-center justify-center">
+                              <img src={~p"/images/screenshots/ashby.png"} alt="Ashby" class="w-full" />
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -566,6 +592,8 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
       </main>
+
+      <Footer.footer :if={@onboarding_form_submitted} />
 
       <%!-- Tinder action buttons: fixed dock, JS-controlled visibility --%>
       <div

@@ -394,12 +394,7 @@ defmodule AlgoraWeb.HomeLive do
                   >
                     <input type="hidden" name={@form[:tech_stack].name} value="[]" />
                     <input type="hidden" name="liked_ids" id="onboarding-liked-ids" value="[]" />
-                    <input
-                      type="hidden"
-                      name="disliked_ids"
-                      id="onboarding-disliked-ids"
-                      value="[]"
-                    />
+                    <input type="hidden" name="disliked_ids" id="onboarding-disliked-ids" value="[]" />
                     <div class="animate-in fade-in slide-in-from-bottom-2 duration-500 delay-200">
                       <label
                         for={@form[:job_description].id}
@@ -480,16 +475,16 @@ defmodule AlgoraWeb.HomeLive do
         <div class="mx-auto flex w-full max-w-6xl gap-3 sm:gap-4 px-6 lg:px-8">
           <button
             type="button"
-            class="pointer-events-auto flex flex-1 basis-0 flex-row items-center justify-center gap-2 rounded-2xl bg-red-950/60 border-2 border-red-500/50 hover:border-red-400 hover:bg-red-900/60 py-4 shadow-xl shadow-red-900/40 transition-[transform,box-shadow] duration-200 ease-out hover:scale-[1.02] active:scale-[0.97] disabled:opacity-60 disabled:pointer-events-none"
+            class="pointer-events-auto flex flex-1 basis-0 flex-row items-center justify-center gap-2 rounded-2xl bg-red-950/60 border-2 border-red-500/50 hover:border-red-400 hover:bg-red-900/60 py-4 shadow-xl shadow-red-900/40 transition-[transform,box-shadow] duration-200 ease-out hover:scale-[1.02] active:scale-[0.97] disabled:bg-opacity-60 text-red-400 disabled:text-red-400/60 disabled:pointer-events-none"
             data-home-swipe="skip"
             aria-label="Skip candidate"
           >
-            <.icon name="tabler-x" class="size-7 shrink-0 text-red-400 sm:size-8" />
-            <span class="text-sm font-semibold text-red-400 tracking-wide">Skip</span>
+            <.icon name="tabler-x" class="size-7 shrink-0 sm:size-8" />
+            <span class="text-sm font-semibold tracking-wide">Skip</span>
           </button>
           <button
             type="button"
-            class="pointer-events-auto flex flex-1 basis-0 flex-row items-center justify-center gap-3 rounded-2xl bg-emerald-950/60 border-2 border-emerald-500/50 hover:border-emerald-400 hover:bg-emerald-900/60 py-4 shadow-xl shadow-emerald-900/40 transition-[transform,box-shadow] duration-200 ease-out hover:scale-[1.02] active:scale-[0.97] disabled:opacity-60 disabled:pointer-events-none"
+            class="pointer-events-auto flex flex-1 basis-0 flex-row items-center justify-center gap-3 rounded-2xl bg-emerald-950/60 border-2 border-emerald-500/50 hover:border-emerald-400 hover:bg-emerald-900/60 py-4 shadow-xl shadow-emerald-900/40 transition-[transform,box-shadow] duration-200 ease-out hover:scale-[1.02] active:scale-[0.97] disabled:bg-opacity-60 text-emerald-400 disabled:text-emerald-400/60 disabled:pointer-events-none"
             data-home-swipe="like"
             aria-label="Like candidate"
           >
@@ -538,10 +533,7 @@ defmodule AlgoraWeb.HomeLive do
                 </clipPath>
               </svg>
             </div>
-            <span
-              id="onboarding-heart-label"
-              class="text-sm font-semibold text-emerald-400 tracking-wide"
-            >
+            <span id="onboarding-heart-label" class="text-sm font-semibold tracking-wide">
               Like
             </span>
           </button>
@@ -639,12 +631,14 @@ defmodule AlgoraWeb.HomeLive do
   end
 
   defp decode_id_list(nil), do: []
+
   defp decode_id_list(value) when is_binary(value) do
     case Jason.decode(value) do
       {:ok, list} when is_list(list) -> list
       _ -> []
     end
   end
+
   defp decode_id_list(value) when is_list(value), do: value
   defp decode_id_list(_), do: []
 

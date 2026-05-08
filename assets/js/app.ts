@@ -243,19 +243,32 @@ function initHomeTinderButtons(dock: HTMLElement) {
       "#onboarding-form-submit-dock button[type=submit]",
     );
     if (form && submitBtn) {
-      form.addEventListener(
-        "submit",
-        () => {
-          const iconSend = submitBtn.querySelector<HTMLElement>("[data-submit-icon]");
-          const iconLoader = submitBtn.querySelector<HTMLElement>("[data-loading-icon]");
-          submitBtn.disabled = true;
-          submitBtn.classList.add("opacity-50", "cursor-not-allowed");
-          if (iconSend) iconSend.style.display = "none";
-          if (iconLoader) iconLoader.style.display = "";
-          // Button is reset by OnboardingFormHook's updated() (error) or destroyed() (success)
-        },
-        { once: true },
-      );
+      const resetSubmitBtn = () => {
+        const iconSend = submitBtn.querySelector<HTMLElement>("[data-submit-icon]");
+        const iconLoader = submitBtn.querySelector<HTMLElement>("[data-loading-icon]");
+        submitBtn.disabled = false;
+        submitBtn.classList.remove("opacity-50", "cursor-not-allowed");
+        if (iconSend) iconSend.style.display = "";
+        if (iconLoader) iconLoader.style.display = "none";
+      };
+
+      form.addEventListener("submit", () => {
+        const iconSend = submitBtn.querySelector<HTMLElement>("[data-submit-icon]");
+        const iconLoader = submitBtn.querySelector<HTMLElement>("[data-loading-icon]");
+        submitBtn.disabled = true;
+        submitBtn.classList.add("opacity-50", "cursor-not-allowed");
+        if (iconSend) iconSend.style.display = "none";
+        if (iconLoader) iconLoader.style.display = "";
+        // Watch for LiveView to remove phx-submit-loading class from the form,
+        // which signals the server has responded (works for both success and error).
+        const observer = new MutationObserver(() => {
+          if (!form.classList.contains("phx-submit-loading")) {
+            resetSubmitBtn();
+            observer.disconnect();
+          }
+        });
+        observer.observe(form, { attributes: true, attributeFilter: ["class"] });
+      });
     }
   };
 
@@ -1328,28 +1341,6 @@ const Hooks = {
       this.onboardingSent = false;
     },
     destroyed() {},
-  },
-  OnboardingFormHook: {
-    mounted() {
-      (this as any)._resetSubmitBtn = () => {
-        const btn = document.querySelector<HTMLButtonElement>(
-          "#onboarding-form-submit-dock button[type=submit]",
-        );
-        if (!btn) return;
-        const iconSend = btn.querySelector<HTMLElement>("[data-submit-icon]");
-        const iconLoader = btn.querySelector<HTMLElement>("[data-loading-icon]");
-        btn.disabled = false;
-        btn.classList.remove("opacity-50", "cursor-not-allowed");
-        if (iconSend) iconSend.style.display = "";
-        if (iconLoader) iconLoader.style.display = "none";
-      };
-    },
-    updated() {
-      (this as any)._resetSubmitBtn?.();
-    },
-    destroyed() {
-      (this as any)._resetSubmitBtn?.();
-    },
   },
   TinderButtons: {
     // All click/state logic now lives in initHomeTinderButtons() which runs at

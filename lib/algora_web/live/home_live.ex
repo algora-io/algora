@@ -310,7 +310,7 @@ defmodule AlgoraWeb.HomeLive do
             <div
               id="home-candidate-fade"
               class={[
-                "min-h-screen pt-4 transition-opacity duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)]",
+                "min-h-screen pt-4 transition-opacity duration-400 ease-out",
                 if(@form_revealed,
                   do: "opacity-0 pointer-events-none",
                   else: "opacity-100"
@@ -352,14 +352,14 @@ defmodule AlgoraWeb.HomeLive do
             <div
               id="home-onboarding-form-overlay"
               class={[
-                "onboarding-form-overlay-scroll absolute inset-0 flex items-start justify-center overflow-y-auto transition-opacity duration-700 ease-out",
+                "onboarding-form-overlay-scroll absolute inset-0 flex items-start justify-center overflow-y-auto transition-opacity duration-400 ease-out",
                 if(@form_revealed, do: "opacity-100", else: "opacity-0 pointer-events-none")
               ]}
             >
               <div
                 id="home-onboarding-form-inner"
                 class={[
-                  "relative z-10 w-full text-card-foreground px-6 lg:px-8 pt-4 sm:pt-8 pb-0 transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)]",
+                  "relative z-10 w-full text-card-foreground px-6 lg:px-8 pt-4 sm:pt-8 pb-0 transition-[opacity,transform] duration-400 ease-out",
                   if(@form_revealed,
                     do: "opacity-100 translate-y-0 scale-100",
                     else: "opacity-0 translate-y-6 scale-[0.97]"
@@ -410,7 +410,7 @@ defmodule AlgoraWeb.HomeLive do
                         placeholder="https://company.com/careers"
                       />
                     </div>
-                    <div class="grid grid-cols-1 gap-6 gap-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-[260ms]">
+                    <div class="grid grid-cols-1 gap-6 gap-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-300">
                       <div>
                         <label
                           for={@form[:comp_range].id}
@@ -440,7 +440,7 @@ defmodule AlgoraWeb.HomeLive do
                         />
                       </div>
                     </div>
-                    <div class="animate-in fade-in slide-in-from-bottom-2 duration-500 delay-[320ms]">
+                    <div class="animate-in fade-in slide-in-from-bottom-2 duration-500 delay-300">
                       <label
                         for={@form[:email].id}
                         class="block text-base sm:text-xl font-semibold leading-snug text-foreground mb-2"
@@ -468,11 +468,11 @@ defmodule AlgoraWeb.HomeLive do
         phx-hook="TinderButtons"
         phx-update="ignore"
         data-like-goal={onboarding_likes_goal()}
-        data-swipe-exit-ms="900"
-        data-swipe-gap-ms="80"
-        data-swipe-enter-ms="280"
+        data-swipe-exit-ms="500"
+        data-swipe-gap-ms="40"
+        data-swipe-enter-ms="200"
         data-onboarding-started={to_string(@onboarding_started)}
-        class="fixed bottom-0 left-0 right-0 z-40 pb-6 sm:pb-8 pt-5 bg-gradient-to-t from-black via-black/80 to-transparent opacity-0 transition-opacity duration-500 pointer-events-none"
+        class="fixed bottom-0 left-0 right-0 z-40 pb-6 sm:pb-8 pt-5 bg-gradient-to-t from-black via-black/80 to-transparent opacity-0 transition-opacity duration-300 pointer-events-none"
       >
         <div class="mx-auto flex w-full max-w-6xl gap-3 sm:gap-4 px-6 lg:px-8">
           <button
@@ -547,7 +547,7 @@ defmodule AlgoraWeb.HomeLive do
         :if={!@onboarding_form_submitted}
         id="onboarding-form-submit-dock"
         class={[
-          "fixed bottom-0 left-0 right-0 z-40 pb-6 sm:pb-8 pt-5 bg-gradient-to-t from-black via-black/80 to-transparent transition-opacity duration-500",
+          "fixed bottom-0 left-0 right-0 z-40 pb-6 sm:pb-8 pt-5 bg-gradient-to-t from-black via-black/80 to-transparent transition-opacity duration-300",
           if(@form_revealed, do: "opacity-100", else: "opacity-0 pointer-events-none")
         ]}
       >

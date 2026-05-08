@@ -163,6 +163,7 @@ defmodule AlgoraWeb.HomeLive do
         <section
           :if={!@onboarding_started}
           id="home-hero-section"
+          phx-update="ignore"
           class="min-h-screen flex flex-col lg:min-h-0 lg:flex-1 lg:overflow-hidden transition-opacity duration-500"
         >
           <div class="flex-1 w-full max-w-6xl mx-auto px-6 lg:px-8 flex flex-col min-h-0">
@@ -321,6 +322,7 @@ defmodule AlgoraWeb.HomeLive do
               <% else %>
                 <div
                   id="home-candidate-stack"
+                  phx-update="ignore"
                   class="home-candidate-stage"
                   data-total={length(@candidates_data)}
                 >

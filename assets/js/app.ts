@@ -41,6 +41,307 @@ let execJS = (selector, attr) => {
     .forEach((el) => liveSocket.execJS(el, el.getAttribute(attr)));
 };
 
+// Set up the home page candidate-section IntersectionObserver outside LiveView's
+// hook lifecycle so the like/skip dock + hero hide work even before the
+// `live` connect completes (e.g. on slow connections / latency sim).
+function initHomeTinderSection() {
+  if ((window as any).__homeTinderInit) return;
+  const section = document.getElementById("candidate-section");
+  if (!section) return;
+  (window as any).__homeTinderInit = true;
+
+  const buttons = document.getElementById("tinder-buttons");
+  const navbar = document.getElementById("home-top-navbar");
+  const hero = document.getElementById("home-hero-section");
+  if (!buttons) return;
+
+  const onboardingActive = () =>
+    new URLSearchParams(window.location.search).has("go") ||
+    section.getAttribute("data-onboarding-started") === "true";
+
+  const showTinderButtons = () => {
+    buttons.classList.remove("opacity-0", "pointer-events-none");
+    buttons.classList.add("opacity-100");
+  };
+
+  const hideHero = () => {
+    if (!hero) return;
+    hero.style.transition = "opacity 400ms ease-out";
+    hero.style.opacity = "0";
+    hero.style.pointerEvents = "none";
+    window.setTimeout(() => {
+      hero.style.display = "none";
+    }, 420);
+  };
+
+  if (onboardingActive()) showTinderButtons();
+
+  initHomeTinderButtons(buttons);
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          showTinderButtons();
+          hideHero();
+          navbar?.classList.remove(
+            "max-h-40",
+            "opacity-100",
+            "translate-y-0",
+          );
+          navbar?.classList.add(
+            "max-h-0",
+            "opacity-0",
+            "-translate-y-full",
+            "pointer-events-none",
+          );
+        } else {
+          navbar?.classList.remove(
+            "max-h-0",
+            "opacity-0",
+            "-translate-y-full",
+            "pointer-events-none",
+          );
+          navbar?.classList.add("max-h-40", "opacity-100", "translate-y-0");
+        }
+      });
+    },
+    { threshold: 0.95 },
+  );
+  observer.observe(section);
+}
+
+function initHomeTinderButtons(dock: HTMLElement) {
+  if ((dock as any).__inited) return;
+  (dock as any).__inited = true;
+
+  const state = {
+    likedIds: [] as string[],
+    dislikedIds: [] as string[],
+    currentIndex: 0,
+    swipeLock: false,
+    formShown: false,
+  };
+
+  const getStack = (): HTMLElement | null =>
+    document.getElementById("home-candidate-stack");
+
+  const initialStack = getStack();
+  const total = initialStack
+    ? Number((initialStack as HTMLElement).dataset.total || "0")
+    : 0;
+  const totalCandidates = Number.isNaN(total) ? 0 : total;
+
+  const goalAttr = Number(dock.getAttribute("data-like-goal") || "3");
+  const likeGoal = Number.isNaN(goalAttr) || goalAttr <= 0 ? 3 : goalAttr;
+
+  const exitMs = Number(dock.getAttribute("data-swipe-exit-ms") || "900");
+  const gapMs = Number(dock.getAttribute("data-swipe-gap-ms") || "80");
+  const enterMs = Number(dock.getAttribute("data-swipe-enter-ms") || "280");
+
+  const findActiveCard = (): HTMLElement | null => {
+    const stack = getStack();
+    if (!stack) return null;
+    return stack.querySelector(
+      ".home-candidate-card-wrap.is-active",
+    ) as HTMLElement | null;
+  };
+
+  const findCardByIndex = (idx: number): HTMLElement | null => {
+    const stack = getStack();
+    if (!stack) return null;
+    return stack.querySelector(
+      `.home-candidate-card-wrap[data-candidate-index="${idx}"]`,
+    ) as HTMLElement | null;
+  };
+
+  const syncDisabled = () => {
+    const blocked = state.likedIds.length >= likeGoal;
+    for (const node of dock.querySelectorAll("[data-home-swipe]")) {
+      if (node instanceof HTMLButtonElement) {
+        node.disabled = blocked || state.swipeLock;
+      }
+    }
+  };
+
+  const updateHeart = () => {
+    const clamped = Math.min(Math.max(state.likedIds.length, 0), likeGoal);
+    const fillPct = Math.trunc((clamped / likeGoal) * 100);
+    const curveBottomPx = Math.max(-10, Math.trunc(fillPct * 0.24) - 10);
+    const tank = dock.querySelector(".onboarding-heart-tank");
+    const curve = dock.querySelector(".onboarding-heart-curve");
+    if (tank instanceof HTMLElement) tank.style.height = `${fillPct}%`;
+    if (curve instanceof HTMLElement)
+      curve.style.bottom = `${curveBottomPx}px`;
+  };
+
+  const pumpHeart = () => {
+    const heart = dock.querySelector(".onboarding-heart");
+    if (!(heart instanceof HTMLElement)) return;
+    heart.classList.remove("is-pumping");
+    void heart.offsetWidth;
+    heart.classList.add("is-pumping");
+    setTimeout(() => heart.classList.remove("is-pumping"), 320);
+  };
+
+  const celebrateGoal = () => {
+    const wrap = dock.querySelector(".onboarding-heart-wrap");
+    if (!(wrap instanceof HTMLElement)) return;
+    wrap.classList.remove("is-goal-celebrate");
+    void wrap.offsetWidth;
+    wrap.classList.add("is-goal-celebrate");
+    setTimeout(() => wrap.classList.remove("is-goal-celebrate"), 920);
+  };
+
+  const writeHiddenInputs = () => {
+    const liked = document.getElementById(
+      "onboarding-liked-ids",
+    ) as HTMLInputElement | null;
+    const disliked = document.getElementById(
+      "onboarding-disliked-ids",
+    ) as HTMLInputElement | null;
+    if (liked) liked.value = JSON.stringify(state.likedIds);
+    if (disliked) disliked.value = JSON.stringify(state.dislikedIds);
+  };
+
+  const revealForm = () => {
+    if (state.formShown) return;
+    state.formShown = true;
+
+    const fade = document.getElementById("home-candidate-fade");
+    if (fade) {
+      fade.classList.remove("opacity-100");
+      fade.classList.add("opacity-0", "pointer-events-none");
+    }
+
+    const overlay = document.getElementById("home-onboarding-form-overlay");
+    const inner = document.getElementById("home-onboarding-form-inner");
+    if (overlay) {
+      overlay.classList.remove("opacity-0", "pointer-events-none");
+      overlay.classList.add("opacity-100");
+    }
+    if (inner) {
+      inner.classList.remove("opacity-0", "translate-y-6", "scale-[0.97]");
+      inner.classList.add("opacity-100", "translate-y-0", "scale-100");
+    }
+
+    dock.classList.remove("opacity-100");
+    dock.classList.add("opacity-0", "pointer-events-none");
+
+    const submitDock = document.getElementById(
+      "onboarding-form-submit-dock",
+    );
+    if (submitDock) {
+      submitDock.classList.remove("opacity-0", "pointer-events-none");
+      submitDock.classList.add("opacity-100");
+    }
+
+    writeHiddenInputs();
+  };
+
+  const advanceTo = (nextIdx: number) => {
+    const next = findCardByIndex(nextIdx);
+    if (!next) return;
+    stripHomeCandidateSwipeClasses(next);
+    next.classList.remove("is-hidden");
+    next.classList.add("is-active", "home-candidate-between");
+    void next.offsetWidth;
+    window.setTimeout(() => {
+      next.classList.remove("home-candidate-between");
+      void next.offsetWidth;
+      next.classList.add("home-candidate-enter");
+      window.setTimeout(() => {
+        next.classList.remove("home-candidate-enter");
+      }, enterMs);
+    }, gapMs);
+  };
+
+  const runSwipe = (action: "like" | "skip") => {
+    if (state.swipeLock) return;
+    if (state.likedIds.length >= likeGoal) return;
+
+    const active = findActiveCard();
+    if (!active) {
+      if (state.likedIds.length >= likeGoal || state.formShown) revealForm();
+      return;
+    }
+
+    const userId = active.dataset.candidateUserId || null;
+
+    if (action === "like" && userId) {
+      state.likedIds.push(userId);
+      updateHeart();
+      pumpHeart();
+      if (state.likedIds.length >= likeGoal) celebrateGoal();
+    } else if (action === "skip" && userId) {
+      state.dislikedIds.push(userId);
+    }
+
+    state.swipeLock = true;
+    syncDisabled();
+
+    const exitKind =
+      action === "like"
+        ? "home-candidate-exit--like"
+        : "home-candidate-exit--skip";
+    stripHomeCandidateSwipeClasses(active);
+    void active.offsetWidth;
+    active.classList.add("home-candidate-exit", exitKind);
+
+    const fromIdx = Number(active.dataset.candidateIndex || "NaN");
+    const nextIdx = fromIdx + 1;
+    const isLastCard = nextIdx >= totalCandidates;
+    const reachedGoal = state.likedIds.length >= likeGoal;
+
+    window.setTimeout(() => {
+      stripHomeCandidateSwipeClasses(active);
+      active.classList.remove("is-active");
+      active.classList.add("is-hidden");
+      state.currentIndex = nextIdx;
+
+      if (reachedGoal || isLastCard) {
+        state.swipeLock = false;
+        syncDisabled();
+        revealForm();
+        return;
+      }
+
+      advanceTo(nextIdx);
+      state.swipeLock = false;
+      syncDisabled();
+    }, exitMs);
+  };
+
+  dock.addEventListener("click", (e: MouseEvent) => {
+    const raw = (e.target as Element | null)?.closest("[data-home-swipe]");
+    if (!(raw instanceof HTMLButtonElement) || raw.disabled) return;
+    const action = raw.getAttribute("data-home-swipe");
+    if (action !== "like" && action !== "skip") return;
+    e.preventDefault();
+    runSwipe(action);
+  });
+
+  document.addEventListener(
+    "submit",
+    (e) => {
+      const form = e.target as HTMLElement | null;
+      if (form && (form as HTMLElement).id === "onboarding-candidates-form") {
+        writeHiddenInputs();
+      }
+    },
+    true,
+  );
+
+  updateHeart();
+  syncDisabled();
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initHomeTinderSection);
+} else {
+  initHomeTinderSection();
+}
+
 function stripHomeCandidateSwipeClasses(el: HTMLElement) {
   el.classList.remove(
     "home-candidate-exit",
@@ -985,101 +1286,9 @@ const Hooks = {
   },
   TinderSection: {
     mounted() {
-      const buttons = document.getElementById("tinder-buttons");
-      const navbar = document.getElementById("home-top-navbar");
-      const hero = document.getElementById("home-hero-section");
-      this.onboardingSent = false;
-      this.userInteracted = false;
-      this.sectionInView = false;
-      if (!buttons) return;
-
-      const hideHero = () => {
-        if (!hero) return;
-        hero.style.transition = "opacity 400ms ease-out";
-        hero.style.opacity = "0";
-        hero.style.pointerEvents = "none";
-        window.setTimeout(() => {
-          hero.style.display = "none";
-        }, 420);
-      };
-
-      const onboardingActive = () =>
-        new URLSearchParams(window.location.search).has("go") ||
-        this.el.getAttribute("data-onboarding-started") === "true";
-
-      const showTinderButtons = () => {
-        buttons.classList.remove("opacity-0", "pointer-events-none");
-        buttons.classList.add("opacity-100");
-      };
-
-      // Deep-link `?go` or server already in onboarding: show dock immediately (section may not yet hit the observer threshold).
-      if (onboardingActive()) {
-        showTinderButtons();
-      }
-
-      const maybeStartOnboarding = () => {
-        // Onboarding "start" is purely visual now (handled by class toggles in this hook).
-        // No server roundtrip — state lives in TinderButtons.
-        if (
-          !this.onboardingSent &&
-          !onboardingActive() &&
-          this.userInteracted &&
-          this.sectionInView
-        ) {
-          this.onboardingSent = true;
-        }
-      };
-
-      const onUserInteraction = () => {
-        this.userInteracted = true;
-        maybeStartOnboarding();
-      };
-
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            this.sectionInView = entry.isIntersecting;
-
-            if (entry.isIntersecting) {
-              showTinderButtons();
-              hideHero();
-              navbar?.classList.remove(
-                "max-h-40",
-                "opacity-100",
-                "translate-y-0",
-              );
-              navbar?.classList.add(
-                "max-h-0",
-                "opacity-0",
-                "-translate-y-full",
-                "pointer-events-none",
-              );
-              maybeStartOnboarding();
-            } else {
-              // Only reveal the dock when the section is nearly in view; never hide it on
-              // scroll-away so Skip/Like stay reachable.
-              navbar?.classList.remove(
-                "max-h-0",
-                "opacity-0",
-                "-translate-y-full",
-                "pointer-events-none",
-              );
-              navbar?.classList.add("max-h-40", "opacity-100", "translate-y-0");
-            }
-          });
-        },
-        { threshold: 0.95 },
-      );
-
-      window.addEventListener("scroll", onUserInteraction, { passive: true });
-      window.addEventListener("wheel", onUserInteraction, { passive: true });
-      window.addEventListener("touchmove", onUserInteraction, {
-        passive: true,
-      });
-
-      observer.observe(this.el);
-      this.observer = observer;
-      this.onUserInteraction = onUserInteraction;
+      // Observer/visibility setup runs in initHomeTinderSection() at script load
+      // (independent of LiveView connect, so dock appears even with high latency).
+      // Hook stays for `updated()` to react to data-onboarding-started changes.
     },
     updated() {
       const onboardingActive =
@@ -1098,259 +1307,13 @@ const Hooks = {
 
       this.onboardingSent = false;
     },
-    destroyed() {
-      if (this.observer) {
-        (this.observer as IntersectionObserver).disconnect();
-      }
-      const onUserInteraction = this.onUserInteraction as
-        | ((event: Event) => void)
-        | undefined;
-
-      if (onUserInteraction) {
-        window.removeEventListener("scroll", onUserInteraction);
-        window.removeEventListener("wheel", onUserInteraction);
-        window.removeEventListener("touchmove", onUserInteraction);
-      }
-    },
+    destroyed() {},
   },
   TinderButtons: {
-    mounted() {
-      const self = this as any;
-      self.likedIds = [] as string[];
-      self.dislikedIds = [] as string[];
-      self.currentIndex = 0;
-      self.swipeLock = false;
-      self.formShown = false;
-
-      self.getStack = (): HTMLElement | null =>
-        document.getElementById("home-candidate-stack");
-      const initialStack = self.getStack();
-      const total = initialStack
-        ? Number((initialStack as HTMLElement).dataset.total || "0")
-        : 0;
-      self.totalCandidates = Number.isNaN(total) ? 0 : total;
-
-      const goalAttr = Number(this.el.getAttribute("data-like-goal") || "3");
-      self.likeGoal = Number.isNaN(goalAttr) || goalAttr <= 0 ? 3 : goalAttr;
-
-      self.exitMs = Number(this.el.getAttribute("data-swipe-exit-ms") || "900");
-      self.gapMs = Number(this.el.getAttribute("data-swipe-gap-ms") || "80");
-      self.enterMs = Number(
-        this.el.getAttribute("data-swipe-enter-ms") || "280",
-      );
-
-      self.findActiveCard = (): HTMLElement | null => {
-        const stack = self.getStack();
-        if (!stack) return null;
-        return stack.querySelector(
-          ".home-candidate-card-wrap.is-active",
-        ) as HTMLElement | null;
-      };
-
-      self.findCardByIndex = (idx: number): HTMLElement | null => {
-        const stack = self.getStack();
-        if (!stack) return null;
-        return stack.querySelector(
-          `.home-candidate-card-wrap[data-candidate-index="${idx}"]`,
-        ) as HTMLElement | null;
-      };
-
-      self.syncDisabled = () => {
-        const busy = self.swipeLock === true;
-        const blocked = self.likedIds.length >= self.likeGoal;
-        for (const node of this.el.querySelectorAll("[data-home-swipe]")) {
-          if (node instanceof HTMLButtonElement) {
-            node.disabled = blocked || busy;
-          }
-        }
-      };
-
-      self.updateHeart = () => {
-        const goal = self.likeGoal;
-        const clamped = Math.min(Math.max(self.likedIds.length, 0), goal);
-        const fillPct = Math.trunc((clamped / goal) * 100);
-        const curveBottomPx = Math.max(-10, Math.trunc(fillPct * 0.24) - 10);
-        const tank = this.el.querySelector(".onboarding-heart-tank");
-        const curve = this.el.querySelector(".onboarding-heart-curve");
-        if (tank instanceof HTMLElement) tank.style.height = `${fillPct}%`;
-        if (curve instanceof HTMLElement)
-          curve.style.bottom = `${curveBottomPx}px`;
-      };
-
-      self.pumpHeart = () => {
-        const heart = this.el.querySelector(".onboarding-heart");
-        if (!(heart instanceof HTMLElement)) return;
-        heart.classList.remove("is-pumping");
-        void heart.offsetWidth;
-        heart.classList.add("is-pumping");
-        setTimeout(() => heart.classList.remove("is-pumping"), 320);
-      };
-
-      self.celebrateGoal = () => {
-        const wrap = this.el.querySelector(".onboarding-heart-wrap");
-        if (!(wrap instanceof HTMLElement)) return;
-        wrap.classList.remove("is-goal-celebrate");
-        void wrap.offsetWidth;
-        wrap.classList.add("is-goal-celebrate");
-        setTimeout(() => wrap.classList.remove("is-goal-celebrate"), 920);
-      };
-
-      self.writeHiddenInputs = () => {
-        const liked = document.getElementById(
-          "onboarding-liked-ids",
-        ) as HTMLInputElement | null;
-        const disliked = document.getElementById(
-          "onboarding-disliked-ids",
-        ) as HTMLInputElement | null;
-        if (liked) liked.value = JSON.stringify(self.likedIds);
-        if (disliked) disliked.value = JSON.stringify(self.dislikedIds);
-      };
-
-      self.revealForm = () => {
-        if (self.formShown) return;
-        self.formShown = true;
-
-        const fade = document.getElementById("home-candidate-fade");
-        if (fade) {
-          fade.classList.remove("opacity-100");
-          fade.classList.add("opacity-0", "pointer-events-none");
-        }
-
-        const overlay = document.getElementById("home-onboarding-form-overlay");
-        const inner = document.getElementById("home-onboarding-form-inner");
-        if (overlay) {
-          overlay.classList.remove("opacity-0", "pointer-events-none");
-          overlay.classList.add("opacity-100");
-        }
-        if (inner) {
-          inner.classList.remove(
-            "opacity-0",
-            "translate-y-6",
-            "scale-[0.97]",
-          );
-          inner.classList.add("opacity-100", "translate-y-0", "scale-100");
-        }
-
-        // Hide tinder dock, show submit dock.
-        this.el.classList.remove("opacity-100");
-        this.el.classList.add("opacity-0", "pointer-events-none");
-
-        const submitDock = document.getElementById(
-          "onboarding-form-submit-dock",
-        );
-        if (submitDock) {
-          submitDock.classList.remove("opacity-0", "pointer-events-none");
-          submitDock.classList.add("opacity-100");
-        }
-
-        self.writeHiddenInputs();
-      };
-
-      self.advanceTo = (nextIdx: number) => {
-        const next = self.findCardByIndex(nextIdx);
-        if (!next) return;
-        stripHomeCandidateSwipeClasses(next);
-        next.classList.remove("is-hidden");
-        next.classList.add("is-active", "home-candidate-between");
-        void next.offsetWidth;
-        window.setTimeout(() => {
-          next.classList.remove("home-candidate-between");
-          void next.offsetWidth;
-          next.classList.add("home-candidate-enter");
-          window.setTimeout(() => {
-            next.classList.remove("home-candidate-enter");
-          }, self.enterMs);
-        }, self.gapMs);
-      };
-
-      self.runSwipe = (action: "like" | "skip") => {
-        if (self.swipeLock) return;
-        if (self.likedIds.length >= self.likeGoal) return;
-
-        const active = self.findActiveCard();
-        if (!active) {
-          // No card to swipe — go straight to form if we already have likes.
-          if (self.likedIds.length >= self.likeGoal || self.formShown) {
-            self.revealForm();
-          }
-          return;
-        }
-
-        const userId = active.dataset.candidateUserId || null;
-
-        if (action === "like" && userId) {
-          self.likedIds.push(userId);
-          self.updateHeart();
-          self.pumpHeart();
-          if (self.likedIds.length >= self.likeGoal) self.celebrateGoal();
-        } else if (action === "skip" && userId) {
-          self.dislikedIds.push(userId);
-        }
-
-        self.swipeLock = true;
-        self.syncDisabled();
-
-        const exitKind =
-          action === "like"
-            ? "home-candidate-exit--like"
-            : "home-candidate-exit--skip";
-        stripHomeCandidateSwipeClasses(active);
-        void active.offsetWidth;
-        active.classList.add("home-candidate-exit", exitKind);
-
-        const fromIdx = Number(active.dataset.candidateIndex || "NaN");
-        const nextIdx = fromIdx + 1;
-        const isLastCard = nextIdx >= self.totalCandidates;
-        const reachedGoal = self.likedIds.length >= self.likeGoal;
-
-        window.setTimeout(() => {
-          stripHomeCandidateSwipeClasses(active);
-          active.classList.remove("is-active");
-          active.classList.add("is-hidden");
-
-          self.currentIndex = nextIdx;
-
-          if (reachedGoal || isLastCard) {
-            self.swipeLock = false;
-            self.syncDisabled();
-            self.revealForm();
-            return;
-          }
-
-          self.advanceTo(nextIdx);
-          self.swipeLock = false;
-          self.syncDisabled();
-        }, self.exitMs);
-      };
-
-      self.boundSwipeClick = (e: MouseEvent) => {
-        const raw = (e.target as Element | null)?.closest("[data-home-swipe]");
-        if (!(raw instanceof HTMLButtonElement) || raw.disabled) return;
-        const action = raw.getAttribute("data-home-swipe");
-        if (action !== "like" && action !== "skip") return;
-        e.preventDefault();
-        self.runSwipe(action);
-      };
-      this.el.addEventListener("click", self.boundSwipeClick);
-
-      // Inject latest liked/disliked into the form right before submit.
-      self.boundFormSubmit = () => self.writeHiddenInputs();
-      const form = document.getElementById("onboarding-candidates-form");
-      if (form) form.addEventListener("submit", self.boundFormSubmit, true);
-
-      self.updateHeart();
-      self.syncDisabled();
-    },
-    destroyed() {
-      const self = this as any;
-      if (self.boundSwipeClick) {
-        this.el.removeEventListener("click", self.boundSwipeClick);
-      }
-      const form = document.getElementById("onboarding-candidates-form");
-      if (form && self.boundFormSubmit) {
-        form.removeEventListener("submit", self.boundFormSubmit, true);
-      }
-    },
+    // All click/state logic now lives in initHomeTinderButtons() which runs at
+    // script load (independent of LV connect), so swipes work pre-mount.
+    mounted() {},
+    destroyed() {},
   },
 } satisfies Record<string, Partial<ViewHook> & Record<string, unknown>>;
 

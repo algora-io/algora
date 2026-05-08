@@ -619,6 +619,11 @@ defmodule AlgoraWeb.HomeLive do
   end
 
   @impl true
+  def handle_event("reveal_form", _params, socket) do
+    {:noreply, assign(socket, form_revealed: true)}
+  end
+
+  @impl true
   def handle_event("tech_stack_changed", %{"tech_stack" => tech_stack}, socket) do
     {:noreply, assign(socket, :tech_stack, tech_stack)}
   end

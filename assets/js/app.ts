@@ -207,6 +207,7 @@ function initHomeTinderButtons(dock: HTMLElement) {
   const revealForm = () => {
     if (state.formShown) return;
     state.formShown = true;
+    (window as any).__homeFormRevealed = true;
 
     const fade = document.getElementById("home-candidate-fade");
     if (fade) {
@@ -1322,6 +1323,37 @@ const Hooks = {
       // Observer/visibility setup runs in initHomeTinderSection() at script load
       // (independent of LiveView connect, so dock appears even with high latency).
       // Hook stays for `updated()` to react to data-onboarding-started changes.
+      //
+      // If the form was revealed before the socket connected, restore that state
+      // now so the server's form_revealed: false patch doesn't hide it.
+      if ((window as any).__homeFormRevealed === true) {
+        const fade = document.getElementById("home-candidate-fade");
+        if (fade) {
+          fade.classList.remove("opacity-100");
+          fade.classList.add("opacity-0", "pointer-events-none");
+        }
+        const overlay = document.getElementById("home-onboarding-form-overlay");
+        const inner = document.getElementById("home-onboarding-form-inner");
+        if (overlay) {
+          overlay.classList.remove("opacity-0", "pointer-events-none");
+          overlay.classList.add("opacity-100");
+        }
+        if (inner) {
+          inner.classList.remove("opacity-0", "translate-y-6", "scale-[0.97]");
+          inner.classList.add("opacity-100", "translate-y-0", "scale-100");
+        }
+        const tinderButtons = document.getElementById("tinder-buttons");
+        if (tinderButtons) {
+          tinderButtons.classList.remove("opacity-100");
+          tinderButtons.classList.add("opacity-0", "pointer-events-none");
+        }
+        const submitDock = document.getElementById("onboarding-form-submit-dock");
+        if (submitDock) {
+          submitDock.classList.remove("opacity-0", "pointer-events-none");
+          submitDock.classList.add("opacity-100");
+        }
+        this.pushEvent("reveal_form", {});
+      }
     },
     updated() {
       const onboardingActive =

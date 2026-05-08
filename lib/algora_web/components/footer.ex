@@ -84,28 +84,10 @@ defmodule AlgoraWeb.Components.Footer do
                 <li>
                   <.link
                     class="text-sm text-muted-foreground hover:text-white transition-colors"
-                    href="/lovable/jobs"
-                    target="_blank"
-                  >
-                    Lovable
-                  </.link>
-                </li>
-                <li>
-                  <.link
-                    class="text-sm text-muted-foreground hover:text-white transition-colors"
                     href="/comfy/jobs"
                     target="_blank"
                   >
                     ComfyUI
-                  </.link>
-                </li>
-                <li>
-                  <.link
-                    class="text-sm text-muted-foreground hover:text-white transition-colors"
-                    href="/firecrawl/jobs"
-                    target="_blank"
-                  >
-                    Firecrawl (YC S22)
                   </.link>
                 </li>
                 <li>
@@ -214,26 +196,6 @@ defmodule AlgoraWeb.Components.Footer do
                     target="_blank"
                   >
                     LinkedIn
-                  </.link>
-                </li>
-                <li>
-                  <.link
-                    class="text-sm text-muted-foreground hover:text-white transition-colors"
-                    href={Constants.get(:discord_url)}
-                    rel="noopener"
-                    target="_blank"
-                  >
-                    Discord
-                  </.link>
-                </li>
-                <li>
-                  <.link
-                    class="text-sm text-muted-foreground hover:text-white transition-colors"
-                    href={Constants.get(:youtube_url)}
-                    rel="noopener"
-                    target="_blank"
-                  >
-                    YouTube
                   </.link>
                 </li>
               </ul>

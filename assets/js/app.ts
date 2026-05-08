@@ -84,29 +84,25 @@ function initHomeTinderSection() {
         if (entry.isIntersecting) {
           showTinderButtons();
           hideHero();
-          navbar?.classList.remove(
-            "max-h-40",
-            "opacity-100",
-            "translate-y-0",
-          );
+          navbar?.classList.remove("max-h-40", "opacity-100", "translate-y-0");
           navbar?.classList.add(
             "max-h-0",
             "opacity-0",
             "-translate-y-full",
             "pointer-events-none",
           );
-        } else {
-          navbar?.classList.remove(
-            "max-h-0",
-            "opacity-0",
-            "-translate-y-full",
-            "pointer-events-none",
-          );
-          navbar?.classList.add("max-h-40", "opacity-100", "translate-y-0");
+        } else if (!onboardingActive()) {
+          // navbar?.classList.remove(
+          //   "max-h-0",
+          //   "opacity-0",
+          //   "-translate-y-full",
+          //   "pointer-events-none",
+          // );
+          // navbar?.classList.add("max-h-40", "opacity-100", "translate-y-0");
         }
       });
     },
-    { threshold: 0.95 },
+    { threshold: 0.8 },
   );
   observer.observe(section);
 }
@@ -171,8 +167,7 @@ function initHomeTinderButtons(dock: HTMLElement) {
     const tank = dock.querySelector(".onboarding-heart-tank");
     const curve = dock.querySelector(".onboarding-heart-curve");
     if (tank instanceof HTMLElement) tank.style.height = `${fillPct}%`;
-    if (curve instanceof HTMLElement)
-      curve.style.bottom = `${curveBottomPx}px`;
+    if (curve instanceof HTMLElement) curve.style.bottom = `${curveBottomPx}px`;
   };
 
   const pumpHeart = () => {
@@ -229,9 +224,7 @@ function initHomeTinderButtons(dock: HTMLElement) {
     dock.classList.remove("opacity-100");
     dock.classList.add("opacity-0", "pointer-events-none");
 
-    const submitDock = document.getElementById(
-      "onboarding-form-submit-dock",
-    );
+    const submitDock = document.getElementById("onboarding-form-submit-dock");
     if (submitDock) {
       submitDock.classList.remove("opacity-0", "pointer-events-none");
       submitDock.classList.add("opacity-100");
@@ -245,8 +238,11 @@ function initHomeTinderButtons(dock: HTMLElement) {
     );
     if (form && submitBtn) {
       const resetSubmitBtn = () => {
-        const iconSend = submitBtn.querySelector<HTMLElement>("[data-submit-icon]");
-        const iconLoader = submitBtn.querySelector<HTMLElement>("[data-loading-icon]");
+        const iconSend =
+          submitBtn.querySelector<HTMLElement>("[data-submit-icon]");
+        const iconLoader = submitBtn.querySelector<HTMLElement>(
+          "[data-loading-icon]",
+        );
         submitBtn.disabled = false;
         submitBtn.classList.remove("opacity-50", "cursor-not-allowed");
         if (iconSend) iconSend.style.display = "";
@@ -254,8 +250,11 @@ function initHomeTinderButtons(dock: HTMLElement) {
       };
 
       form.addEventListener("submit", () => {
-        const iconSend = submitBtn.querySelector<HTMLElement>("[data-submit-icon]");
-        const iconLoader = submitBtn.querySelector<HTMLElement>("[data-loading-icon]");
+        const iconSend =
+          submitBtn.querySelector<HTMLElement>("[data-submit-icon]");
+        const iconLoader = submitBtn.querySelector<HTMLElement>(
+          "[data-loading-icon]",
+        );
         submitBtn.disabled = true;
         submitBtn.classList.add("opacity-50", "cursor-not-allowed");
         if (iconSend) iconSend.style.display = "none";
@@ -268,7 +267,10 @@ function initHomeTinderButtons(dock: HTMLElement) {
             observer.disconnect();
           }
         });
-        observer.observe(form, { attributes: true, attributeFilter: ["class"] });
+        observer.observe(form, {
+          attributes: true,
+          attributeFilter: ["class"],
+        });
       });
     }
   };
@@ -1347,7 +1349,9 @@ const Hooks = {
           tinderButtons.classList.remove("opacity-100");
           tinderButtons.classList.add("opacity-0", "pointer-events-none");
         }
-        const submitDock = document.getElementById("onboarding-form-submit-dock");
+        const submitDock = document.getElementById(
+          "onboarding-form-submit-dock",
+        );
         if (submitDock) {
           submitDock.classList.remove("opacity-0", "pointer-events-none");
           submitDock.classList.add("opacity-100");

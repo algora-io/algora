@@ -145,14 +145,6 @@ defmodule AlgoraWeb.HomeLive do
       <%= if @screenshot? do %>
         <div class="-mt-24" />
       <% end %>
-      <div
-        :if={not @screenshot? and not @onboarding_started}
-        id="home-top-navbar"
-        phx-update="ignore"
-        class="relative z-10 w-full shrink-0 bg-black overflow-hidden transition-all duration-300 ease-out max-h-40 opacity-100 translate-y-0"
-      >
-        <Header.header overlay={false} class="max-w-6xl w-full bg-black" />
-      </div>
 
       <main class={[
         "relative z-10",
@@ -166,6 +158,14 @@ defmodule AlgoraWeb.HomeLive do
           phx-update="ignore"
           class="min-h-screen flex flex-col lg:min-h-0 lg:flex-1 lg:overflow-hidden transition-opacity duration-500"
         >
+          <div
+            :if={not @screenshot? and !@onboarding_started}
+            id="home-top-navbarr"
+            phx-update="ignore"
+            class="relative z-10 w-full shrink-0 bg-black overflow-hidden transition-all duration-300 ease-out max-h-40 opacity-100 translate-y-0"
+          >
+            <Header.header overlay={false} class="max-w-6xl w-full bg-black" />
+          </div>
           <div class="flex-1 w-full max-w-6xl mx-auto px-6 lg:px-8 flex flex-col min-h-0">
             <div class="flex-1 flex flex-col justify-center lg:justify-start pb-4 w-full min-h-0 lg:overscroll-y-contain">
               <h1 class="text-2xl min-[412px]:text-[1.75rem] sm:text-[2.5rem]/[3rem] md:text-[3.5rem]/[4rem] lg:text-[5.2rem]/[5.5rem] xl:text-[5.2rem]/[5.7rem] font-black tracking-tight text-foreground font-display">
@@ -342,7 +342,7 @@ defmodule AlgoraWeb.HomeLive do
                       <Algora.Cloud.candidate_card {Map.merge(candidate, %{
                         anonymize: true,
                         root_class:
-                          "!h-[min(52rem,calc(100dvh-9rem))] !max-h-[min(52rem,calc(100dvh-9rem))]",
+                          "max-h-[calc(100dvh-132px)]",
                         tech_stack: [],
                         hide_badges?: true,
                         hide_scrollbars?: true,

@@ -527,6 +527,14 @@ emoji-picker {
   will-change: opacity, box-shadow, filter;
 }
 
+.home-candidate-card-wrap.is-hidden {
+  display: none;
+}
+
+.home-candidate-card-wrap.is-active {
+  display: block;
+}
+
 .home-candidate-exit.home-candidate-exit--like {
   animation: home-candidate-exit-like 900ms cubic-bezier(0.33, 0, 0.2, 1) forwards;
 }

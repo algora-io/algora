@@ -392,6 +392,7 @@ defmodule AlgoraWeb.HomeLive do
                     for={@form}
                     id="onboarding-candidates-form"
                     phx-submit="submit"
+                    phx-hook="OnboardingFormHook"
                     class="mt-8 flex flex-col gap-8 animate-in fade-in slide-in-from-bottom-3 duration-500 delay-150"
                   >
                     <input type="hidden" name={@form[:tech_stack].name} value="[]" />
@@ -555,9 +556,19 @@ defmodule AlgoraWeb.HomeLive do
           <button
             type="submit"
             form="onboarding-candidates-form"
-            class="flex w-full flex-row items-center justify-center gap-2 rounded-2xl bg-emerald-950/60 border-2 border-emerald-500/50 hover:border-emerald-400 hover:bg-emerald-900/60 py-4 shadow-xl shadow-emerald-900/40 transition-[transform,box-shadow] duration-200 ease-out hover:scale-[1.02] active:scale-[0.97] sm:gap-3"
+            class="flex w-full flex-row items-center justify-center gap-2 rounded-2xl bg-emerald-950/60 border-2 border-emerald-500/50 hover:border-emerald-400 hover:bg-emerald-900/60 py-4 shadow-xl shadow-emerald-900/40 transition-[transform,box-shadow,opacity] duration-200 ease-out hover:scale-[1.02] active:scale-[0.97] sm:gap-3"
           >
-            <.icon name="tabler-send" class="size-6 shrink-0 text-emerald-400 sm:size-7" />
+            <.icon
+              name="tabler-send"
+              data-submit-icon
+              class="size-6 shrink-0 text-emerald-400 sm:size-7"
+            />
+            <.icon
+              name="tabler-loader-2"
+              data-loading-icon
+              class="size-6 shrink-0 text-emerald-400 sm:size-7 animate-spin"
+              style="display: none;"
+            />
             <span class="text-base font-semibold text-emerald-400 tracking-wide sm:text-lg">
               Receive your candidates
             </span>

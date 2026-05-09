@@ -160,9 +160,9 @@ defmodule AlgoraWeb.HomeLive do
         >
           <div
             :if={not @screenshot? and !@onboarding_started}
-            id="home-top-navbarr"
+            id="home-top-navbar"
             phx-update="ignore"
-            class="relative z-10 w-full shrink-0 bg-black overflow-hidden transition-all duration-300 ease-out max-h-40 opacity-100 translate-y-0"
+            class="relative z-10 w-full shrink-0 bg-black overflow-hidden transition-all duration-300 ease-out max-h-40 opacity-100"
           >
             <Header.header overlay={false} class="max-w-6xl w-full bg-black" />
           </div>

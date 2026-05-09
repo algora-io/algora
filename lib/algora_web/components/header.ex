@@ -118,7 +118,7 @@ defmodule AlgoraWeb.Components.Header do
 
           <div class="mt-6 flow-root">
             <div class="-my-6 divide-y divide-border">
-              <div class="space-y-2 py-6">
+              <div :if={nav_links() != []} class="space-y-2 py-6">
                 <%= for link <- nav_links() do %>
                   <.link
                     :if={!link[:desktop_only]}

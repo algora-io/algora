@@ -84,21 +84,11 @@ function initHomeTinderSection() {
         if (entry.isIntersecting) {
           showTinderButtons();
           hideHero();
-          navbar?.classList.remove("max-h-40", "opacity-100", "translate-y-0");
-          navbar?.classList.add(
-            "max-h-0",
-            "opacity-0",
-            "-translate-y-full",
-            "pointer-events-none",
-          );
+          navbar?.classList.remove("max-h-40", "opacity-100");
+          navbar?.classList.add("max-h-0", "opacity-0", "pointer-events-none");
         } else if (!onboardingActive()) {
-          // navbar?.classList.remove(
-          //   "max-h-0",
-          //   "opacity-0",
-          //   "-translate-y-full",
-          //   "pointer-events-none",
-          // );
-          // navbar?.classList.add("max-h-40", "opacity-100", "translate-y-0");
+          // navbar?.classList.remove("max-h-0", "opacity-0", "pointer-events-none");
+          // navbar?.classList.add("max-h-40", "opacity-100");
         }
       });
     },

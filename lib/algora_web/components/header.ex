@@ -40,7 +40,7 @@ defmodule AlgoraWeb.Components.Header do
           <button
             type="button"
             class="rounded-md p-2.5 text-muted-foreground hover:text-foreground"
-            phx-click={JS.show(to: "#mobile-menu")}
+            phx-click={mobile_menu_show_js()}
           >
             <span class="sr-only">Open main menu</span>
             <.icon name="tabler-menu" class="h-6 w-6" />
@@ -109,7 +109,7 @@ defmodule AlgoraWeb.Components.Header do
             <button
               type="button"
               class="rounded-md p-2.5 text-muted-foreground hover:text-foreground"
-              phx-click={JS.hide(to: "#mobile-menu")}
+              phx-click={mobile_menu_hide_js()}
             >
               <span class="sr-only">Close menu</span>
               <.icon name="tabler-x" class="h-6 w-6" />
@@ -195,28 +195,10 @@ defmodule AlgoraWeb.Components.Header do
                     <li>
                       <.link
                         class="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                        href="/lovable/jobs"
-                        target="_blank"
-                      >
-                        Lovable
-                      </.link>
-                    </li>
-                    <li>
-                      <.link
-                        class="text-sm text-muted-foreground hover:text-foreground transition-colors"
                         href="/comfy/jobs"
                         target="_blank"
                       >
                         ComfyUI
-                      </.link>
-                    </li>
-                    <li>
-                      <.link
-                        class="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                        href="/firecrawl/jobs"
-                        target="_blank"
-                      >
-                        Firecrawl (YC S22)
                       </.link>
                     </li>
                     <li>
@@ -323,26 +305,6 @@ defmodule AlgoraWeb.Components.Header do
                         LinkedIn
                       </.link>
                     </li>
-                    <li>
-                      <.link
-                        class="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                        href={AlgoraWeb.Constants.get(:discord_url)}
-                        rel="noopener"
-                        target="_blank"
-                      >
-                        Discord
-                      </.link>
-                    </li>
-                    <li>
-                      <.link
-                        class="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                        href={AlgoraWeb.Constants.get(:youtube_url)}
-                        rel="noopener"
-                        target="_blank"
-                      >
-                        YouTube
-                      </.link>
-                    </li>
                   </ul>
                 </div>
                 <div>
@@ -375,5 +337,17 @@ defmodule AlgoraWeb.Components.Header do
       </div>
     </header>
     """
+  end
+
+  defp mobile_menu_show_js do
+    "overflow-hidden"
+    |> JS.add_class(to: "body")
+    |> JS.show(to: "#mobile-menu")
+  end
+
+  defp mobile_menu_hide_js do
+    [to: "#mobile-menu"]
+    |> JS.hide()
+    |> JS.remove_class("overflow-hidden", to: "body")
   end
 end

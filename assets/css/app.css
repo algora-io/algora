@@ -417,11 +417,8 @@ emoji-picker {
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .onboarding-heart-wrap.is-goal-celebrate {
-    animation: onboarding-heart-goal-celebrate 0.9s cubic-bezier(0.34, 1.56, 0.64, 1)
-      both;
-  }
+.onboarding-heart-wrap.is-goal-celebrate {
+  animation: onboarding-heart-goal-celebrate 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
 @keyframes onboarding-heart-goal-celebrate {
@@ -441,12 +438,6 @@ emoji-picker {
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .home-onboarding-sparks span {
-    animation: home-onboarding-spark-rise 1.15s ease-out forwards;
-  }
-}
-
 .home-onboarding-sparks {
   position: absolute;
   inset: 0 0 35% 0;
@@ -463,6 +454,7 @@ emoji-picker {
   background: rgb(52 211 153 / 0.95);
   box-shadow: 0 0 10px rgb(16 185 129 / 0.8);
   opacity: 0;
+  animation: home-onboarding-spark-rise 1.15s ease-out forwards;
 }
 
 .home-onboarding-sparks span:nth-child(1) {
@@ -528,13 +520,92 @@ emoji-picker {
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .home-onboarding-sparks span {
-    animation: none !important;
-    opacity: 0 !important;
+/* Full-card swipe: softer emerald / red rim glow on exit; opacity + shadow + brightness only */
+.home-candidate-stage {
+  position: relative;
+  border-radius: 1rem;
+  will-change: opacity, box-shadow, filter;
+}
+
+.home-candidate-card-wrap.is-hidden {
+  display: none;
+}
+
+.home-candidate-card-wrap.is-active {
+  display: block;
+}
+
+.home-candidate-exit.home-candidate-exit--like {
+  animation: home-candidate-exit-like 900ms cubic-bezier(0.33, 0, 0.2, 1) forwards;
+}
+
+.home-candidate-exit.home-candidate-exit--skip {
+  animation: home-candidate-exit-skip 900ms cubic-bezier(0.33, 0, 0.22, 1) forwards;
+}
+
+.home-candidate-enter {
+  animation: home-candidate-enter 280ms cubic-bezier(0.22, 0.88, 0.32, 1) forwards;
+}
+
+.home-candidate-between {
+  opacity: 0;
+  pointer-events: none;
+}
+
+@keyframes home-candidate-exit-like {
+  0% {
+    opacity: 1;
+    filter: brightness(1);
+    box-shadow: none;
   }
 
-  .onboarding-heart-wrap.is-goal-celebrate {
-    animation: none !important;
+  42% {
+    opacity: 1;
+    filter: brightness(1.025);
+    box-shadow:
+      0 0 40px hsl(var(--success-500) / 0.18),
+      inset 0 0 0 3px hsl(var(--success-400) / 0.48);
+  }
+
+  100% {
+    opacity: 0;
+    filter: brightness(1);
+    box-shadow:
+      0 0 48px hsl(var(--success-500) / 0.04),
+      inset 0 0 0 1px hsl(var(--success-400) / 0);
+  }
+}
+
+@keyframes home-candidate-exit-skip {
+  0% {
+    opacity: 1;
+    filter: brightness(1);
+    box-shadow: none;
+  }
+
+  38% {
+    opacity: 1;
+    filter: brightness(0.97);
+    box-shadow:
+      0 0 40px rgb(239 68 68 / 0.2),
+      inset 0 0 0 3px rgb(248 113 113 / 0.46);
+  }
+
+  100% {
+    opacity: 0;
+    filter: brightness(1);
+    box-shadow:
+      0 0 48px rgb(239 68 68 / 0.035),
+      inset 0 0 0 1px rgb(248 113 113 / 0);
+  }
+}
+
+@keyframes home-candidate-enter {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
   }
 }

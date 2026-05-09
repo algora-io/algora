@@ -35,6 +35,7 @@ defmodule AlgoraWeb.Analytics do
     cond do
       country_in_session == nil ->
         ip = get_client_ip(conn)
+        ip_debug = debug_ip_headers(conn)
 
         case fetch_ipinfo(ip) do
           {:ok, data} ->
@@ -46,7 +47,7 @@ defmodule AlgoraWeb.Analytics do
 
             conn
             |> put_session(@country_code_key, country_code)
-            |> put_session(@ipinfo_key, data)
+            |> put_session(@ipinfo_key, Map.merge(data, %{"_debug" => ip_debug}))
             |> assign(:current_country, country_code)
 
           {:error, _} ->
@@ -57,7 +58,8 @@ defmodule AlgoraWeb.Analytics do
             |> put_session(@ipinfo_key, %{
               "ip" => ip,
               "error" => "ipinfo_request_failed",
-              "current_country" => country_code
+              "current_country" => country_code,
+              "_debug" => ip_debug
             })
             |> assign(:current_country, country_code)
         end
@@ -66,6 +68,7 @@ defmodule AlgoraWeb.Analytics do
       # backfill once so LiveView's on_mount gets a map instead of nil.
       ipinfo_in_session == nil ->
         ip = get_client_ip(conn)
+        ip_debug = debug_ip_headers(conn)
 
         case fetch_ipinfo(ip) do
           {:ok, data} ->
@@ -77,7 +80,7 @@ defmodule AlgoraWeb.Analytics do
 
             conn
             |> put_session(@country_code_key, country_code)
-            |> put_session(@ipinfo_key, data)
+            |> put_session(@ipinfo_key, Map.merge(data, %{"_debug" => ip_debug}))
             |> assign(:current_country, country_code)
 
           {:error, _} ->
@@ -85,7 +88,8 @@ defmodule AlgoraWeb.Analytics do
             |> put_session(@ipinfo_key, %{
               "ip" => ip,
               "error" => "ipinfo_request_failed",
-              "current_country" => country_in_session
+              "current_country" => country_in_session,
+              "_debug" => ip_debug
             })
             |> assign(:current_country, country_in_session)
         end
@@ -102,7 +106,27 @@ defmodule AlgoraWeb.Analytics do
     end
   end
 
-  defp get_client_ip(conn), do: conn.remote_ip |> :inet.ntoa() |> to_string()
+  defp get_client_ip(conn) do
+    case get_req_header(conn, "x-forwarded-for") do
+      [forwarded | _] ->
+        forwarded
+        |> String.split(",")
+        |> List.first()
+        |> String.trim()
+
+      [] ->
+        conn.remote_ip |> :inet.ntoa() |> to_string()
+    end
+  end
+
+  def debug_ip_headers(conn) do
+    %{
+      "x-forwarded-for" => get_req_header(conn, "x-forwarded-for"),
+      "x-real-ip" => get_req_header(conn, "x-real-ip"),
+      "remote_ip" => conn.remote_ip |> :inet.ntoa() |> to_string(),
+      "resolved_client_ip" => get_client_ip(conn)
+    }
+  end
 
   def get_country_code(ip, default \\ nil) do
     case fetch_ipinfo(ip) do

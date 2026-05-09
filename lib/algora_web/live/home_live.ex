@@ -17,7 +17,6 @@ defmodule AlgoraWeb.HomeLive do
   alias AlgoraWeb.Components.Footer
   alias AlgoraWeb.Components.Header
   alias AlgoraWeb.Data.HomeCache
-  alias AlgoraWeb.LocalStore
 
   require Logger
 
@@ -63,20 +62,16 @@ defmodule AlgoraWeb.HomeLive do
       %{label: "Time to Interview", value: "<1 wk"}
     ]
 
-    # Get cached jobs and orgs data
     jobs_by_user = HomeCache.get_jobs_by_user()
     orgs_with_stats = HomeCache.get_orgs_with_stats()
 
-    # Load candidate data (override via Settings.home_carousel_candidates)
-    candidate_ids =
-      Settings.get_home_carousel_candidate_ids()
+    candidate_ids = Settings.get_home_carousel_candidate_ids()
 
     candidates_data =
       candidate_ids
       |> Enum.map(&load_candidate_data/1)
       |> Enum.reject(&is_nil/1)
 
-    # Build mixed carousel items: Candidate, Candidate, Job page, Candidate, Candidate, Job page
     carousel_items = build_carousel_items(candidates_data)
 
     case socket.assigns[:current_user] do
@@ -99,13 +94,9 @@ defmodule AlgoraWeb.HomeLive do
           |> assign(:tech_stack, [])
           |> assign(:candidates_data, candidates_data)
           |> assign(:carousel_items, carousel_items)
-          |> assign(:current_candidate_index, 0)
           |> assign(:onboarding_started, onboarding_started?(params))
-          |> assign(:liked_ids, [])
-          |> assign(:disliked_ids, [])
-          |> assign(:show_onboarding_form, false)
-          |> assign(:transitioning_to_onboarding_form, false)
           |> assign(:onboarding_form_submitted, false)
+          |> assign(:form_revealed, false)
           |> assign(:client_timezone, client_timezone)
           |> assign(
             :form,
@@ -118,9 +109,7 @@ defmodule AlgoraWeb.HomeLive do
           )
           |> assign_user_applications()
           |> assign_events()
-          |> LocalStore.init(key: __MODULE__)
 
-        socket = if connected?(socket), do: LocalStore.subscribe(socket), else: socket
         {:ok, socket}
     end
   end
@@ -128,7 +117,6 @@ defmodule AlgoraWeb.HomeLive do
   @impl true
   def handle_params(params, _uri, socket) do
     onboarding_started = onboarding_started?(params) || socket.assigns.onboarding_started
-
     {:noreply, assign(socket, :onboarding_started, onboarding_started)}
   end
 
@@ -147,14 +135,6 @@ defmodule AlgoraWeb.HomeLive do
         >
         </div>
       </div>
-      <% likes_reached_goal = onboarding_goal_reached?(@liked_ids) %>
-      <% deck_exhausted? = deck_exhausted?(@current_candidate_index, @candidates_data) %>
-      <% present_onboarding_form_ui? =
-        @show_onboarding_form || deck_exhausted? || @onboarding_form_submitted %>
-      <% tinder_buttons_visible? =
-        (@onboarding_started ||
-           (!@show_onboarding_form && !deck_exhausted? && !@onboarding_form_submitted)) &&
-          !present_onboarding_form_ui? %>
       <div
         id="local-state-store"
         phx-hook="LocalStateStore"
@@ -162,23 +142,9 @@ defmodule AlgoraWeb.HomeLive do
         class="hidden"
       >
       </div>
-      <%!-- <div :if={not @screenshot?} class="container mx-auto max-w-5xl px-4 pt-16 sm:pt-20">
-        <.debug
-          class="max-h-80 text-xs text-foreground border border-white/10"
-          data={visitor_ipinfo_debug(@ipinfo, @current_country, @client_timezone)}
-        />
-      </div> --%>
       <%= if @screenshot? do %>
         <div class="-mt-24" />
       <% end %>
-      <div
-        :if={not @screenshot? and not @onboarding_started}
-        id="home-top-navbar"
-        phx-update="ignore"
-        class="relative z-10 w-full shrink-0 bg-black overflow-hidden transition-all duration-300 ease-out max-h-40 opacity-100 translate-y-0"
-      >
-        <Header.header overlay={false} class="max-w-6xl w-full bg-black" />
-      </div>
 
       <main class={[
         "relative z-10",
@@ -188,36 +154,31 @@ defmodule AlgoraWeb.HomeLive do
         <%!-- Hero section --%>
         <section
           :if={!@onboarding_started}
-          class="min-h-screen flex flex-col lg:min-h-0 lg:flex-1 lg:overflow-hidden"
+          id="home-hero-section"
+          phx-update="ignore"
+          class="flex flex-col lg:min-h-0 lg:flex-1 lg:overflow-hidden transition-opacity duration-500"
         >
+          <div
+            :if={not @screenshot? and !@onboarding_started}
+            id="home-top-navbarr"
+            phx-update="ignore"
+            class="relative z-10 w-full shrink-0 bg-black overflow-hidden transition-all duration-300 ease-out max-h-40 opacity-100 translate-y-0"
+          >
+            <Header.header overlay={false} class="max-w-6xl w-full bg-black" />
+          </div>
           <div class="flex-1 w-full max-w-6xl mx-auto px-6 lg:px-8 flex flex-col min-h-0">
-            <div class="flex-1 flex flex-col lg:items-center justify-center lg:justify-start pb-4 w-full min-h-0 lg:overscroll-y-contain">
-              <%!-- Hero copy (unchanged) --%>
-              <h1 class="text-2xl min-[412px]:text-[1.75rem] sm:text-[2.5rem]/[3rem] md:text-[3.5rem]/[4rem] lg:text-[3rem]/[3.5rem] xl:text-[5rem]/[5.5rem] font-black tracking-tight text-foreground font-display">
+            <div class="flex-1 flex flex-col justify-center lg:justify-start pb-4 w-full min-h-0 lg:overscroll-y-contain">
+              <h1 class="text-2xl min-[412px]:text-[1.75rem] sm:text-[2.5rem]/[3rem] md:text-[3.5rem]/[4rem] lg:text-[5.2rem]/[5.5rem] xl:text-[5.2rem]/[5.7rem] font-black tracking-tight text-foreground font-display">
                 Open source <br class="hidden" />
                 <span class="text-emerald-400">tech recruiting</span>
               </h1>
-              <p class="mt-2 text-[0.9rem]/[1.4rem] min-[412px]:text-base md:text-lg xl:text-lg 2xl:text-2xl leading-6 font-medium text-foreground">
+              <p class="mt-2 xl:mt-4 text-[0.9rem]/[1.4rem] min-[412px]:text-base md:text-lg lg:text-[1.65rem]/[2.0rem] xl:text-[1.65rem]/[2.15rem] leading-6 font-medium text-foreground">
                 Connecting the most prolific open source maintainers & contributors with their next jobs
               </p>
-              <%!--
-            <div class="grid grid-cols-3 place-items-center sm:grid-cols-6 gap-4 md:gap-5 lg:gap-0 py-4 w-full">
-              <img src="/images/wordmarks/coderabbit.svg" alt="CodeRabbit" class="h-6 md:h-7 transition-all" />
-              <img src="/images/wordmarks/asi.svg" alt="Air Space Intelligence" class="h-7 md:h-9 transition-all" />
-              <img src="/images/wordmarks/lovable.svg" alt="Lovable" class="h-3 md:h-4 transition-all" />
-              <img src="/images/wordmarks/comfy.svg" alt="Comfy" class="h-3.5 md:h-5 transition-all saturate-0" />
-              <div class="flex items-center transition-all">
-                <img src="/images/wordmarks/firecrawl.svg" alt="Firecrawl" class="h-6 md:h-7" />
-                <img src="/images/wordmarks/firecrawl2.svg" alt="Firecrawl2" class="h-3 md:h-4" />
-              </div>
-              <img src="/images/wordmarks/textql.svg" alt="TextQL" class="h-4 md:h-5 transition-all" />
-            </div>
-            --%>
-              <%!-- Hires: testimonial cards then metrics --%>
-              <div class="w-full mt-4 sm:mt-8 grid grid-cols-1 gap-6 sm:gap-4 lg:grid-cols-3">
+              <div class="w-full mt-4 lg:mt-8 xl:mt-10 grid grid-cols-1 gap-6 sm:gap-4 lg:grid-cols-3">
                 <%= for hire <- @hires do %>
                   <div
-                    class="relative h-full min-h-[20rem] sm:min-h-[30rem]"
+                    class="relative h-full min-h-[20rem] sm:min-h-[28rem]"
                     style={"--hire-theme: #{hire.theme_color}"}
                   >
                     <div
@@ -320,124 +281,254 @@ defmodule AlgoraWeb.HomeLive do
                 <% end %>
               </div>
             </div>
-            <%!-- Scroll arrow --%>
-            <div class="flex shrink-0 flex-col items-center gap-1 py-6 sm:py-8 lg:py-4 lg:pb-6">
+            <div class="flex shrink-0 flex-col items-center gap-1 py-6 sm:py-8 lg:py-2 xl:py-4 lg:pb-6">
               <span class="text-xs font-medium text-muted-foreground tracking-widest uppercase">
                 Scroll to get started
               </span>
-              <div class="mt-2 flex flex-col items-center animate-bounce">
-                <.icon name="tabler-chevron-down" class="size-5 text-emerald-400" />
-                <.icon name="tabler-chevron-down" class="-mt-2 size-5 text-emerald-400/50" />
+              <div class="mt-1 flex flex-col items-center animate-bounce">
+                <.icon name="tabler-chevron-down" class="size-5 text-muted-foreground" />
+                <.icon name="tabler-chevron-down" class="-mt-2 size-5 text-muted-foreground/50" />
               </div>
             </div>
           </div>
         </section>
 
-        <%!-- Candidate section: tinder-style single card --%>
-        <% current_candidate = Enum.at(@candidates_data, @current_candidate_index) %>
+        <%!-- Candidate section: tinder-style stack, all candidates rendered upfront --%>
         <section
           id="candidate-section"
           phx-hook="TinderSection"
           data-onboarding-started={to_string(@onboarding_started)}
-          class="relative min-h-screen"
+          class="relative min-h-[100svh]"
         >
           <div class="pointer-events-none absolute inset-0 z-[5] overflow-hidden" aria-hidden="true">
-            <div class="motion-safe:animate-onboarding-orb-breathe absolute top-1/2 left-1/2 w-[500px] h-[500px] rounded-full bg-[#1ebba2]/10 blur-[100px] motion-reduce:animate-none">
+            <div class="animate-onboarding-orb-breathe absolute top-1/2 left-1/2 w-[500px] h-[500px] rounded-full bg-[#1ebba2]/10 blur-[100px]">
             </div>
-            <div class="motion-safe:animate-onboarding-orb-breathe absolute top-1/2 right-1/2 w-[500px] h-[500px] rounded-full bg-[#1ebba2]/10 blur-[100px] motion-reduce:animate-none">
+            <div class="animate-onboarding-orb-breathe absolute top-1/2 right-1/2 w-[500px] h-[500px] rounded-full bg-[#1ebba2]/10 blur-[100px]">
             </div>
           </div>
           <div class="relative z-10 w-full max-w-6xl mx-auto px-6 lg:px-8 pb-0">
-            <div class={[
-              "min-h-screen pt-4 transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)] motion-reduce:transition-opacity motion-reduce:duration-500",
-              if(present_onboarding_form_ui?,
-                do:
-                  "opacity-0 pointer-events-none motion-safe:translate-y-3 motion-safe:scale-[0.96] motion-reduce:translate-y-0 motion-reduce:scale-100",
-                else: "opacity-100 translate-y-0 scale-100"
-              )
-            ]}>
-              <%= if current_candidate do %>
-                <Algora.Cloud.candidate_card {Map.merge(current_candidate, %{
-                  anonymize: true,
-                  # root_class: "h-[calc(100svh-8rem)] max-h-[52rem]",
-                  tech_stack: [],
-                  hide_badges?: true,
-                  hide_scrollbars?: true,
-                  hide_preferences?: true
-                })} />
-              <% else %>
-                <div class="min-h-[60vh]" aria-hidden="true"></div>
-              <% end %>
-            </div>
             <div
-              :if={likes_reached_goal || deck_exhausted?}
+              id="home-candidate-fade"
               class={[
-                "onboarding-form-overlay-scroll absolute inset-0 flex justify-center overflow-y-auto transition-opacity duration-700 ease-out",
-                if(@onboarding_form_submitted, do: "items-center", else: "items-start"),
-                if(present_onboarding_form_ui?,
-                  do: "opacity-100",
-                  else: "opacity-0 pointer-events-none"
+                "pt-4 transition-opacity duration-400 ease-out",
+                if(@onboarding_form_submitted,
+                  do: "hidden",
+                  else: "min-h-[100svh]"
+                ),
+                if(@form_revealed,
+                  do: "opacity-0 pointer-events-none",
+                  else: "opacity-100"
                 )
               ]}
             >
-              <div class={[
-                "relative z-10 w-full text-card-foreground px-6 lg:px-8 pt-4 sm:pt-8 pb-0 transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)] motion-reduce:transition-opacity motion-reduce:duration-300",
-                if(present_onboarding_form_ui?,
-                  do: "opacity-100 motion-safe:translate-y-0 motion-safe:scale-100",
+              <%= if @candidates_data == [] do %>
+                <div class="min-h-[60vh]" aria-hidden="true"></div>
+              <% else %>
+                <div
+                  id="home-candidate-stack"
+                  phx-update="ignore"
+                  class="home-candidate-stage"
+                  data-total={length(@candidates_data)}
+                >
+                  <%= for {candidate, idx} <- Enum.with_index(@candidates_data) do %>
+                    <div
+                      class={[
+                        "home-candidate-card-wrap",
+                        if(idx == 0, do: "is-active", else: "is-hidden")
+                      ]}
+                      data-candidate-index={idx}
+                      data-candidate-user-id={candidate.candidate.match.user.id}
+                    >
+                      <Algora.Cloud.candidate_card {Map.merge(candidate, %{
+                        anonymize: true,
+                        root_class: "max-h-[calc(100dvh-132px)]",
+                        tech_stack: [],
+                        hide_badges?: true,
+                        hide_scrollbars?: true,
+                        hide_preferences?: true
+                      })} />
+                    </div>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+            <div
+              id="home-onboarding-form-overlay"
+              class={[
+                "transition-opacity duration-400 ease-out",
+                if(@onboarding_form_submitted,
+                  do: "relative w-full opacity-100",
                   else:
-                    "opacity-0 motion-safe:translate-y-6 motion-safe:scale-[0.97] motion-reduce:translate-y-0 motion-reduce:scale-100"
-                )
-              ]}>
+                    "onboarding-form-overlay-scroll absolute inset-0 flex items-start justify-center overflow-y-auto"
+                ),
+                if(@form_revealed, do: "opacity-100", else: "opacity-0 pointer-events-none")
+              ]}
+            >
+              <div
+                id="home-onboarding-form-inner"
+                class={[
+                  "relative z-10 w-full text-card-foreground px-6 lg:px-8 pt-4 sm:pt-8 pb-0 transition-[opacity,transform] duration-400 ease-out",
+                  if(@form_revealed,
+                    do: "opacity-100 translate-y-0 scale-100",
+                    else: "opacity-0 translate-y-6 scale-[0.97]"
+                  )
+                ]}
+              >
                 <%= if @onboarding_form_submitted do %>
                   <div class="relative flex w-full flex-col items-center justify-center text-center py-12 sm:py-16">
                     <div class="home-onboarding-sparks z-0" aria-hidden="true">
-                      <span />
-                      <span />
-                      <span />
-                      <span />
-                      <span />
-                      <span />
-                      <span />
-                      <span />
+                      <span /><span /><span /><span /><span /><span /><span /><span />
                     </div>
-                    <div class="relative z-10 flex size-16 sm:size-20 items-center justify-center rounded-full bg-emerald-500/15 ring-2 ring-emerald-500/40 mb-6 motion-safe:animate-onboarding-success-icon motion-reduce:animate-none">
+                    <div class="relative z-10 flex size-16 sm:size-20 items-center justify-center rounded-full bg-emerald-500/15 ring-2 ring-emerald-500/40 mb-6 animate-onboarding-success-icon">
                       <.icon name="tabler-check" class="size-9 sm:size-11 text-emerald-400" />
                     </div>
-                    <h2 class="relative z-10 text-2xl sm:text-3xl font-semibold leading-tight tracking-tight text-foreground motion-safe:animate-onboarding-line-in motion-safe:delay-100 motion-reduce:animate-none">
+                    <h2 class="relative z-10 text-2xl sm:text-3xl font-semibold leading-tight tracking-tight text-foreground animate-onboarding-line-in delay-100">
                       You're all set
                     </h2>
-                    <p class="relative z-10 mt-2 max-w-md text-base text-muted-foreground leading-relaxed motion-safe:animate-onboarding-line-in motion-safe:delay-200 motion-reduce:animate-none">
+                    <p class="relative z-10 mt-2 max-w-md text-base text-muted-foreground leading-relaxed animate-onboarding-line-in delay-200">
                       Thanks for reaching out, we'll get in touch soon!
                     </p>
                   </div>
+                  <div class="w-full mt-12 max-w-2xl mx-auto flex flex-col text-left pb-16">
+                    <h3 class="text-xl sm:text-2xl font-semibold tracking-tight text-foreground text-center">
+                      How it works
+                    </h3>
+                    <div class="space-y-12 mt-4">
+                      <div class="w-full space-y-4">
+                        <div class="flex items-start gap-2 sm:gap-3">
+                          <.icon
+                            name="tabler-circle-number-1"
+                            class="w-6 h-6 text-foreground shrink-0"
+                          />
+                          <p class="text-foreground text-sm sm:text-base font-medium">
+                            Share your JDs and receive handpicked candidates with the right skills and experience
+                          </p>
+                        </div>
+                        <div class="relative z-30 mx-auto">
+                          <div class="group/card h-full border-2 border-white/10 bg-muted group relative flex-1 overflow-hidden rounded-xl">
+                            <div class="grid h-7 grid-cols-[1fr_auto_1fr] overflow-hidden border-b border-gray-800">
+                              <div class="ml-2 flex items-center gap-1">
+                                <div class="h-2.5 w-2.5 rounded-full bg-red-400"></div>
+                                <div class="h-2.5 w-2.5 rounded-full bg-yellow-400"></div>
+                                <div class="h-2.5 w-2.5 rounded-full bg-green-400"></div>
+                              </div>
+                              <div class="flex items-center justify-center gap-2">
+                                <img
+                                  src={~p"/images/logo-192px.png"}
+                                  alt="Algora"
+                                  class="w-4 h-4 rounded"
+                                />
+                                <div class="text-xs text-foreground">
+                                  algora.io<span class="text-foreground/70 hidden sm:inline">/candidates</span>
+                                </div>
+                              </div>
+                              <div></div>
+                            </div>
+                            <div class="relative flex aspect-[1200/630] h-full w-full items-center justify-center">
+                              <img
+                                src={~p"/images/screenshots/candidates-page.png"}
+                                alt="Candidates page"
+                                class="w-full bg-[#121214] p-1"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="w-full space-y-4">
+                        <div class="flex items-start gap-2 sm:gap-3">
+                          <.icon
+                            name="tabler-circle-number-2"
+                            class="w-6 h-6 text-foreground shrink-0"
+                          />
+                          <p class="text-foreground text-sm sm:text-base font-medium">
+                            Get notified in your inbox and Slack with candidates ready to interview
+                          </p>
+                        </div>
+                        <div class="relative z-30 mx-auto">
+                          <div class="group/card h-full border-2 border-white/10 bg-muted group relative flex-1 overflow-hidden rounded-xl">
+                            <div class="grid h-7 grid-cols-[1fr_auto_1fr] overflow-hidden border-b border-gray-800">
+                              <div class="ml-2 flex items-center gap-1">
+                                <div class="h-2.5 w-2.5 rounded-full bg-red-400"></div>
+                                <div class="h-2.5 w-2.5 rounded-full bg-yellow-400"></div>
+                                <div class="h-2.5 w-2.5 rounded-full bg-green-400"></div>
+                              </div>
+                              <div class="flex items-center justify-center gap-2">
+                                <img
+                                  src={~p"/images/logos/slack.svg"}
+                                  alt="Slack"
+                                  class="w-4 h-4 rounded"
+                                />
+                                <div class="text-xs text-foreground">
+                                  app.slack.com<span class="text-foreground/70 hidden sm:inline">/client/T05UQ2UMHFX/C09FC54M0S3</span>
+                                </div>
+                              </div>
+                              <div></div>
+                            </div>
+                            <div class="relative flex aspect-[1008/561] h-full w-full items-center justify-center">
+                              <img
+                                src={~p"/images/screenshots/candidate-drip.png"}
+                                alt="Candidate drip"
+                                class="w-full bg-[#121214] p-1"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="w-full space-y-4">
+                        <div class="flex items-start gap-2 sm:gap-3">
+                          <.icon
+                            name="tabler-circle-number-3"
+                            class="w-6 h-6 text-foreground shrink-0"
+                          />
+                          <p class="text-foreground text-sm sm:text-base font-medium">
+                            Candidates are auto-added to your Ashby
+                          </p>
+                        </div>
+                        <div class="relative z-30 mx-auto">
+                          <div class="group/card h-full border-2 border-white/10 bg-muted group relative flex-1 overflow-hidden rounded-xl">
+                            <div class="grid h-7 grid-cols-[1fr_auto_1fr] overflow-hidden border-b border-gray-800">
+                              <div class="ml-2 flex items-center gap-1">
+                                <div class="h-2.5 w-2.5 rounded-full bg-red-400"></div>
+                                <div class="h-2.5 w-2.5 rounded-full bg-yellow-400"></div>
+                                <div class="h-2.5 w-2.5 rounded-full bg-green-400"></div>
+                              </div>
+                              <div class="flex items-center justify-center gap-2">
+                                <img
+                                  src={~p"/images/logos/ashby.png"}
+                                  alt="Ashby"
+                                  class="w-4 h-4 rounded"
+                                />
+                                <div class="text-xs text-foreground">
+                                  app.ashbyhq.com<span class="text-foreground/70 hidden sm:inline">/candidates/pipeline/active</span>
+                                </div>
+                              </div>
+                              <div></div>
+                            </div>
+                            <div class="relative flex aspect-[816/414] h-full w-full items-center justify-center">
+                              <img src={~p"/images/screenshots/ashby.png"} alt="Ashby" class="w-full" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 <% else %>
-                  <h2 class="text-2xl sm:text-3xl font-semibold leading-tight tracking-tight text-foreground motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 motion-safe:duration-500">
+                  <h2 class="text-2xl sm:text-3xl font-semibold leading-tight tracking-tight text-foreground animate-in fade-in slide-in-from-bottom-4 duration-500">
                     Get your top candidates
                   </h2>
-                  <p class="mt-3 text-base text-muted-foreground motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-3 motion-safe:duration-500 motion-safe:delay-75">
+                  <p class="mt-3 text-base text-muted-foreground animate-in fade-in slide-in-from-bottom-3 duration-500 delay-75">
                     You'll hear back from the Algora founders
                   </p>
                   <.form
                     for={@form}
                     id="onboarding-candidates-form"
                     phx-submit="submit"
-                    class="mt-8 flex flex-col gap-8 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-3 motion-safe:duration-500 motion-safe:delay-150"
+                    class="mt-8 flex flex-col gap-8 animate-in fade-in slide-in-from-bottom-3 duration-500 delay-150"
                   >
-                    <%!--
-                      <div class="space-y-3">
-                        <div class="block text-base sm:text-xl font-semibold leading-snug text-foreground">
-                          Tech stack
-                        </div>
-                        <.TechStack
-                          tech={Ecto.Changeset.get_field(@form.source, :tech_stack) || []}
-                          socket={@socket}
-                          form="form"
-                          classes="-mt-2"
-                        />
-                      </div>
-                      --%>
                     <input type="hidden" name={@form[:tech_stack].name} value="[]" />
-                    <div class="motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-500 motion-safe:delay-200">
+                    <input type="hidden" name="liked_ids" id="onboarding-liked-ids" value="[]" />
+                    <input type="hidden" name="disliked_ids" id="onboarding-disliked-ids" value="[]" />
+                    <div class="animate-in fade-in slide-in-from-bottom-2 duration-500 delay-200">
                       <label
                         for={@form[:job_description].id}
                         class="block text-base sm:text-xl font-semibold leading-snug text-foreground mb-2"
@@ -450,7 +541,7 @@ defmodule AlgoraWeb.HomeLive do
                         placeholder="https://company.com/careers"
                       />
                     </div>
-                    <div class="grid grid-cols-1 gap-6 gap-y-8 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-500 motion-safe:delay-[260ms]">
+                    <div class="grid grid-cols-1 gap-6 gap-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-300">
                       <div>
                         <label
                           for={@form[:comp_range].id}
@@ -480,7 +571,7 @@ defmodule AlgoraWeb.HomeLive do
                         />
                       </div>
                     </div>
-                    <div class="motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-500 motion-safe:delay-[320ms]">
+                    <div class="animate-in fade-in slide-in-from-bottom-2 duration-500 delay-300">
                       <label
                         for={@form[:email].id}
                         class="block text-base sm:text-xl font-semibold leading-snug text-foreground mb-2"
@@ -493,18 +584,6 @@ defmodule AlgoraWeb.HomeLive do
                         class="px-3 py-3 !text-sm !sm:text-base sm:!leading-7 bg-white/5"
                       />
                     </div>
-                    <%!-- <div class="grid grid-cols-3 gap-4 sm:gap-8 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-500 motion-safe:delay-[380ms]">
-                      <%= for stat <- @stats1 do %>
-                        <div>
-                          <div class="text-2xl sm:text-3xl font-bold font-display text-foreground">
-                            {stat.value}
-                          </div>
-                          <div class="text-xs sm:text-sm text-muted-foreground mt-1">
-                            {stat.label}
-                          </div>
-                        </div>
-                      <% end %>
-                    </div> --%>
                   </.form>
                 <% end %>
               </div>
@@ -513,43 +592,46 @@ defmodule AlgoraWeb.HomeLive do
         </section>
       </main>
 
-      <%!-- Tinder action buttons: fixed dock, shown when candidate section is in view --%>
+      <Footer.footer :if={@onboarding_form_submitted} />
+
+      <%!-- Tinder action buttons: fixed dock, JS-controlled visibility --%>
       <div
-        :if={tinder_buttons_visible?}
+        :if={!@form_revealed}
         id="tinder-buttons"
         phx-hook="TinderButtons"
         phx-update="ignore"
-        data-like-count={onboarding_likes(@liked_ids)}
         data-like-goal={onboarding_likes_goal()}
-        class="fixed bottom-0 left-0 right-0 z-40 pb-6 sm:pb-8 pt-5 bg-gradient-to-t from-black via-black/80 to-transparent opacity-0 transition-opacity duration-500 pointer-events-none"
+        data-swipe-exit-ms="500"
+        data-swipe-gap-ms="40"
+        data-swipe-enter-ms="200"
+        data-onboarding-started={to_string(@onboarding_started)}
+        class="fixed bottom-0 left-0 right-0 z-40 pb-6 sm:pb-8 pt-5 bg-transparent opacity-0 transition-opacity duration-300 pointer-events-none"
       >
         <div class="mx-auto flex w-full max-w-6xl gap-3 sm:gap-4 px-6 lg:px-8">
           <button
-            class="pointer-events-auto flex flex-1 basis-0 flex-row items-center justify-center gap-2 rounded-2xl bg-red-950/60 border-2 border-red-500/50 hover:border-red-400 hover:bg-red-900/60 py-4 shadow-xl shadow-red-900/40 transition-[transform,box-shadow] duration-200 ease-out motion-safe:hover:scale-[1.02] motion-safe:active:scale-[0.97] disabled:opacity-60 disabled:pointer-events-none"
-            phx-click="dislike_candidate"
-            disabled={likes_reached_goal}
+            type="button"
+            class="pointer-events-auto flex flex-1 basis-0 flex-row items-center justify-center gap-2 rounded-2xl bg-red-950/60 border-2 border-red-500/50 hover:border-red-400 hover:bg-red-900/60 py-4 shadow-xl shadow-red-900/40 transition-[transform,box-shadow] duration-200 ease-out hover:scale-[1.02] active:scale-[0.97] disabled:bg-opacity-60 text-red-400 disabled:text-red-400/60 disabled:pointer-events-none"
+            data-home-swipe="skip"
             aria-label="Skip candidate"
           >
-            <.icon name="tabler-x" class="size-7 shrink-0 text-red-400 sm:size-8" />
-            <span class="text-sm font-semibold text-red-400 tracking-wide">Skip</span>
+            <.icon name="tabler-x" class="size-7 shrink-0 sm:size-8" />
+            <span class="text-sm font-semibold tracking-wide">Skip</span>
           </button>
           <button
-            class="pointer-events-auto flex flex-1 basis-0 flex-row items-center justify-center gap-3 rounded-2xl bg-emerald-950/60 border-2 border-emerald-500/50 hover:border-emerald-400 hover:bg-emerald-900/60 py-4 shadow-xl shadow-emerald-900/40 transition-[transform,box-shadow] duration-200 ease-out motion-safe:hover:scale-[1.02] motion-safe:active:scale-[0.97] disabled:opacity-60 disabled:pointer-events-none"
-            phx-click="like_candidate"
-            disabled={likes_reached_goal}
+            type="button"
+            class="pointer-events-auto flex flex-1 basis-0 flex-row items-center justify-center gap-3 rounded-2xl bg-emerald-950/60 border-2 border-emerald-500/50 hover:border-emerald-400 hover:bg-emerald-900/60 py-4 shadow-xl shadow-emerald-900/40 transition-[transform,box-shadow] duration-200 ease-out hover:scale-[1.02] active:scale-[0.97] disabled:bg-opacity-60 text-emerald-400 disabled:text-emerald-400/60 disabled:pointer-events-none"
+            data-home-swipe="like"
             aria-label="Like candidate"
           >
-            <% fill_pct = onboarding_fill_pct(@liked_ids) %>
-            <% curve_bottom_px = onboarding_curve_bottom_px(@liked_ids) %>
             <div class="onboarding-heart-wrap">
               <div class="onboarding-heart">
-                <div class="onboarding-heart-tank" style={"height: #{fill_pct}%;"}></div>
+                <div class="onboarding-heart-tank" style="height: 0%;"></div>
                 <svg
                   class="onboarding-heart-curve"
                   viewBox="0 24 150 28"
                   preserveAspectRatio="none"
                   shape-rendering="auto"
-                  style={"bottom: #{curve_bottom_px}px;"}
+                  style="bottom: -10px;"
                 >
                   <defs>
                     <path
@@ -586,29 +668,39 @@ defmodule AlgoraWeb.HomeLive do
                 </clipPath>
               </svg>
             </div>
-            <span
-              id="onboarding-heart-label"
-              class="text-sm font-semibold text-emerald-400 tracking-wide"
-            >
+            <span id="onboarding-heart-label" class="text-sm font-semibold tracking-wide">
               Like
             </span>
           </button>
         </div>
       </div>
 
-      <%!-- Onboarding form submit: fixed dock, same chrome as like/dislike --%>
+      <%!-- Onboarding form submit dock: rendered while form not yet submitted; JS toggles visibility --%>
       <div
-        :if={present_onboarding_form_ui? && !@onboarding_form_submitted}
+        :if={!@onboarding_form_submitted}
         id="onboarding-form-submit-dock"
-        class="fixed bottom-0 left-0 right-0 z-40 pb-6 sm:pb-8 pt-5 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none"
+        class={[
+          "fixed bottom-0 left-0 right-0 z-40 pb-6 sm:pb-8 pt-5 bg-gradient-to-t from-black via-black/80 to-transparent transition-opacity duration-300",
+          if(@form_revealed, do: "opacity-100", else: "opacity-0 pointer-events-none")
+        ]}
       >
         <div class="mx-auto flex w-full max-w-6xl gap-3 sm:gap-4 px-6 lg:px-8 items-stretch justify-center">
           <button
             type="submit"
             form="onboarding-candidates-form"
-            class="pointer-events-auto flex w-full flex-row items-center justify-center gap-2 rounded-2xl bg-emerald-950/60 border-2 border-emerald-500/50 hover:border-emerald-400 hover:bg-emerald-900/60 py-4 shadow-xl shadow-emerald-900/40 transition-[transform,box-shadow] duration-200 ease-out motion-safe:hover:scale-[1.02] motion-safe:active:scale-[0.97] sm:gap-3"
+            class="flex w-full cursor-pointer flex-row items-center justify-center gap-2 rounded-2xl bg-emerald-950/60 border-2 border-emerald-500/50 hover:border-emerald-400 hover:bg-emerald-900/60 py-4 shadow-xl shadow-emerald-900/40 transition-[transform,box-shadow,opacity] duration-200 ease-out hover:scale-[1.02] active:scale-[0.97] sm:gap-3"
           >
-            <.icon name="tabler-send" class="size-6 shrink-0 text-emerald-400 sm:size-7" />
+            <.icon
+              name="tabler-send"
+              data-submit-icon
+              class="size-6 shrink-0 text-emerald-400 sm:size-7"
+            />
+            <.icon
+              name="tabler-loader-2"
+              data-loading-icon
+              class="size-6 shrink-0 text-emerald-400 sm:size-7 animate-spin"
+              style="display: none;"
+            />
             <span class="text-base font-semibold text-emerald-400 tracking-wide sm:text-lg">
               Receive your candidates
             </span>
@@ -617,33 +709,37 @@ defmodule AlgoraWeb.HomeLive do
       </div>
     </div>
 
-    <%!--
-    <div class="relative isolate overflow-hidden bg-gradient-to-br from-black to-background">
-      <Footer.footer class="max-w-[88rem]" />
-    </div>
-    --%>
-
     <.modal_video_dialog />
     """
   end
 
   @impl true
-  def handle_event("submit", %{"form" => params}, socket) do
+  def handle_event("submit", params, socket) do
+    form_params = params["form"] || %{}
+
     tech_stack =
-      Jason.decode!(params["tech_stack"] || "[]") ++
-        case String.trim(params["tech_stack_input"] || "") do
+      Jason.decode!(form_params["tech_stack"] || "[]") ++
+        case String.trim(form_params["tech_stack_input"] || "") do
           "" -> []
           tech_stack_input -> String.split(tech_stack_input, ",")
         end
 
-    params = Map.put(params, "tech_stack", tech_stack)
+    form_params = Map.put(form_params, "tech_stack", tech_stack)
 
-    case %Form{} |> Form.changeset(params) |> Ecto.Changeset.apply_action(:save) do
+    liked_ids = decode_id_list(params["liked_ids"])
+    disliked_ids = decode_id_list(params["disliked_ids"])
+
+    socket =
+      socket
+      |> assign(:form_revealed, true)
+      |> assign(:onboarding_started, true)
+
+    case %Form{} |> Form.changeset(form_params) |> Ecto.Changeset.apply_action(:save) do
       {:ok, data} ->
         welcome_attrs =
           Map.merge(Map.from_struct(data), %{
-            liked_ids: home_onboarding_feedback_user_ids(socket.assigns.liked_ids),
-            disliked_ids: home_onboarding_feedback_user_ids(socket.assigns.disliked_ids)
+            liked_ids: home_onboarding_feedback_user_ids(liked_ids),
+            disliked_ids: home_onboarding_feedback_user_ids(disliked_ids)
           })
 
         Algora.Cloud.create_welcome_task(welcome_attrs)
@@ -656,66 +752,13 @@ defmodule AlgoraWeb.HomeLive do
   end
 
   @impl true
+  def handle_event("reveal_form", _params, socket) do
+    {:noreply, assign(socket, form_revealed: true)}
+  end
+
+  @impl true
   def handle_event("tech_stack_changed", %{"tech_stack" => tech_stack}, socket) do
     {:noreply, assign(socket, :tech_stack, tech_stack)}
-  end
-
-  @impl true
-  def handle_event("restore_settings", token, socket) do
-    socket =
-      socket
-      |> LocalStore.restore(token)
-      |> assign(:liked_ids, [])
-      |> assign(:show_onboarding_form, false)
-      |> assign(:transitioning_to_onboarding_form, false)
-      |> assign(:onboarding_form_submitted, false)
-
-    {:noreply, socket}
-  end
-
-  @impl true
-  def handle_event("start_onboarding", _params, socket) do
-    if socket.assigns.onboarding_started do
-      {:noreply, socket}
-    else
-      {:noreply, assign(socket, :onboarding_started, true)}
-    end
-  end
-
-  @impl true
-  def handle_event("like_candidate", _params, socket) do
-    current = Enum.at(socket.assigns.candidates_data, socket.assigns.current_candidate_index)
-    user_id = current && current.candidate.match.user.id
-    liked_ids = if user_id, do: [user_id | socket.assigns.liked_ids], else: socket.assigns.liked_ids
-    likes_reached_goal = onboarding_goal_reached?(liked_ids)
-
-    socket = assign(socket, :liked_ids, liked_ids)
-
-    cond do
-      likes_reached_goal && socket.assigns.transitioning_to_onboarding_form ->
-        {:noreply, socket}
-
-      likes_reached_goal ->
-        Process.send_after(self(), :show_onboarding_form, 450)
-        {:noreply, assign(socket, :transitioning_to_onboarding_form, true)}
-
-      true ->
-        {:noreply, assign(socket, :current_candidate_index, socket.assigns.current_candidate_index + 1)}
-    end
-  end
-
-  @impl true
-  def handle_event("dislike_candidate", _params, socket) do
-    current = Enum.at(socket.assigns.candidates_data, socket.assigns.current_candidate_index)
-    user_id = current && current.candidate.match.user.id
-    disliked_ids = if user_id, do: [user_id | socket.assigns.disliked_ids], else: socket.assigns.disliked_ids
-
-    socket =
-      socket
-      |> assign(:current_candidate_index, socket.assigns.current_candidate_index + 1)
-      |> LocalStore.assign_cached(:disliked_ids, disliked_ids)
-
-    {:noreply, socket}
   end
 
   @impl true
@@ -737,16 +780,18 @@ defmodule AlgoraWeb.HomeLive do
     end
   end
 
-  @impl true
-  def handle_info(:show_onboarding_form, socket) do
-    {:noreply,
-     socket
-     |> assign(:show_onboarding_form, true)
-     |> assign(:transitioning_to_onboarding_form, false)}
+  defp decode_id_list(nil), do: []
+
+  defp decode_id_list(value) when is_binary(value) do
+    case Jason.decode(value) do
+      {:ok, list} when is_list(list) -> list
+      _ -> []
+    end
   end
 
-  # Session stores lowercase ISO code from AlgoraWeb.Analytics (IPinfo Lite). Prefer a readable
-  # country name; ConnectCountries covers Stripe-supported codes (fallback: uppercase code).
+  defp decode_id_list(value) when is_list(value), do: value
+  defp decode_id_list(_), do: []
+
   defp location_prefill(client_timezone, country_code) do
     us? =
       is_binary(country_code) and String.downcase(String.trim(country_code)) == "us"
@@ -777,20 +822,6 @@ defmodule AlgoraWeb.HomeLive do
     end
   end
 
-  defp visitor_ipinfo_debug(nil, current_country, client_timezone) do
-    %{
-      "note" =>
-        "No ipinfo in session yet (e.g. session from before this payload was stored). current_country from session:",
-      "current_country" => current_country,
-      "client_timezone" => client_timezone
-    }
-  end
-
-  defp visitor_ipinfo_debug(data, _current_country, client_timezone) when is_map(data) do
-    Map.put(data, "client_timezone", client_timezone)
-  end
-
-  # Same IANA zone as Timezone.svelte / assets/js/liveSocket `params.timezone`.
   defp read_client_timezone(socket) do
     case get_connect_params(socket) do
       %{"timezone" => tz} when is_binary(tz) and tz != "" -> tz
@@ -819,28 +850,6 @@ defmodule AlgoraWeb.HomeLive do
     ids
     |> Enum.reverse()
     |> Enum.uniq()
-  end
-
-  defp deck_exhausted?(index, candidates_data) when is_list(candidates_data) do
-    candidates_data != [] and match?(nil, Enum.at(candidates_data, index))
-  end
-
-  defp onboarding_goal_reached?(liked_ids), do: onboarding_likes(liked_ids) >= onboarding_likes_goal()
-
-  defp onboarding_likes(liked_ids) do
-    liked_ids
-    |> Enum.uniq()
-    |> length()
-    |> min(onboarding_likes_goal())
-  end
-
-  defp onboarding_fill_pct(liked_ids) do
-    trunc(onboarding_likes(liked_ids) / onboarding_likes_goal() * 100)
-  end
-
-  defp onboarding_curve_bottom_px(liked_ids) do
-    fill_pct = onboarding_fill_pct(liked_ids)
-    max(-10, trunc(fill_pct * 0.24) - 10)
   end
 
   def event_card(assigns) do
@@ -991,28 +1000,23 @@ defmodule AlgoraWeb.HomeLive do
         nil
 
       match ->
-        # Preload the nested job_posting.user association
         match = Algora.Repo.preload(match, job_posting: :user)
         user = match.user
 
-        # Fetch contributions for this user
         contributions = Algora.Workspace.list_user_contributions([user.id], exclude_personal: false, display_all: true)
 
         contributions_map = %{user.id => contributions}
 
-        # Fetch language contributions for this user
         language_contributions_map =
           [user.id]
           |> Algora.Cloud.list_language_contributions_batch()
           |> transform_language_contributions()
 
-        # Fetch heatmap data for this user
         heatmaps_map =
           [user.id]
           |> Algora.Cloud.list_heatmaps()
           |> Map.new(fn heatmap -> {heatmap.user_id, heatmap.data} end)
 
-        # Build interviews map
         interviews_map = build_interviews_map([match])
 
         %{
@@ -1040,7 +1044,6 @@ defmodule AlgoraWeb.HomeLive do
   end
 
   defp transform_language_contributions(contributions_map) do
-    # Transform language contributions similar to candidates2_live.ex
     Map.new(contributions_map, fn {user_id, contributions} ->
       transformed =
         contributions
@@ -1067,7 +1070,6 @@ defmodule AlgoraWeb.HomeLive do
         |> Enum.reject(&is_nil/1)
         |> Enum.group_by(& &1.language)
         |> Enum.map(fn {_language, contribs} ->
-          # Combine contributions for the same language
           Enum.reduce(contribs, fn contrib, acc ->
             %{
               acc
@@ -1083,7 +1085,6 @@ defmodule AlgoraWeb.HomeLive do
   end
 
   defp build_interviews_map(matches) do
-    # Build interviews map for matches similar to candidates2_live.ex
     import Ecto.Query
 
     alias Algora.Repo
@@ -1105,19 +1106,13 @@ defmodule AlgoraWeb.HomeLive do
   end
 
   defp build_carousel_items(candidates_data) do
-    job_pages = [
-      # %{url: "https://algora.io/og/coderabbit/jobs", alt: "CodeRabbit jobs"},
-      # %{url: "https://algora.io/og/lovable/jobs", alt: "Lovable jobs"}
-    ]
+    job_pages = []
 
-    # Cadence: Candidate, Candidate, Job page, Candidate, Candidate, Job page
     candidates_data
     |> Enum.reduce({[], 0, 0}, fn candidate, {acc, candidate_count, job_page_index} ->
-      # Add the candidate
       acc_with_candidate = acc ++ [{:candidate, candidate}]
       new_candidate_count = candidate_count + 1
 
-      # After every 2 candidates, insert a job page
       if job_pages != [] and rem(new_candidate_count, 2) == 0 do
         job_page = Enum.at(job_pages, rem(job_page_index, length(job_pages)))
         {acc_with_candidate ++ [{:job_page, job_page}], new_candidate_count, job_page_index + 1}

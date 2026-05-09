@@ -197,6 +197,22 @@ We also recommend using [direnv](https://github.com/direnv/direnv) to load envir
    make watch
    ```
 
+### Graceful Fly.io Deploys
+
+For Fly.io deployments that should avoid interrupting in-flight requests and workers, build and push the image first:
+
+```sh
+fly deploy --build-only --push
+```
+
+Then pass the resulting image ref to the deploy helper:
+
+```sh
+mix run deploy.exs registry.fly.io/algora:deployment-xxxx
+```
+
+The helper doubles the `app` process group, updates the new machines to the image, marks old machines unhealthy through `/health`, pauses local Oban queues, waits for the Fly checks to drain traffic, and then stops and destroys the old machines.
+
 ### Setting up external services
 
 Some features of Algora rely on external services. If you're not planning on using these features, feel free to skip setting them up.

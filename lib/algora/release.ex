@@ -18,6 +18,11 @@ defmodule Algora.Release do
     {:ok, _, _} = Ecto.Migrator.with_repo(repo, &Ecto.Migrator.run(&1, :down, to: version))
   end
 
+  def prepare_for_deploy do
+    Algora.DeploymentHealth.down()
+    Oban.pause_all_queues(local_only: true)
+  end
+
   defp repos do
     Application.fetch_env!(@app, :ecto_repos)
   end

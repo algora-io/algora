@@ -38,6 +38,7 @@ defmodule Algora.Application do
         Algora.ScreenshotQueue,
         Algora.RateLimit,
         AlgoraWeb.Data.HomeCache,
+        Algora.DeploymentHealth,
         # Start to serve requests, typically the last entry
         AlgoraWeb.Endpoint,
         Algora.Stargazer,

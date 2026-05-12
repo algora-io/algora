@@ -1379,6 +1379,7 @@ defmodule AlgoraWeb.CoreComponents do
   end
 
   defdelegate tech_badge(assigns), to: AlgoraWeb.Components.TechBadge
+  defdelegate country_badge(assigns), to: AlgoraWeb.Components.CountryBadge
 
   defdelegate accordion_item(assigns), to: Accordion
   defdelegate accordion_trigger(assigns), to: Accordion

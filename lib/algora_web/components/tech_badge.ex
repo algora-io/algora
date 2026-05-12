@@ -1,22 +1,26 @@
 defmodule AlgoraWeb.Components.TechBadge do
   @moduledoc false
-  use Phoenix.Component
+  use AlgoraWeb.Component
 
   import AlgoraWeb.Components.UI.Avatar
   import AlgoraWeb.Components.UI.Badge
 
   attr :tech, :string, required: true
   attr :variant, :string, default: "outline"
+  attr :size, :string, values: ~w(sm default), default: "default"
   attr :rest, :global
 
   def tech_badge(assigns) do
     assigns =
-      assign(assigns, :tech_lower, normalize(assigns.tech))
+      assigns
+      |> assign(:tech_lower, normalize(assigns.tech))
+      |> assign(:badge_class, badge_size_class(assigns.size))
+      |> assign(:avatar_class, avatar_size_class(assigns.size))
 
     ~H"""
-    <.badge variant={@variant} {@rest}>
+    <.badge variant={@variant} class={@badge_class} {@rest}>
       <%= if Enum.any?(langs(), &(normalize(&1) == @tech_lower)) do %>
-        <.avatar class="w-4 h-4 mr-1 rounded-sm">
+        <.avatar class={classes([@avatar_class, "mr-1 rounded-sm"])}>
           <.avatar_image src={icon_url(@tech_lower)} class={icon_class(@tech_lower)} />
           <.avatar_fallback>
             {Algora.Util.initials(@tech, 1)}
@@ -27,6 +31,12 @@ defmodule AlgoraWeb.Components.TechBadge do
     </.badge>
     """
   end
+
+  defp badge_size_class("sm"), do: "text-[10px] px-1.5 py-0.5"
+  defp badge_size_class(_), do: nil
+
+  defp avatar_size_class("sm"), do: "w-3 h-3"
+  defp avatar_size_class(_), do: "w-4 h-4"
 
   defp icon_url("nvidia"), do: "/images/logos/nvidia.svg"
   defp icon_url("firecracker"), do: "/images/logos/firecracker.png"

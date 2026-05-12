@@ -12,6 +12,7 @@ defmodule Algora.Bounties do
   alias Algora.Bounties.Jobs
   alias Algora.Bounties.LineItem
   alias Algora.Bounties.Tip
+  alias Algora.Github
   alias Algora.Organizations.Member
   alias Algora.Payments
   alias Algora.Payments.Transaction
@@ -1599,12 +1600,57 @@ defmodule Algora.Bounties do
   def get_attempt_emoji(%Attempt{warnings_count: count}) when count > 0, do: "🟡"
   def get_attempt_emoji(%Attempt{status: :active}), do: "🟢"
 
+  @spec delete_bounty_full(Bounty.t()) :: {:ok, Bounty.t()} | {:error, atom()}
+  def delete_bounty_full(%Bounty{} = bounty) do
+    bounty = Repo.preload(bounty, [:owner, ticket: [repository: :user]])
+    owner = bounty.ticket.repository.user.provider_login
+    repo = bounty.ticket.repository.name
+    number = bounty.ticket.number
+    delete_bounty_full(owner, repo, number)
+  end
+
+  @spec delete_bounty_full(String.t(), String.t(), integer()) :: {:ok, [Bounty.t()]} | {:error, atom()}
+  def delete_bounty_full(owner, repo, number) do
+    installation_id = Workspace.get_installation_id_by_owner(owner)
+
+    with {:ok, token} <- Github.get_installation_token(installation_id),
+         {:ok, ticket} <- Workspace.ensure_ticket(token, owner, repo, number),
+         :ok <-
+           (case Workspace.fetch_command_response(ticket.id, :bounty) do
+              {:ok, cr} ->
+                with {:ok, _} <- Github.delete_issue_comment(token, owner, repo, cr.provider_response_id),
+                     {:ok, _} <- Workspace.delete_command_response(cr.id) do
+                  :ok
+                else
+                  {:error, _} -> :ok
+                end
+
+              {:error, :not_found} ->
+                :ok
+            end),
+         :ok <- Workspace.remove_existing_amount_labels(token, owner, repo, number),
+         {:ok, _} <-
+           (case Github.remove_label_from_issue(token, owner, repo, number, "💎 Bounty") do
+              {:ok, result} -> {:ok, result}
+              {:error, _} -> {:ok, :skipped}
+            end) do
+      from(b in Bounty, where: b.ticket_id == ^ticket.id)
+      |> Repo.all()
+      |> Enum.reduce_while({:ok, []}, fn bounty, {:ok, acc} ->
+        case delete_bounty(bounty) do
+          {:ok, b} -> {:cont, {:ok, [b | acc]}}
+          error -> {:halt, error}
+        end
+      end)
+    end
+  end
+
   @spec delete_bounty(Bounty.t()) :: {:ok, Bounty.t()} | {:error, Ecto.Changeset.t()}
   def delete_bounty(%Bounty{} = bounty) do
     Repo.tx(fn ->
       with {:ok, updated_bounty} <-
              bounty
-             |> Bounty.changeset(%{status: :cancelled})
+             |> change(%{status: :cancelled})
              |> Repo.update() do
         broadcast()
         {:ok, updated_bounty}

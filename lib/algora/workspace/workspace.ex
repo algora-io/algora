@@ -6,6 +6,7 @@ defmodule Algora.Workspace do
   alias Algora.Accounts
   alias Algora.Accounts.User
   alias Algora.Github
+  alias Algora.Github.Client
   alias Algora.Organizations.Member
   alias Algora.Repo
   alias Algora.Util
@@ -186,7 +187,7 @@ defmodule Algora.Workspace do
   def fetch_maintainers(token, owner, repo) do
     path = "/repos/#{owner}/#{repo}/contributors?per_page=100&page=1"
 
-    case Algora.Github.Client.fetch(token, path) do
+    case Client.fetch(token, path) do
       {:ok, contributors} when is_list(contributors) ->
         contributors
 
@@ -202,7 +203,7 @@ defmodule Algora.Workspace do
   def fetch_contributors_count(token, owner, repo) do
     path = "/repos/#{owner}/#{repo}/contributors?per_page=1&anon=1"
 
-    case Algora.Github.Client.fetch_with_headers(token, path) do
+    case Client.fetch_with_headers(token, path) do
       {:ok, _, headers} ->
         link = List.keyfind(headers, "link", 0)
 
@@ -233,13 +234,12 @@ defmodule Algora.Workspace do
   defp fetch_downloads_count_page(token, owner, repo, page, acc) do
     path = "/repos/#{owner}/#{repo}/releases?per_page=100&page=#{page}"
 
-    case Algora.Github.Client.fetch(token, path) do
+    case Client.fetch(token, path) do
       {:ok, releases} when is_list(releases) and releases != [] ->
         total =
           Enum.reduce(releases, acc, fn release, sum ->
             assets_total =
-              (release["assets"] || [])
-              |> Enum.reduce(0, fn asset, s -> s + (asset["download_count"] || 0) end)
+              Enum.reduce(release["assets"] || [], 0, fn asset, s -> s + (asset["download_count"] || 0) end)
 
             sum + assets_total
           end)
@@ -852,7 +852,7 @@ defmodule Algora.Workspace do
   def remove_amount_label(token, owner, repo, number, amount) do
     label = "$#{amount |> Money.to_decimal() |> Util.format_number_compact()}"
 
-    case Github.Client.fetch(token, "/repos/#{owner}/#{repo}/issues/#{number}/labels/#{label}", "DELETE") do
+    case Client.fetch(token, "/repos/#{owner}/#{repo}/issues/#{number}/labels/#{label}", "DELETE") do
       # TODO: properly parse DELETE responses in Github.Client
       {:error, %Jason.DecodeError{data: ""}} ->
         :ok
@@ -1199,25 +1199,29 @@ defmodule Algora.Workspace do
     :ok
   end
 
-  def remove_existing_amount_labels(token, owner, repo, number) do
+  def get_amount_labels(token, owner, repo, number) do
     case Github.list_labels(token, owner, repo, number) do
       {:ok, labels} ->
         amount_labels =
           labels
-          |> Enum.filter(fn label -> String.starts_with?(label["name"], "$") end)
+          |> Enum.filter(fn label -> String.match?(label["name"], ~r/^\$\d+[.,]?\d*$/) end)
           |> Enum.map(fn label -> label["name"] end)
 
-        case amount_labels do
-          [] ->
-            :ok
+        {:ok, amount_labels}
 
-          _ ->
-            Enum.each(amount_labels, fn label_name ->
-              Github.remove_label_from_issue(token, owner, repo, number, label_name)
-            end)
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
 
-            :ok
-        end
+  def remove_existing_amount_labels(token, owner, repo, number) do
+    case get_amount_labels(token, owner, repo, number) do
+      {:ok, amount_labels} ->
+        Enum.each(amount_labels, fn label_name ->
+          Github.remove_label_from_issue(token, owner, repo, number, label_name)
+        end)
+
+        :ok
 
       {:error, reason} ->
         Logger.warning("Failed to list labels for #{owner}/#{repo}##{number}: #{inspect(reason)}")

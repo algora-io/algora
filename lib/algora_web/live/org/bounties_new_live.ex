@@ -129,7 +129,7 @@ defmodule AlgoraWeb.Org.BountiesNewLive do
         </div>
 
         <.section>
-          {create_bounty(assigns)}
+          <!-- {create_bounty(assigns)} -->
         </.section>
       </div>
 

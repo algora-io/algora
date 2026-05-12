@@ -292,6 +292,39 @@ defmodule Algora.Settings do
     set("featured_transactions", %{"ids" => ids})
   end
 
+  def get_featured_talent_for_location(state) when is_binary(state) do
+    case get("featured_talent_by_location") do
+      %{} = locations ->
+        case Map.get(locations, state) do
+          ids when is_list(ids) -> ids
+          _ -> []
+        end
+
+      _ ->
+        []
+    end
+  end
+
+  def set_featured_talent_for_location(state, ids) when is_binary(state) and is_list(ids) do
+    locations =
+      case get("featured_talent_by_location") do
+        %{} = m -> m
+        _ -> %{}
+      end
+
+    set("featured_talent_by_location", Map.put(locations, state, ids))
+  end
+
+  def add_featured_talent_for_location(state, user_id) when is_binary(state) and is_binary(user_id) do
+    ids = get_featured_talent_for_location(state)
+    if user_id in ids, do: {:ok, ids}, else: set_featured_talent_for_location(state, ids ++ [user_id])
+  end
+
+  def remove_featured_talent_for_location(state, user_id) when is_binary(state) and is_binary(user_id) do
+    ids = get_featured_talent_for_location(state)
+    set_featured_talent_for_location(state, Enum.reject(ids, &(&1 == user_id)))
+  end
+
   def get_home_carousel_candidate_ids do
     case get("home_carousel_candidates") do
       %{"ids" => ids} when is_list(ids) -> ids

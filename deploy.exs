@@ -4,6 +4,7 @@ defmodule Algora.GracefulDeploy do
   @default_app "algora"
   @default_process_group "app"
   @default_drain_seconds 30
+  @default_health_timeout 180
   @default_shutdown_timeout 120
   @fly System.get_env("FLY_BIN", "fly")
   @prepare_command ~s(/app/bin/algora rpc "Algora.Release.prepare_for_deploy()")
@@ -16,6 +17,7 @@ defmodule Algora.GracefulDeploy do
           app: :string,
           process_group: :string,
           drain_seconds: :integer,
+          health_timeout: :integer,
           shutdown_timeout: :integer
         ]
       )
@@ -28,6 +30,7 @@ defmodule Algora.GracefulDeploy do
     app = opts[:app] || System.get_env("FLY_APP_NAME") || @default_app
     process_group = opts[:process_group] || @default_process_group
     drain_seconds = opts[:drain_seconds] || @default_drain_seconds
+    health_timeout = opts[:health_timeout] || @default_health_timeout
     shutdown_timeout = opts[:shutdown_timeout] || @default_shutdown_timeout
 
     old_machines = list_process_machines(app, process_group)
@@ -54,6 +57,8 @@ defmodule Algora.GracefulDeploy do
         ["machine", "update", machine["id"], "--app", app, "--image", new_image_ref, "--yes"]
       )
     end)
+
+    wait_for_machines_healthy(app, new_machines, health_timeout)
 
     Enum.each(old_machines, fn machine ->
       IO.puts("Marking #{machine["id"]} unhealthy and pausing local queues")
@@ -115,6 +120,80 @@ defmodule Algora.GracefulDeploy do
     end
   end
 
+  defp wait_for_machines_healthy(app, machines, timeout_seconds) do
+    Enum.each(machines, fn machine ->
+      wait_for_machine_healthy(app, machine["id"], timeout_seconds)
+    end)
+  end
+
+  defp wait_for_machine_healthy(app, machine_id, timeout_seconds) do
+    deadline = System.monotonic_time(:millisecond) + :timer.seconds(timeout_seconds)
+
+    wait_for_machine_healthy_until(app, machine_id, deadline)
+  end
+
+  defp wait_for_machine_healthy_until(app, machine_id, deadline) do
+    status = machine_status(app, machine_id)
+
+    if machine_healthy?(status) do
+      IO.puts("Replacement machine #{machine_id} is healthy")
+    else
+      if System.monotonic_time(:millisecond) >= deadline do
+        raise """
+        Replacement machine #{machine_id} did not become healthy before the timeout.
+        Refusing to drain old machines while the new image is not passing Fly checks.
+        """
+      end
+
+      IO.puts("Waiting for replacement machine #{machine_id} to pass Fly checks")
+      Process.sleep(:timer.seconds(5))
+      wait_for_machine_healthy_until(app, machine_id, deadline)
+    end
+  end
+
+  defp machine_status(app, machine_id) do
+    {json, 0} = run!("status #{machine_id}", ["machine", "status", machine_id, "--app", app, "--json"])
+    Jason.decode!(json)
+  end
+
+  defp machine_healthy?(status) do
+    machine_started?(status) and fly_checks_passing?(status)
+  end
+
+  defp machine_started?(%{"state" => "started"}), do: true
+  defp machine_started?(%{"instance" => %{"state" => "started"}}), do: true
+  defp machine_started?(_status), do: false
+
+  defp fly_checks_passing?(status) do
+    statuses =
+      status
+      |> Map.take(["checks"])
+      |> check_statuses()
+
+    statuses != [] and Enum.all?(statuses, &(&1 in ["passing", "passed"]))
+  end
+
+  defp check_statuses(%{"status" => status} = data) when is_binary(status) do
+    child_statuses =
+      data
+      |> Map.drop(["status"])
+      |> check_statuses()
+
+    [status | child_statuses]
+  end
+
+  defp check_statuses(map) when is_map(map) do
+    map
+    |> Map.values()
+    |> Enum.flat_map(&check_statuses/1)
+  end
+
+  defp check_statuses(list) when is_list(list) do
+    Enum.flat_map(list, &check_statuses/1)
+  end
+
+  defp check_statuses(_value), do: []
+
   defp scale_count(app, process_group, count) do
     run!("scale #{process_group}=#{count}", [
       "scale",
@@ -163,6 +242,7 @@ defmodule Algora.GracefulDeploy do
       --app, -a             Fly app name (defaults to FLY_APP_NAME or algora)
       --process-group, -g   Fly process group to rotate (defaults to app)
       --drain-seconds       Seconds to wait after marking old machines unhealthy
+      --health-timeout      Seconds to wait for replacement machines to pass checks
       --shutdown-timeout    Seconds Fly should allow SIGTERM shutdown before SIGKILL
     """)
 

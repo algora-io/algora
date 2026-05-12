@@ -211,7 +211,7 @@ Then pass the resulting image ref to the deploy helper:
 mix run deploy.exs registry.fly.io/algora:deployment-xxxx
 ```
 
-The helper doubles the `app` process group, updates the new machines to the image, marks old machines unhealthy through `/health`, pauses local Oban queues, waits for the Fly checks to drain traffic, and then stops and destroys the old machines.
+The helper doubles the `app` process group, updates the new machines to the image, waits for each replacement machine to pass Fly health checks, marks old machines unhealthy through `/health`, pauses local Oban queues, waits for the Fly checks to drain traffic, and then stops and destroys the old machines.
 
 ### Setting up external services
 

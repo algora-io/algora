@@ -1,4 +1,4 @@
-defmodule AlgoraWeb.Org.BountiesLive do
+﻿defmodule AlgoraWeb.Org.BountiesLive do
   @moduledoc false
   use AlgoraWeb, :live_view
   use Ecto.Schema
@@ -220,7 +220,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
                       <% end %>
                     </td>
                     <td class="[&:has([role=checkbox])]:pr-0 p-4 align-middle">
-                      <div class="flex items-center justify-end gap-2">
+                      <div :if={@current_user_role in [:admin, :mod]} class="flex items-center justify-end gap-2">
                         <.button
                           phx-click="edit-bounty-amount"
                           phx-value-id={bounty.id}
@@ -449,7 +449,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
                  bounty.ticket.repository.user.provider_login,
                  bounty.ticket.repository.name,
                  bounty.ticket.number,
-                 "💎 Bounty"
+                 "ðŸ’Ž Bounty"
                ),
              {:ok, _} <- Workspace.delete_command_response(cr.id),
              {:ok, _bounty} <- Bounties.delete_bounty(bounty) do

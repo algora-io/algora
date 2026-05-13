@@ -26,6 +26,8 @@ defmodule AlgoraWeb.Org.BountiesLive do
     |> Algora.Validations.validate_money_positive(:amount)
   end
 
+  defp can_manage_bounties?(role), do: role in [:admin, :mod]
+
   def mount(_params, _session, socket) do
     {:ok,
      socket
@@ -219,7 +221,10 @@ defmodule AlgoraWeb.Org.BountiesLive do
                         </div>
                       <% end %>
                     </td>
-                    <td class="[&:has([role=checkbox])]:pr-0 p-4 align-middle">
+                    <td
+                      :if={can_manage_bounties?(@current_user_role)}
+                      class="[&:has([role=checkbox])]:pr-0 p-4 align-middle"
+                    >
                       <div class="flex items-center justify-end gap-2">
                         <.button
                           phx-click="edit-bounty-amount"
@@ -363,7 +368,12 @@ defmodule AlgoraWeb.Org.BountiesLive do
     </div>
 
     <!-- Edit Amount Drawer -->
-    <.drawer show={@show_edit_modal} direction="right" on_cancel="cancel-edit">
+    <.drawer
+      :if={can_manage_bounties?(@current_user_role)}
+      show={@show_edit_modal}
+      direction="right"
+      on_cancel="cancel-edit"
+    >
       <.drawer_header>
         <.drawer_title>Edit Bounty Amount</.drawer_title>
         <.drawer_description>
@@ -415,7 +425,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
 
   def handle_event("delete-bounty", %{"id" => bounty_id}, socket) do
     cond do
-      socket.assigns.current_user_role in [:admin, :mod] ->
+      can_manage_bounties?(socket.assigns.current_user_role) ->
         bounty =
           Bounty
           |> Repo.get(bounty_id)
@@ -475,7 +485,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
 
   def handle_event("edit-bounty-amount", %{"id" => bounty_id}, socket) do
     cond do
-      socket.assigns.current_user_role in [:admin, :mod] ->
+      can_manage_bounties?(socket.assigns.current_user_role) ->
         [bounty] = Bounties.list_bounties(id: bounty_id)
         changeset = edit_amount_changeset(%{amount: bounty.amount})
 

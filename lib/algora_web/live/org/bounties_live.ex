@@ -1,4 +1,4 @@
-﻿defmodule AlgoraWeb.Org.BountiesLive do
+defmodule AlgoraWeb.Org.BountiesLive do
   @moduledoc false
   use AlgoraWeb, :live_view
   use Ecto.Schema
@@ -10,6 +10,7 @@
   alias Algora.Bounties.Bounty
   alias Algora.Github
   alias Algora.Markdown
+  alias Algora.Organizations.Member
   alias Algora.Payments
   alias Algora.Repo
   alias Algora.Types.USD
@@ -220,8 +221,12 @@
                       <% end %>
                     </td>
                     <td class="[&:has([role=checkbox])]:pr-0 p-4 align-middle">
-                      <div :if={@current_user_role in [:admin, :mod]} class="flex items-center justify-end gap-2">
+                      <div
+                        :if={Member.can_edit_bounty?(@current_user_role) or Member.can_delete_bounty?(@current_user_role)}
+                        class="flex items-center justify-end gap-2"
+                      >
                         <.button
+                          :if={Member.can_edit_bounty?(@current_user_role)}
                           phx-click="edit-bounty-amount"
                           phx-value-id={bounty.id}
                           variant="secondary"
@@ -230,6 +235,7 @@
                           Edit Amount
                         </.button>
                         <.button
+                          :if={Member.can_delete_bounty?(@current_user_role)}
                           phx-click="delete-bounty"
                           phx-value-id={bounty.id}
                           variant="destructive"
@@ -363,7 +369,7 @@
     </div>
 
     <!-- Edit Amount Drawer -->
-    <.drawer show={@show_edit_modal} direction="right" on_cancel="cancel-edit">
+    <.drawer :if={Member.can_edit_bounty?(@current_user_role)} show={@show_edit_modal} direction="right" on_cancel="cancel-edit">
       <.drawer_header>
         <.drawer_title>Edit Bounty Amount</.drawer_title>
         <.drawer_description>
@@ -415,7 +421,7 @@
 
   def handle_event("delete-bounty", %{"id" => bounty_id}, socket) do
     cond do
-      socket.assigns.current_user_role in [:admin, :mod] ->
+      Member.can_delete_bounty?(socket.assigns.current_user_role) ->
         bounty =
           Bounty
           |> Repo.get(bounty_id)
@@ -449,7 +455,7 @@
                  bounty.ticket.repository.user.provider_login,
                  bounty.ticket.repository.name,
                  bounty.ticket.number,
-                 "ðŸ’Ž Bounty"
+                 "💎 Bounty"
                ),
              {:ok, _} <- Workspace.delete_command_response(cr.id),
              {:ok, _bounty} <- Bounties.delete_bounty(bounty) do
@@ -475,7 +481,7 @@
 
   def handle_event("edit-bounty-amount", %{"id" => bounty_id}, socket) do
     cond do
-      socket.assigns.current_user_role in [:admin, :mod] ->
+      Member.can_edit_bounty?(socket.assigns.current_user_role) ->
         [bounty] = Bounties.list_bounties(id: bounty_id)
         changeset = edit_amount_changeset(%{amount: bounty.amount})
 
@@ -513,62 +519,66 @@
   end
 
   def handle_event("save-bounty-amount", params, socket) do
-    form_params =
-      case params do
-        %{"edit_amount" => form_params} -> form_params
-        %{"bounties_live" => form_params} -> form_params
-        _ -> %{}
-      end
-
-    changeset = edit_amount_changeset(form_params)
-
-    case apply_action(changeset, :update) do
-      {:ok, %{amount: amount}} ->
-        bounty =
-          Bounty
-          |> Repo.get(socket.assigns.editing_bounty.id)
-          |> Repo.preload([:owner, [ticket: [repository: :user]]])
-
-        with {:ok, installation} <-
-               Workspace.fetch_installation_by(
-                 provider: "github",
-                 connected_user_id: bounty.ticket.repository.user.id
-               ),
-             {:ok, bounty} <-
-               bounty
-               |> Bounty.changeset(%{amount: amount})
-               |> Repo.update(),
-             {:ok, cr} <-
-               Workspace.fetch_command_response(bounty.ticket_id, :bounty),
-             {:ok, _job} <-
-               Bounties.notify_bounty(
-                 %{
-                   owner: bounty.owner,
-                   bounty: bounty,
-                   ticket_ref: %{
-                     owner: bounty.ticket.repository.user.provider_login,
-                     repo: bounty.ticket.repository.name,
-                     number: bounty.ticket.number
-                   }
-                 },
-                 installation_id: installation.provider_id,
-                 command_id: cr.provider_command_id,
-                 command_source: cr.command_source
-               ) do
-          {:noreply,
-           socket
-           |> assign(:show_edit_modal, false)
-           |> assign(:editing_bounty, nil)
-           |> assign(:edit_form, to_form(edit_amount_changeset()))
-           |> put_flash(:info, "Bounty amount updated successfully")
-           |> assign_bounties()}
-        else
-          {:error, _changeset} ->
-            {:noreply, put_flash(socket, :error, "Failed to update bounty amount")}
+    if Member.can_edit_bounty?(socket.assigns.current_user_role) do
+      form_params =
+        case params do
+          %{"edit_amount" => form_params} -> form_params
+          %{"bounties_live" => form_params} -> form_params
+          _ -> %{}
         end
 
-      {:error, changeset} ->
-        {:noreply, assign(socket, :edit_form, to_form(changeset))}
+      changeset = edit_amount_changeset(form_params)
+
+      case apply_action(changeset, :update) do
+        {:ok, %{amount: amount}} ->
+          bounty =
+            Bounty
+            |> Repo.get(socket.assigns.editing_bounty.id)
+            |> Repo.preload([:owner, [ticket: [repository: :user]]])
+
+          with {:ok, installation} <-
+                 Workspace.fetch_installation_by(
+                   provider: "github",
+                   connected_user_id: bounty.ticket.repository.user.id
+                 ),
+               {:ok, bounty} <-
+                 bounty
+                 |> Bounty.changeset(%{amount: amount})
+                 |> Repo.update(),
+               {:ok, cr} <-
+                 Workspace.fetch_command_response(bounty.ticket_id, :bounty),
+               {:ok, _job} <-
+                 Bounties.notify_bounty(
+                   %{
+                     owner: bounty.owner,
+                     bounty: bounty,
+                     ticket_ref: %{
+                       owner: bounty.ticket.repository.user.provider_login,
+                       repo: bounty.ticket.repository.name,
+                       number: bounty.ticket.number
+                     }
+                   },
+                   installation_id: installation.provider_id,
+                   command_id: cr.provider_command_id,
+                   command_source: cr.command_source
+                 ) do
+            {:noreply,
+             socket
+             |> assign(:show_edit_modal, false)
+             |> assign(:editing_bounty, nil)
+             |> assign(:edit_form, to_form(edit_amount_changeset()))
+             |> put_flash(:info, "Bounty amount updated successfully")
+             |> assign_bounties()}
+          else
+            {:error, _changeset} ->
+              {:noreply, put_flash(socket, :error, "Failed to update bounty amount")}
+          end
+
+        {:error, changeset} ->
+          {:noreply, assign(socket, :edit_form, to_form(changeset))}
+      end
+    else
+      {:noreply, put_flash(socket, :error, "You are not authorized to edit bounty amounts")}
     end
   end
 

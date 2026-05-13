@@ -218,12 +218,20 @@ defmodule AlgoraWeb.BountyLive do
 
   @impl true
   def handle_event("reward", _params, socket) do
-    {:noreply, assign(socket, :show_reward_modal, true)}
+    if Member.can_create_bounty?(socket.assigns[:current_user_role]) do
+      {:noreply, assign(socket, :show_reward_modal, true)}
+    else
+      {:noreply, put_flash(socket, :error, "You are not authorized to reward bounties")}
+    end
   end
 
   @impl true
   def handle_event("exclusive", _params, socket) do
-    {:noreply, assign(socket, :show_exclusive_modal, true)}
+    if Member.can_create_bounty?(socket.assigns[:current_user_role]) do
+      {:noreply, assign(socket, :show_exclusive_modal, true)}
+    else
+      {:noreply, put_flash(socket, :error, "You are not authorized to manage exclusives")}
+    end
   end
 
   @impl true
@@ -249,21 +257,25 @@ defmodule AlgoraWeb.BountyLive do
 
   @impl true
   def handle_event("pay_with_stripe", %{"reward_bounty_form" => params}, socket) do
-    changeset = RewardBountyForm.changeset(%RewardBountyForm{}, params)
+    if Member.can_create_bounty?(socket.assigns[:current_user_role]) do
+      changeset = RewardBountyForm.changeset(%RewardBountyForm{}, params)
 
-    case apply_action(changeset, :save) do
-      {:ok, _data} ->
-        case reward_bounty(socket, socket.assigns.bounty, changeset) do
-          {:ok, session_url} ->
-            {:noreply, redirect(socket, external: session_url)}
+      case apply_action(changeset, :save) do
+        {:ok, _data} ->
+          case reward_bounty(socket, socket.assigns.bounty, changeset) do
+            {:ok, session_url} ->
+              {:noreply, redirect(socket, external: session_url)}
 
-          {:error, reason} ->
-            Logger.error("Failed to create payment session: #{inspect(reason)}")
-            {:noreply, put_flash(socket, :error, "Something went wrong")}
-        end
+            {:error, reason} ->
+              Logger.error("Failed to create payment session: #{inspect(reason)}")
+              {:noreply, put_flash(socket, :error, "Something went wrong")}
+          end
 
-      {:error, changeset} ->
-        {:noreply, assign(socket, :reward_form, to_form(changeset))}
+        {:error, changeset} ->
+          {:noreply, assign(socket, :reward_form, to_form(changeset))}
+      end
+    else
+      {:noreply, put_flash(socket, :error, "You are not authorized to reward bounties")}
     end
   end
 
@@ -274,38 +286,42 @@ defmodule AlgoraWeb.BountyLive do
 
   @impl true
   def handle_event("share_exclusive", %{"exclusive_bounty_form" => params}, socket) do
-    changeset = ExclusiveBountyForm.changeset(%ExclusiveBountyForm{}, params)
-    bounty = socket.assigns.bounty
+    if Member.can_create_bounty?(socket.assigns[:current_user_role]) do
+      changeset = ExclusiveBountyForm.changeset(%ExclusiveBountyForm{}, params)
+      bounty = socket.assigns.bounty
 
-    case apply_action(changeset, :save) do
-      {:ok, data} ->
-        with {:ok, token} <- Accounts.get_access_token(socket.assigns.current_user),
-             {:ok, user} <- Workspace.ensure_user(token, data.github_handle),
-             shared_with = Enum.uniq(bounty.shared_with ++ [user.provider_id]),
-             {:ok, bounty} <-
-               bounty
-               |> Bounty.settings_changeset(%{
-                 shared_with: shared_with,
-                 deadline: if(data.deadline, do: DateTime.new!(data.deadline, ~T[00:00:00], "Etc/UTC"))
-               })
-               |> Repo.update() do
-          {:noreply,
-           socket
-           |> put_flash(:info, "Bounty shared!")
-           |> assign(:bounty, bounty)
-           |> assign_exclusives(shared_with)
-           |> close_drawers()}
-        else
-          nil ->
-            {:noreply, put_flash(socket, :error, "User not found")}
+      case apply_action(changeset, :save) do
+        {:ok, data} ->
+          with {:ok, token} <- Accounts.get_access_token(socket.assigns.current_user),
+               {:ok, user} <- Workspace.ensure_user(token, data.github_handle),
+               shared_with = Enum.uniq(bounty.shared_with ++ [user.provider_id]),
+               {:ok, bounty} <-
+                 bounty
+                 |> Bounty.settings_changeset(%{
+                   shared_with: shared_with,
+                   deadline: if(data.deadline, do: DateTime.new!(data.deadline, ~T[00:00:00], "Etc/UTC"))
+                 })
+                 |> Repo.update() do
+            {:noreply,
+             socket
+             |> put_flash(:info, "Bounty shared!")
+             |> assign(:bounty, bounty)
+             |> assign_exclusives(shared_with)
+             |> close_drawers()}
+          else
+            nil ->
+              {:noreply, put_flash(socket, :error, "User not found")}
 
-          {:error, reason} ->
-            Logger.error("Failed to share bounty: #{inspect(reason)}")
-            {:noreply, put_flash(socket, :error, "Something went wrong")}
-        end
+            {:error, reason} ->
+              Logger.error("Failed to share bounty: #{inspect(reason)}")
+              {:noreply, put_flash(socket, :error, "Something went wrong")}
+          end
 
-      {:error, changeset} ->
-        {:noreply, assign(socket, :exclusive_form, to_form(changeset))}
+        {:error, changeset} ->
+          {:noreply, assign(socket, :exclusive_form, to_form(changeset))}
+      end
+    else
+      {:noreply, put_flash(socket, :error, "You are not authorized to manage exclusives")}
     end
   end
 

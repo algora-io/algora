@@ -37,6 +37,10 @@ defmodule Algora.Organizations.Member do
 
   def can_create_bounty?(role), do: role in [:admin, :mod]
 
+  def can_edit_bounty?(role), do: role in [:admin, :mod]
+
+  def can_delete_bounty?(role), do: role in [:admin, :mod]
+
   def can_create_contract?(role), do: role in [:admin, :mod]
 
   def can_view_matches?(org, role), do: org.contract_signed && role in [:admin, :mod]

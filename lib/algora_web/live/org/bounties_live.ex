@@ -219,7 +219,10 @@ defmodule AlgoraWeb.Org.BountiesLive do
                         </div>
                       <% end %>
                     </td>
-                    <td class="[&:has([role=checkbox])]:pr-0 p-4 align-middle">
+                    <td
+                      :if={can_manage_bounties?(@current_user_role)}
+                      class="[&:has([role=checkbox])]:pr-0 p-4 align-middle"
+                    >
                       <div class="flex items-center justify-end gap-2">
                         <.button
                           phx-click="edit-bounty-amount"
@@ -692,6 +695,8 @@ defmodule AlgoraWeb.Org.BountiesLive do
   end
 
   defp page_size, do: 10
+
+  defp can_manage_bounties?(role), do: role in [:admin, :mod]
 
   defp assign_bounties(socket) do
     current_org = socket.assigns.current_org

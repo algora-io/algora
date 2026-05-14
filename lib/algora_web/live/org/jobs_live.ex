@@ -66,6 +66,7 @@ defmodule AlgoraWeb.Org.JobsLive do
                   <.link
                     href={url}
                     target="_blank"
+                    rel="noopener"
                     class="text-muted-foreground hover:text-foreground"
                   >
                     <.icon name={icon} class="size-4" />
@@ -85,7 +86,7 @@ defmodule AlgoraWeb.Org.JobsLive do
             <%= for {platform, icon} <- social_icons(),
                       url = social_link(@current_org, platform),
                       not is_nil(url) do %>
-              <.link href={url} target="_blank" class="text-muted-foreground hover:text-foreground">
+              <.link href={url} target="_blank" rel="noopener" class="text-muted-foreground hover:text-foreground">
                 <.icon name={icon} class="size-5" />
               </.link>
             <% end %>

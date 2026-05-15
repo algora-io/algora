@@ -50,23 +50,32 @@
             <.wordmark class="h-8 w-auto text-white" />
           </div>
           <nav class="flex flex-1 flex-col divide-y divide-border">
-            <ul role="list" class="-mx-2 space-y-1 pb-6">
-              <%= for item <- @nav |> List.first() |> Map.get(:items) do %>
+            <ul role="list" class="flex flex-col gap-y-6 pb-6">
+              <%= for {section, index} <- Enum.with_index(@nav) do %>
                 <li>
-                  <.link
-                    navigate={item.href}
-                    target={Map.get(item, :target)}
-                    class={[
-                      "group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold",
-                      if(@active_tab == item.tab,
-                        do: "bg-gray-900 text-white",
-                        else: "text-gray-400 hover:bg-gray-900 hover:text-white"
-                      )
-                    ]}
-                  >
-                    <.icon name={item.icon} class="h-6 w-6 shrink-0" />
-                    <span>{item.label}</span>
-                  </.link>
+                  <%= if length(@nav) > 1 do %>
+                    <div class="text-xs/6 font-semibold text-gray-400 mb-2">{section.title}</div>
+                  <% end %>
+                  <ul role="list" class="-mx-2 space-y-1">
+                    <%= for item <- section.items do %>
+                      <li>
+                        <.link
+                          navigate={item.href}
+                          target={Map.get(item, :target)}
+                          class={[
+                            "group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold",
+                            if(@active_tab == item.tab,
+                              do: "bg-gray-900 text-white",
+                              else: "text-gray-400 hover:bg-gray-900 hover:text-white"
+                            )
+                          ]}
+                        >
+                          <.icon name={item.icon} class="h-6 w-6 shrink-0" />
+                          <span>{item.label}</span>
+                        </.link>
+                      </li>
+                    <% end %>
+                  </ul>
                 </li>
               <% end %>
             </ul>

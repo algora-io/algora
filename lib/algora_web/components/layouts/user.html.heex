@@ -53,7 +53,7 @@
             <ul role="list" class="flex flex-col gap-y-6 pb-6">
               <%= for {section, index} <- Enum.with_index(@nav) do %>
                 <li>
-                  <%= if length(@nav) > 1 do %>
+                  <%= if length(@nav) > 1 && section.title do %>
                     <div class="text-xs/6 font-semibold text-gray-400 mb-2">{section.title}</div>
                   <% end %>
                   <ul role="list" class="-mx-2 space-y-1">

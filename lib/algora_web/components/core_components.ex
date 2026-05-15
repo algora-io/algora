@@ -1185,6 +1185,12 @@ defmodule AlgoraWeb.CoreComponents do
     """
   end
 
+  def icon(%{name: "tabler-inbound" <> _} = assigns) do
+    ~H"""
+    <.icon name="tabler-outbound" class={classes(["rotate-180", @class])} />
+    """
+  end
+
   def icon(%{name: "tabler-" <> _} = assigns) do
     ~H"""
     <span class={[@name, @class]} {@rest} />

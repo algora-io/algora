@@ -109,76 +109,114 @@
   </div>
   
 <!-- Static sidebar for desktop -->
-  <div class="scrollbar-thin hidden border-r border-border/50 lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:flex lg:flex-col lg:w-16 lg:overflow-y-auto lg:bg-popover lg:pb-4">
-    <div class="flex h-16 shrink-0 items-center justify-center">
-      <.logo class="h-8 w-auto text-white" />
+  <%= if Map.get(assigns, :wide_sidebar?) do %>
+    <div class="scrollbar-thin hidden border-r border-border lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:flex lg:flex-col lg:w-52 lg:overflow-y-auto lg:bg-popover lg:pb-4">
+      <div class="flex h-16 shrink-0 items-center px-6">
+        <.wordmark class="h-8 w-auto text-foreground" />
+      </div>
+      <nav class="flex flex-1 flex-col px-6 pb-4">
+        <ul role="list" class="flex flex-1 flex-col gap-y-7">
+          <%= for {section, index} <- Enum.with_index(@nav) do %>
+            <li>
+              <div class="text-xs/6 font-semibold text-gray-400">{section.title}</div>
+              <ul role="list" class="-mx-2 mt-2 space-y-1">
+                <%= for item <- section.items do %>
+                  <li>
+                    <.link
+                      navigate={item.href}
+                      target={Map.get(item, :target)}
+                      class={[
+                        "group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold",
+                        if(@active_tab == item.tab,
+                          do: "bg-white/5 text-white",
+                          else: "text-gray-400 hover:bg-white/5 hover:text-white"
+                        ),
+                        item[:class]
+                      ]}
+                    >
+                      <.icon name={item.icon} class="size-6 shrink-0" />
+                      {item.label}
+                    </.link>
+                  </li>
+                <% end %>
+              </ul>
+            </li>
+          <% end %>
+        </ul>
+      </nav>
     </div>
-    <nav class="mt-4">
-      <%= for {section, index} <- Enum.with_index(@nav) do %>
-        <ul role="list" class="flex flex-col items-center space-y-1">
-          <%= for item <- section.items do %>
-            <li>
-              <.link
-                navigate={item.href}
-                target={Map.get(item, :target)}
-                class={[
-                  "group flex gap-x-3 rounded-md p-3 text-sm/6 font-semibold text-gray-400 hover:bg-gray-800 hover:text-white",
-                  if(@active_tab == item.tab,
-                    do: "bg-gray-800 text-white",
-                    else: "text-gray-400 hover:bg-gray-800 hover:text-white"
-                  ),
-                  item[:class]
-                ]}
-              >
-                <.icon name={item.icon} class="h-6 w-6 shrink-0" />
-                <span class="sr-only">{item.label}</span>
-              </.link>
-            </li>
-          <% end %>
-        </ul>
-        <.separator :if={index != length(@nav) - 1} class="mx-auto my-4 w-2/3" />
-      <% end %>
+  <% else %>
+    <div class="scrollbar-thin hidden border-r border-border/50 lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:flex lg:flex-col lg:w-16 lg:overflow-y-auto lg:bg-popover lg:pb-4">
+      <div class="flex h-16 shrink-0 items-center justify-center">
+        <.logo class="h-8 w-auto text-white" />
+      </div>
+      <nav class="mt-4">
+        <%= for {section, index} <- Enum.with_index(@nav) do %>
+          <ul role="list" class="flex flex-col items-center space-y-1">
+            <%= for item <- section.items do %>
+              <li>
+                <.link
+                  navigate={item.href}
+                  target={Map.get(item, :target)}
+                  class={[
+                    "group flex gap-x-3 rounded-md p-3 text-sm/6 font-semibold text-gray-400 hover:bg-gray-800 hover:text-white",
+                    if(@active_tab == item.tab,
+                      do: "bg-gray-800 text-white",
+                      else: "text-gray-400 hover:bg-gray-800 hover:text-white"
+                    ),
+                    item[:class]
+                  ]}
+                >
+                  <.icon name={item.icon} class="h-6 w-6 shrink-0" />
+                  <span class="sr-only">{item.label}</span>
+                </.link>
+              </li>
+            <% end %>
+          </ul>
+          <.separator :if={index != length(@nav) - 1} class="mx-auto my-4 w-2/3" />
+        <% end %>
 
-      <%= if assigns[:threads] && assigns[:threads] != [] do %>
-        <.separator class="mx-auto my-4 w-2/3" />
-        <ul role="list" class="space-y-1">
-          <%= for %{contact: contact, path: path} <- @threads do %>
-            <li>
-              <.link
-                class="flex justify-center p-2"
-                navigate={path}
-                title={Algora.Accounts.User.handle(contact)}
-              >
-                <div class="relative inline-block">
-                  <.avatar>
-                    <.avatar_image src={contact.avatar_url} />
-                    <.avatar_fallback>
-                      {Algora.Util.initials(Algora.Accounts.User.handle(contact))}
-                    </.avatar_fallback>
-                  </.avatar>
-                  <span class="absolute right-0 bottom-0 block h-2 w-2 rounded-full bg-green-400 ring-2 ring-white dark:ring-gray-950">
-                  </span>
-                </div>
-              </.link>
-            </li>
-          <% end %>
-        </ul>
-      <% end %>
-    </nav>
-    <ul role="list" class="mt-auto flex flex-col items-center space-y-1">
-      <li>
-        <.link
-          navigate={~p"/docs"}
-          class="group flex gap-x-3 rounded-md p-3 text-sm/6 font-semibold text-gray-400 hover:bg-gray-800 hover:text-white"
-        >
-          <.icon name="tabler-help" class="h-6 w-6 shrink-0" />
-          <span class="sr-only">Help</span>
-        </.link>
-      </li>
-    </ul>
-  </div>
+        <%= if assigns[:threads] && assigns[:threads] != [] do %>
+          <.separator class="mx-auto my-4 w-2/3" />
+          <ul role="list" class="space-y-1">
+            <%= for %{contact: contact, path: path} <- @threads do %>
+              <li>
+                <.link
+                  class="flex justify-center p-2"
+                  navigate={path}
+                  title={Algora.Accounts.User.handle(contact)}
+                >
+                  <div class="relative inline-block">
+                    <.avatar>
+                      <.avatar_image src={contact.avatar_url} />
+                      <.avatar_fallback>
+                        {Algora.Util.initials(Algora.Accounts.User.handle(contact))}
+                      </.avatar_fallback>
+                    </.avatar>
+                    <span class="absolute right-0 bottom-0 block h-2 w-2 rounded-full bg-green-400 ring-2 ring-white dark:ring-gray-950">
+                    </span>
+                  </div>
+                </.link>
+              </li>
+            <% end %>
+          </ul>
+        <% end %>
+      </nav>
+      <ul role="list" class="mt-auto flex flex-col items-center space-y-1">
+        <li>
+          <.link
+            navigate={~p"/docs"}
+            class="group flex gap-x-3 rounded-md p-3 text-sm/6 font-semibold text-gray-400 hover:bg-gray-800 hover:text-white"
+          >
+            <.icon name="tabler-help" class="h-6 w-6 shrink-0" />
+            <span class="sr-only">Help</span>
+          </.link>
+        </li>
+      </ul>
+    </div>
+  <% end %>
 
-  <div class="lg:pl-16">
+  <div class={if Map.get(assigns, :wide_sidebar?), do: "lg:pl-52", else: "lg:pl-16"}>
     <div
       id="navbar"
       phx-hook="NavBar"
@@ -217,7 +255,7 @@
           <.icon name="tabler-menu" class="size-6 text-white" />
         </button>
       </div>
-      <%= if Map.get(assigns, :admin_page?) && Map.get(assigns, :selected_period) do %>
+      <%= if Map.get(assigns, :wide_sidebar?) && Map.get(assigns, :selected_period) do %>
         <ul role="list">
           <.button
             :for={period <- ["7d", "30d", "90d"]}

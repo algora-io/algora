@@ -11,103 +11,27 @@ defmodule AlgoraWeb.BountiesLive do
   require Logger
 
   @impl true
-  def handle_params(%{"tech" => tech}, _uri, socket) when is_binary(tech) do
-    selected_techs = tech |> String.split(",") |> Enum.reject(&(&1 == "")) |> Enum.map(&String.downcase/1)
-    valid_techs = Enum.map(socket.assigns.techs, fn {tech, _} -> String.downcase(tech) end)
-    # Only keep valid techs that exist in the available tech list
-    selected_techs = Enum.filter(selected_techs, &(&1 in valid_techs))
-
-    query_opts =
-      if selected_techs == [] do
-        Keyword.delete(socket.assigns.query_opts, :tech_stack)
-      else
-        Keyword.put(socket.assigns.query_opts, :tech_stack, selected_techs)
-      end
-
-    {:noreply,
-     socket
-     |> assign(:page_title, "#{Enum.map_join(selected_techs, "/", &String.capitalize/1)} Bounties")
-     |> assign(:selected_techs, selected_techs)
-     |> assign(:query_opts, query_opts)
-     |> assign_bounties()}
-  end
-
-  def handle_params(_params, _uri, socket) do
-    {:noreply,
-     socket
-     |> assign(:page_title, "Bounties")
-     |> assign(:selected_techs, [])
-     |> assign(:query_opts, Keyword.delete(socket.assigns.query_opts, :tech_stack))
-     |> assign_bounties()}
+  def handle_params(params, _uri, socket) do
+    {:noreply, assign_filters(socket, params)}
   end
 
   @impl true
-  def mount(%{"tech" => tech}, _session, socket) when is_binary(tech) do
+  def mount(params, _session, socket) do
     if connected?(socket) do
       Bounties.subscribe()
     end
 
-    # Parse selected techs from URL params and ensure lowercase
-    selected_techs =
-      tech
-      |> String.split(",")
-      |> Enum.reject(&(&1 == ""))
-      |> Enum.map(&String.downcase/1)
-
-    query_opts =
-      [
-        status: :open,
-        limit: page_size(),
-        current_user: socket.assigns[:current_user]
-      ] ++
-        if socket.assigns[:current_user] do
-          [amount_gt: Money.new(:USD, 100)]
-        else
-          [amount_gt: Money.new(:USD, 500)]
-        end
-
-    techs = Bounties.list_tech(query_opts)
-
-    # Only keep valid techs that exist in the available tech list (case insensitive)
-    valid_techs = Enum.map(techs, fn {tech, _} -> String.downcase(tech) end)
-    selected_techs = Enum.filter(selected_techs, &(&1 in valid_techs))
-
-    query_opts = if selected_techs == [], do: query_opts, else: Keyword.put(query_opts, :tech_stack, selected_techs)
+    default_min_amount = default_min_amount(socket)
 
     {:ok,
      socket
-     |> assign(:techs, techs)
-     |> assign(:selected_techs, selected_techs)
-     |> assign(:query_opts, query_opts)
-     |> assign_bounties()
-     |> assign_events()}
-  end
-
-  def mount(_params, _session, socket) do
-    if connected?(socket) do
-      Bounties.subscribe()
-    end
-
-    query_opts =
-      [
-        status: :open,
-        limit: page_size(),
-        current_user: socket.assigns[:current_user]
-      ] ++
-        if socket.assigns[:current_user] do
-          [amount_gt: Money.new(:USD, 100)]
-        else
-          [amount_gt: Money.new(:USD, 500)]
-        end
-
-    techs = Bounties.list_tech(query_opts)
-
-    {:ok,
-     socket
-     |> assign(:techs, techs)
-     |> assign(:selected_techs, [])
-     |> assign(:query_opts, query_opts)
-     |> assign_bounties()
+     |> assign(:base_query_opts, [
+       status: :open,
+       limit: page_size(),
+       current_user: socket.assigns[:current_user]
+     ])
+     |> assign(:default_min_amount, default_min_amount)
+     |> assign_filters(params)
      |> assign_events()}
   end
 
@@ -116,6 +40,36 @@ defmodule AlgoraWeb.BountiesLive do
     ~H"""
     <div class="container mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:px-8">
       <.section title="Bounties" subtitle="Open bounties for you">
+        <form
+          phx-change="filter_amount"
+          phx-submit="filter_amount"
+          class="mb-4 flex flex-wrap items-end gap-2"
+        >
+          <div class="w-32">
+            <.input
+              type="number"
+              id="bounty-min-amount"
+              name="min"
+              label="Min"
+              min="0"
+              value={@min_amount || ""}
+              phx-debounce="300"
+            />
+          </div>
+          <span class="pb-2 text-sm text-muted-foreground">-</span>
+          <div class="w-32">
+            <.input
+              type="number"
+              id="bounty-max-amount"
+              name="max"
+              label="Max"
+              min="0"
+              value={@max_amount || ""}
+              phx-debounce="300"
+            />
+          </div>
+          <.button type="submit">Apply</.button>
+        </form>
         <div class="mb-4 flex sm:flex-wrap gap-2 whitespace-nowrap overflow-x-auto scrollbar-thin">
           <%= for {tech, count} <- @techs do %>
             <div phx-click="toggle_tech" phx-value-tech={tech} class="cursor-pointer">
@@ -610,14 +564,20 @@ defmodule AlgoraWeb.BountiesLive do
       end
 
     query_opts =
-      if selected_techs == [] do
-        Keyword.delete(socket.assigns.query_opts, :tech_stack)
-      else
-        Keyword.put(socket.assigns.query_opts, :tech_stack, selected_techs)
-      end
+      build_query_opts(
+        socket.assigns.base_query_opts,
+        selected_techs,
+        socket.assigns.min_amount,
+        socket.assigns.max_amount
+      )
 
-    # Update the URL with selected techs
-    path = if selected_techs == [], do: ~p"/bounties", else: ~p"/bounties/#{Enum.join(selected_techs, ",")}"
+    path =
+      bounties_path(
+        selected_techs,
+        socket.assigns.min_amount,
+        socket.assigns.max_amount,
+        socket.assigns.default_min_amount
+      )
 
     {:noreply,
      socket
@@ -626,6 +586,147 @@ defmodule AlgoraWeb.BountiesLive do
      |> assign(:query_opts, query_opts)
      |> assign_bounties()}
   end
+
+  @impl true
+  def handle_event("filter_amount", params, socket) do
+    {min_amount, max_amount} = parse_amount_params(params, socket.assigns.default_min_amount)
+
+    query_opts =
+      build_query_opts(
+        socket.assigns.base_query_opts,
+        socket.assigns.selected_techs,
+        min_amount,
+        max_amount
+      )
+
+    path =
+      bounties_path(
+        socket.assigns.selected_techs,
+        min_amount,
+        max_amount,
+        socket.assigns.default_min_amount
+      )
+
+    {:noreply,
+     socket
+     |> push_patch(to: path)
+     |> assign(:min_amount, min_amount)
+     |> assign(:max_amount, max_amount)
+     |> assign(:query_opts, query_opts)
+     |> assign_bounties()}
+  end
+
+  defp assign_filters(socket, params) do
+    {min_amount, max_amount} = parse_amount_params(params, socket.assigns.default_min_amount)
+    tech_query_opts = build_query_opts(socket.assigns.base_query_opts, [], min_amount, max_amount)
+    techs = Bounties.list_tech(tech_query_opts)
+    selected_techs = parse_selected_techs(params["tech"], techs)
+
+    query_opts =
+      build_query_opts(socket.assigns.base_query_opts, selected_techs, min_amount, max_amount)
+
+    socket
+    |> assign(:page_title, page_title(selected_techs))
+    |> assign(:techs, techs)
+    |> assign(:selected_techs, selected_techs)
+    |> assign(:min_amount, min_amount)
+    |> assign(:max_amount, max_amount)
+    |> assign(:query_opts, query_opts)
+    |> assign_bounties()
+  end
+
+  defp parse_selected_techs(tech, techs) when is_binary(tech) do
+    valid_techs = Enum.map(techs, fn {tech, _} -> String.downcase(tech) end)
+
+    tech
+    |> String.split(",")
+    |> Enum.reject(&(&1 == ""))
+    |> Enum.map(&String.downcase/1)
+    |> Enum.filter(&(&1 in valid_techs))
+  end
+
+  defp parse_selected_techs(_tech, _techs), do: []
+
+  defp parse_amount_params(params, default_min_amount) do
+    min_amount = parse_amount(params["min"])
+    max_amount = parse_amount(params["max"])
+
+    min_amount =
+      if blank?(params["min"]) and blank?(params["max"]) do
+        default_min_amount
+      else
+        min_amount
+      end
+
+    {min_amount, max_amount}
+  end
+
+  defp parse_amount(amount) when is_binary(amount) do
+    case Integer.parse(amount) do
+      {amount, ""} when amount >= 0 -> amount
+      _ -> nil
+    end
+  end
+
+  defp parse_amount(_amount), do: nil
+
+  defp blank?(value), do: value in [nil, ""]
+
+  defp build_query_opts(base_query_opts, selected_techs, min_amount, max_amount) do
+    base_query_opts
+    |> maybe_put_amount_gt(min_amount)
+    |> maybe_put_amount_lt(max_amount)
+    |> maybe_put_tech_stack(selected_techs)
+  end
+
+  defp maybe_put_amount_gt(query_opts, nil), do: query_opts
+  defp maybe_put_amount_gt(query_opts, amount) do
+    Keyword.put(query_opts, :amount_gt, Money.new(:USD, amount))
+  end
+
+  defp maybe_put_amount_lt(query_opts, nil), do: query_opts
+  defp maybe_put_amount_lt(query_opts, amount) do
+    Keyword.put(query_opts, :amount_lt, Money.new(:USD, amount))
+  end
+
+  defp maybe_put_tech_stack(query_opts, []), do: query_opts
+  defp maybe_put_tech_stack(query_opts, selected_techs) do
+    Keyword.put(query_opts, :tech_stack, selected_techs)
+  end
+
+  defp bounties_path(selected_techs, min_amount, max_amount, default_min_amount) do
+    path =
+      if selected_techs == [] do
+        ~p"/bounties"
+      else
+        ~p"/bounties/#{Enum.join(selected_techs, ",")}"
+      end
+
+    case amount_query_params(min_amount, max_amount, default_min_amount) do
+      [] -> path
+      params -> path <> "?" <> URI.encode_query(params)
+    end
+  end
+
+  defp amount_query_params(min_amount, max_amount, default_min_amount) do
+    []
+    |> maybe_put_amount_query_param("max", max_amount, not is_nil(max_amount))
+    |> maybe_put_amount_query_param(
+      "min",
+      min_amount,
+      not is_nil(min_amount) and (min_amount != default_min_amount or not is_nil(max_amount))
+    )
+  end
+
+  defp maybe_put_amount_query_param(params, key, amount, true), do: [{key, amount} | params]
+  defp maybe_put_amount_query_param(params, _key, _amount, _put?), do: params
+
+  defp page_title([]), do: "Bounties"
+  defp page_title(selected_techs) do
+    "#{Enum.map_join(selected_techs, "/", &String.capitalize/1)} Bounties"
+  end
+
+  defp default_min_amount(socket), do: if(socket.assigns[:current_user], do: 100, else: 500)
 
   defp assign_bounties(socket) do
     bounties = Bounties.list_bounties(socket.assigns.query_opts)

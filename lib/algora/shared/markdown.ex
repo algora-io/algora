@@ -41,7 +41,7 @@ defmodule Algora.Markdown do
 
       {:error, error} ->
         Logger.error("Error converting markdown to html: #{inspect(error)}")
-        md_or_doc
+        if is_binary(md_or_doc), do: md_or_doc, else: inspect(md_or_doc)
     end
   end
 
@@ -54,7 +54,7 @@ defmodule Algora.Markdown do
 
       {:error, error} ->
         Logger.error("Error converting markdown to html: #{inspect(error)}")
-        md_or_doc
+        if is_binary(md_or_doc), do: md_or_doc, else: inspect(md_or_doc)
     end
   end
 end

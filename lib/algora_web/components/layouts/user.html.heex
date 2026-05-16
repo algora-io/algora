@@ -45,7 +45,7 @@
           </button>
         </div>
 
-        <div class="flex grow h-full flex-col gap-y-5 overflow-y-auto bg-gray-950 px-6 pb-2 ring-1 ring-white/10">
+        <div class="flex grow h-full flex-col gap-y-5 overflow-y-auto bg-gray-950 px-6 pb-2 ring-1 ring-white/10 scrollbar-thin">
           <div class="flex h-16 shrink-0 items-center">
             <.wordmark class="h-8 w-auto text-white" />
           </div>
@@ -80,37 +80,39 @@
               <% end %>
             </ul>
 
-            <div class="py-6 space-y-4">
-              <.button
-                :if={Algora.Stargazer.count()}
-                class="group w-full flex items-center"
-                target="_blank"
-                rel="noopener"
-                variant="secondary"
-                href={AlgoraWeb.Constants.get(:github_repo_url)}
-              >
-                <.icon
-                  name="github"
-                  class="mr-2 h-5 shrink-0 justify-start text-foreground/80 group-hover:text-foreground transition"
-                />
-                <span class="mr-1">Star</span>
-                <span class="font-semibold text-amber-300 flex items-center gap-1">
-                  {Algora.Stargazer.count()}
-                  <.icon name="tabler-star-filled" class="h-3 w-3 shrink-0" />
-                </span>
-              </.button>
-              <.button :if={!@current_user.handle} navigate={~p"/auth/signup"} class="w-full">
-                Sign up
-              </.button>
-              <.button
-                :if={!@current_user.handle}
-                navigate={~p"/auth/login"}
-                class="w-full"
-                variant="secondary"
-              >
-                Sign in
-              </.button>
-            </div>
+            <%= if !Map.get(assigns, :wide_sidebar?) do %>
+              <div class="py-6 space-y-4">
+                <.button
+                  :if={Algora.Stargazer.count()}
+                  class="group w-full flex items-center"
+                  target="_blank"
+                  rel="noopener"
+                  variant="secondary"
+                  href={AlgoraWeb.Constants.get(:github_repo_url)}
+                >
+                  <.icon
+                    name="github"
+                    class="mr-2 h-5 shrink-0 justify-start text-foreground/80 group-hover:text-foreground transition"
+                  />
+                  <span class="mr-1">Star</span>
+                  <span class="font-semibold text-amber-300 flex items-center gap-1">
+                    {Algora.Stargazer.count()}
+                    <.icon name="tabler-star-filled" class="h-3 w-3 shrink-0" />
+                  </span>
+                </.button>
+                <.button :if={!@current_user.handle} navigate={~p"/auth/signup"} class="w-full">
+                  Sign up
+                </.button>
+                <.button
+                  :if={!@current_user.handle}
+                  navigate={~p"/auth/login"}
+                  class="w-full"
+                  variant="secondary"
+                >
+                  Sign in
+                </.button>
+              </div>
+            <% end %>
           </nav>
         </div>
       </div>
@@ -277,6 +279,7 @@
           </.button>
         </ul>
       <% end %>
+
       <div class="ml-auto flex items-center gap-x-6">
         <.link
           :if={Algora.Stargazer.count()}

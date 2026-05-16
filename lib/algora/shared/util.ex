@@ -163,6 +163,13 @@ defmodule Algora.Util do
     end
   end
 
+  def relative_time(datetime) do
+    case time_ago_compact(datetime) do
+      "now" -> "just now"
+      t -> "#{t} ago"
+    end
+  end
+
   def timestamp(date, nil) do
     Calendar.strftime(date, "%Y-%m-%d %I:%M %p UTC")
   end

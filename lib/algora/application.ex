@@ -21,9 +21,12 @@ defmodule Algora.Application do
          |> Keyword.put(:plugins, [
            {Oban.Plugins.Cron,
             timezone: "America/Los_Angeles",
-            crontab: [
-              {"0 3 * * *", Algora.Bounties.Jobs.SyncOpenBounties}
-            ]}
+            crontab:
+              [{"0 3 * * *", Algora.Bounties.Jobs.SyncOpenBounties}] ++
+                if(Code.ensure_loaded?(AlgoraCloud.Workers.SyncCandidates),
+                  do: [{"0 * * * *", AlgoraCloud.Workers.SyncCandidates}],
+                  else: []
+                )}
          ])},
         {DNSCluster, query: Application.get_env(:algora, :dns_cluster_query) || :ignore},
         {Phoenix.PubSub, name: Algora.PubSub},

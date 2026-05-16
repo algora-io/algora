@@ -35,6 +35,12 @@ defmodule AlgoraWeb.Components.Bounties do
                     {Money.to_string!(bounty.amount)}
                   </span>
                   <span class="text-foreground">{bounty.ticket.title}</span>
+                  <span
+                    :if={bounty.inserted_at}
+                    class="ml-auto pl-2 whitespace-nowrap text-xs tabular-nums text-muted-foreground"
+                  >
+                    {Algora.Util.relative_time(bounty.inserted_at)}
+                  </span>
                 </div>
               </div>
             </li>

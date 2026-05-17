@@ -105,6 +105,8 @@ defmodule Algora.Accounts.User do
     field :slack_url, :string
     field :linkedin_url, :string
     field :linkedin_meta, :map, default: %{}
+    field :linkedin_profile, :map
+    field :linkedin_profile_raw, :string
     field :google_scholar_url, :string
     field :employment_info, :map, default: %{}
 

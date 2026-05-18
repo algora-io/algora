@@ -36,6 +36,9 @@ defmodule AlgoraWeb.Components.Bounties do
                   </span>
                   <span class="text-foreground">{bounty.ticket.title}</span>
                 </div>
+                <div class="text-xs text-muted-foreground">
+                  {Algora.Util.time_ago(bounty.inserted_at)}
+                </div>
               </div>
             </li>
           </.link>

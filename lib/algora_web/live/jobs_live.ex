@@ -143,8 +143,8 @@ defmodule AlgoraWeb.JobsLive do
                           </div>
                         </div>
                         <%= if MapSet.member?(@user_applications, job.id) do %>
-                          <.button disabled class="opacity-50">
-                            <.icon name="tabler-check" class="h-4 w-4 mr-2 -ml-1" /> Applied
+                          <.button phx-click="withdraw_job" phx-value-job-id={job.id} variant="secondary">
+                            <.icon name="tabler-x" class="h-4 w-4 mr-2 -ml-1" /> Withdraw
                           </.button>
                         <% else %>
                           <.button phx-click="apply_job" phx-value-job-id={job.id}>
@@ -544,6 +544,21 @@ defmodule AlgoraWeb.JobsLive do
         end
       else
         {:noreply, redirect(socket, external: Algora.Github.authorize_url(%{return_to: "/jobs"}))}
+      end
+    else
+      {:noreply, redirect(socket, external: Algora.Github.authorize_url(%{return_to: "/jobs"}))}
+    end
+  end
+
+  @impl true
+  def handle_event("withdraw_job", %{"job-id" => job_id}, socket) do
+    if socket.assigns[:current_user] do
+      case Jobs.withdraw_application(job_id, socket.assigns.current_user) do
+        {:ok, _} ->
+          {:noreply, assign_user_applications(socket) |> put_flash(:info, "Application withdrawn")}
+
+        {:error, _} ->
+          {:noreply, put_flash(socket, :error, "Failed to withdraw application. Please try again.")}
       end
     else
       {:noreply, redirect(socket, external: Algora.Github.authorize_url(%{return_to: "/jobs"}))}

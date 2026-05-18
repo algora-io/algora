@@ -1382,7 +1382,7 @@ defmodule Algora.Bounties do
     base_query()
     |> list_bounties_query(Keyword.put(criteria, :limit, :infinity))
     |> where([b, r: r], not is_nil(r.tech_stack))
-    |> join(:cross_lateral, [b, r: r], tech in fragment("SELECT UNNEST(?) as tech", r.tech_stack), as: :tech)
+    |> join(:cross_lateral, [b, r: r], tech in fragment("SELECT UNNEST(r.tech_stack) as tech"), as: :tech)
     |> group_by([b, r: r, tech: tech], fragment("tech"))
     |> select([b, r: r, tech: tech], {fragment("tech"), count(fragment("tech"))})
     |> order_by([b, r: r, tech: tech], desc: count(fragment("tech")))

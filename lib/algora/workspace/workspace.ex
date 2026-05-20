@@ -108,7 +108,8 @@ defmodule Algora.Workspace do
 
   def create_ticket_from_github(token, owner, repo, number) do
     with {:ok, issue} <- Github.get_issue(token, owner, repo, number),
-         {:ok, repository} <- ensure_repository(token, owner, repo) do
+         {:ok, repository} <- ensure_repository(token, owner, repo, force: true),
+         {:ok, _tech_stack} <- ensure_repo_tech_stack(token, repository, force: true) do
       issue
       |> Ticket.github_changeset(repository)
       |> Repo.insert()
@@ -118,7 +119,8 @@ defmodule Algora.Workspace do
   def update_ticket_from_github(token, owner, repo, number) do
     with ticket when not is_nil(ticket) <- get_ticket(owner, repo, number),
          {:ok, issue} <- Github.get_issue(token, owner, repo, number),
-         {:ok, repository} <- ensure_repository(token, owner, repo) do
+         {:ok, repository} <- ensure_repository(token, owner, repo, force: true),
+         {:ok, _tech_stack} <- ensure_repo_tech_stack(token, repository, force: true) do
       ticket
       |> Ticket.github_changeset(issue, repository)
       |> Repo.update()
@@ -674,11 +676,17 @@ defmodule Algora.Workspace do
     end
   end
 
-  def ensure_repo_tech_stack(_token, %{tech_stack: tech_stack}) when tech_stack != [] do
-    {:ok, tech_stack}
+  def ensure_repo_tech_stack(token, repository, opts \\ []) do
+    force_refresh? = Keyword.get(opts || [], :force, false)
+
+    if repository.tech_stack != [] and not force_refresh? do
+      {:ok, repository.tech_stack}
+    else
+      refresh_repo_tech_stack(token, repository)
+    end
   end
 
-  def ensure_repo_tech_stack(token, repository) do
+  defp refresh_repo_tech_stack(token, repository) do
     with {:ok, languages} <- Github.list_repository_languages(token, repository.user.provider_login, repository.name) do
       top_languages =
         languages

@@ -370,9 +370,11 @@ defmodule AlgoraWeb.ClaimLive do
                   Claim
                 </.card_title>
                 <%= if is_nil(@current_context_pending_payment) or Money.positive?(@current_context_pending_payment) do %>
-                  <.button phx-click="reward_bounty">
-                    Reward bounty
-                  </.button>
+                  <%= if @available_bounties != [] do %>
+                    <.button phx-click="reward_bounty">
+                      Reward bounty
+                    </.button>
+                  <% end %>
                 <% else %>
                   <.badge variant="success">
                     <.icon name="tabler-check" class="size-4 mr-2 -ml-1" /> Rewarded

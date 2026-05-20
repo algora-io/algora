@@ -658,6 +658,26 @@ defmodule Algora.BountiesTest do
       assert Enum.any?(bounties, &(&1.status == :paid))
       refute Enum.any?(bounties, &(&1.status == :cancelled))
     end
+
+    test "orders bounties by amount descending" do
+      low = insert_bounty_for_sort(amount: Money.new!(100, :USD), tech_stack: ["Elixir"])
+      high = insert_bounty_for_sort(amount: Money.new!(900, :USD), tech_stack: ["Ruby"])
+      mid = insert_bounty_for_sort(amount: Money.new!(500, :USD), tech_stack: ["JavaScript"])
+
+      bounties = Bounties.list_bounties(order: :amount, limit: 3)
+
+      assert Enum.map(bounties, & &1.id) == [high.id, mid.id, low.id]
+    end
+
+    test "orders bounties by primary repository technology" do
+      javascript = insert_bounty_for_sort(amount: Money.new!(100, :USD), tech_stack: ["JavaScript"])
+      elixir = insert_bounty_for_sort(amount: Money.new!(100, :USD), tech_stack: ["Elixir"])
+      c = insert_bounty_for_sort(amount: Money.new!(100, :USD), tech_stack: ["C"])
+
+      bounties = Bounties.list_bounties(order: :technology, limit: 3)
+
+      assert Enum.map(bounties, & &1.id) == [c.id, elixir.id, javascript.id]
+    end
   end
 
   describe "list_claims/1" do
@@ -737,5 +757,18 @@ defmodule Algora.BountiesTest do
       payout = Enum.find(line_items, &(&1.type == :payout))
       assert payout.description == "repo#123"
     end
+  end
+
+  defp insert_bounty_for_sort(attrs) do
+    owner = insert!(:user)
+    repo = insert!(:repository, user: owner, tech_stack: attrs[:tech_stack])
+    ticket = insert!(:ticket, repository: repo)
+
+    insert!(:bounty,
+      amount: attrs[:amount],
+      owner: owner,
+      creator: owner,
+      ticket: ticket
+    )
   end
 end

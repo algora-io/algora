@@ -10,102 +10,51 @@ defmodule AlgoraWeb.BountiesLive do
 
   require Logger
 
+  @default_sort "date"
+  @sort_options [{"date", "Date"}, {"price", "Price"}, {"technology", "Technology"}]
+
   @impl true
-  def handle_params(%{"tech" => tech}, _uri, socket) when is_binary(tech) do
-    selected_techs = tech |> String.split(",") |> Enum.reject(&(&1 == "")) |> Enum.map(&String.downcase/1)
-    valid_techs = Enum.map(socket.assigns.techs, fn {tech, _} -> String.downcase(tech) end)
-    # Only keep valid techs that exist in the available tech list
-    selected_techs = Enum.filter(selected_techs, &(&1 in valid_techs))
+  def handle_params(params, _uri, socket) do
+    selected_techs = parse_selected_techs(params["tech"], socket.assigns.techs)
+    selected_sort = parse_sort(params["sort"])
 
     query_opts =
-      if selected_techs == [] do
-        Keyword.delete(socket.assigns.query_opts, :tech_stack)
-      else
-        Keyword.put(socket.assigns.query_opts, :tech_stack, selected_techs)
-      end
+      socket.assigns.query_opts
+      |> Keyword.put(:order, sort_order(selected_sort))
+      |> put_selected_techs(selected_techs)
 
     {:noreply,
      socket
-     |> assign(:page_title, "#{Enum.map_join(selected_techs, "/", &String.capitalize/1)} Bounties")
+     |> assign(:page_title, page_title(selected_techs))
      |> assign(:selected_techs, selected_techs)
+     |> assign(:selected_sort, selected_sort)
      |> assign(:query_opts, query_opts)
      |> assign_bounties()}
   end
 
-  def handle_params(_params, _uri, socket) do
-    {:noreply,
-     socket
-     |> assign(:page_title, "Bounties")
-     |> assign(:selected_techs, [])
-     |> assign(:query_opts, Keyword.delete(socket.assigns.query_opts, :tech_stack))
-     |> assign_bounties()}
-  end
-
   @impl true
-  def mount(%{"tech" => tech}, _session, socket) when is_binary(tech) do
+  def mount(params, _session, socket) do
     if connected?(socket) do
       Bounties.subscribe()
     end
 
-    # Parse selected techs from URL params and ensure lowercase
-    selected_techs =
-      tech
-      |> String.split(",")
-      |> Enum.reject(&(&1 == ""))
-      |> Enum.map(&String.downcase/1)
-
-    query_opts =
-      [
-        status: :open,
-        limit: page_size(),
-        current_user: socket.assigns[:current_user]
-      ] ++
-        if socket.assigns[:current_user] do
-          [amount_gt: Money.new(:USD, 100)]
-        else
-          [amount_gt: Money.new(:USD, 500)]
-        end
-
+    query_opts = base_query_opts(socket)
     techs = Bounties.list_tech(query_opts)
 
-    # Only keep valid techs that exist in the available tech list (case insensitive)
-    valid_techs = Enum.map(techs, fn {tech, _} -> String.downcase(tech) end)
-    selected_techs = Enum.filter(selected_techs, &(&1 in valid_techs))
+    selected_techs = parse_selected_techs(params["tech"], techs)
+    selected_sort = parse_sort(params["sort"])
 
-    query_opts = if selected_techs == [], do: query_opts, else: Keyword.put(query_opts, :tech_stack, selected_techs)
+    query_opts =
+      query_opts
+      |> Keyword.put(:order, sort_order(selected_sort))
+      |> put_selected_techs(selected_techs)
 
     {:ok,
      socket
      |> assign(:techs, techs)
+     |> assign(:sort_options, @sort_options)
      |> assign(:selected_techs, selected_techs)
-     |> assign(:query_opts, query_opts)
-     |> assign_bounties()
-     |> assign_events()}
-  end
-
-  def mount(_params, _session, socket) do
-    if connected?(socket) do
-      Bounties.subscribe()
-    end
-
-    query_opts =
-      [
-        status: :open,
-        limit: page_size(),
-        current_user: socket.assigns[:current_user]
-      ] ++
-        if socket.assigns[:current_user] do
-          [amount_gt: Money.new(:USD, 100)]
-        else
-          [amount_gt: Money.new(:USD, 500)]
-        end
-
-    techs = Bounties.list_tech(query_opts)
-
-    {:ok,
-     socket
-     |> assign(:techs, techs)
-     |> assign(:selected_techs, [])
+     |> assign(:selected_sort, selected_sort)
      |> assign(:query_opts, query_opts)
      |> assign_bounties()
      |> assign_events()}
@@ -116,21 +65,42 @@ defmodule AlgoraWeb.BountiesLive do
     ~H"""
     <div class="container mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:px-8">
       <.section title="Bounties" subtitle="Open bounties for you">
-        <div class="mb-4 flex sm:flex-wrap gap-2 whitespace-nowrap overflow-x-auto scrollbar-thin">
-          <%= for {tech, count} <- @techs do %>
-            <div phx-click="toggle_tech" phx-value-tech={tech} class="cursor-pointer">
-              <.badge
-                variant={if String.downcase(tech) in @selected_techs, do: "success", else: "default"}
-                class={
-                  if String.downcase(tech) in @selected_techs,
-                    do: "hover:bg-success/5 transition-colors",
-                    else: "hover:bg-accent/80 transition-colors"
-                }
+        <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div class="flex sm:flex-wrap gap-2 whitespace-nowrap overflow-x-auto scrollbar-thin">
+            <%= for {tech, count} <- @techs do %>
+              <div phx-click="toggle_tech" phx-value-tech={tech} class="cursor-pointer">
+                <.badge
+                  variant={
+                    if String.downcase(tech) in @selected_techs, do: "success", else: "default"
+                  }
+                  class={
+                    if String.downcase(tech) in @selected_techs,
+                      do: "hover:bg-success/5 transition-colors",
+                      else: "hover:bg-accent/80 transition-colors"
+                  }
+                >
+                  {tech} ({count})
+                </.badge>
+              </div>
+            <% end %>
+          </div>
+
+          <form phx-change="change_sort" class="flex shrink-0 items-center gap-2">
+            <label for="bounty-sort" class="text-sm font-medium text-muted-foreground">Sort</label>
+            <select
+              id="bounty-sort"
+              name="sort"
+              class="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
+            >
+              <option
+                :for={{value, label} <- @sort_options}
+                value={value}
+                selected={value == @selected_sort}
               >
-                {tech} ({count})
-              </.badge>
-            </div>
-          <% end %>
+                {label}
+              </option>
+            </select>
+          </form>
         </div>
         <%= if Enum.empty?(@bounties) do %>
           <.card class="rounded-lg bg-card py-12 text-center lg:rounded-[2rem]">
@@ -585,12 +555,7 @@ defmodule AlgoraWeb.BountiesLive do
     %{bounties: bounties} = socket.assigns
 
     more_bounties =
-      Bounties.list_bounties(
-        Keyword.put(socket.assigns.query_opts, :before, %{
-          inserted_at: List.last(bounties).inserted_at,
-          id: List.last(bounties).id
-        })
-      )
+      Bounties.list_bounties(Keyword.put(socket.assigns.query_opts, :offset, length(bounties)))
 
     {:noreply,
      socket
@@ -609,22 +574,11 @@ defmodule AlgoraWeb.BountiesLive do
         [tech | socket.assigns.selected_techs]
       end
 
-    query_opts =
-      if selected_techs == [] do
-        Keyword.delete(socket.assigns.query_opts, :tech_stack)
-      else
-        Keyword.put(socket.assigns.query_opts, :tech_stack, selected_techs)
-      end
+    {:noreply, push_patch(socket, to: bounty_path(selected_techs, socket.assigns.selected_sort))}
+  end
 
-    # Update the URL with selected techs
-    path = if selected_techs == [], do: ~p"/bounties", else: ~p"/bounties/#{Enum.join(selected_techs, ",")}"
-
-    {:noreply,
-     socket
-     |> push_patch(to: path)
-     |> assign(:selected_techs, selected_techs)
-     |> assign(:query_opts, query_opts)
-     |> assign_bounties()}
+  def handle_event("change_sort", %{"sort" => sort}, socket) do
+    {:noreply, push_patch(socket, to: bounty_path(socket.assigns.selected_techs, parse_sort(sort)))}
   end
 
   defp assign_bounties(socket) do
@@ -636,6 +590,53 @@ defmodule AlgoraWeb.BountiesLive do
   end
 
   defp page_size, do: 10
+
+  defp base_query_opts(socket) do
+    [
+      status: :open,
+      limit: page_size(),
+      current_user: socket.assigns[:current_user]
+    ] ++
+      if socket.assigns[:current_user] do
+        [amount_gt: Money.new(:USD, 100)]
+      else
+        [amount_gt: Money.new(:USD, 500)]
+      end
+  end
+
+  defp parse_selected_techs(nil, _techs), do: []
+
+  defp parse_selected_techs(tech, techs) when is_binary(tech) do
+    valid_techs = Enum.map(techs, fn {tech, _} -> String.downcase(tech) end)
+
+    tech
+    |> String.split(",")
+    |> Enum.reject(&(&1 == ""))
+    |> Enum.map(&String.downcase/1)
+    |> Enum.filter(&(&1 in valid_techs))
+  end
+
+  defp parse_sort(sort) when sort in ["price", "technology"], do: sort
+  defp parse_sort(_sort), do: @default_sort
+
+  defp sort_order("price"), do: :amount
+  defp sort_order("technology"), do: :technology
+  defp sort_order(_sort), do: :date
+
+  defp put_selected_techs(query_opts, []), do: Keyword.delete(query_opts, :tech_stack)
+  defp put_selected_techs(query_opts, selected_techs), do: Keyword.put(query_opts, :tech_stack, selected_techs)
+
+  defp page_title([]), do: "Bounties"
+  defp page_title(selected_techs), do: "#{Enum.map_join(selected_techs, "/", &String.capitalize/1)} Bounties"
+
+  defp bounty_path(selected_techs, selected_sort) do
+    query = if selected_sort == @default_sort, do: [], else: [sort: selected_sort]
+
+    case selected_techs do
+      [] -> ~p"/bounties?#{query}"
+      techs -> ~p"/bounties/#{Enum.join(techs, ",")}?#{query}"
+    end
+  end
 
   defp events(assigns) do
     ~H"""

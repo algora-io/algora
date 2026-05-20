@@ -245,6 +245,8 @@ defmodule AlgoraWeb.Router do
   scope "/", AlgoraWeb do
     pipe_through [:browser]
 
+    get "/profile/:handle", UserController, :profile
+
     scope "/:repo_owner/:repo_name" do
       get "/", RepoController, :index
 

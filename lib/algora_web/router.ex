@@ -98,6 +98,10 @@ defmodule AlgoraWeb.Router do
       live "/user/transactions", User.TransactionsLive, :index
       live "/user/settings", User.SettingsLive, :edit
       live "/user/installations", User.InstallationsLive, :index
+      live "/bounties", BountiesLive, :index
+      live "/bounties/:tech", BountiesLive, :index
+      live "/leaderboard", LeaderboardLive, :index
+      live "/projects", OrgsLive, :index
     end
 
     live_session :home,
@@ -108,10 +112,6 @@ defmodule AlgoraWeb.Router do
     live_session :public,
       layout: {AlgoraWeb.Layouts, :user},
       on_mount: [{AlgoraWeb.UserAuth, :current_user}, Nav] do
-      live "/bounties", BountiesLive, :index
-      live "/bounties/:tech", BountiesLive, :index
-      live "/leaderboard", LeaderboardLive, :index
-      live "/projects", OrgsLive, :index
       live "/claims/:group_id", ClaimLive
       live "/payment/success", Payment.SuccessLive, :index
       live "/payment/canceled", Payment.CanceledLive, :index

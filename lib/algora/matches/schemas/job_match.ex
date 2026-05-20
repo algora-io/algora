@@ -67,6 +67,14 @@ defmodule Algora.Matches.JobMatch do
       :provider_feedback_meta,
       :provider_interviews_meta
     ])
+    |> then(fn cs ->
+      Enum.reduce([:provider_candidate_id, :provider_application_id], cs, fn field, acc ->
+        case Map.fetch(attrs, field) do
+          {:ok, ""} -> force_change(acc, field, "")
+          _ -> acc
+        end
+      end)
+    end)
     |> validate_required([:user_id, :job_posting_id])
     |> validate_inclusion(:status, [:pending, :discarded, :automatched, :dripped, :approved, :highlighted])
     |> foreign_key_constraint(:user_id)

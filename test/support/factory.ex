@@ -222,6 +222,14 @@ defmodule Algora.Factory do
     }
   end
 
+  def user_contribution_factory do
+    %Algora.Workspace.UserContribution{
+      id: Nanoid.generate(),
+      contribution_count: 1,
+      last_fetched_at: DateTime.utc_now()
+    }
+  end
+
   def ticket_factory do
     %Algora.Workspace.Ticket{
       id: Nanoid.generate(),

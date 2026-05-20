@@ -893,10 +893,14 @@ defmodule Algora.Workspace do
                  ilike(repo_owner.provider_login, "%firstcontributions%") or
                  repo_owner.provider_login == "up-for-grabs"),
         order_by: [
+          desc: fragment("CASE WHEN ? = 'highlighted' THEN 1 ELSE 0 END", uc.status),
           desc: fragment("CASE WHEN ? && ?::citext[] THEN 1 ELSE 0 END", r.tech_stack, ^tech_stack),
           desc: r.stargazers_count
         ],
         select: %UserContribution{
+          id: uc.id,
+          user_id: uc.user_id,
+          repository_id: uc.repository_id,
           contribution_count: uc.contribution_count,
           user: map(u, [:id, :provider_login]),
           status: uc.status,
@@ -921,6 +925,13 @@ defmodule Algora.Workspace do
         where(query, [uc, u, r, repo_owner], repo_owner.type == :organization)
       else
         query
+      end
+
+    query =
+      if opts[:include_hidden] do
+        query
+      else
+        where(query, [uc, u, r, repo_owner], uc.status != :hidden)
       end
 
     query =

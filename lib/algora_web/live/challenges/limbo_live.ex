@@ -44,6 +44,7 @@ defmodule AlgoraWeb.Challenges.LimboLive do
       <div class="absolute top-0 z-10 w-full">
         <Header.header class="max-w-[100rem]" hide_banner />
       </div>
+
       <main class="relative z-0">
         <article>
           <div class="text-white">
@@ -106,6 +107,7 @@ defmodule AlgoraWeb.Challenges.LimboLive do
               </section>
               <section
                 :if={not Enum.empty?(@leaderboard)}
+                id="leaderboard"
                 class="relative md:mb-18 mb-12 xl:pt-20 2xl:pt-52 overflow-hidden"
               >
                 <%!-- ambient orbs --%>
@@ -218,74 +220,124 @@ defmodule AlgoraWeb.Challenges.LimboLive do
                   </div>
                 </div>
               </section>
-              <section class="my-24 md:my-36">
-                <div class="relative z-50 mx-auto max-w-7xl px-6 pt-6 lg:px-8">
+              <section class="relative my-24 md:my-36">
+                <div class="absolute inset-0 z-10 bg-background/60 flex items-center justify-center rounded-xl">
+                  <div class="text-center px-6">
+                    <div class="inline-flex items-center gap-2 rounded-full border border-[#4ff7d3]/30 bg-emerald-800/90 px-5 py-2 text-base font-semibold text-[#4ff7d3] mb-4">
+                      Challenge Completed
+                    </div>
+                    <p class="text-xl sm:text-3xl font-semibold text-white mb-1">
+                      Submissions are closed
+                    </p>
+                    <p class="text-sm sm:text-lg font-medium text-white/80">
+                      All bounties have been awarded to the winners
+                    </p>
+                  </div>
+                </div>
+                <div class="relative mx-auto max-w-7xl px-6 pt-6 lg:px-8">
                   <h2 class="flex justify-center text-4xl font-black leading-none tracking-tighter mix-blend-exclusion md:text-7xl">
                     How to participate
                   </h2>
-                  <p class="text-center mt-4 text-base font-medium text-gray-200">
+                  <p class="text-center mt-4 text-base font-medium text-gray-400">
                     Got questions?
                     <a
                       target="_blank"
-                      class="font-semibold text-white underline"
+                      class="font-semibold text-[#4ff7d3] hover:text-[#75ffe1] transition-colors"
                       href="https://discord.gg/jgjmyYgHwB"
                     >
-                      Join us on Discord!
+                      Join us on Discord
                     </a>
                   </p>
-                  <ul class="mt-4 md:mt-8 space-y-4 md:space-y-2 mx-auto max-w-5xl">
-                    <li class="flex w-full items-start pt-2 text-left text-white">
-                      <.icon name="tabler-square-rounded-number-1" class="size-8 mr-2 shrink-0" />
-                      <span class="text-base font-medium leading-7">
-                        <a
-                          rel="noopener"
-                          target="_blank"
-                          class="font-semibold text-white underline inline-flex"
-                          href="https://github.com/tursodatabase/turso/blob/main/CONTRIBUTING.md"
-                        >
-                          Set up your development environment
-                        </a>
-                        and build the Turso CLI locally
-                      </span>
-                    </li>
-                    <li class="flex w-full items-start pt-2 text-left text-white">
-                      <.icon name="tabler-square-rounded-number-2" class="size-8 mr-2 shrink-0" />
-                      <span class="text-base font-medium leading-7">
-                        Explore the
-                        <a
-                          rel="noopener"
-                          target="_blank"
-                          class="font-semibold text-white underline inline-flex"
-                          href="https://github.com/tursodatabase/turso/tree/main/simulator"
-                        >
-                          simulator
-                        </a>
-                        directory to understand our Deterministic Simulation Testing framework
-                      </span>
-                    </li>
-                    <li class="flex w-full items-start pt-2 text-left text-white">
-                      <.icon name="tabler-square-rounded-number-3" class="size-8 mr-2 shrink-0" />
-                      <span class="text-base font-medium leading-7">
-                        Improve the Deterministic Simulator to expose a new data corruption bug that the simulator would not have been able to catch before. A data corruption bug is a bug in which the database loses data in a way that cannot be recovered by a future patch
-                      </span>
-                    </li>
-                    <li class="flex w-full items-start pt-2 text-left text-white">
-                      <.icon name="tabler-square-rounded-number-4" class="size-8 mr-2 shrink-0" />
-                      <span class="text-base font-medium leading-7">
-                        Submit a PR with the Deterministic Simulator improvements to catch the bug. If your PR is merged, you'll receive an
-                        <span class="font-display font-bold text-[#4ff7d3]">$800</span>
-                        reward. Note that only bugs present in the latest released version of Turso, in features that are enabled by default are eligible. This excludes experimental and gated features.
-                      </span>
-                    </li>
-                    <li class="flex w-full items-start pt-2 text-left text-white">
-                      <.icon name="tabler-square-rounded-number-5" class="size-8 mr-2 shrink-0" />
-                      <span class="text-base font-medium leading-7">
-                        Fix the identified bug for an additional
-                        <span class="font-display font-bold text-[#4ff7d3]">$200</span>
-                        reward
-                      </span>
-                    </li>
-                  </ul>
+                  <div class="mt-10 md:mt-14 mx-auto max-w-5xl space-y-4">
+                    <%!-- Step 1 --%>
+                    <div class="group relative flex gap-4 rounded-xl border border-white/10 bg-white/[3%] p-5 transition-colors hover:border-[#4ff7d3]/30 hover:bg-white/[5%]">
+                      <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#4ff7d3]/30 bg-[#4ff7d3]/10 font-mono text-sm font-bold text-[#4ff7d3]">
+                        1
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <div class="font-semibold text-white mb-1">Set up your environment</div>
+                        <p class="text-sm text-gray-400 leading-relaxed">
+                          Follow the
+                          <a
+                            rel="noopener"
+                            target="_blank"
+                            class="font-medium text-[#4ff7d3] hover:text-[#75ffe1] transition-colors"
+                            href="https://github.com/tursodatabase/turso/blob/main/CONTRIBUTING.md"
+                          >
+                            CONTRIBUTING.md guide
+                          </a>
+                          to build the Turso CLI locally. You'll need Rust installed and the repo cloned.
+                        </p>
+                      </div>
+                    </div>
+                    <%!-- Step 2 --%>
+                    <div class="group relative flex gap-4 rounded-xl border border-white/10 bg-white/[3%] p-5 transition-colors hover:border-[#4ff7d3]/30 hover:bg-white/[5%]">
+                      <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#4ff7d3]/30 bg-[#4ff7d3]/10 font-mono text-sm font-bold text-[#4ff7d3]">
+                        2
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <div class="font-semibold text-white mb-1">Understand the DST framework</div>
+                        <p class="text-sm text-gray-400 leading-relaxed">
+                          Explore the
+                          <a
+                            rel="noopener"
+                            target="_blank"
+                            class="font-medium text-[#4ff7d3] hover:text-[#75ffe1] transition-colors"
+                            href="https://github.com/tursodatabase/turso/tree/main/simulator"
+                          >
+                            simulator directory
+                          </a>
+                          to learn how Turso's Deterministic Simulation Testing works and what kinds of bugs it currently detects.
+                        </p>
+                      </div>
+                    </div>
+                    <%!-- Step 3 --%>
+                    <div class="group relative flex gap-4 rounded-xl border border-white/10 bg-white/[3%] p-5 transition-colors hover:border-[#4ff7d3]/30 hover:bg-white/[5%]">
+                      <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#4ff7d3]/30 bg-[#4ff7d3]/10 font-mono text-sm font-bold text-[#4ff7d3]">
+                        3
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <div class="font-semibold text-white mb-1">Find a data corruption bug</div>
+                        <p class="text-sm text-gray-400 leading-relaxed">
+                          Improve the simulator to expose a bug that slipped through. A qualifying bug causes data loss or corruption that cannot be recovered by a future patch in features enabled by default in the latest release.
+                        </p>
+                      </div>
+                    </div>
+                    <%!-- Step 4 --%>
+                    <div class="group relative flex gap-4 rounded-xl border border-[#4ff7d3]/20 bg-[#4ff7d3]/[4%] p-5 transition-colors hover:border-[#4ff7d3]/40 hover:bg-[#4ff7d3]/[7%]">
+                      <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#4ff7d3]/40 bg-[#4ff7d3]/15 font-mono text-sm font-bold text-[#4ff7d3]">
+                        4
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 mb-1">
+                          <span class="font-semibold text-white">
+                            Submit a PR with your simulator improvements
+                          </span>
+                        </div>
+                        <p class="text-sm text-gray-400 leading-relaxed">
+                          Open a pull request adding the DST scenarios that catch the bug. Once your PR is merged, you receive an
+                          <span class="font-semibold text-[#4ff7d3]">$800</span>
+                          reward. Experimental or gated features are not eligible.
+                        </p>
+                      </div>
+                    </div>
+                    <%!-- Step 5 --%>
+                    <div class="group relative flex gap-4 rounded-xl border border-[#4ff7d3]/20 bg-[#4ff7d3]/[4%] p-5 transition-colors hover:border-[#4ff7d3]/40 hover:bg-[#4ff7d3]/[7%]">
+                      <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#4ff7d3]/40 bg-[#4ff7d3]/15 font-mono text-sm font-bold text-[#4ff7d3]">
+                        5
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 mb-1">
+                          <span class="font-semibold text-white">Fix the bug</span>
+                        </div>
+                        <p class="text-sm text-gray-400 leading-relaxed">
+                          Patch the underlying issue you uncovered and earn an additional
+                          <span class="font-semibold text-[#4ff7d3]">$200</span>
+                          bringing the total reward to <span class="font-semibold text-[#4ff7d3]">$1,000</span>.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </section>
               <section class="mx-auto my-24 max-w-7xl md:my-36">

@@ -21,7 +21,7 @@ defmodule AlgoraWeb.Components.Footer do
         ])
       }>
         <div>
-          <div class="grid grid-cols-2 gap-x-8 gap-y-12 sm:grid-cols-3 lg:grid-cols-5">
+          <div class="grid grid-cols-2 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
             <%!-- Col 1: Company + phone numbers --%>
             <div class="sm:col-span-1">
               <h3 class="text-sm font-semibold uppercase tracking-wider text-white">
@@ -112,7 +112,7 @@ defmodule AlgoraWeb.Components.Footer do
             </div>
 
             <%!-- Col 3: Bounties --%>
-            <div class="sm:col-span-1">
+            <%!-- <div class="sm:col-span-1">
               <h3 class="text-sm font-semibold uppercase tracking-wider text-white">
                 Bounties
               </h3>
@@ -150,7 +150,7 @@ defmodule AlgoraWeb.Components.Footer do
                   </.link>
                 </li>
               </ul>
-            </div>
+            </div> --%>
 
             <%!-- Col 4: Connect --%>
             <div class="sm:col-span-1">

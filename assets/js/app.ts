@@ -934,6 +934,105 @@ const Hooks = {
       this.storage.removeItem(obj.key);
     },
   },
+  BountyBuckets: {
+    mounted() {
+      this.storageKey =
+        this.el.getAttribute("data-storage-key") || "algora:bounty-preferences:v1";
+      this.handleClick = (event: Event) => {
+        const target = event.target as HTMLElement | null;
+        const button = target?.closest("[data-bounty-action]") as HTMLElement | null;
+        if (!button) return;
+
+        event.preventDefault();
+        const item = button.closest("[data-bounty-id]") as HTMLElement | null;
+        if (!item) return;
+
+        const bountyId = item.dataset.bountyId;
+        const action = button.dataset.bountyAction;
+        if (!bountyId || !action) return;
+
+        const preferences = this.readPreferences();
+        const current = preferences[bountyId] || "remaining";
+
+        if (action === "favorite") {
+          preferences[bountyId] = current === "favorite" ? "remaining" : "favorite";
+        }
+
+        if (action === "ignore") {
+          preferences[bountyId] = current === "ignored" ? "remaining" : "ignored";
+        }
+
+        if (preferences[bountyId] === "remaining") {
+          delete preferences[bountyId];
+        }
+
+        this.writePreferences(preferences);
+        this.applyBuckets();
+      };
+
+      this.el.addEventListener("click", this.handleClick);
+      this.applyBuckets();
+    },
+
+    updated() {
+      this.applyBuckets();
+    },
+
+    destroyed() {
+      this.el.removeEventListener("click", this.handleClick);
+    },
+
+    readPreferences() {
+      try {
+        return JSON.parse(localStorage.getItem(this.storageKey) || "{}");
+      } catch {
+        return {};
+      }
+    },
+
+    writePreferences(preferences: Record<string, string>) {
+      localStorage.setItem(this.storageKey, JSON.stringify(preferences));
+    },
+
+    applyBuckets() {
+      const preferences = this.readPreferences();
+      const lists = {
+        favorite: this.el.querySelector('[data-bucket-list="favorite"]'),
+        remaining: this.el.querySelector('[data-bucket-list="remaining"]'),
+        ignored: this.el.querySelector('[data-bucket-list="ignored"]'),
+      } as Record<string, HTMLElement | null>;
+
+      const items = Array.from(
+        this.el.querySelectorAll("[data-bounty-id]"),
+      ) as HTMLElement[];
+
+      items.forEach((item) => {
+        const bountyId = item.dataset.bountyId;
+        const bucket = bountyId ? preferences[bountyId] || "remaining" : "remaining";
+        lists[bucket]?.appendChild(item);
+        this.updateLabels(item, bucket);
+      });
+
+      ["favorite", "ignored"].forEach((bucket) => {
+        const section = this.el.querySelector(`[data-bucket="${bucket}"]`);
+        const count = lists[bucket]?.children.length || 0;
+        section?.classList.toggle("hidden", count === 0);
+      });
+    },
+
+    updateLabels(item: HTMLElement, bucket: string) {
+      const favoriteLabel = item.querySelector("[data-favorite-label]");
+      const ignoreLabel = item.querySelector("[data-ignore-label]");
+
+      if (favoriteLabel) {
+        favoriteLabel.textContent = bucket === "favorite" ? "Unfavorite" : "Favorite";
+      }
+
+      if (ignoreLabel) {
+        ignoreLabel.textContent = bucket === "ignored" ? "Unignore" : "Ignore";
+      }
+    },
+  },
   CtrlEnterSubmit: {
     mounted() {
       this.el.addEventListener("keydown", (e) => {

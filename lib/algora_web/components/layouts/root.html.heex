@@ -50,6 +50,16 @@
     <link rel="apple-touch-icon" sizes="192x192" href="/images/logo-192px.png" />
     <link rel="apple-touch-icon" sizes="512x512" href="/images/logo-512px.png" />
 
+    <script>
+      (() => {
+        try {
+          const theme = localStorage.getItem("theme");
+          const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+          const useDark = theme === "dark" || (!theme && systemDark);
+          document.documentElement.classList.toggle("dark", useDark);
+        } catch (_error) {}
+      })();
+    </script>
     <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
     <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}>
     </script>
@@ -71,7 +81,7 @@
       rel="stylesheet"
     />
   </head>
-  <body class="dark">
+  <body>
     {@inner_content}
     <div
       :if={Application.get_env(:algora, :ingest_token)}

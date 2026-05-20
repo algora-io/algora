@@ -303,9 +303,9 @@ defmodule Algora.Matches do
   end
 
   def is_match_recent?(match) do
+    timestamp = match.dripped_at || match.inserted_at
     one_week_ago = DateTime.add(DateTime.utc_now(), -7, :day)
-
-    DateTime.after?(match.inserted_at, one_week_ago)
+    DateTime.after?(timestamp, one_week_ago)
   end
 
   def get_latest_match_with_notes(user_id) do

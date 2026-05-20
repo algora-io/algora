@@ -236,7 +236,7 @@ defmodule AlgoraWeb.User.ProfileLive do
               <h2 class="text-lg font-semibold">Top Contributions</h2>
               <%= for {owner, contributions} <- aggregate_contributions(@contributions) do %>
                 <.link
-                  href={"https://github.com/#{owner.provider_login}/#{List.first(contributions).repository.name}/pulls?q=author%3A#{@user.provider_login}+is%3Amerged+"}
+                  href={contribution_search_url(owner, @user)}
                   target="_blank"
                   rel="noopener"
                   class="flex items-center gap-3 rounded-xl pr-2 bg-card/50 border border-border/50 hover:border-border transition-all group"
@@ -344,5 +344,12 @@ defmodule AlgoraWeb.User.ProfileLive do
     contributions
     |> Enum.map(& &1.contribution_count)
     |> Enum.sum()
+  end
+
+  defp contribution_search_url(owner, user) do
+    scope = if owner.type in [:organization, "organization"], do: "org", else: "user"
+    query = "author:#{user.provider_login} is:merged #{scope}:#{owner.provider_login}"
+
+    "https://github.com/pulls?q=#{URI.encode_www_form(query)}"
   end
 end

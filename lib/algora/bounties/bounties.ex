@@ -1268,8 +1268,8 @@ defmodule Algora.Bounties do
         query
 
       {:tech_stack, tech_stack}, query ->
-        from([b, r: r] in query,
-          where: b.visibility == :exclusive or fragment("? && ?::citext[]", r.tech_stack, ^tech_stack)
+        from([_b, r: r] in query,
+          where: fragment("? && ?::citext[]", r.tech_stack, ^tech_stack)
         )
 
       {:amount_gt, min_amount}, query ->

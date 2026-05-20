@@ -658,6 +658,36 @@ defmodule Algora.BountiesTest do
       assert Enum.any?(bounties, &(&1.status == :paid))
       refute Enum.any?(bounties, &(&1.status == :cancelled))
     end
+
+    test "filters tech pages by repository tech stack instead of exclusive visibility" do
+      svelte_repo = insert!(:repository, %{user: insert!(:user), tech_stack: ["Svelte"]})
+      rust_repo = insert!(:repository, %{user: insert!(:user), tech_stack: ["Rust"]})
+
+      svelte_ticket = insert!(:ticket, %{repository: svelte_repo})
+      rust_ticket = insert!(:ticket, %{repository: rust_repo})
+
+      matching_bounty = insert!(:bounty, ticket: svelte_ticket, owner: insert!(:user), visibility: :public)
+      _unrelated_exclusive_bounty = insert!(:bounty, ticket: rust_ticket, owner: insert!(:user), visibility: :exclusive)
+
+      bounties = Bounties.list_bounties(tech_stack: ["Svelte"])
+
+      assert Enum.map(bounties, & &1.id) == [matching_bounty.id]
+    end
+  end
+
+  describe "list_tech/1" do
+    test "counts only bounties whose repository matches the selected tech stack" do
+      svelte_repo = insert!(:repository, %{user: insert!(:user), tech_stack: ["Svelte"]})
+      rust_repo = insert!(:repository, %{user: insert!(:user), tech_stack: ["Rust"]})
+
+      svelte_ticket = insert!(:ticket, %{repository: svelte_repo})
+      rust_ticket = insert!(:ticket, %{repository: rust_repo})
+
+      insert!(:bounty, ticket: svelte_ticket, owner: insert!(:user), visibility: :public)
+      insert!(:bounty, ticket: rust_ticket, owner: insert!(:user), visibility: :exclusive)
+
+      assert Bounties.list_tech(tech_stack: ["Svelte"]) == [{"Svelte", 1}]
+    end
   end
 
   describe "list_claims/1" do

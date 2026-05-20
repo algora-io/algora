@@ -1331,9 +1331,34 @@ defmodule Algora.Bounties do
     |> join(:inner, [b], o in assoc(b, :owner), as: :o)
     |> join(:left, [t: t], r in assoc(t, :repository), as: :r)
     |> join(:left, [r: r], ro in assoc(r, :user), as: :ro)
+    |> join(:left, [t: t], a in subquery(attempt_activity_query()), on: a.ticket_id == t.id, as: :attempt_activity)
+    |> join(:left, [t: t], c in subquery(claim_activity_query()), on: c.ticket_id == t.id, as: :claim_activity)
     |> where([b], not is_nil(b.amount))
     |> where([b], b.status != :cancelled)
     |> apply_criteria(criteria)
+  end
+
+  defp attempt_activity_query do
+    from a in Attempt,
+      where: a.status == :active,
+      group_by: a.ticket_id,
+      select: %{
+        ticket_id: a.ticket_id,
+        active_attempt_count: count(a.id),
+        last_attempt_at: max(a.inserted_at)
+      }
+  end
+
+  defp claim_activity_query do
+    from c in Claim,
+      where: c.status != :cancelled,
+      where: c.type == :pull_request,
+      group_by: c.target_id,
+      select: %{
+        ticket_id: c.target_id,
+        pull_request_count: count(c.group_id, :distinct),
+        last_claim_at: max(c.inserted_at)
+      }
   end
 
   def list_bounties_with(base_query, criteria \\ []) do
@@ -1341,7 +1366,7 @@ defmodule Algora.Bounties do
     |> list_bounties_query(criteria)
     # TODO: sort by b.paid_at if criteria[:status] == :paid
     |> order_by([b], desc: b.inserted_at, desc: b.id)
-    |> select([b, o: o, t: t, ro: ro, r: r], %{
+    |> select([b, o: o, t: t, ro: ro, r: r, attempt_activity: a, claim_activity: c], %{
       id: b.id,
       inserted_at: b.inserted_at,
       amount: b.amount,
@@ -1373,6 +1398,19 @@ defmodule Algora.Bounties do
           provider_login: ro.provider_login,
           avatar_url: ro.avatar_url
         }
+      },
+      activity: %{
+        active_attempt_count: type(fragment("COALESCE(?, 0)", a.active_attempt_count), :integer),
+        pull_request_count: type(fragment("COALESCE(?, 0)", c.pull_request_count), :integer),
+        last_activity_at:
+          fragment(
+            "GREATEST(?, COALESCE(?, ?), COALESCE(?, ?))",
+            b.inserted_at,
+            a.last_attempt_at,
+            b.inserted_at,
+            c.last_claim_at,
+            b.inserted_at
+          )
       }
     })
     |> Repo.all()

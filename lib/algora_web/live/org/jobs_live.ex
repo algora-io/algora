@@ -178,9 +178,19 @@ defmodule AlgoraWeb.Org.JobsLive do
                         <% end %>
                       </div>
                     </div>
-                    <.button phx-click="apply_job" phx-value-job-id={job.id}>
-                      I'm interested
-                    </.button>
+                    <%= if MapSet.member?(@user_applications, job.id) do %>
+                      <.button
+                        variant="secondary"
+                        phx-click="withdraw_application"
+                        phx-value-job-id={job.id}
+                      >
+                        Withdraw
+                      </.button>
+                    <% else %>
+                      <.button phx-click="apply_job" phx-value-job-id={job.id}>
+                        I'm interested
+                      </.button>
+                    <% end %>
                   </div>
                 <% end %>
               </div>
@@ -250,6 +260,27 @@ defmodule AlgoraWeb.Org.JobsLive do
       end
     else
       # Not logged in, just redirect
+      {:noreply, push_navigate(socket, to: "/#{org.handle}/job/#{job_id}/apply")}
+    end
+  end
+
+  @impl true
+  def handle_event("withdraw_application", %{"job-id" => job_id}, socket) do
+    current_user = socket.assigns[:current_user]
+    org = socket.assigns.current_org
+
+    if current_user do
+      case Jobs.withdraw_application(job_id, current_user) do
+        {:ok, _application} ->
+          {:noreply, assign_user_applications(socket)}
+
+        {:error, :not_found} ->
+          {:noreply, put_flash(socket, :error, "Application not found.")}
+
+        {:error, _changeset} ->
+          {:noreply, put_flash(socket, :error, "Failed to withdraw application. Please try again.")}
+      end
+    else
       {:noreply, push_navigate(socket, to: "/#{org.handle}/job/#{job_id}/apply")}
     end
   end

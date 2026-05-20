@@ -31,37 +31,31 @@ defmodule AlgoraWeb.ChallengesLive do
         </div>
 
         <%!-- Active challenges --%>
-        <div class="mb-6 flex items-center gap-4">
+        <%!-- <div class="mb-6 flex items-center gap-4">
           <div class="h-px flex-1 bg-border/60"></div>
           <span class="flex items-center gap-1.5 text-xs font-medium uppercase tracking-widest text-muted-foreground">
             <span class="size-1.5 rounded-full bg-emerald-500"></span> Active
           </span>
           <div class="h-px flex-1 bg-border/60"></div>
         </div>
-        <div class="flex flex-col gap-6 md:grid md:grid-cols-3">
-          <.challenge_card
-            image="/images/challenges/jules/og.png"
-            href={~p"/challenges/jules"}
-            status={:active}
-          />
-          <.challenge_card
-            image="/images/challenges/limbo/og.png"
-            href={~p"/challenges/turso"}
-            status={:active}
-          />
-        </div>
+        <div class="flex flex-col gap-6 md:grid md:grid-cols-3"></div> --%>
 
         <%!-- Divider --%>
-        <div class="my-10 flex items-center gap-4">
+        <%!-- <div class="my-10 flex items-center gap-4">
           <div class="h-px flex-1 bg-border/60"></div>
           <span class="text-xs font-medium uppercase tracking-widest text-muted-foreground">
             Completed
           </span>
           <div class="h-px flex-1 bg-border/60"></div>
-        </div>
+        </div> --%>
 
         <%!-- Completed challenges --%>
-        <div class="flex flex-col gap-6 md:grid md:grid-cols-3">
+        <div class="flex flex-col gap-6 md:grid md:grid-cols-2">
+          <.challenge_card
+            image="/images/challenges/limbo/og.png"
+            href={~p"/challenges/turso"}
+            status={:completed}
+          />
           <.challenge_card
             image="/images/challenges/golem/og.png"
             href={~p"/challenges/golem"}
@@ -114,7 +108,7 @@ defmodule AlgoraWeb.ChallengesLive do
       <%= if @status == :completed do %>
         <div class="absolute top-3 right-3 z-10 flex items-center gap-1.5 rounded-full bg-emerald-950/50 group-hover:bg-emerald-950/70 transition-colors ring-1 ring-emerald-500/40 backdrop-blur-sm px-2.5 py-1 pointer-events-none">
           <.icon name="tabler-check" class="size-3 text-emerald-400" />
-          <span class="text-xs font-semibold text-emerald-400">Rewarded</span>
+          <span class="text-xs font-semibold text-emerald-400">Completed</span>
         </div>
       <% end %>
     </div>

@@ -116,8 +116,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
   defp process_event(
          %Webhook{event_action: "pull_request.closed", payload: %{"pull_request" => %{"merged_at" => nil}}} = webhook,
          _commands
-       ),
-       do: handle_ticket_state_change(webhook)
+       ), do: handle_ticket_state_change(webhook)
 
   defp process_event(%Webhook{event_action: "pull_request.closed", payload: payload} = webhook, _commands) do
     _res = handle_ticket_state_change(webhook)
@@ -325,7 +324,11 @@ defmodule AlgoraWeb.Webhooks.GithubController do
         "pull_request" -> {:ticket, payload["pull_request"]["id"]}
       end
 
-    ticket_number = get_github_ticket(webhook)["number"]
+    ticket_ref = %{
+      owner: payload["repository"]["owner"]["login"],
+      repo: payload["repository"]["name"],
+      number: get_github_ticket(webhook)["number"]
+    }
 
     strategy = :set
     # strategy =
@@ -349,22 +352,22 @@ defmodule AlgoraWeb.Webhooks.GithubController do
            ),
          {:ok, owner} <- Accounts.fetch_user_by(id: installation.connected_user_id),
          {:ok, creator} <- Workspace.ensure_user(token, author["login"]) do
-      Bounties.create_bounty(
-        %{
-          creator: creator,
-          owner: owner,
-          amount: amount,
-          ticket_ref: %{
-            owner: payload["repository"]["owner"]["login"],
-            repo: payload["repository"]["name"],
-            number: ticket_number
-          }
-        },
-        strategy: strategy,
-        installation_id: payload["installation"]["id"],
-        command_id: command_id,
-        command_source: command_source
-      )
+      if unchanged_bounty_edit?(webhook, owner, amount, token, ticket_ref) do
+        {:ok, :unchanged}
+      else
+        Bounties.create_bounty(
+          %{
+            creator: creator,
+            owner: owner,
+            amount: amount,
+            ticket_ref: ticket_ref
+          },
+          strategy: strategy,
+          installation_id: payload["installation"]["id"],
+          command_id: command_id,
+          command_source: command_source
+        )
+      end
     else
       false ->
         {:error, :unauthorized}
@@ -590,6 +593,21 @@ defmodule AlgoraWeb.Webhooks.GithubController do
 
     {:error, :unknown_command}
   end
+
+  defp unchanged_bounty_edit?(%Webhook{event_action: "issue_comment.edited"}, owner, amount, token, %{
+         owner: repo_owner,
+         repo: repo_name,
+         number: number
+       }) do
+    with {:ok, ticket} <- Workspace.ensure_ticket(token, repo_owner, repo_name, number),
+         %Bounty{} = bounty <- Repo.get_by(Bounty, owner_id: owner.id, ticket_id: ticket.id) do
+      Money.equal?(bounty.amount, amount)
+    else
+      _ -> false
+    end
+  end
+
+  defp unchanged_bounty_edit?(_webhook, _owner, _amount, _token, _ticket_ref), do: false
 
   def build_command({:claim, args}, commands) do
     splits = Keyword.get_values(commands, :split)

@@ -310,7 +310,7 @@ defmodule Algora.Accounts.User do
     if identity_changeset.valid? do
       params =
         %{
-          "handle" => user.handle || Algora.Organizations.ensure_unique_handle(info["login"]),
+          "handle" => refreshed_handle(user, info["login"]),
           "email" => user.email || primary_email,
           "display_name" => user.display_name || info["name"],
           "bio" => user.bio || info["bio"],
@@ -321,7 +321,8 @@ defmodule Algora.Accounts.User do
           "provider" => "github",
           "provider_id" => to_string(info["id"]),
           "provider_login" => info["login"],
-          "provider_meta" => info
+          "provider_meta" => info,
+          "last_context" => refreshed_last_context(user, info["login"])
         }
 
       params =
@@ -344,7 +345,8 @@ defmodule Algora.Accounts.User do
         :provider,
         :provider_id,
         :provider_login,
-        :provider_meta
+        :provider_meta,
+        :last_context
       ])
       |> generate_id()
       |> validate_required([:email, :handle])
@@ -430,6 +432,21 @@ defmodule Algora.Accounts.User do
   def signup_changeset(%User{} = user, params) do
     cast(user, params, [:email, :signup_token])
   end
+
+  defp refreshed_handle(%User{handle: nil}, new_login), do: Algora.Organizations.ensure_unique_handle(new_login)
+
+  defp refreshed_handle(%User{handle: handle, provider_login: old_login}, new_login)
+       when is_binary(handle) and handle == old_login and is_binary(old_login) and old_login != new_login do
+    Algora.Organizations.ensure_unique_handle(new_login)
+  end
+
+  defp refreshed_handle(%User{handle: handle}, _new_login), do: handle
+
+  defp refreshed_last_context(%User{last_context: last_context, provider_login: old_login}, new_login)
+       when is_binary(last_context) and last_context == old_login and is_binary(old_login) and old_login != new_login,
+       do: new_login
+
+  defp refreshed_last_context(%User{last_context: last_context}, _new_login), do: last_context
 
   def validate_email(changeset) do
     changeset

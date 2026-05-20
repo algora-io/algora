@@ -153,6 +153,66 @@ defmodule Algora.AccountsTest do
       assert user.id == user_again.id
     end
 
+    test "refreshes mirrored handle and last_context when github login changes", %{
+      emails: emails,
+      token: token,
+      primary_email: primary_email
+    } do
+      existing_user =
+        insert!(:user,
+          email: primary_email,
+          handle: "shravan20",
+          provider: "github",
+          provider_id: "12345",
+          provider_login: "shravan20",
+          last_context: "shravan20"
+        )
+
+      github_info = %{
+        "id" => "12345",
+        "login" => "zhravan",
+        "name" => "Shravan",
+        "avatar_url" => "https://example.com/avatar.jpg",
+        "bio" => "Updated bio"
+      }
+
+      {:ok, updated_user} = Accounts.register_github_user(existing_user, primary_email, github_info, emails, token)
+
+      assert updated_user.handle == "zhravan"
+      assert updated_user.provider_login == "zhravan"
+      assert updated_user.last_context == "zhravan"
+    end
+
+    test "preserves custom handle when github login changes", %{
+      emails: emails,
+      token: token,
+      primary_email: primary_email
+    } do
+      existing_user =
+        insert!(:user,
+          email: primary_email,
+          handle: "custom-handle",
+          provider: "github",
+          provider_id: "12345",
+          provider_login: "shravan20",
+          last_context: "custom-handle"
+        )
+
+      github_info = %{
+        "id" => "12345",
+        "login" => "zhravan",
+        "name" => "Shravan",
+        "avatar_url" => "https://example.com/avatar.jpg",
+        "bio" => "Updated bio"
+      }
+
+      {:ok, updated_user} = Accounts.register_github_user(existing_user, primary_email, github_info, emails, token)
+
+      assert updated_user.handle == "custom-handle"
+      assert updated_user.provider_login == "zhravan"
+      assert updated_user.last_context == "custom-handle"
+    end
+
     test "user.name is never nil", %{
       github_info: github_info,
       emails: emails,

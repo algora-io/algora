@@ -28,6 +28,11 @@ defmodule AlgoraWeb.Router do
     plug Plug.Parsers, parsers: [:urlencoded, {:json, json_decoder: Jason}]
   end
 
+  # Legacy tRPC pipeline
+  pipeline :trpc do
+    plug CORSPlug, headers: ["Content-Type"]
+  end
+
   @redirects Application.compile_env(:algora, :redirects, [])
 
   for {from, to} <- @redirects do
@@ -159,6 +164,14 @@ defmodule AlgoraWeb.Router do
   scope "/api", AlgoraWeb.API do
     pipe_through :api
     post "/store_session", StoreSessionController, :create
+
+    # Legacy tRPC endpoints
+    scope "/trpc" do
+      pipe_through :trpc
+
+      options "/bounty.list", BountyController, :options
+      get "/bounty.list", BountyController, :index
+    end
 
     # Legacy OG Image redirects
     get "/og/:org_handle/:asset", OGRedirectController, :redirect_to_org_path

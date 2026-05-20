@@ -83,6 +83,9 @@ defmodule AlgoraWeb.Endpoint do
   # Subdomains that should not trigger any special routing
   @ignored_subdomains ~w[app console www sitemaps sitemap m api home ai test tv]
 
+  # Legacy tRPC endpoint
+  defp canonical_host(%{path_info: ["api", "trpc" | _]} = conn, _opts), do: conn
+
   defp canonical_host(%{path_info: ["health"]} = conn, _opts), do: conn
 
   defp canonical_host(%{host: host} = conn, _opts) do

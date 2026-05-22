@@ -751,7 +751,7 @@ defmodule AlgoraWeb.CoreComponents do
 
     ~H"""
     <div>
-      <label class="flex items-center gap-4 text-sm leading-6 text-gray-300">
+      <label class="flex items-center gap-2 text-sm leading-6 text-gray-300">
         <%!-- <input type="hidden" name={@name} value="false" /> --%>
         <input
           type="checkbox"
@@ -774,7 +774,7 @@ defmodule AlgoraWeb.CoreComponents do
 
     ~H"""
     <div>
-      <label class="flex items-center gap-4 text-sm leading-6 text-gray-300">
+      <label class="flex items-center gap-2 text-sm leading-6 text-gray-300">
         <input
           type="radio"
           id={@id || @name}

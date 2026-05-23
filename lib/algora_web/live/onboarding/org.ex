@@ -6,6 +6,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   import Ecto.Changeset
 
   alias Algora.Matches
+  alias Algora.Settings
 
   require Logger
 
@@ -55,7 +56,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    candidate_ids = ["qsQa7KN3Cq4PwGWG", "Y5JrLmNRvL7o3Bes", "EPYrDRS1ojkjqL9w", "Y1LQ896AbtT9Wjj1", "1ErYxMGNt6zTfjKS"]
+    candidate_ids = Settings.get_home_carousel_candidate_ids()
 
     candidates_data =
       candidate_ids
@@ -232,12 +233,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
               <div class="mt-1 flex items-center gap-12 overflow-x-auto scrollbar-thin pb-0">
                 <img src="/images/wordmarks/coderabbit.svg" alt="CodeRabbit" class="h-9 shrink-0" />
                 <img src="/images/wordmarks/asi.svg" alt="Air Space Intelligence" class="h-12" />
-                <img src="/images/wordmarks/lovable.svg" alt="Lovable" class="h-6 shrink-0" />
                 <img src="/images/wordmarks/comfy.svg" alt="Comfy" class="h-7 shrink-0 saturate-0" />
-                <div class="flex items-center gap-1 shrink-0">
-                  <img src="/images/wordmarks/firecrawl.svg" alt="Firecrawl" class="h-10 shrink-0" />
-                  <img src="/images/wordmarks/firecrawl2.svg" alt="Firecrawl2" class="h-6 shrink-0" />
-                </div>
                 <img src="/images/wordmarks/textql.svg" alt="TextQL" class="h-7 transition-all" />
               </div>
             </div>
@@ -401,7 +397,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                   data-carousel-item={index}
                   class={"transition-opacity duration-500 #{if index == 0, do: "opacity-100", else: "opacity-0 absolute inset-0"}"}
                 >
-                  <Algora.Cloud.candidate_card {Map.merge(candidate_data, %{anonymize: true, root_class: "h-[40rem] lg:h-[31.5rem]", fade_to_black?: false, tech_stack: [], hide_badges?: true, hide_scrollbars?: true})} />
+                  <Algora.Cloud.candidate_card {Map.merge(candidate_data, %{anonymize: true, root_class: "h-[40rem] lg:h-[36rem]", fade_to_black?: false, tech_stack: [], hide_badges?: true, hide_scrollbars?: true})} />
                 </div>
               <% end %>
             </div>
@@ -409,39 +405,9 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         </div>
       </div>
 
-      <footer class="w-full py-4 border-t border-white/20">
-        <div class="container mx-auto px-4">
-          <div class="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div class="text-sm text-foreground/90 text-left md:text-left w-full md:w-auto">
-              © #{Date.utc_today().year} Algora PBC. All rights reserved.
-            </div>
-            <div class="grid grid-cols-1 md:flex md:flex-row items-stretch gap-2 w-full md:w-auto">
-              <.link
-                class="w-full md:w-auto flex items-center rounded-lg border border-gray-500 py-2 pl-2 pr-3.5 text-xs text-foreground/90 hover:text-foreground transition-colors hover:border-gray-400"
-                href={AlgoraWeb.Constants.get(:calendar_url)}
-                rel="noopener"
-              >
-                <.icon name="tabler-calendar-clock" class="size-4" />
-                <span class="ml-1.5">Schedule a call</span>
-              </.link>
-              <.link
-                class="w-full md:w-auto flex items-center rounded-lg border border-gray-500 py-2 pl-2 pr-3.5 text-xs text-foreground/90 hover:text-foreground transition-colors hover:border-gray-400"
-                href="tel:+16504202207"
-              >
-                <.icon name="tabler-phone" class="size-4" /> <span class="font-bold ml-1">US</span>
-                <span class="ml-1">+1 (650) 420-2207</span>
-              </.link>
-              <.link
-                class="w-full md:w-auto flex items-center rounded-lg border border-gray-500 py-2 pl-2 pr-3.5 text-xs text-foreground/90 hover:text-foreground transition-colors hover:border-gray-400"
-                href="tel:+306973184144"
-              >
-                <.icon name="tabler-phone" class="size-4" /> <span class="font-bold ml-1">EU</span>
-                <span class="ml-1">+30 (697) 318-4144</span>
-              </.link>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <div class="bg-black mt-12 md:mt-28">
+        <AlgoraWeb.Components.Footer.footer class="pt-12 md:pt-28" />
+      </div>
     </main>
     """
   end

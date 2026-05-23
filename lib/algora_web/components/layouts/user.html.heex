@@ -120,7 +120,7 @@
   </div>
   
 <!-- Static sidebar for desktop -->
-  <%= if Map.get(assigns, :wide_sidebar?) do %>
+  <%= if @nav != [] && Map.get(assigns, :wide_sidebar?) do %>
     <div class="scrollbar-thin hidden border-r border-border lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:flex lg:flex-col lg:w-52 lg:overflow-y-auto lg:bg-popover lg:pb-4">
       <div class="flex h-16 shrink-0 items-center px-6">
         <.wordmark class="h-8 w-auto text-foreground" />
@@ -157,7 +157,10 @@
       </nav>
     </div>
   <% else %>
-    <div class="scrollbar-thin hidden border-r border-border/50 lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:flex lg:flex-col lg:w-16 lg:overflow-y-auto lg:bg-popover lg:pb-4">
+    <div
+      :if={@nav != []}
+      class="scrollbar-thin hidden border-r border-border/50 lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:flex lg:flex-col lg:w-16 lg:overflow-y-auto lg:bg-popover lg:pb-4"
+    >
       <div class="flex h-16 shrink-0 items-center justify-center">
         <.logo class="h-8 w-auto text-white" />
       </div>
@@ -227,14 +230,21 @@
     </div>
   <% end %>
 
-  <div class={if Map.get(assigns, :wide_sidebar?), do: "lg:pl-52", else: "lg:pl-16"}>
+  <div class={
+    if @nav == [],
+      do: "",
+      else: if(Map.get(assigns, :wide_sidebar?), do: "lg:pl-52", else: "lg:pl-16")
+  }>
     <div
       id="navbar"
       phx-hook="NavBar"
-      class="sticky top-0 z-40 flex h-16 shrink-0 items-center justify-between gap-x-6 border-b border-border bg-background px-4 shadow-sm sm:px-6 lg:px-8"
+      class={"sticky top-0 z-40 flex h-16 shrink-0 items-center justify-between gap-x-6 bg-background shadow-sm px-4 sm:px-6 lg:px-8 #{if(@nav == [], do: "max-w-7xl container mx-auto", else: "border-b border-border")}"}
     >
       <!-- Mobile menu button -->
-      <div class="flex lg:hidden">
+      <%= if @nav == [] do %>
+        <.wordmark class="h-8 w-auto text-white" />
+      <% end %>
+      <div class={if @nav == [], do: "hidden", else: "flex lg:hidden"}>
         <button
           type="button"
           class="-m-2.5 p-2.5"
@@ -403,7 +413,7 @@
   <% end %>
 <% end %>
 
-<div :if={!@current_user && !assigns[:screenshot?]} class="relative pt-24">
+<div :if={!@current_user && !assigns[:screenshot?]} class="relative pt-16">
   <.flash_group flash={@flash} />
   <AlgoraWeb.Components.Header.header />
   {@inner_content}

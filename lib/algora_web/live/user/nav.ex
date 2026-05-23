@@ -47,63 +47,6 @@ defmodule AlgoraWeb.User.Nav do
   def assign_nav_items(%{assigns: %{current_user: nil}} = socket, _mode), do: socket
 
   def assign_nav_items(socket, :default) do
-    nav = [
-      %{
-        title: "Main",
-        items: [
-          %{
-            href: "/home",
-            tab: :dashboard,
-            icon: "tabler-home",
-            label: "Dashboard"
-          },
-          %{
-            href: "/#{socket.assigns.current_user.handle}/profile",
-            tab: :profile,
-            icon: "tabler-user",
-            label: "Profile"
-          },
-          %{href: "/bounties", tab: :bounties, icon: "tabler-diamond", label: "Bounties"},
-          %{href: "/projects", tab: :projects, icon: "tabler-rocket", label: "Projects"},
-          %{
-            href: "/user/transactions",
-            tab: :transactions,
-            icon: "tabler-wallet",
-            label: "Transactions"
-          },
-          %{href: "/user/settings", tab: :settings, icon: "tabler-settings", label: "Settings"}
-        ]
-      }
-    ]
-
-    assign(socket, :nav, nav)
-  end
-
-  def assign_nav_items(socket, :viewer) do
-    if socket.assigns.current_user == socket.assigns[:current_context] do
-      assign_nav_items(socket, :default)
-    else
-      nav = [
-        %{
-          title: "Main",
-          items: [
-            %{
-              href: "/",
-              tab: :dashboard,
-              icon: "tabler-home",
-              label: "Dashboard"
-            },
-            %{
-              href: "/#{socket.assigns.current_user.handle}/profile",
-              tab: :profile,
-              icon: "tabler-user",
-              label: "Profile"
-            }
-          ]
-        }
-      ]
-
-      assign(socket, :nav, nav)
-    end
+    assign(socket, :nav, [])
   end
 end

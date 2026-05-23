@@ -14,8 +14,6 @@
     <br />
     <a href="https://algora.io">Website</a>
     ·
-    <a href="https://algora.io/discord">Discord</a>
-    ·
     <a href="https://twitter.com/algoraio">Twitter</a>
     ·
     <a href="https://www.youtube.com/@algora-io">YouTube</a>

@@ -99,7 +99,6 @@ defmodule AlgoraWeb.Router do
     live_session :authenticated,
       layout: {AlgoraWeb.Layouts, :user},
       on_mount: [{AlgoraWeb.UserAuth, :ensure_authenticated}, Nav] do
-      live "/home", User.DashboardLive, :index
       live "/user/transactions", User.TransactionsLive, :index
       live "/user/settings", User.SettingsLive, :edit
       live "/user/installations", User.InstallationsLive, :index
@@ -129,10 +128,6 @@ defmodule AlgoraWeb.Router do
       live "/hire", Onboarding.OrgLive
       live "/onboarding/org", Onboarding.OrgLive
       live "/onboarding/dev", Onboarding.DevLive
-      live "/community", CommunityLive, :index
-      live "/community/:tech", CommunityLive, :index
-      live "/platform", PlatformLive, :index
-      live "/crowdfund", CrowdfundLive, :index
       live "/challenges", ChallengesLive
       live "/challenges/turso", Challenges.LimboLive
       live "/challenges/primeintellect", Challenges.PrimeintellectLive

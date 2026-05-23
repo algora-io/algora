@@ -182,34 +182,106 @@ defmodule AlgoraWeb.SignInLive do
         </div>
       </div>
       <div class="relative hidden w-0 flex-1 lg:block">
-        <div class="absolute inset-0 flex flex-col items-center justify-center bg-background p-12">
-          <div :if={@random_quote} class="max-w-xl">
-            <div class="relative text-base">
-              <svg
-                viewBox="0 0 162 128"
-                fill="none"
-                aria-hidden="true"
-                class="absolute -top-12 left-0 h-32 stroke-white/25"
-              >
-                <path
-                  id="b56e9dab-6ccb-4d32-ad02-6b4bb5d9bbeb"
-                  d="M65.5697 118.507L65.8918 118.89C68.9503 116.314 71.367 113.253 73.1386 109.71C74.9162 106.155 75.8027 102.28 75.8027 98.0919C75.8027 94.237 75.16 90.6155 73.8708 87.2314C72.5851 83.8565 70.8137 80.9533 68.553 78.5292C66.4529 76.1079 63.9476 74.2482 61.0407 72.9536C58.2795 71.4949 55.276 70.767 52.0386 70.767C48.9935 70.767 46.4686 71.1668 44.4872 71.9924L44.4799 71.9955L44.4726 71.9988C42.7101 72.7999 41.1035 73.6831 39.6544 74.6492C38.2407 75.5916 36.8279 76.455 35.4159 77.2394L35.4047 77.2457L35.3938 77.2525C34.2318 77.9787 32.6713 78.3634 30.6736 78.3634C29.0405 78.3634 27.5131 77.2868 26.1274 74.8257C24.7483 72.2185 24.0519 69.2166 24.0519 65.8071C24.0519 60.0311 25.3782 54.4081 28.0373 48.9335C30.703 43.4454 34.3114 38.345 38.8667 33.6325C43.5812 28.761 49.0045 24.5159 55.1389 20.8979C60.1667 18.0071 65.4966 15.6179 71.1291 13.7305C73.8626 12.8145 75.8027 10.2968 75.8027 7.38572C75.8027 3.6497 72.6341 0.62247 68.8814 1.1527C61.1635 2.2432 53.7398 4.41426 46.6119 7.66522C37.5369 11.6459 29.5729 17.0612 22.7236 23.9105C16.0322 30.6019 10.618 38.4859 6.47981 47.558L6.47976 47.558L6.47682 47.5647C2.4901 56.6544 0.5 66.6148 0.5 77.4391C0.5 84.2996 1.61702 90.7679 3.85425 96.8404L3.8558 96.8445C6.08991 102.749 9.12394 108.02 12.959 112.654L12.959 112.654L12.9646 112.661C16.8027 117.138 21.2829 120.739 26.4034 123.459L26.4033 123.459L26.4144 123.465C31.5505 126.033 37.0873 127.316 43.0178 127.316C47.5035 127.316 51.6783 126.595 55.5376 125.148L55.5376 125.148L55.5477 125.144C59.5516 123.542 63.0052 121.456 65.9019 118.881L65.5697 118.507Z"
-                >
-                </path>
-                <use href="#b56e9dab-6ccb-4d32-ad02-6b4bb5d9bbeb" x="86"></use>
-              </svg>
-              <blockquote class="text-3xl font-medium text-foreground">
-                {@random_quote.text}
-              </blockquote>
-            </div>
-
-            <div class="mt-8 flex items-center gap-4">
-              <div class="size-12 overflow-hidden rounded-full bg-muted">
-                <img src={@random_quote.avatar} alt="Avatar" class="h-full w-full object-cover" />
+        <div class="absolute inset-0 overflow-y-auto bg-background">
+          <div class="w-full mt-12 max-w-3xl mx-auto flex flex-col text-left px-12 pb-16">
+            <h3 class="text-xl sm:text-2xl font-semibold tracking-tight text-foreground text-center">
+              How it works
+            </h3>
+            <div class="space-y-12 mt-4">
+              <div class="w-full space-y-4">
+                <div class="flex items-start gap-2 sm:gap-3">
+                  <.icon name="tabler-circle-number-1" class="w-6 h-6 text-foreground shrink-0" />
+                  <p class="text-foreground text-sm sm:text-base font-medium">
+                    Share your JDs and receive handpicked candidates with the right skills and experience
+                  </p>
+                </div>
+                <div class="relative z-30 mx-auto">
+                  <div class="group/card h-full border-2 border-white/10 bg-muted group relative flex-1 overflow-hidden rounded-xl">
+                    <div class="grid h-7 grid-cols-[1fr_auto_1fr] overflow-hidden border-b border-gray-800">
+                      <div class="ml-2 flex items-center gap-1">
+                        <div class="h-2.5 w-2.5 rounded-full bg-red-400"></div>
+                        <div class="h-2.5 w-2.5 rounded-full bg-yellow-400"></div>
+                        <div class="h-2.5 w-2.5 rounded-full bg-green-400"></div>
+                      </div>
+                      <div class="flex items-center justify-center gap-2">
+                        <img src={~p"/images/logo-192px.png"} alt="Algora" class="w-4 h-4 rounded" />
+                        <div class="text-xs text-foreground">
+                          algora.io<span class="text-foreground/70">/candidates</span>
+                        </div>
+                      </div>
+                      <div></div>
+                    </div>
+                    <div class="relative flex aspect-[1200/630] h-full w-full items-center justify-center">
+                      <img
+                        src={~p"/images/screenshots/candidates-page.png"}
+                        alt="Candidates page"
+                        class="w-full bg-[#121214] p-1"
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div>
-                <div class="font-medium text-foreground">{@random_quote.author}</div>
-                <div class="text-sm text-muted-foreground">{@random_quote.role}</div>
+              <div class="w-full space-y-4">
+                <div class="flex items-start gap-2 sm:gap-3">
+                  <.icon name="tabler-circle-number-2" class="w-6 h-6 text-foreground shrink-0" />
+                  <p class="text-foreground text-sm sm:text-base font-medium">
+                    Get notified in your inbox and Slack with candidates ready to interview
+                  </p>
+                </div>
+                <div class="relative z-30 mx-auto">
+                  <div class="group/card h-full border-2 border-white/10 bg-muted group relative flex-1 overflow-hidden rounded-xl">
+                    <div class="grid h-7 grid-cols-[1fr_auto_1fr] overflow-hidden border-b border-gray-800">
+                      <div class="ml-2 flex items-center gap-1">
+                        <div class="h-2.5 w-2.5 rounded-full bg-red-400"></div>
+                        <div class="h-2.5 w-2.5 rounded-full bg-yellow-400"></div>
+                        <div class="h-2.5 w-2.5 rounded-full bg-green-400"></div>
+                      </div>
+                      <div class="flex items-center justify-center gap-2">
+                        <img src={~p"/images/logos/slack.svg"} alt="Slack" class="w-4 h-4 rounded" />
+                        <div class="text-xs text-foreground">
+                          app.slack.com<span class="text-foreground/70">/client/T05UQ2UMHFX/C09FC54M0S3</span>
+                        </div>
+                      </div>
+                      <div></div>
+                    </div>
+                    <div class="relative flex aspect-[1008/561] h-full w-full items-center justify-center">
+                      <img
+                        src={~p"/images/screenshots/candidate-drip.png"}
+                        alt="Candidate drip"
+                        class="w-full bg-[#121214] p-1"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="w-full space-y-4">
+                <div class="flex items-start gap-2 sm:gap-3">
+                  <.icon name="tabler-circle-number-3" class="w-6 h-6 text-foreground shrink-0" />
+                  <p class="text-foreground text-sm sm:text-base font-medium">
+                    Candidates are auto-added to your Ashby
+                  </p>
+                </div>
+                <div class="relative z-30 mx-auto">
+                  <div class="group/card h-full border-2 border-white/10 bg-muted group relative flex-1 overflow-hidden rounded-xl">
+                    <div class="grid h-7 grid-cols-[1fr_auto_1fr] overflow-hidden border-b border-gray-800">
+                      <div class="ml-2 flex items-center gap-1">
+                        <div class="h-2.5 w-2.5 rounded-full bg-red-400"></div>
+                        <div class="h-2.5 w-2.5 rounded-full bg-yellow-400"></div>
+                        <div class="h-2.5 w-2.5 rounded-full bg-green-400"></div>
+                      </div>
+                      <div class="flex items-center justify-center gap-2">
+                        <img src={~p"/images/logos/ashby.png"} alt="Ashby" class="w-4 h-4 rounded" />
+                        <div class="text-xs text-foreground">
+                          app.ashbyhq.com<span class="text-foreground/70">/candidates/pipeline/active</span>
+                        </div>
+                      </div>
+                      <div></div>
+                    </div>
+                    <div class="relative flex aspect-[816/414] h-full w-full items-center justify-center">
+                      <img src={~p"/images/screenshots/ashby.png"} alt="Ashby" class="w-full" />
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -228,13 +300,6 @@ defmodule AlgoraWeb.SignInLive do
       end
 
     changeset = User.login_changeset(%User{}, %{})
-
-    socket =
-      if connected?(socket) do
-        assign(socket, :random_quote, get_random_quote())
-      else
-        assign(socket, :random_quote, nil)
-      end
 
     {:ok,
      socket
@@ -337,44 +402,4 @@ defmodule AlgoraWeb.SignInLive do
   end
 
   defp throttle, do: :timer.sleep(1000)
-
-  defp get_random_quote do
-    Enum.random([
-      %{
-        text:
-          "That's one massive advantage open source companies have versus closed source. You get to show people your work, plus you can point to your contributions as proof of your abilities.",
-        author: "Eric Allam",
-        role: "Founder & CTO, Trigger.dev (YC W23)",
-        avatar: ~p"/images/people/eric-allam.jpg"
-      },
-      %{
-        text:
-          "We've used Algora extensively at Golem Cloud for our hiring needs. Many times someone who is very active in open-source development, these types of engineers often make fantastic additions to a team.",
-        author: "John A. De Goes",
-        role: "Founder & CEO, Golem Cloud",
-        avatar: ~p"/images/people/john-de-goes-2.jpg"
-      },
-      %{
-        text:
-          "We were doing bounties on Algora, and this one developer Nick kept solving them. His personality really came through in the GitHub issues and code. We ended up hiring him from that.",
-        author: "Eric Allam",
-        role: "Founder & CTO, Trigger.dev (YC W23)",
-        avatar: ~p"/images/people/eric-allam.jpg"
-      },
-      %{
-        text:
-          "A GitHub issue is this atomic unit of a problem, and allowing you to put a cash bounty on it, to solve this specific problem, without any overhead, and make it available to any person, I find it very interesting.",
-        author: "Jonny Burger",
-        role: "Founder, Remotion",
-        avatar: "https://avatars.githubusercontent.com/u/1629785?v=4"
-      },
-      %{
-        text:
-          "I certainly believe people should be compensated for their time, especially if we commercially benefit from it. When possible we should offer some sort of compensation.",
-        author: "Josh Pigford",
-        role: "Co-founder & CEO, Maybe",
-        avatar: "https://avatars.githubusercontent.com/u/35243?v=4"
-      }
-    ])
-  end
 end

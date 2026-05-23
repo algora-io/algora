@@ -207,22 +207,9 @@ defmodule AlgoraWeb.CoreComponents do
     <.dropdown id="dashboard-dropdown" class="min-w-[12rem]">
       <:img src={@current_context.avatar_url} alt={@current_context.handle} />
       <:title>{@current_context.name}</:title>
-      <:subtitle :if={@current_context.handle && @current_context.id != @current_user.id}>
+      <:subtitle :if={@current_context.handle}>
         @{@current_context.handle}
       </:subtitle>
-      <:subtitle :if={
-        @current_context.handle && @current_context.id == @current_user.id &&
-          (@current_user.last_context == "personal" or is_nil(@current_user.last_context))
-      }>
-        Solver dashboard
-      </:subtitle>
-      <:subtitle :if={
-        @current_context.handle && @current_context.id == @current_user.id &&
-          not (@current_user.last_context == "personal" or is_nil(@current_user.last_context))
-      }>
-        Bounty board
-      </:subtitle>
-
       <:link :if={@current_user.handle} href={~p"/set_context/personal"}>
         <div class="flex items-center whitespace-nowrap">
           <div class="mr-3 relative size-10 shrink-0">
@@ -239,28 +226,7 @@ defmodule AlgoraWeb.CoreComponents do
           <div class="truncate">
             <div class="font-semibold truncate">{@current_user.name}</div>
             <div class="text-sm text-muted-foreground truncate">
-              Solver dashboard
-            </div>
-          </div>
-        </div>
-      </:link>
-      <:link :if={@current_user.handle} href={~p"/set_context/#{@current_user.handle}"}>
-        <div class="flex items-center whitespace-nowrap">
-          <div class="mr-3 relative size-10 shrink-0">
-            <.avatar class="mr-3 size-10">
-              <.avatar_image src={@current_user.avatar_url} />
-              <.avatar_fallback>
-                {Algora.Util.initials(@current_user.name)}
-              </.avatar_fallback>
-            </.avatar>
-            <div class="absolute -right-2 -bottom-1 bg-popover rounded-full size-5 flex items-center justify-center">
-              <.icon name="tabler-currency-dollar" class="size-5 text-foreground" />
-            </div>
-          </div>
-          <div class="truncate">
-            <div class="font-semibold truncate">{@current_user.name}</div>
-            <div class="text-sm text-muted-foreground truncate">
-              Bounty board
+              @{@current_user.handle}
             </div>
           </div>
         </div>
@@ -295,6 +261,14 @@ defmodule AlgoraWeb.CoreComponents do
             <.icon name="tabler-adjustments-alt" class="size-6" />
           </div>
           <div class="font-semibold">Admin</div>
+        </div>
+      </:link>
+      <:link :if={@current_user.id == @current_context.id} href={~p"/user/transactions"}>
+        <div class="flex items-center whitespace-nowrap">
+          <div class="mr-3 flex size-10 items-center justify-center bg-accent rounded-full">
+            <.icon name="tabler-wallet" class="size-6" />
+          </div>
+          <div class="font-semibold">Payouts</div>
         </div>
       </:link>
       <:link href={~p"/auth/logout"}>

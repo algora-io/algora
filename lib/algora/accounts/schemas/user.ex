@@ -197,6 +197,9 @@ defmodule Algora.Accounts.User do
     field :amount_raised, Money
     field :company_valuation, Money
 
+    field :company_pitch, :string
+    field :algora_note, :string
+
     # Ashby integration fields
     field :ashby_api_key, :string
     field :ashby_source_id, :string

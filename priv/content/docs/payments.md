@@ -17,6 +17,8 @@ Through Stripe Connect, Algora offers the most comprehensive country coverage av
 In some countries, such as India & UAE, receiving international payments is limited to sole proprietors, limited liability partnerships and companies (e.g. not available to individuals).
 
 Payouts to the following countries/regions are supported:
+<p>If you are in a country where Stripe Connect is not available (e.g., mainland China), you can request payout via PayPal by contacting Algora support or the sponsor directly. Please provide your PayPal email in the issue.</p>
+<p>If you are in a country where Stripe Connect is not available (e.g., mainland China), you can request payout via PayPal by contacting Algora support or the sponsor directly. Please provide your PayPal email in the issue.</p>
 
 <div class="grid grid-cols-2 gap-4 border-t border-gray-700 pt-4 sm:grid-cols-3">
   <div class="flex gap-2 items-center">

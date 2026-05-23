@@ -142,13 +142,6 @@ defmodule AlgoraWeb.Router do
       live "/challenges/golem", Challenges.GolemLive
       live "/challenges/tsperf", Challenges.TsperfLive
       live "/swift", SwiftBountiesLive
-      live "/blog/:slug", BlogLive, :show
-      live "/blog", BlogLive, :index
-      live "/changelog/:slug", ChangelogLive, :show
-      live "/changelog", ChangelogLive, :index
-      live "/docs/*path", DocsLive, :show
-      live "/case-studies/:slug", CaseStudyLive, :show
-      live "/case-studies", CaseStudyLive, :index
     end
 
     live_session :root,

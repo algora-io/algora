@@ -65,7 +65,6 @@ defmodule AlgoraWeb.Endpoint do
 
   # Subdomain aliases: subdomain → path prefix (overrides default routing)
   @subdomain_aliases %{
-    "docs" => "/docs",
     "swift" => "/swift"
   }
 
@@ -81,7 +80,7 @@ defmodule AlgoraWeb.Endpoint do
   @challenge_subdomains ~w[clickhouse jules]
 
   # Subdomains that should not trigger any special routing
-  @ignored_subdomains ~w[app console www sitemaps sitemap m api home ai test tv]
+  @ignored_subdomains ~w[app console www sitemaps sitemap m api home ai test docs blog tv]
 
   # Legacy tRPC endpoint
   defp canonical_host(%{path_info: ["api", "trpc" | _]} = conn, _opts), do: conn

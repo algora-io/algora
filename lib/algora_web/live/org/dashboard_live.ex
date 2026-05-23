@@ -66,84 +66,95 @@ defmodule AlgoraWeb.Org.DashboardLive do
   def mount(params, _session, socket) do
     %{current_org: current_org} = socket.assigns
 
-    if Member.can_create_bounty?(socket.assigns.current_user_role) do
-      previewed_user = get_previewed_user(current_org)
+    candidates =
+      Algora.Matches.list_job_matches(
+        org_id: current_org.id,
+        status: [:dripped, :approved, :highlighted],
+        preload: [:user, :job_posting]
+      )
 
-      _experts = Accounts.list_developers(org_id: current_org.id, earnings_gt: Money.zero(:USD))
-      experts = []
+    if candidates == [] do
+      if Member.can_create_bounty?(socket.assigns.current_user_role) do
+        previewed_user = get_previewed_user(current_org)
 
-      installations = Workspace.list_installations_by(connected_user_id: previewed_user.id, provider: "github")
+        _experts = Accounts.list_developers(org_id: current_org.id, earnings_gt: Money.zero(:USD))
+        experts = []
 
-      contributors = list_contributors(current_org)
+        installations = Workspace.list_installations_by(connected_user_id: previewed_user.id, provider: "github")
 
-      matches = Algora.Settings.get_org_matches(previewed_user)
+        contributors = list_contributors(current_org)
 
-      contributions =
-        matches
-        |> Enum.map(& &1.user.id)
-        |> Workspace.list_user_contributions()
-        |> Enum.group_by(& &1.user.id)
+        matches = Algora.Settings.get_org_matches(previewed_user)
 
-      developers =
-        contributors
-        |> Enum.map(& &1.user)
-        |> Enum.concat(experts)
-        |> Enum.concat(Enum.map(matches, & &1.user))
+        contributions =
+          matches
+          |> Enum.map(& &1.user.id)
+          |> Workspace.list_user_contributions()
+          |> Enum.group_by(& &1.user.id)
 
-      oauth_url = Github.authorize_url(%{return_to: "/#{current_org.handle}/dashboard"})
+        developers =
+          contributors
+          |> Enum.map(& &1.user)
+          |> Enum.concat(experts)
+          |> Enum.concat(Enum.map(matches, & &1.user))
 
-      contracts =
-        [org_id: socket.assigns.current_org.id]
-        |> Bounties.list_contracts()
-        |> Enum.map(fn c ->
-          case c.shared_with do
-            [user_id] ->
-              user = Repo.one(from u in User, where: u.provider_id == ^user_id)
-              %{contract: c, user: user}
+        oauth_url = Github.authorize_url(%{return_to: "/#{current_org.handle}/dashboard"})
 
-            _ ->
-              nil
-          end
-        end)
-        |> Enum.filter(& &1)
+        contracts =
+          [org_id: socket.assigns.current_org.id]
+          |> Bounties.list_contracts()
+          |> Enum.map(fn c ->
+            case c.shared_with do
+              [user_id] ->
+                user = Repo.one(from u in User, where: u.provider_id == ^user_id)
+                %{contract: c, user: user}
 
-      {:ok,
-       socket
-       |> assign(:page_title, current_org.name)
-       |> assign(
-         :page_description,
-         "Share bounties, tips or contracts with #{header_prefix(current_org)} contributors and Algora matches"
-       )
-       |> assign(:screenshot?, not is_nil(params["screenshot"]))
-       |> assign(:pending_action, nil)
-       |> assign(:ip_address, AlgoraWeb.Util.get_ip(socket))
-       |> assign(:has_fresh_token?, Accounts.has_fresh_token?(socket.assigns.current_user))
-       |> assign(:installations, installations)
-       |> assign(:experts, experts)
-       |> assign(:contributors, contributors)
-       |> assign(:previewed_user, previewed_user)
-       |> assign(:contracts, contracts)
-       |> assign(:matches, matches)
-       |> assign(:contributions, contributions)
-       |> assign(:developers, developers)
-       |> assign(:has_more_bounties, false)
-       |> assign(:oauth_url, oauth_url)
-       |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
-       |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
-       |> assign(:contract_form, to_form(ContractForm.changeset(%ContractForm{}, %{})))
-       |> assign(:show_share_drawer, false)
-       |> assign(:share_drawer_type, nil)
-       |> assign(:selected_developer, nil)
-       |> assign(:secret, nil)
-       |> assign_login_form(User.login_changeset(%User{}, %{}))
-       |> assign_payable_bounties()
-       |> assign_achievements()
-       # Will be initialized when chat starts
-       |> assign(:thread, nil)
-       |> assign(:messages, [])
-       |> assign(:show_chat, false)}
+              _ ->
+                nil
+            end
+          end)
+          |> Enum.filter(& &1)
+
+        {:ok,
+         socket
+         |> assign(:page_title, current_org.name)
+         |> assign(
+           :page_description,
+           "Share bounties, tips or contracts with #{header_prefix(current_org)} contributors and Algora matches"
+         )
+         |> assign(:screenshot?, not is_nil(params["screenshot"]))
+         |> assign(:pending_action, nil)
+         |> assign(:ip_address, AlgoraWeb.Util.get_ip(socket))
+         |> assign(:has_fresh_token?, Accounts.has_fresh_token?(socket.assigns.current_user))
+         |> assign(:installations, installations)
+         |> assign(:experts, experts)
+         |> assign(:contributors, contributors)
+         |> assign(:previewed_user, previewed_user)
+         |> assign(:contracts, contracts)
+         |> assign(:matches, matches)
+         |> assign(:contributions, contributions)
+         |> assign(:developers, developers)
+         |> assign(:has_more_bounties, false)
+         |> assign(:oauth_url, oauth_url)
+         |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
+         |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
+         |> assign(:contract_form, to_form(ContractForm.changeset(%ContractForm{}, %{})))
+         |> assign(:show_share_drawer, false)
+         |> assign(:share_drawer_type, nil)
+         |> assign(:selected_developer, nil)
+         |> assign(:secret, nil)
+         |> assign_login_form(User.login_changeset(%User{}, %{}))
+         |> assign_payable_bounties()
+         |> assign_achievements()
+         # Will be initialized when chat starts
+         |> assign(:thread, nil)
+         |> assign(:messages, [])
+         |> assign(:show_chat, false)}
+      else
+        {:ok, redirect(socket, to: ~p"/#{current_org.handle}/home")}
+      end
     else
-      {:ok, redirect(socket, to: ~p"/#{current_org.handle}/home")}
+      {:ok, redirect(socket, to: ~p"/#{current_org.handle}/candidates")}
     end
   end
 
@@ -346,66 +357,31 @@ defmodule AlgoraWeb.Org.DashboardLive do
           </div>
         </.section>
 
-        <%= if @previewed_user.id in ["xT2oJ8z7wTHWgs8g", "ETU6LA5QADkB2Dig"] or @previewed_user.contract_signed or (not is_nil(@previewed_user.stage) and @previewed_user.stage != :none) do %>
-          <.section title={"#{header_prefix(@previewed_user)} Candidates"}>
-            <.link href={"/#{@previewed_user.handle}/candidates"}>
-              <img
-                src={"/og/#{@previewed_user.handle}/candidates"}
-                class="aspect-[1200/630] w-full object-cover border border-border rounded-xl"
-              />
-            </.link>
-          </.section>
-        <% else %>
-          <.section
-            :if={@contributors != []}
-            title={"#{header_prefix(@previewed_user)} Contributors"}
-            subtitle="Share bounties, tips or contract opportunities with your top contributors"
-          >
-            <div class="relative w-full overflow-auto max-h-[250px] scrollbar-thin">
-              <table class="w-full caption-bottom text-sm">
-                <tbody>
-                  <%= for %Contributor{user: user} <- @contributors do %>
-                    <.developer_card
-                      user={user}
-                      contract_for_user={contract_for_user(@contracts, user)}
-                      contract_type={
-                        if(Enum.find(@matches, &(&1.user.id == user.id)),
-                          do: "marketplace",
-                          else: "bring_your_own"
-                        )
-                      }
-                      current_org={@current_org}
-                    />
-                  <% end %>
-                </tbody>
-              </table>
-            </div>
-          </.section>
-        <% end %>
-
-        <div
-          :if={length(@achievements) > 1}
-          class="lg:hidden border ring-1 ring-transparent rounded-xl overflow-hidden"
+        <.section
+          :if={@contributors != []}
+          title={"#{header_prefix(@previewed_user)} Contributors"}
+          subtitle="Share bounties, tips or contract opportunities with your top contributors"
         >
-          <div class="bg-card/75 flex flex-col h-full p-4 rounded-xl border-t-4 sm:border-t-0 sm:border-l-4 border-emerald-400">
-            <div class="p-4 sm:p-6">
-              <.getting_started
-                id="getting_started_main"
-                achievements={
-                  if incomplete?(@achievements, :complete_signin_status) or
-                       incomplete?(@achievements, :complete_signup_status),
-                     do: @achievements |> Enum.take(1),
-                     else: @achievements
-                }
-                current_user={@current_user}
-                current_org={@current_org}
-                secret={@secret}
-                login_form={@login_form}
-                previewed_user={@previewed_user}
-              />
-            </div>
+          <div class="relative w-full overflow-auto max-h-[250px] scrollbar-thin">
+            <table class="w-full caption-bottom text-sm">
+              <tbody>
+                <%= for %Contributor{user: user} <- @contributors do %>
+                  <.developer_card
+                    user={user}
+                    contract_for_user={contract_for_user(@contracts, user)}
+                    contract_type={
+                      if(Enum.find(@matches, &(&1.user.id == user.id)),
+                        do: "marketplace",
+                        else: "bring_your_own"
+                      )
+                    }
+                    current_org={@current_org}
+                  />
+                <% end %>
+              </tbody>
+            </table>
           </div>
-        </div>
+        </.section>
 
         <%!-- <.section
           :if={@matches != []}
@@ -493,26 +469,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                   </div>
                   <.card_title>No bounties yet</.card_title>
                   <.card_description class="pt-2">
-                    <%= if @installations == [] do %>
-                      Install Algora in {@current_org.name} to create new bounties by commenting
-                      <code class="mx-1 inline-block rounded bg-emerald-950/75 px-1 py-0.5 font-mono text-sm text-emerald-400 ring-1 ring-emerald-400/25">
-                        /bounty $1000
-                      </code>
-                      on GitHub issues
-                      <.button
-                        :if={@installations == []}
-                        phx-click="install_app"
-                        class="mt-4 flex mx-auto"
-                      >
-                        <Logos.github class="w-4 h-4 mr-2 -ml-1" /> Install Algora
-                      </.button>
-                    <% else %>
-                      Create new bounties by commenting
-                      <code class="mx-1 inline-block rounded bg-emerald-950/75 px-1 py-0.5 font-mono text-sm text-emerald-400 ring-1 ring-emerald-400/25">
-                        /bounty $1000
-                      </code>
-                      on GitHub issues
-                    <% end %>
+                    New bounties will appear here
                   </.card_description>
                 </.card_header>
               </.card>
@@ -1464,14 +1421,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
             <.input field={@bounty_form[:url]} placeholder="https://github.com/owner/repo/issues/123" />
             <.input icon="tabler-currency-dollar" field={@bounty_form[:amount]} />
           </div>
-          <div class="flex items-center justify-between gap-4">
-            <p class="text-xs text-muted-foreground">
-              <.icon name="tabler-sparkles" class="size-4 text-current mr-1" /> ...or just comment
-              <code class="px-1 py-0.5 text-success">/bounty $100</code>
-              on GitHub issues (requires GitHub auth)
-            </p>
-            <.button size="sm">Submit</.button>
-          </div>
         </.simple_form>
       </div>
     </div>
@@ -1494,14 +1443,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
             <.input field={@tip_form[:url]} placeholder="https://github.com/owner/repo/pull/123" />
             <.input field={@tip_form[:github_handle]} placeholder="jsmith" />
             <.input icon="tabler-currency-dollar" field={@tip_form[:amount]} />
-          </div>
-          <div class="flex items-center justify-between gap-4">
-            <p class="text-xs text-muted-foreground">
-              <.icon name="tabler-sparkles" class="size-4 text-current mr-1" /> ...or just comment
-              <code class="px-1 py-0.5 text-success">/tip $100</code>
-              on GitHub issues (requires GitHub auth)
-            </p>
-            <.button size="sm">Submit</.button>
           </div>
         </.simple_form>
       </div>

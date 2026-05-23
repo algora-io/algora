@@ -16,7 +16,7 @@ defmodule AlgoraWeb.LeaderboardLive do
 
   def render(assigns) do
     ~H"""
-    <div class="container mx-auto max-w-7xl space-y-6 p-6">
+    <div class="container mx-auto max-w-7xl space-y-6 p-4 sm:px-6 lg:px-8">
       <div class="space-y-1">
         <h1 class="text-2xl font-bold"></h1>
         <p class="text-muted-foreground"></p>

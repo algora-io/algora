@@ -39,7 +39,7 @@ defmodule AlgoraWeb.OrgsLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="container mx-auto max-w-7xl space-y-6 p-6">
+    <div class="container mx-auto max-w-7xl space-y-6 p-4 sm:px-6 lg:px-8">
       <.section title="Projects" subtitle="Meet the projects on Algora">
         <div id="orgs-container" phx-hook="InfiniteScroll">
           <ul class="flex flex-col gap-8 md:grid md:grid-cols-2 xl:grid-cols-3">

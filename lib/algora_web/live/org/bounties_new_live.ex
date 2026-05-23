@@ -67,7 +67,7 @@ defmodule AlgoraWeb.Org.BountiesNewLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="container mx-auto max-w-7xl space-y-6 p-6">
+    <div class="container mx-auto max-w-7xl space-y-6 p-4 sm:px-6 lg:px-8">
       <!-- Org Header -->
       <div class="rounded-xl border bg-card p-6 text-card-foreground">
         <div class="flex flex-col gap-6 md:flex-row">

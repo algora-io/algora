@@ -185,7 +185,7 @@ defmodule AlgoraWeb.Org.TransactionsLive do
 
   def render(assigns) do
     ~H"""
-    <div class="container mx-auto max-w-7xl space-y-6 p-6">
+    <div class="container mx-auto max-w-7xl space-y-6 p-4 sm:px-6 lg:px-8">
       <div class="space-y-4">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div class="space-y-1">

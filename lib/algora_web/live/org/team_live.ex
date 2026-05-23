@@ -22,7 +22,7 @@ defmodule AlgoraWeb.Org.TeamLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="container mx-auto max-w-7xl space-y-6 p-6">
+    <div class="container mx-auto max-w-7xl space-y-6 p-4 sm:px-6 lg:px-8">
       <.card>
         <.card_header>
           <.card_title>Team</.card_title>

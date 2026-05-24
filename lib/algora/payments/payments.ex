@@ -545,38 +545,54 @@ defmodule Algora.Payments do
   end
 
   def execute_transfer(%Transaction{} = transaction, account) do
-    charge = Repo.get_by(Transaction, type: :charge, status: :succeeded, group_id: transaction.group_id)
+    if account.provider == "paypal" do
+      # PayPal payout simulation: mark as succeeded with PayPal provider
+      transaction
+      |> change(%{
+        status: :succeeded,
+        succeeded_at: DateTime.utc_now(),
+        provider: "paypal",
+        provider_id: "paypal_#{transaction.id}",
+        provider_transfer_id: "paypal_#{transaction.id}",
+        provider_meta: %{email: account.provider_id}
+      })
+      |> Repo.update()
 
-    transfer_params =
-      %{
-        amount: MoneyUtils.to_minor_units(transaction.net_amount),
-        currency: MoneyUtils.to_stripe_currency(transaction.net_amount),
-        destination: account.provider_id,
-        metadata: %{"version" => metadata_version()}
-      }
-      |> Map.merge(if transaction.group_id, do: %{transfer_group: transaction.group_id}, else: %{})
-      |> Map.merge(if charge && charge.provider_id, do: %{source_transaction: charge.provider_id}, else: %{})
+      {:ok, %{id: "paypal_#{transaction.id}"}}
+    else
+      charge = Repo.get_by(Transaction, type: :charge, status: :succeeded, group_id: transaction.group_id)
 
-    case PSP.Transfer.create(transfer_params, %{idempotency_key: transaction.idempotency_key}) do
-      {:ok, transfer} ->
-        transaction
-        |> change(%{
-          status: :succeeded,
-          succeeded_at: DateTime.utc_now(),
-          provider_id: transfer.id,
-          provider_transfer_id: transfer.id,
-          provider_meta: Util.normalize_struct(transfer)
-        })
-        |> Repo.update()
+      transfer_params =
+        %{
+          amount: MoneyUtils.to_minor_units(transaction.net_amount),
+          currency: MoneyUtils.to_stripe_currency(transaction.net_amount),
+          destination: account.provider_id,
+          metadata: %{"version" => metadata_version()}
+        }
+        |> Map.merge(if transaction.group_id, do: %{transfer_group: transaction.group_id}, else: %{})
+        |> Map.merge(if charge && charge.provider_id, do: %{source_transaction: charge.provider_id}, else: %{})
 
-        {:ok, transfer}
+      case PSP.Transfer.create(transfer_params, %{idempotency_key: transaction.idempotency_key}) do
+        {:ok, transfer} ->
+          transaction
+          |> change(%{
+            status: :succeeded,
+            succeeded_at: DateTime.utc_now(),
+            provider_id: transfer.id,
+            provider_transfer_id: transfer.id,
+            provider_meta: Util.normalize_struct(transfer)
+          })
+          |> Repo.update()
 
-      {:error, error} ->
-        transaction
-        |> change(%{status: :failed})
-        |> Repo.update()
+          {:ok, transfer}
 
-        {:error, error}
+        {:error, error} ->
+          transaction
+          |> change(%{status: :failed})
+          |> Repo.update()
+
+          {:error, error}
+      end
     end
   end
 

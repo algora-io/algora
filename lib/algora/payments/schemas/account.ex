@@ -59,7 +59,7 @@ defmodule Algora.Payments.Account do
       :user_id
     ])
     |> validate_inclusion(:type, [:standard, :express])
-    |> validate_inclusion(:country, Algora.PSP.ConnectCountries.list_codes())
+    |> validate_inclusion(:country, Algora.PSP.ConnectCountries.list_codes(), except: &(&1.provider == "paypal"))
     |> foreign_key_constraint(:user_id)
     |> generate_id()
   end

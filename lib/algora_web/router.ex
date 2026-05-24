@@ -56,6 +56,10 @@ defmodule AlgoraWeb.Router do
 
   redirect("/comfy-org", "/comfy", :permanent)
   redirect("/comfy-org/*path", "/comfy/*path", :permanent)
+  
+  # User/Org alias redirects (Issue #166)
+  redirect("/sayanget", "/say", :temporary)
+  redirect("/sayanget/*path", "/say/*path", :temporary)
 
   scope "/" do
     forward "/asset", AlgoraWeb.Plugs.RewriteAssetsPlug, upstream: :assets_url

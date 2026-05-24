@@ -290,11 +290,11 @@
         </ul>
       <% end %>
       <%= if assigns[:pinned_orgs] && assigns[:pinned_orgs] != [] do %>
-        <ul role="list" class="flex items-center gap-x-2">
+        <ul role="list" class="ml-auto flex items-center gap-x-2">
           <%= for org <- @pinned_orgs do %>
             <li>
               <.link href={"/admin/orgs/#{org.handle}"}>
-                <.avatar class="size-8">
+                <.avatar class="w-10 h-10">
                   <.avatar_image src={org.avatar_url} />
                   <.avatar_fallback>{Algora.Util.initials(org.handle)}</.avatar_fallback>
                 </.avatar>
@@ -304,7 +304,10 @@
         </ul>
       <% end %>
 
-      <div class="ml-auto flex items-center gap-x-6">
+      <div
+        :if={is_nil(assigns[:pinned_orgs]) || assigns[:pinned_orgs] == []}
+        class="ml-auto flex items-center gap-x-6"
+      >
         <.link
           :if={Algora.Stargazer.count()}
           class="group w-fit outline-none hidden sm:flex"

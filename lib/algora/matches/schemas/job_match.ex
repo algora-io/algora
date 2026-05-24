@@ -31,6 +31,7 @@ defmodule Algora.Matches.JobMatch do
     field :provider_application_meta, :map, default: %{}
     field :provider_feedback_meta, :map, default: %{}
     field :provider_interviews_meta, :map, default: %{}
+    field :provider_notes_meta, :map, default: %{}
 
     belongs_to :user, Algora.Accounts.User
     belongs_to :job_posting, Algora.Jobs.JobPosting
@@ -65,7 +66,8 @@ defmodule Algora.Matches.JobMatch do
       :provider_candidate_meta,
       :provider_application_meta,
       :provider_feedback_meta,
-      :provider_interviews_meta
+      :provider_interviews_meta,
+      :provider_notes_meta
     ])
     |> then(fn cs ->
       Enum.reduce([:provider_candidate_id, :provider_application_id], cs, fn field, acc ->
@@ -93,5 +95,9 @@ defmodule Algora.Matches.JobMatch do
 
   def get_interview_schedules(match) do
     get_in(match.provider_interviews_meta, ["schedules"]) || []
+  end
+
+  def get_candidate_notes(match) do
+    get_in(match.provider_notes_meta, ["notes"]) || []
   end
 end

@@ -404,7 +404,8 @@ defmodule AlgoraWeb.Components.TechBadge do
       "MLflow",
       "Shadcn",
       "Jotai",
-      "Trino"
+      "Trino",
+      "R"
     ]
   end
 end

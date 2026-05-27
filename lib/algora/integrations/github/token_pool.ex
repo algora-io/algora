@@ -22,7 +22,7 @@ defmodule Algora.Github.TokenPool do
   end
 
   def maybe_get_token do
-    GenServer.call(__MODULE__, :maybe_get_token)
+    GenServer.call(__MODULE__, :maybe_get_token, 10_000)
   end
 
   def refresh_tokens do

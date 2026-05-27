@@ -15,6 +15,7 @@ defmodule AlgoraWeb.SwiftBountiesLive do
   alias AlgoraWeb.Components.Logos
   alias AlgoraWeb.Forms.BountyForm
   alias AlgoraWeb.Forms.TipForm
+  alias AlgoraWeb.LocalStore
   alias AlgoraWeb.UserAuth
 
   require Logger
@@ -34,7 +35,7 @@ defmodule AlgoraWeb.SwiftBountiesLive do
           |> assign(:page_image, "#{AlgoraWeb.Endpoint.url()}/images/og/swift.png")
           |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
           |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
-          |> assign(:oauth_url, Github.authorize_url(%{socket_id: socket.id}))
+          |> assign(:oauth_url, Github.authorize_url(%{return_to: "/swift"}))
           |> assign(:pending_action, nil)
           |> assign_bounties()
           |> assign_active_repos()
@@ -48,7 +49,11 @@ defmodule AlgoraWeb.SwiftBountiesLive do
 
   def render(assigns) do
     ~H"""
-    <div class="relative isolate overflow-hidden bg-background">
+    <div
+      id="swift-bounties-page"
+      class="relative isolate overflow-hidden bg-background"
+      phx-hook="LocalStateStore"
+    >
       <svg
         class="[mask-image:radial-gradient(100%_100%_at_top_right,white,transparent)] absolute inset-0 -z-10 size-full stroke-white/10"
         aria-hidden="true"
@@ -497,6 +502,28 @@ defmodule AlgoraWeb.SwiftBountiesLive do
     """
   end
 
+  @impl true
+  def handle_params(_params, _uri, socket) do
+    {:noreply,
+     socket
+     |> LocalStore.init(key: __MODULE__)
+     |> LocalStore.subscribe()}
+  end
+
+  @impl true
+  def handle_event("restore_settings", params, socket) do
+    socket = LocalStore.restore(socket, params)
+
+    case socket.assigns.pending_action do
+      nil ->
+        {:noreply, socket}
+
+      {event, params} ->
+        socket = LocalStore.assign_cached(socket, :pending_action, nil)
+        handle_event(event, params, socket)
+    end
+  end
+
   defp create_bounty(assigns) do
     ~H"""
     <.card class="bg-muted/30">
@@ -583,8 +610,8 @@ defmodule AlgoraWeb.SwiftBountiesLive do
       else
         {:noreply,
          socket
-         |> assign(:pending_action, {event, unsigned_params})
-         |> push_event("open_popup", %{url: socket.assigns.oauth_url})}
+         |> LocalStore.assign_cached(:pending_action, {event, unsigned_params})
+         |> redirect(external: socket.assigns.oauth_url)}
       end
     else
       {:noreply, assign(socket, :bounty_form, to_form(changeset))}
@@ -619,8 +646,8 @@ defmodule AlgoraWeb.SwiftBountiesLive do
       else
         {:noreply,
          socket
-         |> assign(:pending_action, {event, unsigned_params})
-         |> push_event("open_popup", %{url: socket.assigns.oauth_url})}
+         |> LocalStore.assign_cached(:pending_action, {event, unsigned_params})
+         |> redirect(external: socket.assigns.oauth_url)}
       end
     else
       {:noreply, assign(socket, :tip_form, to_form(changeset))}

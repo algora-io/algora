@@ -10,13 +10,18 @@ defmodule AlgoraWeb.Org.SettingsLive do
   alias Algora.Markdown
   alias Algora.Payments
   alias AlgoraWeb.Components.Logos
+  alias AlgoraWeb.LocalStore
 
   require Logger
 
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="container mx-auto max-w-7xl space-y-6 p-4 sm:px-6 lg:px-8">
+    <div
+      id="org-settings-page"
+      class="container mx-auto max-w-7xl space-y-6 p-4 sm:px-6 lg:px-8"
+      phx-hook="LocalStateStore"
+    >
       <div class="space-y-1">
         <h1 class="text-2xl font-bold">Settings</h1>
         <p class="text-muted-foreground">Update your settings and preferences</p>
@@ -248,7 +253,8 @@ defmodule AlgoraWeb.Org.SettingsLive do
      socket
      |> assign(:has_fresh_token?, Accounts.has_fresh_token?(socket.assigns.current_user))
      |> assign(:installations, installations)
-     |> assign(:oauth_url, Github.authorize_url(%{socket_id: socket.id}))
+     |> assign(:oauth_url, Github.authorize_url(%{return_to: "/#{current_org.handle}/settings"}))
+     |> assign(:pending_action, nil)
      |> assign_has_default_payment_method()
      |> assign(:template_form, to_form(template_changeset))
      |> assign(:template_preview, preview_template(socket, template))
@@ -285,8 +291,8 @@ defmodule AlgoraWeb.Org.SettingsLive do
        redirect(socket, external: Github.install_url_select_target())
      else
        socket
-       |> assign(:pending_action, {event, unsigned_params})
-       |> push_event("open_popup", %{url: socket.assigns.oauth_url})
+       |> LocalStore.assign_cached(:pending_action, {event, unsigned_params})
+       |> redirect(external: socket.assigns.oauth_url)
      end}
   end
 
@@ -361,13 +367,31 @@ defmodule AlgoraWeb.Org.SettingsLive do
   end
 
   @impl true
+  def handle_event("restore_settings", params, socket) do
+    socket = LocalStore.restore(socket, params)
+
+    case socket.assigns.pending_action do
+      nil ->
+        {:noreply, socket}
+
+      {event, params} ->
+        socket = LocalStore.assign_cached(socket, :pending_action, nil)
+        handle_event(event, params, socket)
+    end
+  end
+
+  @impl true
   def handle_event(_event, _params, socket) do
     {:noreply, socket}
   end
 
   @impl true
   def handle_params(params, _url, socket) do
-    {:noreply, apply_action(socket, socket.assigns.live_action, params)}
+    {:noreply,
+     socket
+     |> LocalStore.init(key: __MODULE__)
+     |> LocalStore.subscribe()
+     |> apply_action(socket.assigns.live_action, params)}
   end
 
   defp apply_action(socket, :edit, _params) do

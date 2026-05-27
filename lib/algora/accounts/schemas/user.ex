@@ -58,7 +58,6 @@ defmodule Algora.Accounts.User do
     field :last_active_at, :utc_datetime_usec
     field :last_job_match_email_at, :utc_datetime_usec
     field :last_dm_date, :utc_datetime_usec
-    field :internal_tags, {:array, :string}, default: []
     field :candidate_notes, :string
     field :dm_thread_url, :string
     field :contribution_scores, :map, default: %{}

@@ -24,17 +24,22 @@ defmodule AlgoraWeb.Components.Bounties do
               </div>
 
               <div class="flex-grow min-w-0 mr-4">
-                <div class="flex items-center text-sm">
-                  <span class="font-semibold mr-1">
-                    {bounty.repository.owner.name || bounty.owner.name}
+                <div class="flex items-center justify-between text-sm w-full">
+                  <div class="flex items-center truncate">
+                    <span class="font-semibold mr-1 flex-shrink-0">
+                      {bounty.repository.owner.name || bounty.owner.name}
+                    </span>
+                    <span :if={bounty.ticket.number} class="text-muted-foreground mr-2 flex-shrink-0">
+                      #{bounty.ticket.number}
+                    </span>
+                    <span class="font-display whitespace-nowrap text-sm font-semibold tabular-nums text-success mr-2 flex-shrink-0">
+                      {Money.to_string!(bounty.amount)}
+                    </span>
+                    <span class="text-foreground truncate">{bounty.ticket.title}</span>
+                  </div>
+                  <span class="text-xs text-muted-foreground whitespace-nowrap ml-2 hidden sm:inline flex-shrink-0">
+                    {Algora.Util.time_ago(bounty.inserted_at)}
                   </span>
-                  <span :if={bounty.ticket.number} class="text-muted-foreground mr-2">
-                    #{bounty.ticket.number}
-                  </span>
-                  <span class="font-display whitespace-nowrap text-sm font-semibold tabular-nums text-success mr-2">
-                    {Money.to_string!(bounty.amount)}
-                  </span>
-                  <span class="text-foreground">{bounty.ticket.title}</span>
                 </div>
               </div>
             </li>

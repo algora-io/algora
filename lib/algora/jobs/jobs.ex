@@ -225,6 +225,13 @@ defmodule Algora.Jobs do
     |> MapSet.new()
   end
 
+  def withdraw_application(job_id, user) do
+    case JobApplication |> where([a], a.job_id == ^job_id and a.user_id == ^user.id) |> Repo.one() do
+      nil -> {:error, :not_found}
+      application -> Repo.delete(application)
+    end
+  end
+
   def get_job_posting(id) do
     case JobPosting |> Repo.get(id) |> Repo.preload(:user) do
       nil -> {:error, :not_found}

@@ -934,6 +934,27 @@ defmodule AlgoraWeb.PlatformLive do
   end
 
   @impl true
+  def handle_event("withdraw_job", %{"job-id" => job_id}, socket) do
+    if socket.assigns[:current_user] do
+      case Jobs.withdraw_application(job_id, socket.assigns.current_user) do
+        {:ok, _application} ->
+          {:noreply,
+           socket
+           |> assign_user_applications()
+           |> put_flash(:info, "Application withdrawn successfully.")}
+
+        {:error, :not_found} ->
+          {:noreply, put_flash(socket, :error, "Application not found.")}
+
+        {:error, _reason} ->
+          {:noreply, put_flash(socket, :error, "Failed to withdraw application. Please try again.")}
+      end
+    else
+      {:noreply, redirect(socket, external: Algora.Github.authorize_url(%{return_to: "/jobs"}))}
+    end
+  end
+
+  @impl true
   def handle_async(:fetch_metadata, {:ok, metadata}, socket) do
     {:noreply,
      socket

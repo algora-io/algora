@@ -16,8 +16,8 @@ defmodule AlgoraWeb.User.TransactionsLive do
     use Ecto.Schema
 
     import Ecto.Changeset
-
-    @countries Algora.PSP.ConnectCountries.list()
+    @countries (Algora.PSP.ConnectCountries.list() ++ [{"China", "CN"}])
+               |> Enum.sort_by(&elem(&1, 0))
 
     embedded_schema do
       field :country, :string
@@ -68,26 +68,34 @@ defmodule AlgoraWeb.User.TransactionsLive do
   end
 
   def handle_event("view_dashboard", _params, socket) do
-    case Payments.create_login_link(socket.assigns.account) do
-      {:ok, %{url: url}} -> {:noreply, redirect(socket, external: url)}
-      {:error, _reason} -> {:noreply, put_flash(socket, :error, "Something went wrong")}
+    if socket.assigns.account.provider == "manual" do
+      {:noreply, put_flash(socket, :info, "Your payout account is managed manually. Please contact support to update your payout details.")}
+    else
+      case Payments.create_login_link(socket.assigns.account) do
+        {:ok, %{url: url}} -> {:noreply, redirect(socket, external: url)}
+        {:error, _reason} -> {:noreply, put_flash(socket, :error, "Something went wrong")}
+      end
     end
   end
 
   def handle_event("setup_payout_account", _params, socket) do
-    type = if socket.assigns.account.details_submitted, do: "account_update", else: "account_onboarding"
+    if socket.assigns.account.provider == "manual" do
+      {:noreply, put_flash(socket, :info, "Your payout account is managed manually. Please contact support to update your payout details.")}
+    else
+      type = if socket.assigns.account.details_submitted, do: "account_update", else: "account_onboarding"
 
-    case Payments.create_account_link(socket.assigns.account, AlgoraWeb.Endpoint.url(), type) do
-      {:ok, %{url: url}} ->
-        {:noreply, redirect(socket, external: url)}
+      case Payments.create_account_link(socket.assigns.account, AlgoraWeb.Endpoint.url(), type) do
+        {:ok, %{url: url}} ->
+          {:noreply, redirect(socket, external: url)}
 
-      # {:error, %Stripe.Error{} = error} ->
-      #  Algora.Notifier.notify_stripe_account_link_error(socket.assigns.current_user, error)
-      #  Algora.Signal.send_error(error, %StripeAccountLinkError{})
-      #  {:noreply, put_flash(socket, :error, "Failed to link payout account for your country")}
+        # {:error, %Stripe.Error{} = error} ->
+        #  Algora.Notifier.notify_stripe_account_link_error(socket.assigns.current_user, error)
+        #  Algora.Signal.send_error(error, %StripeAccountLinkError{})
+        #  {:noreply, put_flash(socket, :error, "Failed to link payout account for your country")}
 
-      {:error, _reason} ->
-        {:noreply, put_flash(socket, :error, "Something went wrong")}
+        {:error, _reason} ->
+          {:noreply, put_flash(socket, :error, "Something went wrong")}
+      end
     end
   end
 

@@ -275,6 +275,23 @@ defmodule Algora.Payments do
 
   @spec create_account(user :: User.t(), country :: String.t()) ::
           {:ok, Account.t()} | {:error, Ecto.Changeset.t()}
+  def create_account(user, "CN") do
+    attrs = %{
+      provider: "manual",
+      provider_id: "manual_" <> Ecto.UUID.generate(),
+      type: :standard,
+      user_id: user.id,
+      country: "CN",
+      details_submitted: true,
+      charges_enabled: true,
+      payouts_enabled: true
+    }
+
+    %Account{}
+    |> Account.changeset(attrs)
+    |> Repo.insert()
+  end
+
   def create_account(user, country) do
     type = PSP.ConnectCountries.account_type(country)
 

@@ -220,7 +220,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
                       <% end %>
                     </td>
                     <td class="[&:has([role=checkbox])]:pr-0 p-4 align-middle">
-                      <div class="flex items-center justify-end gap-2">
+                      <div :if={@current_user_role in [:admin, :mod] and bounty.owner.id == @current_org.id} class="flex items-center justify-end gap-2">
                         <.button
                           phx-click="edit-bounty-amount"
                           phx-value-id={bounty.id}
@@ -414,13 +414,16 @@ defmodule AlgoraWeb.Org.BountiesLive do
   end
 
   def handle_event("delete-bounty", %{"id" => bounty_id}, socket) do
-    cond do
-      socket.assigns.current_user_role in [:admin, :mod] ->
-        bounty =
-          Bounty
-          |> Repo.get(bounty_id)
-          |> Repo.preload([:owner, [ticket: [repository: :user]]])
+    bounty =
+      Bounty
+      |> Repo.get(bounty_id)
+      |> Repo.preload([:owner, [ticket: [repository: :user]]])
 
+    cond do
+      is_nil(bounty) ->
+        {:noreply, put_flash(socket, :error, "Bounty not found")}
+
+      socket.assigns.current_user_role in [:admin, :mod] and bounty.owner_id == socket.assigns.current_org.id ->
         with {:ok, installation} <-
                Workspace.fetch_installation_by(
                  provider: "github",
@@ -474,9 +477,13 @@ defmodule AlgoraWeb.Org.BountiesLive do
   end
 
   def handle_event("edit-bounty-amount", %{"id" => bounty_id}, socket) do
+    bounty = List.first(Bounties.list_bounties(id: bounty_id))
+
     cond do
-      socket.assigns.current_user_role in [:admin, :mod] ->
-        [bounty] = Bounties.list_bounties(id: bounty_id)
+      is_nil(bounty) ->
+        {:noreply, put_flash(socket, :error, "Bounty not found")}
+
+      socket.assigns.current_user_role in [:admin, :mod] and bounty.owner.id == socket.assigns.current_org.id ->
         changeset = edit_amount_changeset(%{amount: bounty.amount})
 
         {:noreply,

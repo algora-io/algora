@@ -77,7 +77,9 @@ defmodule AlgoraWeb.Org.TransactionsLive do
   end
 
   def handle_event("setup_payout_account", _params, socket) do
-    case Payments.create_account_link(socket.assigns.account, AlgoraWeb.Endpoint.url()) do
+    type = if socket.assigns.account.details_submitted, do: "account_update", else: "account_onboarding"
+
+    case Payments.create_account_link(socket.assigns.account, AlgoraWeb.Endpoint.url(), type) do
       {:ok, %{url: url}} -> {:noreply, redirect(socket, external: url)}
       {:error, _reason} -> {:noreply, put_flash(socket, :error, "Something went wrong")}
     end

@@ -201,9 +201,13 @@ defmodule Algora.Jobs do
   end
 
   def create_application(job_id, user, attrs \\ %{}) do
-    %JobApplication{job_id: job_id, user_id: user.id}
-    |> JobApplication.changeset(attrs)
-    |> Repo.insert()
+    if user.candidates_require_confirmation do
+      {:error, :email_confirmation_required}
+    else
+      %JobApplication{job_id: job_id, user_id: user.id}
+      |> JobApplication.changeset(attrs)
+      |> Repo.insert()
+    end
   end
 
   def ensure_application(job_id, user, attrs \\ %{}) do

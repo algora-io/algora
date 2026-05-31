@@ -417,6 +417,17 @@ defmodule Algora.Settings do
     set("portfolio_companies:#{host_handle}", %{"org_ids" => org_ids})
   end
 
+  def get_org_feed(org_handle) when is_binary(org_handle) do
+    case get("org_feed:#{org_handle}") do
+      %{"entries" => entries} when is_list(entries) -> entries
+      _ -> []
+    end
+  end
+
+  def set_org_feed(org_handle, entries) when is_binary(org_handle) and is_list(entries) do
+    set("org_feed:#{org_handle}", %{"entries" => entries})
+  end
+
   defp format_timestamp(datetime) do
     datetime
     |> DateTime.to_string()

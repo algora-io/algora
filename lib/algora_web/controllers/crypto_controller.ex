@@ -17,7 +17,7 @@ defmodule AlgoraWeb.CryptoController do
   alias Algora.PSP.Crypto, as: CryptoPSP
   alias Algora.Repo
 
-  plug :authenticate_user when action in [:link_wallet, :unlink_wallet, :escrow_params]
+  plug :authenticate_user when action in [:link_wallet, :unlink_wallet, :escrow_params, :confirm_escrow, :release_escrow, :refund_escrow, :get_escrow]
 
   @doc """
   POST /api/crypto/wallets - Links a wallet to the authenticated user.
@@ -25,31 +25,39 @@ defmodule AlgoraWeb.CryptoController do
   def link_wallet(conn, %{"address" => address, "network" => network}) do
     user = conn.assigns.current_user
 
-    case Crypto.link_wallet(user, %{
-           address: address,
-           network: String.to_existing_atom(network),
-           label: conn.params["label"]
-         }) do
-      {:ok, wallet} ->
-        conn
-        |> put_status(:created)
-        |> json(%{
-          id: wallet.id,
-          address: wallet.address,
-          network: wallet.network,
-          status: wallet.status,
-          label: wallet.label
-        })
+    supported_networks = ["solana"]
 
-      {:error, %Ecto.Changeset{} = changeset} ->
-        conn
-        |> put_status(:unprocessable_entity)
-        |> json(%{errors: format_changeset_errors(changeset)})
+    if network not in supported_networks do
+      conn
+      |> put_status(:bad_request)
+      |> json(%{error: "Unsupported network. Supported: #{Enum.join(supported_networks, ", ")}"})
+    else
+      case Crypto.link_wallet(user, %{
+             address: address,
+             network: String.to_atom(network),
+             label: conn.params["label"]
+           }) do
+        {:ok, wallet} ->
+          conn
+          |> put_status(:created)
+          |> json(%{
+            id: wallet.id,
+            address: wallet.address,
+            network: wallet.network,
+            status: wallet.status,
+            label: wallet.label
+          })
 
-      {:error, reason} ->
-        conn
-        |> put_status(:bad_request)
-        |> json(%{error: to_string(reason)})
+        {:error, %Ecto.Changeset{} = changeset} ->
+          conn
+          |> put_status(:unprocessable_entity)
+          |> json(%{errors: format_changeset_errors(changeset)})
+
+        {:error, reason} ->
+          conn
+          |> put_status(:bad_request)
+          |> json(%{error: to_string(reason)})
+      end
     end
   end
 
@@ -86,16 +94,22 @@ defmodule AlgoraWeb.CryptoController do
     user = conn.assigns.current_user
 
     with {:ok, contributor} <- resolve_contributor(params),
+         amount when not is_nil(amount) <- parse_amount(params["amount"]),
          {:ok, session} <- CryptoPSP.create_session(%{
            payer: user,
            contributor: contributor,
-           amount: parse_amount(params["amount"]),
+           amount: amount,
            bounty_id: params["bounty_id"],
            tip_id: params["tip_id"],
            claim_id: params["claim_id"]
          }) do
       json(conn, session)
     else
+      nil ->
+        conn
+        |> put_status(:bad_request)
+        |> json(%{error: "Invalid or missing amount"})
+
       {:error, :payer_wallet_not_found} ->
         conn
         |> put_status(:precondition_failed)
@@ -105,6 +119,16 @@ defmodule AlgoraWeb.CryptoController do
         conn
         |> put_status(:precondition_failed)
         |> json(%{error: "Recipient does not have a linked Solana wallet."})
+
+      {:error, :contributor_not_found} ->
+        conn
+        |> put_status(:not_found)
+        |> json(%{error: "Contributor not found"})
+
+      {:error, :contributor_required} ->
+        conn
+        |> put_status(:bad_request)
+        |> json(%{error: "contributor_handle or contributor_id is required"})
 
       {:error, reason} ->
         conn
@@ -257,17 +281,21 @@ defmodule AlgoraWeb.CryptoController do
   defp resolve_contributor(_), do: {:error, :contributor_required}
 
   defp parse_amount(amount) when is_binary(amount) do
-    {value, _} = Float.parse(amount)
-    Money.new(value, :USD)
+    case Float.parse(amount) do
+      {value, _} -> Money.new(round(value * 100), :USD)
+      :error -> nil
+    end
   end
 
   defp parse_amount(%Money{} = amount), do: amount
+
+  defp parse_amount(_), do: nil
 
   defp format_changeset_errors(changeset) do
     Ecto.Changeset.traverse_errors(changeset, fn {msg, opts} ->
       Enum.reduce(opts, msg, fn {key, value}, acc ->
         String.replace(acc, "%{#{key}}", to_string(value))
-      end)
+      end))
     end)
   end
 end

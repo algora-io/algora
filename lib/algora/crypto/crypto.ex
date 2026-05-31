@@ -28,7 +28,7 @@ defmodule Algora.Crypto do
   alias Algora.Crypto.CryptoEscrow
   alias Algora.Crypto.CryptoWallet
   alias Algora.Crypto.Solana
-  alias Algora.Payments
+  alias Algora.MoneyUtils
   alias Algora.Repo
 
   require Logger
@@ -180,7 +180,7 @@ defmodule Algora.Crypto do
       true ->
         group_id = Nanoid.generate()
         fee_bps = CryptoEscrow.default_platform_fee_bps()
-        amount_lamports = Payments.MoneyUtils.to_minor_units(amount)
+        amount_lamports = MoneyUtils.to_minor_units(amount)
 
         Repo.tx(fn ->
           with {:ok, escrow} <-
@@ -225,8 +225,7 @@ defmodule Algora.Crypto do
           {:ok, CryptoEscrow.t()} | {:error, atom()}
   def process_escrow_release(escrow_id, release_signature) do
     with {:ok, escrow} <- Repo.fetch(CryptoEscrow, escrow_id),
-         true <- escrow.state == :created,
-         false <- {:error, :escrow_not_in_created_state},
+         :created <- escrow.state || {:error, :escrow_not_in_created_state},
          {:ok, escrow} <-
            escrow
            |> CryptoEscrow.release_changeset(%{release_transaction_signature: release_signature})
@@ -250,8 +249,7 @@ defmodule Algora.Crypto do
           {:ok, CryptoEscrow.t()} | {:error, atom()}
   def process_escrow_refund(escrow_id, refund_signature) do
     with {:ok, escrow} <- Repo.fetch(CryptoEscrow, escrow_id),
-         true <- escrow.state == :created,
-         false <- {:error, :escrow_not_in_created_state},
+         :created <- escrow.state || {:error, :escrow_not_in_created_state},
          {:ok, escrow} <-
            escrow
            |> CryptoEscrow.refund_changeset(%{refund_transaction_signature: refund_signature})
@@ -343,7 +341,7 @@ defmodule Algora.Crypto do
       contributor_address: contributor_wallet && contributor_wallet.address,
       platform_address: platform_wallet && platform_wallet.address,
       mint_address: CryptoEscrow.default_mint_address(),
-      amount: Payments.MoneyUtils.to_minor_units(amount),
+      amount: MoneyUtils.to_minor_units(amount),
       platform_fee_bps: CryptoEscrow.default_platform_fee_bps(),
       deadline: DateTime.add(DateTime.utc_now(), 30, :day) |> DateTime.to_unix(),
       network: :solana
@@ -480,7 +478,13 @@ defmodule Algora.Crypto do
         nil
 
       address ->
-        get_wallet_by_address(address) || %{id: nil, address: address, network: :solana}
+        case get_wallet_by_address(address) do
+          nil ->
+            Logger.warning("Platform wallet address #{address} not found in DB. Please link it first.")
+            nil
+          wallet ->
+            wallet
+        end
     end
   end
 end

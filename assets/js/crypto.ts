@@ -207,7 +207,19 @@ export const CryptoEscrowHook = {
   }) {
     try {
       // Step 1: Get escrow parameters from backend
-      const escrowParams = await apiCall("GET", "/escrow-params", null);
+      const queryParams = new URLSearchParams({
+        contributor_handle: params.contributor_handle,
+        amount: params.amount,
+      });
+      if (params.bounty_id) queryParams.set("bounty_id", params.bounty_id);
+      if (params.tip_id) queryParams.set("tip_id", params.tip_id);
+      if (params.claim_id) queryParams.set("claim_id", params.claim_id);
+
+      const escrowParams = await apiCall(
+        "GET",
+        `/escrow-params?${queryParams.toString()}`,
+        null,
+      );
 
       // Step 2: Build the on-chain transaction
       // This requires the Solana web3.js library loaded
@@ -323,7 +335,6 @@ export const CryptoEscrowHook = {
 
 function connection(network: string) {
   // Returns a Solana RPC connection
-  // This would use @solana/web3.js Connection
   const rpcUrl =
     network === "solana"
       ? document
@@ -333,8 +344,19 @@ function connection(network: string) {
       : "https://api.devnet.solana.com";
 
   // Placeholder — actual Connection would come from @solana/web3.js
+  // In production, replace this with: new Connection(rpcUrl, "confirmed")
   return {
     sendRawTransaction: async (serialized: Buffer) => {
+      // Use Buffer-based base64 encoding for binary data (btoa is for ASCII only)
+      const encoded =
+        typeof Buffer !== "undefined"
+          ? serialized.toString("base64")
+          : btoa(
+              String.fromCharCode.apply(
+                null,
+                Array.from(new Uint8Array(serialized)),
+              ),
+            );
       const response = await fetch(rpcUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -342,10 +364,7 @@ function connection(network: string) {
           jsonrpc: "2.0",
           id: 1,
           method: "sendTransaction",
-          params: [
-            btoa(String.fromCharCode.apply(null, serialized as any)),
-            { encoding: "base64" },
-          ],
+          params: [encoded, { encoding: "base64" }],
         }),
       });
       const result = await response.json();

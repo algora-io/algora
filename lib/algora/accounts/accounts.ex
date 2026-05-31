@@ -284,22 +284,22 @@ defmodule Algora.Accounts do
   def get_user_by!(fields), do: Repo.get_by!(User, fields)
 
   @doc """
-  Gets a user by checking email across multiple fields.
+  Lists users matching an email across multiple fields.
 
-  Checks the following fields in this order:
-  - user.provider_meta["email"]
+  Checks the following fields independently:
   - user.internal_email
   - user.email
+  - user.provider_meta["email"]
 
-  Returns the first user found matching any of these email fields.
+  Returns a list of all users whose any email field matches.
 
   ## Examples
 
       iex> list_users_by_any_email("user@example.com")
-      %User{}
+      [%User{}]
 
       iex> list_users_by_any_email("unknown@example.com")
-      nil
+      []
 
   """
   def list_users_by_any_email(email) when is_binary(email) do

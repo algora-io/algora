@@ -80,18 +80,20 @@ defmodule Algora.PSP.Crypto do
         escrow_account_address: escrow_account_address,
         escrow_token_account_address: escrow_token_account_address
       }) do
-    with {:ok, escrow} <- Repo.fetch(CryptoEscrow, escrow_id) do
-      # Update escrow with on-chain addresses
-      escrow
-      |> Ecto.Changeset.change(%{
-        escrow_account_address: escrow_account_address,
-        escrow_token_account_address: escrow_token_account_address,
-        create_transaction_signature: signature
-      })
-      |> Repo.update()
-
+    with {:ok, escrow} <- Repo.fetch(CryptoEscrow, escrow_id),
+         {:ok, updated_escrow} <-
+           escrow
+           |> Ecto.Changeset.change(%{
+             escrow_account_address: escrow_account_address,
+             escrow_token_account_address: escrow_token_account_address,
+             create_transaction_signature: signature
+           })
+           |> Repo.update() do
       # Enqueue verification job
-      Algora.Crypto.Jobs.VerifyEscrow.enqueue_creation(escrow_id, signature)
+      case Algora.Crypto.Jobs.VerifyEscrow.enqueue_creation(escrow_id, signature) do
+        {:ok, _job} -> {:ok, updated_escrow}
+        {:error, reason} -> {:error, reason}
+      end
     end
   end
 

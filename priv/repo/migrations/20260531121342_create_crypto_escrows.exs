@@ -2,7 +2,7 @@ defmodule Algora.Repo.Migrations.CreateCryptoEscrows do
   use Ecto.Migration
 
   def change do
-    execute "CREATE TYPE escrow_state AS ENUM ('created', 'released', 'refunded')",
+    execute "CREATE TYPE escrow_state AS ENUM ('created', 'released', 'refunded', 'failed')",
             "DROP TYPE escrow_state"
 
     create table(:crypto_escrows, primary_key: false) do

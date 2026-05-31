@@ -154,7 +154,7 @@ defmodule Algora.Crypto.OnChainVerifier do
     with {:ok, escrow} <- Repo.fetch(CryptoEscrow, escrow_id) do
       escrow
       |> Ecto.Changeset.change(%{
-        state: :refunded,
+        state: :failed,
         provider_meta: Map.merge(escrow.provider_meta || %{}, %{
           "failed_at" => DateTime.utc_now() |> DateTime.to_iso8601(),
           "failure_reason" => "on_chain_transaction_failed"

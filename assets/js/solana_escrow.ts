@@ -236,15 +236,22 @@ export async function buildRefundEscrowTx(escrow: {
 // Instruction Data Encoding
 // ============================================================
 
-// Discriminator for Anchor instructions (first 8 bytes of SHA256("global:create_escrow"))
+// Discriminators for Anchor instructions.
+// These MUST be computed as: sha256("global:<method_name>")[0..8]
+// NOTE: Replace these with the actual values from your Anchor IDL after building the program.
+// Run: anchor idl build && cat target/idl/solana_escrow.json | jq '.instructions[].discriminator'
+// The values below are placeholders and MUST be updated before deploying to mainnet.
 const CREATE_ESCROW_DISCRIMINATOR = Buffer.from([
-  0x99, 0x5c, 0x3b, 0x4e, 0x2d, 0x7e, 0x8c, 0x1a,
+  // TODO: Replace with actual discriminator from Anchor IDL for "create_escrow"
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 ]);
 const RELEASE_ESCROW_DISCRIMINATOR = Buffer.from([
-  0x7a, 0x2b, 0x5d, 0x1f, 0x3e, 0x8c, 0x4a, 0x6d,
+  // TODO: Replace with actual discriminator from Anchor IDL for "release_escrow"
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 ]);
 const REFUND_ESCROW_DISCRIMINATOR = Buffer.from([
-  0x4d, 0x1e, 0x6a, 0x8f, 0x2c, 0x5b, 0x3d, 0x7e,
+  // TODO: Replace with actual discriminator from Anchor IDL for "refund_escrow"
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 ]);
 
 function encodeCreateEscrowData(

@@ -20,7 +20,7 @@ defmodule Algora.Crypto.CryptoEscrow do
   alias Algora.Payments.Transaction
 
   @networks [:solana]
-  @states [:created, :released, :refunded]
+  @states [:created, :released, :refunded, :failed]
 
   @default_platform_fee_bps 500
   @default_mint_address "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"

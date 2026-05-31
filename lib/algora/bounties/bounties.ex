@@ -277,6 +277,8 @@ defmodule Algora.Bounties do
           attempts :: list(Attempt.t()),
           claims :: list(Claim.t())
         ) :: String.t()
+  def get_response_body([], _ticket_ref, _attempts, _claims), do: ""
+
   def get_response_body(bounties, ticket_ref, attempts, claims) do
     custom_template =
       Repo.one(
@@ -636,7 +638,7 @@ defmodule Algora.Bounties do
            |> Claim.changeset(%{status: :cancelled, group_share: Decimal.new(0)})
            |> Repo.update() do
         {:ok, _} -> {:cont, :ok}
-        error -> error
+        error -> {:halt, error}
       end
     end)
   end
@@ -683,11 +685,11 @@ defmodule Algora.Bounties do
       ) do
     body =
       cond do
+        amount == nil ->
+          "Please specify an amount to tip (e.g. `/tip $100 @#{recipient || "username"}`)"
+
         recipient == nil ->
           "Please specify a recipient to tip (e.g. `/tip $#{Money.to_decimal(amount)} @jsmith`)"
-
-        amount == nil ->
-          "Please specify an amount to tip (e.g. `/tip $100 @#{recipient}`)"
 
         true ->
           installation =

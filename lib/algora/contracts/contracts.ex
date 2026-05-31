@@ -510,9 +510,9 @@ defmodule Algora.Contracts do
                destination: account.provider_id
              },
              %{idempotency_key: transaction.id}
-           ) do
+           ),
+         {:ok, _} <- mark_contract_as_paid(contract) do
       update_transaction_status(transaction, stripe_transfer, :succeeded)
-      mark_contract_as_paid(contract)
       {:ok, stripe_transfer}
     else
       {:error, error} ->
@@ -552,7 +552,9 @@ defmodule Algora.Contracts do
   end
 
   defp mark_contract_as_paid(contract) do
-    change(contract, %{status: :paid})
+    contract
+    |> change(%{status: :paid})
+    |> Repo.update()
   end
 
   defp renew_contract(contract) do

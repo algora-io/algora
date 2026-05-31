@@ -246,8 +246,9 @@ defmodule AlgoraWeb.Org.DashboardLive do
                                 </div>
                               </div>
                               <.link
-                                rel="noopener"
                                 class="group/issue inline-flex flex-col"
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 href={Bounty.url(bounty)}
                               >
                                 <div :if={Bounty.path(bounty)} class="flex items-center gap-4">

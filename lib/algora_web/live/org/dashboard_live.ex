@@ -73,8 +73,8 @@ defmodule AlgoraWeb.Org.DashboardLive do
         preload: [:user, :job_posting]
       )
 
-    if candidates == [] do
-      if Member.can_create_bounty?(socket.assigns.current_user_role) do
+    if Member.can_create_bounty?(socket.assigns.current_user_role) do
+      if candidates == [] do
         previewed_user = get_previewed_user(current_org)
 
         _experts = Accounts.list_developers(org_id: current_org.id, earnings_gt: Money.zero(:USD))
@@ -151,10 +151,10 @@ defmodule AlgoraWeb.Org.DashboardLive do
          |> assign(:messages, [])
          |> assign(:show_chat, false)}
       else
-        {:ok, redirect(socket, to: ~p"/#{current_org.handle}/home")}
+        {:ok, redirect(socket, to: ~p"/#{current_org.handle}/candidates")}
       end
     else
-      {:ok, redirect(socket, to: ~p"/#{current_org.handle}/candidates")}
+      {:ok, redirect(socket, to: ~p"/#{current_org.handle}/home")}
     end
   end
 

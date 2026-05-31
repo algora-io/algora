@@ -305,7 +305,7 @@ defmodule Algora.Accounts do
   def list_users_by_any_email(email) when is_binary(email) do
     Repo.all(
       from u in User,
-        where: fragment("COALESCE(?, ?, ?->>'email') = ?", u.internal_email, u.email, u.provider_meta, ^email)
+        where: u.internal_email == ^email or u.email == ^email or fragment("?->>'email' = ?", u.provider_meta, ^email)
     )
   end
 

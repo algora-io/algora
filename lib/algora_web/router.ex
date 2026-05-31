@@ -168,6 +168,24 @@ defmodule AlgoraWeb.Router do
     get "/shields/:org_handle/bounties", ShieldsController, :bounties
   end
 
+  # Crypto payment API endpoints
+  scope "/api/crypto", AlgoraWeb do
+    pipe_through :api
+
+    # Wallet management (requires auth)
+    post "/wallets", CryptoController, :link_wallet
+    delete "/wallets/:id", CryptoController, :unlink_wallet
+
+    # Escrow parameters (requires auth)
+    get "/escrow-params", CryptoController, :escrow_params
+
+    # Escrow lifecycle
+    post "/escrow/confirm", CryptoController, :confirm_escrow
+    post "/escrow/:id/release", CryptoController, :release_escrow
+    post "/escrow/:id/refund", CryptoController, :refund_escrow
+    get "/escrow/:id", CryptoController, :get_escrow
+  end
+
   # Other scopes may use custom stacks.
   # scope "/api", AlgoraWeb do
   #   pipe_through :api

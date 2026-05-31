@@ -1,0 +1,27 @@
+# Anchor
+.anchor
+target
+
+# Node
+node_modules
+dist
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Cargo
+**/Cargo.lock

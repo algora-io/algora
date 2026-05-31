@@ -43,6 +43,12 @@ if config_env() == :prod do
     publishable_key: System.fetch_env!("STRIPE_PUBLISHABLE_KEY"),
     webhook_secret: System.fetch_env!("STRIPE_WEBHOOK_SECRET")
 
+  config :algora, :crypto,
+    solana_rpc_url: System.get_env("SOLANA_RPC_URL", "https://api.mainnet-beta.solana.com"),
+    solana_ws_url: System.get_env("SOLANA_WS_URL", "wss://api.mainnet-beta.solana.com"),
+    solana_escrow_program_id: System.get_env("SOLANA_ESCROW_PROGRAM_ID"),
+    crypto_platform_wallet_address: System.get_env("CRYPTO_PLATFORM_WALLET_ADDRESS")
+
   database_url =
     System.get_env("DATABASE_URL") ||
       raise """

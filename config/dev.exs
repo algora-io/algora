@@ -24,6 +24,12 @@ config :algora, :stripe,
   test_customer_id: System.get_env("STRIPE_TEST_CUSTOMER_ID"),
   test_account_id: System.get_env("STRIPE_TEST_ACCOUNT_ID")
 
+config :algora, :crypto,
+  solana_rpc_url: System.get_env("SOLANA_RPC_URL", "https://api.devnet.solana.com"),
+  solana_ws_url: System.get_env("SOLANA_WS_URL", "wss://api.devnet.solana.com"),
+  solana_escrow_program_id: System.get_env("SOLANA_ESCROW_PROGRAM_ID", "Escrow11111111111111111111111111111111111111"),
+  crypto_platform_wallet_address: System.get_env("CRYPTO_PLATFORM_WALLET_ADDRESS")
+
 # Configure your database
 config :algora, Algora.Repo,
   url: System.get_env("DATABASE_URL"),

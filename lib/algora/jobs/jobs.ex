@@ -201,9 +201,13 @@ defmodule Algora.Jobs do
   end
 
   def create_application(job_id, user, attrs \\ %{}) do
-    %JobApplication{job_id: job_id, user_id: user.id}
-    |> JobApplication.changeset(attrs)
-    |> Repo.insert()
+    if user.candidates_require_confirmation do
+      {:error, :email_confirmation_required}
+    else
+      %JobApplication{job_id: job_id, user_id: user.id}
+      |> JobApplication.changeset(attrs)
+      |> Repo.insert()
+    end
   end
 
   def ensure_application(job_id, user, attrs \\ %{}) do
@@ -219,6 +223,13 @@ defmodule Algora.Jobs do
     |> select([a], a.job_id)
     |> Repo.all()
     |> MapSet.new()
+  end
+
+  def withdraw_application(job_id, user) do
+    case JobApplication |> where([a], a.job_id == ^job_id and a.user_id == ^user.id) |> Repo.one() do
+      nil -> {:error, :not_found}
+      application -> Repo.delete(application)
+    end
   end
 
   def get_job_posting(id) do

@@ -143,8 +143,8 @@ defmodule AlgoraWeb.JobsLive do
                           </div>
                         </div>
                         <%= if MapSet.member?(@user_applications, job.id) do %>
-                          <.button disabled class="opacity-50">
-                            <.icon name="tabler-check" class="h-4 w-4 mr-2 -ml-1" /> Applied
+                          <.button phx-click="withdraw_job" phx-value-job-id={job.id} class="bg-red-600 hover:bg-red-700">
+                            <.icon name="tabler-x" class="h-4 w-4 mr-2 -ml-1" /> Withdraw
                           </.button>
                         <% else %>
                           <.button phx-click="apply_job" phx-value-job-id={job.id}>
@@ -539,11 +539,35 @@ defmodule AlgoraWeb.JobsLive do
           {:ok, _application} ->
             {:noreply, assign_user_applications(socket)}
 
+          {:error, :email_confirmation_required} ->
+            {:noreply, put_flash(socket, :error, "Email confirmation required. Please check your email for a confirmation code.")}
+
           {:error, _changeset} ->
             {:noreply, put_flash(socket, :error, "Failed to submit application. Please try again.")}
         end
       else
         {:noreply, redirect(socket, external: Algora.Github.authorize_url(%{return_to: "/jobs"}))}
+      end
+    else
+      {:noreply, redirect(socket, external: Algora.Github.authorize_url(%{return_to: "/jobs"}))}
+    end
+  end
+
+  @impl true
+  def handle_event("withdraw_job", %{"job-id" => job_id}, socket) do
+    if socket.assigns[:current_user] do
+      case Jobs.withdraw_application(job_id, socket.assigns.current_user) do
+        {:ok, _application} ->
+          {:noreply,
+           socket
+           |> assign_user_applications()
+           |> put_flash(:info, "Application withdrawn successfully.")}
+
+        {:error, :not_found} ->
+          {:noreply, put_flash(socket, :error, "Application not found.")}
+
+        {:error, _reason} ->
+          {:noreply, put_flash(socket, :error, "Failed to withdraw application. Please try again.")}
       end
     else
       {:noreply, redirect(socket, external: Algora.Github.authorize_url(%{return_to: "/jobs"}))}

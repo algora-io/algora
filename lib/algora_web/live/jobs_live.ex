@@ -539,6 +539,9 @@ defmodule AlgoraWeb.JobsLive do
           {:ok, _application} ->
             {:noreply, assign_user_applications(socket)}
 
+          {:error, :email_confirmation_required} ->
+            {:noreply, put_flash(socket, :error, "Email confirmation required. Please check your email for a confirmation code.")}
+
           {:error, _changeset} ->
             {:noreply, put_flash(socket, :error, "Failed to submit application. Please try again.")}
         end

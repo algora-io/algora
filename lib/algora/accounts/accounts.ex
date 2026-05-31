@@ -617,7 +617,13 @@ defmodule Algora.Accounts do
   def get_last_context_user(nil), do: nil
 
   def get_last_context_user(%User{} = user) do
-    case last_context(user) do
+    get_context_user(user, last_context(user))
+  end
+
+  def get_context_user(nil, _context), do: nil
+
+  def get_context_user(%User{} = user, context) do
+    case context do
       "personal" ->
         user
 
@@ -630,8 +636,8 @@ defmodule Algora.Accounts do
       "repo/" <> _repo_full_name ->
         user
 
-      last_context ->
-        get_user_by_handle(last_context)
+      handle ->
+        get_user_by_handle(handle)
     end
   end
 

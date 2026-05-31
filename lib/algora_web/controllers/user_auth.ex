@@ -241,12 +241,19 @@ defmodule AlgoraWeb.UserAuth do
   def signed_in_path_from_context(org_handle), do: ~p"/#{org_handle}/dashboard"
 
   def signed_in_path(%User{} = user) do
-    signed_in_path_from_context(Accounts.last_context(user))
+    last_context = Accounts.last_context(user)
+
+    if Accounts.get_context_user(user, last_context) do
+      signed_in_path_from_context(last_context)
+    else
+      signed_in_path_from_context(Accounts.default_context())
+    end
   end
 
   def signed_in_path(conn) do
     cond do
-      last_context = get_session(conn, :last_context) ->
+      (last_context = get_session(conn, :last_context)) && conn.assigns[:current_user] &&
+          Accounts.get_context_user(conn.assigns[:current_user], last_context) ->
         signed_in_path_from_context(last_context)
 
       user = conn.assigns[:current_user] ->

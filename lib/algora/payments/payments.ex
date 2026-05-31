@@ -303,14 +303,14 @@ defmodule Algora.Payments do
     end
   end
 
-  @spec create_account_link(account :: Account.t(), base_url :: String.t()) ::
+  @spec create_account_link(account :: Account.t(), base_url :: String.t(), type :: String.t()) ::
           {:ok, PSP.account_link()} | {:error, PSP.error()}
-  def create_account_link(account, base_url) do
+  def create_account_link(account, base_url, type \\ "account_onboarding") do
     PSP.AccountLink.create(%{
       account: account.provider_id,
       refresh_url: "#{base_url}/callbacks/stripe/refresh",
       return_url: "#{base_url}/callbacks/stripe/return",
-      type: "account_onboarding"
+      type: type
     })
   end
 

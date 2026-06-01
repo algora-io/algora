@@ -41,15 +41,16 @@ defmodule Algora.Bounties.Jobs.NotifyBounty do
       """
 
       if Github.pat_enabled() do
-        with {:ok, comment} <-
-               Github.create_issue_comment(Github.pat(), ticket_ref.owner, ticket_ref.repo, ticket_ref.number, body),
-             {:ok, ticket} <-
+        with {:ok, ticket} <-
                Workspace.ensure_ticket(Github.pat(), ticket_ref.owner, ticket_ref.repo, ticket_ref.number) do
-          Workspace.create_command_response(%{
-            comment: comment,
-            command_source: command_source,
+          Workspace.ensure_command_response(%{
+            token: Github.pat(),
+            ticket_ref: ticket_ref,
             command_id: command_id,
-            ticket_id: ticket.id
+            command_type: :bounty,
+            command_source: command_source,
+            ticket: ticket,
+            body: body
           })
         end
       else

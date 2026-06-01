@@ -275,6 +275,23 @@ defmodule Algora.Payments do
 
   @spec create_account(user :: User.t(), country :: String.t()) ::
           {:ok, Account.t()} | {:error, Ecto.Changeset.t()}
+  def create_account(user, "CN") do
+    attrs = %{
+      provider: "manual",
+      provider_id: "manual_" <> Ecto.UUID.generate(),
+      type: :standard,
+      user_id: user.id,
+      country: "CN",
+      details_submitted: true,
+      charges_enabled: true,
+      payouts_enabled: true
+    }
+
+    %Account{}
+    |> Account.changeset(attrs)
+    |> Repo.insert()
+  end
+
   def create_account(user, country) do
     type = PSP.ConnectCountries.account_type(country)
 
@@ -303,14 +320,14 @@ defmodule Algora.Payments do
     end
   end
 
-  @spec create_account_link(account :: Account.t(), base_url :: String.t()) ::
+  @spec create_account_link(account :: Account.t(), base_url :: String.t(), type :: String.t()) ::
           {:ok, PSP.account_link()} | {:error, PSP.error()}
-  def create_account_link(account, base_url) do
+  def create_account_link(account, base_url, type \\ "account_onboarding") do
     PSP.AccountLink.create(%{
       account: account.provider_id,
       refresh_url: "#{base_url}/callbacks/stripe/refresh",
       return_url: "#{base_url}/callbacks/stripe/return",
-      type: "account_onboarding"
+      type: type
     })
   end
 

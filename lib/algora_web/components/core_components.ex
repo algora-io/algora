@@ -263,6 +263,14 @@ defmodule AlgoraWeb.CoreComponents do
           <div class="font-semibold">Admin</div>
         </div>
       </:link>
+      <:link :if={@current_user.id == @current_context.id && @current_user.handle} href={~p"/#{@current_user.handle}/profile"}>
+        <div class="flex items-center whitespace-nowrap">
+          <div class="mr-3 flex size-10 items-center justify-center bg-accent rounded-full">
+            <.icon name="tabler-user" class="size-6" />
+          </div>
+          <div class="font-semibold">Profile</div>
+        </div>
+      </:link>
       <:link :if={@current_user.id == @current_context.id} href={~p"/user/transactions"}>
         <div class="flex items-center whitespace-nowrap">
           <div class="mr-3 flex size-10 items-center justify-center bg-accent rounded-full">

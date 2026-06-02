@@ -293,7 +293,7 @@
         <ul role="list" class="ml-auto flex items-center gap-x-2">
           <%= for org <- @pinned_orgs do %>
             <li>
-              <.link href={"/admin/orgs/#{org.handle}"}>
+              <.link href={"/#{org.handle}/admin"}>
                 <.avatar class="w-10 h-10">
                   <.avatar_image src={org.avatar_url} />
                   <.avatar_fallback>{Algora.Util.initials(org.handle)}</.avatar_fallback>

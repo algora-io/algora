@@ -109,6 +109,10 @@ defmodule AlgoraWeb.Endpoint do
     Path.join([@subdomain_aliases[sub], conn.request_path])
   end
 
+  defp path_for_subdomain(sub, %{request_path: "/admin" <> _} = conn) when is_map_key(@candidate_aliases, sub) do
+    Path.join(["/#{@candidate_aliases[sub]}", conn.request_path])
+  end
+
   defp path_for_subdomain(sub, conn) when is_map_key(@candidate_aliases, sub) do
     Path.join(["/#{@candidate_aliases[sub]}/candidates", conn.request_path])
   end

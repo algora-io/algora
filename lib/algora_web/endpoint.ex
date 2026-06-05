@@ -73,7 +73,8 @@ defmodule AlgoraWeb.Endpoint do
     "create" => "anything",
     "lovablelabs" => "lovable",
     "textqllabs" => "textql",
-    "comfy-org" => "comfy"
+    "comfy-org" => "comfy",
+    "asi" => "airspace-intelligence"
   }
 
   # Subdomains that redirect to /challenges/:subdomain

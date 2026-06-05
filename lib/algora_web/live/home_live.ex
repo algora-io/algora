@@ -1007,10 +1007,7 @@ defmodule AlgoraWeb.HomeLive do
 
         contributions_map = %{user.id => contributions}
 
-        language_contributions_map =
-          [user.id]
-          |> Algora.Cloud.list_language_contributions_batch()
-          |> transform_language_contributions()
+        language_contributions_map = Algora.Cloud.list_language_contributions_batch([user.id])
 
         heatmaps_map =
           [user.id]
@@ -1041,47 +1038,6 @@ defmodule AlgoraWeb.HomeLive do
           tech_stack: match.job_posting.tech_stack || []
         }
     end
-  end
-
-  defp transform_language_contributions(contributions_map) do
-    Map.new(contributions_map, fn {user_id, contributions} ->
-      transformed =
-        contributions
-        |> Enum.map(fn contrib ->
-          case contrib.language do
-            "JavaScript" -> %{contrib | language: "TypeScript"}
-            "Jupyter Notebook" -> %{contrib | language: "Python"}
-            "Markdown" -> nil
-            "MDX" -> nil
-            "TeX" -> nil
-            "HTML" -> nil
-            "CSS" -> nil
-            "Sass" -> nil
-            "Nunjucks" -> nil
-            "Nushell" -> nil
-            "reStructuredText" -> nil
-            "Nix" -> nil
-            "Makefile" -> nil
-            "Emacs Lisp" -> nil
-            "Mustache" -> nil
-            _ -> contrib
-          end
-        end)
-        |> Enum.reject(&is_nil/1)
-        |> Enum.group_by(& &1.language)
-        |> Enum.map(fn {_language, contribs} ->
-          Enum.reduce(contribs, fn contrib, acc ->
-            %{
-              acc
-              | prs: acc.prs + contrib.prs,
-                percentage: Decimal.add(acc.percentage, contrib.percentage)
-            }
-          end)
-        end)
-        |> Enum.sort_by(& &1.percentage, {:desc, Decimal})
-
-      {user_id, transformed}
-    end)
   end
 
   defp build_interviews_map(matches) do

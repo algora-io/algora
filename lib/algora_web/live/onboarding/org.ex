@@ -87,10 +87,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         contributions_map = %{user.id => contributions}
 
         # Fetch language contributions for this user
-        language_contributions_map =
-          [user.id]
-          |> Algora.Cloud.list_language_contributions_batch()
-          |> transform_language_contributions()
+        language_contributions_map = Algora.Cloud.list_language_contributions_batch([user.id])
 
         # Fetch heatmap data for this user
         heatmaps_map =
@@ -123,49 +120,6 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           tech_stack: match.job_posting.tech_stack || []
         }
     end
-  end
-
-  defp transform_language_contributions(contributions_map) do
-    # Transform language contributions similar to candidates2_live.ex
-    Map.new(contributions_map, fn {user_id, contributions} ->
-      transformed =
-        contributions
-        |> Enum.map(fn contrib ->
-          case contrib.language do
-            "JavaScript" -> %{contrib | language: "TypeScript"}
-            "Jupyter Notebook" -> %{contrib | language: "Python"}
-            "Markdown" -> nil
-            "MDX" -> nil
-            "TeX" -> nil
-            "HTML" -> nil
-            "CSS" -> nil
-            "Sass" -> nil
-            "Nunjucks" -> nil
-            "Nushell" -> nil
-            "reStructuredText" -> nil
-            "Nix" -> nil
-            "Makefile" -> nil
-            "Emacs Lisp" -> nil
-            "Mustache" -> nil
-            _ -> contrib
-          end
-        end)
-        |> Enum.reject(&is_nil/1)
-        |> Enum.group_by(& &1.language)
-        |> Enum.map(fn {_language, contribs} ->
-          # Combine contributions for the same language
-          Enum.reduce(contribs, fn contrib, acc ->
-            %{
-              acc
-              | prs: acc.prs + contrib.prs,
-                percentage: Decimal.add(acc.percentage, contrib.percentage)
-            }
-          end)
-        end)
-        |> Enum.sort_by(& &1.percentage, {:desc, Decimal})
-
-      {user_id, transformed}
-    end)
   end
 
   defp build_interviews_map(matches) do

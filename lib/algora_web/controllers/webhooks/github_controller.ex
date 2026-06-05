@@ -505,7 +505,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
   end
 
   defp execute_command(%Webhook{event_action: event_action, author: author, payload: payload}, {:attempt, args})
-       when event_action in ["issue_comment.created", "issue_comment.edited"] do
+       when event_action == "issue_comment.created" do
     source_ticket_ref = %{
       owner: payload["repository"]["owner"]["login"],
       repo: payload["repository"]["name"],

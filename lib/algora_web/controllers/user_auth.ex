@@ -238,7 +238,14 @@ defmodule AlgoraWeb.UserAuth do
     end
   end
 
-  def signed_in_path_from_context(org_handle), do: ~p"/#{org_handle}/dashboard"
+  def signed_in_path_from_context(org_handle) do
+    # Handle case where last_context is an old provider_login (GitHub username)
+    # that no longer exists as a user/org handle
+    case Repo.get_by(User, handle: org_handle) do
+      nil -> ~p"/home"
+      _user_or_org -> ~p"/#{org_handle}/dashboard"
+    end
+  end
 
   def signed_in_path(%User{} = user) do
     signed_in_path_from_context(Accounts.last_context(user))

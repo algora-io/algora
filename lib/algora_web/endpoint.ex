@@ -118,12 +118,12 @@ defmodule AlgoraWeb.Endpoint do
   end
 
   defp path_for_subdomain(sub, conn) do
+    # Lower alert severity to prevent alert spamming from subdomain enumeration
+    # (bug bounty scanners, automated tools, etc.)
     case Algora.Accounts.get_user_by_handle(sub) do
-      nil ->
-        conn.request_path
-
+      nil -> conn.request_path
       _user ->
-        Algora.Activities.alert("👀 Someone is viewing https://#{sub}.algora.io", :critical)
+        Algora.Activities.alert("👀 Someone is viewing https://#{sub}.algora.io", :info)
         Path.join(["/#{sub}/candidates", conn.request_path])
     end
   end

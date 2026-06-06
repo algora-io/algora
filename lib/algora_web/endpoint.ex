@@ -128,7 +128,6 @@ defmodule AlgoraWeb.Endpoint do
         conn.request_path
 
       _user ->
-        Algora.Activities.alert("👀 Someone is viewing https://#{sub}.algora.io", :critical)
         Path.join(["/#{sub}/candidates", conn.request_path])
     end
   end

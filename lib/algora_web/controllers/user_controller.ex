@@ -22,4 +22,14 @@ defmodule AlgoraWeb.UserController do
         raise AlgoraWeb.NotFoundError
     end
   end
+
+  def profile(conn, _params) do
+    case conn.assigns[:current_user] do
+      nil ->
+        redirect(conn, to: "/auth/login")
+
+      user ->
+        redirect(conn, to: "/#{user.handle}/profile")
+    end
+  end
 end

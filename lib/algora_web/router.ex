@@ -33,6 +33,11 @@ defmodule AlgoraWeb.Router do
     plug CORSPlug, headers: ["Content-Type"]
   end
 
+  # Route redirects for common paths that don't exist at top level
+  redirect("/home", "/", :temporary)
+  redirect("/dashboard", "/", :temporary)
+  redirect("/settings", "/user/settings", :temporary)
+
   scope "/" do
     forward "/asset", AlgoraWeb.Plugs.RewriteAssetsPlug, upstream: :assets_url
     forward "/storage", AlgoraWeb.Plugs.RewriteStoragePlug, upstream: :storage_url
@@ -56,6 +61,7 @@ defmodule AlgoraWeb.Router do
     get "/auth/logout", OAuthCallbackController, :sign_out
     get "/tip", TipController, :create
     get "/preview", OrgPreviewCallbackController, :new
+    get "/profile", UserController, :profile
 
     scope "/callbacks" do
       get "/stripe/refresh", StripeCallbackController, :refresh
@@ -222,6 +228,10 @@ defmodule AlgoraWeb.Router do
 
     scope "/:handle" do
       get "/", UserController, :index
+    end
+
+    scope "/users" do
+      get "/:handle", UserController, :index
     end
   end
 end

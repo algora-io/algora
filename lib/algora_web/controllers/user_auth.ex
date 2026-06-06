@@ -229,7 +229,7 @@ defmodule AlgoraWeb.UserAuth do
 
   defp maybe_store_return_to(conn), do: conn
 
-  def signed_in_path_from_context("personal"), do: ~p"/home"
+  def signed_in_path_from_context("personal"), do: ~p"/bounties"
 
   def signed_in_path_from_context("preview/" <> ctx) do
     case String.split(ctx, "/") do

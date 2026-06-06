@@ -12,21 +12,11 @@ config :algora,
   description: "Algora connects companies and engineers for full-time and contract work",
   ecto_repos: [Algora.Repo],
   generators: [timestamp_type: :utc_datetime_usec],
-  redirects: [
-    {"/tv", "https://algora.io"},
-    {"/docs/bounties/payments", "/docs/payments"},
-    {"/sdk", "https://github.com/algora-io/sdk"},
-    {"/healthcare", "https://blog.algora.io/post/healthcare"},
-    {"/podcast", "https://www.youtube.com/@algora-io/podcasts"},
-    {"/create/org", "/onboarding/org"},
-    {"/solve", "/onboarding/dev"},
-    {"/onboarding/solver", "/onboarding/dev"},
-    {"/:org/contract/:id", "/:org/contracts/:id"},
-    {"/org/*path", "/*path"},
-    {"/@/:handle", "/:handle/profile"},
-    {"/challenges/limbo", "/challenges/turso"},
-    {"/challenges/primeintellect-ai", "/challenges/primeintellect"}
-  ]
+  redirects: [],
+  subdomain_aliases: %{},
+  candidate_aliases: %{},
+  challenge_subdomains: [],
+  ignored_subdomains: []
 
 # Configures the endpoint
 config :algora, AlgoraWeb.Endpoint,

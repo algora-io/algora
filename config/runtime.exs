@@ -20,6 +20,28 @@ if System.get_env("PHX_SERVER") do
   config :algora, AlgoraWeb.Endpoint, server: true
 end
 
+decode_json_map = fn key -> case System.get_env(key) do
+  nil -> %{}
+  json -> :json.decode(json)
+end end
+
+decode_json_list = fn key -> case System.get_env(key) do
+  nil -> []
+  json -> json |> :json.decode() |> Enum.map(&List.to_tuple/1)
+end end
+
+decode_csv = fn key -> case System.get_env(key) do
+  nil -> []
+  val -> String.split(val, ",", trim: true)
+end end
+
+config :algora,
+  redirects: decode_json_list.("REDIRECTS_JSON"),
+  subdomain_aliases: decode_json_map.("SUBDOMAIN_ALIASES_JSON"),
+  candidate_aliases: decode_json_map.("CANDIDATE_ALIASES_JSON"),
+  challenge_subdomains: decode_csv.("CHALLENGE_SUBDOMAINS"),
+  ignored_subdomains: decode_csv.("IGNORED_SUBDOMAINS")
+
 if config_env() == :prod do
   config :algora, :github,
     client_id: System.fetch_env!("GITHUB_CLIENT_ID"),

@@ -61,27 +61,9 @@ defmodule AlgoraWeb.Endpoint do
   plug Plug.MethodOverride
   plug Plug.Head
   plug Plug.Session, @session_options
+  plug AlgoraWeb.Plugs.RuntimeRedirectPlug
   plug AlgoraWeb.Router
 
-  # Subdomain aliases: subdomain → path prefix (overrides default routing)
-  @subdomain_aliases %{
-    "swift" => "/swift"
-  }
-
-  # Subdomain → org slug for /org/candidates routing
-  @candidate_aliases %{
-    "create" => "anything",
-    "lovablelabs" => "lovable",
-    "textqllabs" => "textql",
-    "comfy-org" => "comfy",
-    "asi" => "airspace-intelligence"
-  }
-
-  # Subdomains that redirect to /challenges/:subdomain
-  @challenge_subdomains ~w[clickhouse jules]
-
-  # Subdomains that should not trigger any special routing
-  @ignored_subdomains ~w[app console www sitemaps sitemap m api home ai test docs blog tv]
 
   # Legacy tRPC endpoint
   defp canonical_host(%{path_info: ["api", "trpc" | _]} = conn, _opts), do: conn
@@ -104,32 +86,37 @@ defmodule AlgoraWeb.Endpoint do
     redirect_to_canonical_host(conn, path || conn.request_path)
   end
 
-  defp path_for_subdomain(sub, _conn) when sub in @ignored_subdomains, do: nil
-
-  defp path_for_subdomain(sub, conn) when is_map_key(@subdomain_aliases, sub) do
-    Path.join([@subdomain_aliases[sub], conn.request_path])
-  end
-
-  defp path_for_subdomain(sub, %{request_path: "/admin" <> _} = conn) when is_map_key(@candidate_aliases, sub) do
-    Path.join(["/#{@candidate_aliases[sub]}", conn.request_path])
-  end
-
-  defp path_for_subdomain(sub, conn) when is_map_key(@candidate_aliases, sub) do
-    Path.join(["/#{@candidate_aliases[sub]}/candidates", conn.request_path])
-  end
-
-  defp path_for_subdomain(sub, conn) when sub in @challenge_subdomains do
-    Path.join(["/challenges/#{sub}", conn.request_path])
-  end
-
   defp path_for_subdomain(sub, conn) do
-    case Algora.Accounts.get_user_by_handle(sub) do
-      nil ->
-        conn.request_path
+    ignored = Application.get_env(:algora, :ignored_subdomains, [])
+    subdomain_aliases = Application.get_env(:algora, :subdomain_aliases, %{})
+    candidate_aliases = Application.get_env(:algora, :candidate_aliases, %{})
+    challenge_subdomains = Application.get_env(:algora, :challenge_subdomains, [])
 
-      _user ->
-        Algora.Activities.alert("👀 Someone is viewing https://#{sub}.algora.io", :critical)
-        Path.join(["/#{sub}/candidates", conn.request_path])
+    cond do
+      sub in ignored ->
+        nil
+
+      Map.has_key?(subdomain_aliases, sub) ->
+        Path.join([subdomain_aliases[sub], conn.request_path])
+
+      Map.has_key?(candidate_aliases, sub) and String.starts_with?(conn.request_path, "/admin") ->
+        Path.join(["/#{candidate_aliases[sub]}", conn.request_path])
+
+      Map.has_key?(candidate_aliases, sub) ->
+        Path.join(["/#{candidate_aliases[sub]}/candidates", conn.request_path])
+
+      sub in challenge_subdomains ->
+        Path.join(["/challenges/#{sub}", conn.request_path])
+
+      true ->
+        case Algora.Accounts.get_user_by_handle(sub) do
+          nil ->
+            conn.request_path
+
+          _user ->
+            Algora.Activities.alert("👀 Someone is viewing https://#{sub}.algora.io", :critical)
+            Path.join(["/#{sub}/candidates", conn.request_path])
+        end
     end
   end
 

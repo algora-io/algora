@@ -33,33 +33,6 @@ defmodule AlgoraWeb.Router do
     plug CORSPlug, headers: ["Content-Type"]
   end
 
-  @redirects Application.compile_env(:algora, :redirects, [])
-
-  for {from, to} <- @redirects do
-    redirect(from, to, :temporary)
-  end
-
-  redirect("/create", "/anything", :permanent)
-  redirect("/create/*path", "/anything/*path", :permanent)
-
-  redirect("/lovablelabs", "/lovable", :permanent)
-  redirect("/lovablelabs/*path", "/lovable/*path", :permanent)
-
-  redirect("/TextQLLabs", "/textql", :permanent)
-  redirect("/TextQLLabs/*path", "/textql/*path", :permanent)
-
-  redirect("/textqllabs", "/textql", :permanent)
-  redirect("/textqllabs/*path", "/textql/*path", :permanent)
-
-  redirect("/Comfy-Org", "/comfy", :permanent)
-  redirect("/Comfy-Org/*path", "/comfy/*path", :permanent)
-
-  redirect("/comfy-org", "/comfy", :permanent)
-  redirect("/comfy-org/*path", "/comfy/*path", :permanent)
-
-  redirect("/asi", "/airspace-intelligence", :permanent)
-  redirect("/asi/*path", "/airspace-intelligence/*path", :permanent)
-
   scope "/" do
     forward "/asset", AlgoraWeb.Plugs.RewriteAssetsPlug, upstream: :assets_url
     forward "/storage", AlgoraWeb.Plugs.RewriteStoragePlug, upstream: :storage_url

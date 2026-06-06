@@ -30,11 +30,13 @@ defmodule Algora.Bounties do
   @type criterion ::
           {:id, String.t()}
           | {:limit, non_neg_integer() | :infinity}
+          | {:offset, non_neg_integer()}
           | {:ticket_id, String.t()}
           | {:owner_id, String.t()}
           | {:owner_handles, [String.t()]}
           | {:status, :open | :paid}
           | {:tech_stack, [String.t()]}
+          | {:order, :date | :amount | :technology}
           | {:before, %{inserted_at: DateTime.t(), id: String.t()}}
           | {:amount_gt, Money.t()}
           | {:current_user, User.t()}
@@ -1199,6 +1201,9 @@ defmodule Algora.Bounties do
       {:limit, limit}, query ->
         from([b] in query, limit: ^limit)
 
+      {:offset, offset}, query ->
+        from([b] in query, offset: ^offset)
+
       {:ticket_id, ticket_id}, query ->
         from([b] in query, where: b.ticket_id == ^ticket_id)
 
@@ -1340,7 +1345,7 @@ defmodule Algora.Bounties do
     base_query
     |> list_bounties_query(criteria)
     # TODO: sort by b.paid_at if criteria[:status] == :paid
-    |> order_by([b], desc: b.inserted_at, desc: b.id)
+    |> order_bounties(criteria[:order])
     |> select([b, o: o, t: t, ro: ro, r: r], %{
       id: b.id,
       inserted_at: b.inserted_at,
@@ -1376,6 +1381,22 @@ defmodule Algora.Bounties do
       }
     })
     |> Repo.all()
+  end
+
+  defp order_bounties(query, :amount) do
+    order_by(query, [b], desc: fragment("amount(?)", b.amount), desc: b.inserted_at, desc: b.id)
+  end
+
+  defp order_bounties(query, :technology) do
+    order_by(query, [b, r: r],
+      asc: fragment("COALESCE(LOWER((?)[1]::text), '~')", r.tech_stack),
+      desc: b.inserted_at,
+      desc: b.id
+    )
+  end
+
+  defp order_bounties(query, _order) do
+    order_by(query, [b], desc: b.inserted_at, desc: b.id)
   end
 
   def list_tech(criteria \\ []) do

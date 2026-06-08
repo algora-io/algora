@@ -2,7 +2,6 @@ defmodule AlgoraWeb.Router do
   use AlgoraWeb, :router
 
   import AlgoraWeb.Analytics, only: [fetch_current_country: 2, fetch_current_page: 2]
-  import AlgoraWeb.RedirectPlug
   import AlgoraWeb.UserAuth, only: [fetch_current_user: 2]
 
   alias AlgoraWeb.Org.RepoNav

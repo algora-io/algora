@@ -4,7 +4,6 @@ defmodule AlgoraWeb.HomeLive do
   use LiveSvelte.Components
 
   import AlgoraWeb.Components.ModalVideo
-  import Ecto.Changeset
 
   alias Algora.Accounts
   alias Algora.Bounties

@@ -1,4 +1,4 @@
-defmodule Algora.Repo.Migrations.CreateUserTags do
+defmodule Algora.Repo.Migrations.CreateUserTagsTable do
   use Ecto.Migration
 
   @disable_ddl_transaction true

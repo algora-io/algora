@@ -40,6 +40,7 @@ config :algora,
   subdomain_aliases: decode_json_map.("SUBDOMAIN_ALIASES_JSON"),
   candidate_aliases: decode_json_map.("CANDIDATE_ALIASES_JSON"),
   challenge_subdomains: decode_csv.("CHALLENGE_SUBDOMAINS"),
+  portfolio_subdomains: decode_csv.("PORTFOLIO_SUBDOMAINS"),
   ignored_subdomains: decode_csv.("IGNORED_SUBDOMAINS")
 
 if config_env() == :prod do

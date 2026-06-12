@@ -91,6 +91,7 @@ defmodule AlgoraWeb.Endpoint do
     subdomain_aliases = Application.get_env(:algora, :subdomain_aliases, %{})
     candidate_aliases = Application.get_env(:algora, :candidate_aliases, %{})
     challenge_subdomains = Application.get_env(:algora, :challenge_subdomains, [])
+    portfolio_subdomains = Application.get_env(:algora, :portfolio_subdomains, [])
 
     cond do
       sub in ignored ->
@@ -107,6 +108,12 @@ defmodule AlgoraWeb.Endpoint do
 
       sub in challenge_subdomains ->
         Path.join(["/challenges/#{sub}", conn.request_path])
+
+      sub in portfolio_subdomains ->
+        case conn.path_info do
+          [] -> "/#{sub}/portfolio"
+          [username | rest] -> Path.join(["/#{sub}/#{username}/portfolio" | rest])
+        end
 
       true ->
         case Algora.Accounts.get_user_by_handle(sub) do

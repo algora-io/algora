@@ -1,5 +1,7 @@
 defmodule Algora.Contracts do
   @moduledoc false
+  require Logger
+
   import Ecto.Changeset
   import Ecto.Query
 

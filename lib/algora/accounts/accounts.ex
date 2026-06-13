@@ -479,10 +479,10 @@ defmodule Algora.Accounts do
       Enum.each(orgs, fn org ->
         case Organizations.create_member(org, user, :mod) do
           {:ok, _member} ->
-            Algora.Activities.alert("#{user.email} joined #{org.name}", :info)
+            Logger.info("#{user.email} joined #{org.name}")
 
           {:error, _reason} ->
-            Algora.Activities.alert("#{user.email} failed to join #{org.name}", :error)
+            Logger.error("#{user.email} failed to join #{org.name}")
         end
       end)
 

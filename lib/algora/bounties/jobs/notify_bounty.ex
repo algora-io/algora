@@ -12,7 +12,7 @@ defmodule Algora.Bounties.Jobs.NotifyBounty do
 
   @impl Oban.Worker
   def perform(%Oban.Job{args: %{"bounty_id" => bounty_id, "visibility" => "exclusive", "shared_with" => shared_with}}) do
-    Algora.Activities.alert("Notify exclusive bounty #{bounty_id} to #{inspect(shared_with)}")
+    Logger.info("Notify exclusive bounty #{bounty_id} to #{inspect(shared_with)}")
   end
 
   def perform(%Oban.Job{

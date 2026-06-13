@@ -725,7 +725,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
         case Contracts.create_contract(contract_params) do
           {:ok, contract} ->
-            Algora.Activities.alert(
+            Logger.info(
               "Contract offer from #{socket.assigns.current_org.handle} to #{socket.assigns.selected_developer.handle} for #{data.hourly_rate}/hour x #{data.hours_per_week} hours/week. ID: #{contract.id}"
             )
 

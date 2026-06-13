@@ -691,7 +691,7 @@ defmodule Algora.Payments do
       )
 
       for job <- job_postings do
-        Algora.Activities.alert("Job payment received! #{job.company_name} #{job.email} #{job.url}", :critical)
+        Logger.info("Job payment received! #{job.company_name} #{job.email} #{job.url}")
       end
 
       auto_txs =
@@ -701,9 +701,8 @@ defmodule Algora.Payments do
           manual? = tx.bounty_id in manual_bounty_ids
 
           if tx.type == :credit and manual? do
-            Algora.Activities.alert(
-              "Contract payment received. URL: #{AlgoraWeb.Endpoint.url()}/#{bounty.owner.handle}/contracts/#{bounty.id}",
-              :info
+            Logger.info(
+              "Contract payment received. URL: #{AlgoraWeb.Endpoint.url()}/#{bounty.owner.handle}/contracts/#{bounty.id}"
             )
           end
 
@@ -777,9 +776,8 @@ defmodule Algora.Payments do
       user = Repo.get_by(User, id: tx.user_id)
       bounty = Repo.get_by(Bounty, id: tx.bounty_id)
 
-      Algora.Activities.alert(
-        "Release #{amount} escrow to #{recipient.handle} for #{AlgoraWeb.Endpoint.url()}/#{user.handle}/contracts/#{bounty.id}",
-        :critical
+      Logger.info(
+        "Release #{amount} escrow to #{recipient.handle} for #{AlgoraWeb.Endpoint.url()}/#{user.handle}/contracts/#{bounty.id}"
       )
 
       debit_id = Nanoid.generate()

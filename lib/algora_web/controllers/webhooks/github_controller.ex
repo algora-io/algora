@@ -33,13 +33,11 @@ defmodule AlgoraWeb.Webhooks.GithubController do
 
       {:error, reason} ->
         Logger.error("❌ #{inspect(webhook.event_action)}: #{inspect(reason)}")
-        alert(webhook, {:error, reason})
         {:error, reason}
     end
   rescue
     error ->
       Logger.error("❌ #{inspect(webhook.event_action)}: #{inspect(error)}")
-      alert(webhook, {:error, error})
       {:error, error}
   end
 
@@ -583,9 +581,8 @@ defmodule AlgoraWeb.Webhooks.GithubController do
   defp execute_command(webhook, command) do
     github_ticket = get_github_ticket(webhook)
 
-    Algora.Activities.alert(
-      "Received unknown command: #{inspect(command)}. Ticket: #{github_ticket["html_url"]}. Hook ID: #{webhook.hook_id}",
-      :error
+    Logger.error(
+      "Received unknown command: #{inspect(command)}. Ticket: #{github_ticket["html_url"]}. Hook ID: #{webhook.hook_id}"
     )
 
     {:error, :unknown_command}
@@ -727,19 +724,6 @@ defmodule AlgoraWeb.Webhooks.GithubController do
           {:error, reason} -> {:error, reason}
         end
     end
-  end
-
-  defp alert(%Webhook{event_action: event_action} = webhook, {:error, error}) do
-    message =
-      case get_github_ticket(webhook) do
-        github_ticket when not is_nil(github_ticket) ->
-          "Error processing event: #{event_action}. Ticket: #{github_ticket["html_url"]}. Hook ID: #{webhook.hook_id}. Error: #{inspect(error)}"
-
-        _ ->
-          "Error processing event: #{event_action}. Hook ID: #{webhook.hook_id}. Error: #{inspect(error)}"
-      end
-
-    Algora.Activities.alert(message, :error)
   end
 
   defp get_github_ticket(%Webhook{event: event, payload: payload}) do

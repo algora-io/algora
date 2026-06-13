@@ -64,7 +64,6 @@ defmodule AlgoraWeb.Endpoint do
   plug AlgoraWeb.Plugs.RuntimeRedirectPlug
   plug AlgoraWeb.Router
 
-
   # Legacy tRPC endpoint
   defp canonical_host(%{path_info: ["api", "trpc" | _]} = conn, _opts), do: conn
 
@@ -117,12 +116,8 @@ defmodule AlgoraWeb.Endpoint do
 
       true ->
         case Algora.Accounts.get_user_by_handle(sub) do
-          nil ->
-            conn.request_path
-
-          _user ->
-            Algora.Activities.alert("👀 Someone is viewing https://#{sub}.algora.io", :critical)
-            Path.join(["/#{sub}/candidates", conn.request_path])
+          nil -> conn.request_path
+          _user -> Path.join(["/#{sub}/candidates", conn.request_path])
         end
     end
   end

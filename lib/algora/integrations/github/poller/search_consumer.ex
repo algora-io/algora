@@ -24,7 +24,7 @@ defmodule Algora.Github.Poller.SearchConsumer do
   end
 
   defp run_command({:tip, args}, ticket_ref, _comment) do
-    Algora.Activities.alert("Creating global tip intent for #{inspect(args[:amount])}: #{inspect(ticket_ref)}", :info)
+    Logger.info("Creating global tip intent for #{inspect(args[:amount])}: #{inspect(ticket_ref)}")
 
     Bounties.create_tip_intent(%{
       recipient: args[:recipient],
@@ -54,7 +54,7 @@ defmodule Algora.Github.Poller.SearchConsumer do
         #     _ -> :set
         #   end
 
-        Algora.Activities.alert("Creating global bounty for #{inspect(args[:amount])}: #{inspect(ticket_ref)}", :info)
+        Logger.info("Creating global bounty for #{inspect(args[:amount])}: #{inspect(ticket_ref)}")
 
         Bounties.create_bounty(
           %{
@@ -79,9 +79,8 @@ defmodule Algora.Github.Poller.SearchConsumer do
   end
 
   defp run_command(command, ticket_ref, comment) do
-    Algora.Activities.alert(
-      "Received unknown command: #{inspect(command)}. Ticket ref: #{inspect(ticket_ref)}. URL: #{comment["url"]}",
-      :error
+    Logger.error(
+      "Received unknown command: #{inspect(command)}. Ticket ref: #{inspect(ticket_ref)}. URL: #{comment["url"]}"
     )
   end
 end

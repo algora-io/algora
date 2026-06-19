@@ -1,5 +1,7 @@
 defmodule Algora.Organizations do
   @moduledoc false
+  require Logger
+
   import Ecto.Changeset
   import Ecto.Query
 
@@ -28,7 +30,7 @@ defmodule Algora.Organizations do
   end
 
   def onboard_organization(params) do
-    Algora.Activities.alert("New organization: #{inspect(params)}", :critical)
+    Logger.info("New organization: #{inspect(params)}")
 
     user = Repo.get_by(User, email: params.user.email)
 
@@ -401,12 +403,12 @@ defmodule Algora.Organizations do
       end)
     else
       {:error, error} ->
-        Algora.Activities.alert("Error initializing preview for #{repo_owner}/#{repo_name}: #{inspect(error)}", :error)
+        Logger.error("Error initializing preview for #{repo_owner}/#{repo_name}: #{inspect(error)}")
         {:error, error}
     end
   rescue
     error ->
-      Algora.Activities.alert("Error initializing preview for #{repo_owner}/#{repo_name}: #{inspect(error)}", :error)
+      Logger.error("Error initializing preview for #{repo_owner}/#{repo_name}: #{inspect(error)}")
       {:error, error}
   end
 end

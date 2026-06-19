@@ -2,7 +2,6 @@ defmodule AlgoraWeb.Challenges.ClickhouseLive do
   @moduledoc false
   use AlgoraWeb, :live_view
 
-  alias Algora.Activities
   alias Algora.Jobs
   alias AlgoraWeb.Components.Header
 
@@ -18,11 +17,7 @@ defmodule AlgoraWeb.Challenges.ClickhouseLive do
        "Contribute to ClickHouse to win interviews and bounties!"
      )
      |> assign(:page_image, "#{AlgoraWeb.Endpoint.url()}/images/challenges/clickhouse/og.png")
-     |> assign(:jobs, jobs)
-     |> assign(:show_submit_drawer, false)
-     |> assign(:repo_pr_link, "")
-     |> assign(:resume_url, "")
-     |> assign(:linkedin_url, "")}
+     |> assign(:jobs, jobs)}
   end
 
   @impl true
@@ -241,13 +236,7 @@ defmodule AlgoraWeb.Challenges.ClickhouseLive do
                     <li class="flex w-full items-start pt-2 text-left text-white">
                       <.icon name="tabler-square-rounded-number-4" class="size-8 mr-2 shrink-0" />
                       <span class="text-base font-medium leading-7">
-                        <button
-                          phx-click="open_submit_drawer"
-                          class="font-semibold text-[#ffcc00] hover:text-[#ffd700] underline transition-colors inline-flex"
-                        >
-                          Submit your work
-                        </button>
-                        by November 17, 2025, 10 AM PST
+                        Submit your work by November 17, 2025, 10 AM PST
                       </span>
                     </li>
                     <li class="flex w-full items-start pt-2 text-left text-white">
@@ -521,113 +510,6 @@ defmodule AlgoraWeb.Challenges.ClickhouseLive do
         <AlgoraWeb.Components.Footer.footer class="pt-12 md:pt-28" />
       </div>
     </div>
-
-    <.drawer
-      show={@show_submit_drawer}
-      on_cancel="close_submit_drawer"
-      direction="right"
-      class="min-w-[50vw]"
-    >
-      <.drawer_header>
-        <.drawer_title>Submit your work</.drawer_title>
-        <.drawer_description>
-          Share your work with the ClickHouse team
-        </.drawer_description>
-      </.drawer_header>
-      <.drawer_content>
-        <form phx-submit="submit_challenge" class="space-y-6">
-          <.input
-            label="Repository or PR Link"
-            type="text"
-            id="repo_pr_link"
-            name="repo_pr_link"
-            value={@repo_pr_link}
-            placeholder="https://github.com/username/repo or PR link"
-            required
-            phx-change="update_field"
-          />
-
-          <.input
-            label="Resume URL"
-            type="text"
-            id="resume_url"
-            name="resume_url"
-            value={@resume_url}
-            placeholder="https://example.com/resume.pdf"
-            phx-change="update_field"
-          />
-
-          <.input
-            label="LinkedIn URL"
-            type="text"
-            id="linkedin_url"
-            name="linkedin_url"
-            value={@linkedin_url}
-            placeholder="https://linkedin.com/in/username"
-            phx-change="update_field"
-          />
-
-          <div class="flex gap-4">
-            <.button type="button" class="flex-1" variant="outline" phx-click="close_submit_drawer">
-              Cancel
-            </.button>
-            <.button type="submit" class="flex-1">
-              Submit
-            </.button>
-          </div>
-        </form>
-      </.drawer_content>
-    </.drawer>
     """
-  end
-
-  @impl true
-  def handle_event("open_submit_drawer", _params, socket) do
-    {:noreply, assign(socket, :show_submit_drawer, true)}
-  end
-
-  @impl true
-  def handle_event("close_submit_drawer", _params, socket) do
-    {:noreply,
-     socket
-     |> assign(:show_submit_drawer, false)
-     |> assign(:repo_pr_link, "")
-     |> assign(:resume_url, "")
-     |> assign(:linkedin_url, "")}
-  end
-
-  @impl true
-  def handle_event("update_field", %{"repo_pr_link" => value}, socket) do
-    {:noreply, assign(socket, :repo_pr_link, value)}
-  end
-
-  def handle_event("update_field", %{"resume_url" => value}, socket) do
-    {:noreply, assign(socket, :resume_url, value)}
-  end
-
-  def handle_event("update_field", %{"linkedin_url" => value}, socket) do
-    {:noreply, assign(socket, :linkedin_url, value)}
-  end
-
-  @impl true
-  def handle_event("submit_challenge", params, socket) do
-    submission_data = %{
-      repo_pr_link: params["repo_pr_link"],
-      resume_url: params["resume_url"],
-      linkedin_url: params["linkedin_url"],
-      submitted_at: DateTime.to_iso8601(DateTime.utc_now()),
-      challenge: "ClickHouse Database Engineering"
-    }
-
-    json_data = Jason.encode!(submission_data, pretty: true)
-    Activities.alert("ClickHouse Challenge Submission:\n```json\n#{json_data}\n```", :critical)
-
-    {:noreply,
-     socket
-     |> assign(:show_submit_drawer, false)
-     |> assign(:repo_pr_link, "")
-     |> assign(:resume_url, "")
-     |> assign(:linkedin_url, "")
-     |> put_flash(:info, "Your submission has been received! The ClickHouse team will review it shortly.")}
   end
 end

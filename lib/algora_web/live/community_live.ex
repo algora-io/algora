@@ -1118,13 +1118,13 @@ defmodule AlgoraWeb.CommunityLive do
 
   @impl true
   def handle_event("create_bounty", %{"bounty_form" => params}, socket) do
-    Algora.Activities.alert("Bounty intent: #{inspect(params)}", :critical)
+    Logger.info("Bounty intent: #{inspect(params)}")
     {:noreply, redirect(socket, to: ~p"/auth/signup")}
   end
 
   @impl true
   def handle_event("create_tip", %{"tip_form" => params}, socket) do
-    Algora.Activities.alert("Tip intent: #{inspect(params)}", :critical)
+    Logger.info("Tip intent: #{inspect(params)}")
     {:noreply, redirect(socket, to: ~p"/auth/signup")}
   end
 

@@ -16,6 +16,7 @@ config :algora,
   subdomain_aliases: %{},
   candidate_aliases: %{},
   challenge_subdomains: [],
+  portfolio_subdomains: [],
   ignored_subdomains: []
 
 # Configures the endpoint

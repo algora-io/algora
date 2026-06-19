@@ -51,7 +51,7 @@
           </div>
           <nav class="flex flex-1 flex-col divide-y divide-border">
             <ul role="list" class="flex flex-col gap-y-6 pb-6">
-              <%= for {section, index} <- Enum.with_index(@nav) do %>
+              <%= for {section, _index} <- Enum.with_index(@nav) do %>
                 <li>
                   <%= if length(@nav) > 1 && section.title do %>
                     <div class="text-xs/6 font-semibold text-gray-400 mb-2">{section.title}</div>
@@ -127,7 +127,7 @@
       </div>
       <nav class="flex flex-1 flex-col px-6 pb-4">
         <ul role="list" class="flex flex-1 flex-col gap-y-7">
-          <%= for {section, index} <- Enum.with_index(@nav) do %>
+          <%= for {section, _index} <- Enum.with_index(@nav) do %>
             <li>
               <div class="text-xs/6 font-semibold text-gray-400">{section.title}</div>
               <ul role="list" class="-mx-2 mt-2 space-y-1">

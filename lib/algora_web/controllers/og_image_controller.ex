@@ -32,7 +32,7 @@ defmodule AlgoraWeb.OGImageController do
           else
             {:ready,
              conn
-             |> put_resp_content_type("image/png")
+             |> put_resp_content_type("image/png", nil)
              |> put_resp_header("cache-control", "public, max-age=#{max_age(path)}")
              |> send_resp(200, body)}
           end
@@ -54,7 +54,7 @@ defmodule AlgoraWeb.OGImageController do
             case take_and_upload_screenshot(path, "?token=#{token}") do
               {:ok, body} ->
                 conn
-                |> put_resp_content_type("image/png")
+                |> put_resp_content_type("image/png", nil)
                 |> put_resp_header("cache-control", "public, max-age=#{max_age(path)}")
                 |> send_resp(200, body)
 
@@ -114,7 +114,7 @@ defmodule AlgoraWeb.OGImageController do
           case take_and_upload_screenshot(path, search_params) do
             {:ok, body} ->
               conn
-              |> put_resp_content_type("image/png")
+              |> put_resp_content_type("image/png", nil)
               |> put_resp_header("cache-control", "public, max-age=#{max_age(path)}")
               |> send_resp(200, body)
 
@@ -123,7 +123,7 @@ defmodule AlgoraWeb.OGImageController do
           end
         else
           conn
-          |> put_resp_content_type("image/png")
+          |> put_resp_content_type("image/png", nil)
           |> put_resp_header("cache-control", "public, max-age=#{max_age(path)}")
           |> send_resp(200, body)
         end
@@ -132,7 +132,7 @@ defmodule AlgoraWeb.OGImageController do
         case take_and_upload_screenshot(path, search_params) do
           {:ok, body} ->
             conn
-            |> put_resp_content_type("image/png")
+            |> put_resp_content_type("image/png", nil)
             |> put_resp_header("cache-control", "public, max-age=#{max_age(path)}")
             |> send_resp(200, body)
 

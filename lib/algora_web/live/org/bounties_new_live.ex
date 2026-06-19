@@ -332,46 +332,6 @@ defmodule AlgoraWeb.Org.BountiesNewLive do
     {:noreply, socket}
   end
 
-  defp create_bounty(assigns) do
-    ~H"""
-    <div class="border ring-1 ring-transparent rounded-xl overflow-hidden">
-      <div class="bg-card/75 flex flex-col h-full p-4 rounded-xl border-t-4 sm:border-t-0 sm:border-l-4 border-emerald-400">
-        <div class="p-4 sm:p-6">
-          <div class="text-2xl font-semibold text-foreground">
-            Fund any {@org.name} issue<br class="block sm:hidden" />
-            <span class="text-success drop-shadow-[0_1px_5px_#34d39980]">
-              in seconds
-            </span>
-          </div>
-          <div class="pt-1 text-base font-medium text-muted-foreground">
-            Prioritize issues and reward contributors when work is done
-          </div>
-          <.simple_form for={@bounty_form} phx-submit="create_bounty">
-            <div class="flex flex-col gap-6 pt-6">
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <.input
-                  label="Issue URL"
-                  field={@bounty_form[:url]}
-                  placeholder={"https://github.com/#{@org.provider_login}/repo/issues/1337"}
-                />
-                <.input label="Amount" icon="tabler-currency-dollar" field={@bounty_form[:amount]} />
-              </div>
-              <p class="text-sm text-muted-foreground">
-                <.icon name="tabler-sparkles" class="size-4 text-current mr-1" /> Comment
-                <code class="px-1 py-0.5 text-success">/bounty $100</code>
-                on GitHub issues
-              </p>
-              <div class="flex justify-end gap-4">
-                <.button>Submit</.button>
-              </div>
-            </div>
-          </.simple_form>
-        </div>
-      </div>
-    </div>
-    """
-  end
-
   defp social_links do
     [
       {:website, "tabler-world"},

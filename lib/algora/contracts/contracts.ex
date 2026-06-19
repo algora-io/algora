@@ -1,5 +1,7 @@
 defmodule Algora.Contracts do
   @moduledoc false
+  require Logger
+
   import Ecto.Changeset
   import Ecto.Query
 
@@ -41,11 +43,11 @@ defmodule Algora.Contracts do
   def create_contract(attrs) do
     case %Contract{} |> Contract.changeset(attrs) |> Repo.insert() do
       {:ok, contract} ->
-        Activities.alert("Contract created: #{contract.id}", :info)
+        Logger.info("Contract created: #{contract.id}")
         {:ok, contract}
 
       {:error, error} ->
-        Activities.alert("Error creating contract: #{inspect(error)}", :error)
+        Logger.error("Error creating contract: #{inspect(error)}")
         {:error, error}
     end
   end

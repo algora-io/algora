@@ -428,6 +428,17 @@ defmodule Algora.Settings do
     set("org_feed:#{org_handle}", %{"entries" => entries})
   end
 
+  def get_github_repo_allowlist do
+    case get("github_repo_allowlist") do
+      %{"owners" => owners} when is_list(owners) -> owners
+      _ -> []
+    end
+  end
+
+  def set_github_repo_allowlist(owners) when is_list(owners) do
+    set("github_repo_allowlist", %{"owners" => owners})
+  end
+
   defp format_timestamp(datetime) do
     datetime
     |> DateTime.to_string()

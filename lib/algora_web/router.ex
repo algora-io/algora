@@ -2,7 +2,6 @@ defmodule AlgoraWeb.Router do
   use AlgoraWeb, :router
 
   import AlgoraWeb.Analytics, only: [fetch_current_country: 2, fetch_current_page: 2]
-  import AlgoraWeb.RedirectPlug
   import AlgoraWeb.UserAuth, only: [fetch_current_user: 2]
 
   alias AlgoraWeb.Org.RepoNav
@@ -40,10 +39,6 @@ defmodule AlgoraWeb.Router do
     forward "/ingest/static", AlgoraWeb.Plugs.RewriteIngestStaticPlug, upstream: :ingest_static_url
 
     forward "/ingest", AlgoraWeb.Plugs.RewriteIngestPlug, upstream: :ingest_url
-
-    forward "/observe/script.js", AlgoraWeb.Plugs.RewriteObserveJSPlug, upstream: "https://plausible.io/js/script.js"
-
-    forward "/observe/event", AlgoraWeb.Plugs.RewriteObserveEventPlug, upstream: "https://plausible.io/api/event"
 
     get "/health", AlgoraWeb.HealthController, :index
   end
@@ -187,8 +182,6 @@ defmodule AlgoraWeb.Router do
         live "/team", Org.TeamLive, :index
         live "/leaderboard", Org.LeaderboardLive, :index
         live "/jobs", Org.JobsLive, :index
-        live "/jobs/:id", Org.JobLive
-        live "/jobs/:id/:tab", Org.JobLive
       end
 
       live_session :org_admin,

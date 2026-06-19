@@ -53,12 +53,11 @@
     <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
     <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}>
     </script>
-    <script
-      defer
-      src={~p"/observe/script.js"}
-      data-api={~p"/observe/event"}
-      data-domain={URI.parse(AlgoraWeb.Endpoint.url()).host}
-    >
+    <script async src="https://plausible.io/js/pa-K2_PRCUzHnAdNVAIVrSLM.js">
+    </script>
+    <script>
+      window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+      plausible.init()
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

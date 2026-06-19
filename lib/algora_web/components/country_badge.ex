@@ -22,7 +22,7 @@ defmodule AlgoraWeb.Components.CountryBadge do
       |> assign(:badge_class, badge_size_class(assigns.size))
 
     ~H"""
-    <.badge :if={@flag} variant={@variant} class={["gap-1", @badge_class]} title={@state} {@rest}>
+    <.badge :if={@flag} variant={@variant} class={classes(["gap-1", @badge_class])} title={@state} {@rest}>
       <span>{@flag}</span>
       <span class="line-clamp-1">{@label}</span>
       <span :if={@count} class="text-muted-foreground">({@count})</span>

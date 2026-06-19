@@ -23,6 +23,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
 
   def process_delivery(webhook) do
     with :ok <- ensure_human_author(webhook),
+         :ok <- ensure_repo_allowed(webhook),
          {:ok, commands} <- process_commands(webhook),
          :ok <- process_event(webhook, commands) do
       Logger.debug("✅ #{inspect(webhook.event_action)}")
@@ -31,15 +32,16 @@ defmodule AlgoraWeb.Webhooks.GithubController do
       {:error, :bot_event} ->
         :ok
 
+      {:error, :repo_not_allowed} ->
+        :ok
+
       {:error, reason} ->
         Logger.error("❌ #{inspect(webhook.event_action)}: #{inspect(reason)}")
-        alert(webhook, {:error, reason})
         {:error, reason}
     end
   rescue
     error ->
       Logger.error("❌ #{inspect(webhook.event_action)}: #{inspect(error)}")
-      alert(webhook, {:error, error})
       {:error, error}
   end
 
@@ -47,6 +49,22 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     case author do
       %{"type" => "Bot"} -> {:error, :bot_event}
       _ -> :ok
+    end
+  end
+
+  defp ensure_repo_allowed(%Webhook{payload: payload}) do
+    owner = get_in(payload, ["repository", "owner", "login"])
+
+    if is_nil(owner) do
+      {:error, :repo_not_allowed}
+    else
+      allowlist = Algora.Settings.get_github_repo_allowlist()
+
+      if allowlist == [] or String.downcase(owner) in Enum.map(allowlist, &String.downcase/1) do
+        :ok
+      else
+        {:error, :repo_not_allowed}
+      end
     end
   end
 
@@ -583,9 +601,8 @@ defmodule AlgoraWeb.Webhooks.GithubController do
   defp execute_command(webhook, command) do
     github_ticket = get_github_ticket(webhook)
 
-    Algora.Activities.alert(
-      "Received unknown command: #{inspect(command)}. Ticket: #{github_ticket["html_url"]}. Hook ID: #{webhook.hook_id}",
-      :error
+    Logger.error(
+      "Received unknown command: #{inspect(command)}. Ticket: #{github_ticket["html_url"]}. Hook ID: #{webhook.hook_id}"
     )
 
     {:error, :unknown_command}
@@ -727,19 +744,6 @@ defmodule AlgoraWeb.Webhooks.GithubController do
           {:error, reason} -> {:error, reason}
         end
     end
-  end
-
-  defp alert(%Webhook{event_action: event_action} = webhook, {:error, error}) do
-    message =
-      case get_github_ticket(webhook) do
-        github_ticket when not is_nil(github_ticket) ->
-          "Error processing event: #{event_action}. Ticket: #{github_ticket["html_url"]}. Hook ID: #{webhook.hook_id}. Error: #{inspect(error)}"
-
-        _ ->
-          "Error processing event: #{event_action}. Hook ID: #{webhook.hook_id}. Error: #{inspect(error)}"
-      end
-
-    Algora.Activities.alert(message, :error)
   end
 
   defp get_github_ticket(%Webhook{event: event, payload: payload}) do

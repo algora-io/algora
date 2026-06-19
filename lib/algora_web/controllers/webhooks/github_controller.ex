@@ -23,12 +23,16 @@ defmodule AlgoraWeb.Webhooks.GithubController do
 
   def process_delivery(webhook) do
     with :ok <- ensure_human_author(webhook),
+         :ok <- ensure_repo_allowed(webhook),
          {:ok, commands} <- process_commands(webhook),
          :ok <- process_event(webhook, commands) do
       Logger.debug("✅ #{inspect(webhook.event_action)}")
       :ok
     else
       {:error, :bot_event} ->
+        :ok
+
+      {:error, :repo_not_allowed} ->
         :ok
 
       {:error, reason} ->
@@ -45,6 +49,22 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     case author do
       %{"type" => "Bot"} -> {:error, :bot_event}
       _ -> :ok
+    end
+  end
+
+  defp ensure_repo_allowed(%Webhook{payload: payload}) do
+    owner = get_in(payload, ["repository", "owner", "login"])
+
+    if is_nil(owner) do
+      {:error, :repo_not_allowed}
+    else
+      allowlist = Algora.Settings.get_github_repo_allowlist()
+
+      if allowlist == [] or String.downcase(owner) in Enum.map(allowlist, &String.downcase/1) do
+        :ok
+      else
+        {:error, :repo_not_allowed}
+      end
     end
   end
 

@@ -94,6 +94,7 @@ defmodule AlgoraWeb.Forms.ContractForm do
                         :if={contractor.provider_login}
                         href={"https://github.com/#{contractor.provider_login}"}
                         target="_blank"
+                        rel="noopener"
                         class="flex items-center gap-1 hover:underline"
                       >
                         <.icon name="github" class="h-4 w-4" />
@@ -103,6 +104,7 @@ defmodule AlgoraWeb.Forms.ContractForm do
                         :if={contractor.provider_meta["twitter_handle"]}
                         href={"https://x.com/#{contractor.provider_meta["twitter_handle"]}"}
                         target="_blank"
+                        rel="noopener"
                         class="flex items-center gap-1 hover:underline"
                       >
                         <.icon name="tabler-brand-x" class="h-4 w-4" />

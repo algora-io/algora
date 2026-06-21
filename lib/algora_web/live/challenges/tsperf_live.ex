@@ -235,6 +235,46 @@ defmodule AlgoraWeb.Challenges.TsperfLive do
                     />
                   </a>
                 </div>
+                <div class="mx-auto flex max-w-xl flex-col gap-4 px-4 pt-4 sm:flex-row">
+                  <a
+                    rel="noopener noreferrer"
+                    class="group relative flex min-h-44 flex-1 flex-col overflow-hidden rounded-xl border border-white/15 bg-white/[3%] p-5 text-white shadow-[0px_3.26536px_2.21381px_0px_rgba(30,_27,_75,_0.08),_0px_7.84712px_5.32008px_0px_rgba(30,_27,_75,_0.11),_0px_14.77543px_10.01724px_0px_rgba(30,_27,_75,_0.14)] hover:border-white/30 hover:no-underline"
+                    href="https://github.com/o1TIMI/tsperf-inspector"
+                  >
+                    <div class="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,_rgba(110,231,183,0.16)_0%,_rgba(99,102,241,0.12)_38%,_rgba(5,2,23,0)_72%)]">
+                    </div>
+                    <div class="relative">
+                      <div class="text-sm font-bold uppercase tracking-wider text-emerald-200">
+                        Community submission
+                      </div>
+                      <h3 class="mt-3 text-2xl font-black leading-none tracking-tighter">
+                        TSPerf Inspector
+                      </h3>
+                      <p class="mt-3 text-sm font-medium leading-6 text-indigo-100/80">
+                        MIT licensed VSCode extension for inspecting TypeScript type resolution time and structural complexity.
+                      </p>
+                    </div>
+                  </a>
+                  <a
+                    rel="noopener noreferrer"
+                    class="group relative flex min-h-44 flex-1 flex-col overflow-hidden rounded-xl border border-white/15 bg-white/[3%] p-5 text-white shadow-[0px_3.26536px_2.21381px_0px_rgba(30,_27,_75,_0.08),_0px_7.84712px_5.32008px_0px_rgba(30,_27,_75,_0.11),_0px_14.77543px_10.01724px_0px_rgba(30,_27,_75,_0.14)] hover:border-white/30 hover:no-underline"
+                    href="https://github.com/o1TIMI/tsperf-inspector/releases/tag/v0.1.0"
+                  >
+                    <div class="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,_rgba(45,212,191,0.16)_0%,_rgba(79,70,229,0.12)_38%,_rgba(5,2,23,0)_72%)]">
+                    </div>
+                    <div class="relative">
+                      <div class="text-sm font-bold uppercase tracking-wider text-emerald-200">
+                        Installable release
+                      </div>
+                      <h3 class="mt-3 text-2xl font-black leading-none tracking-tighter">
+                        v0.1.0 VSIX
+                      </h3>
+                      <p class="mt-3 text-sm font-medium leading-6 text-indigo-100/80">
+                        Packaged extension release with local verification from <code>npm test</code> and <code>vsce package</code>.
+                      </p>
+                    </div>
+                  </a>
+                </div>
                 <div class="px-4 pt-8">
                   <button
                     type="button"

@@ -128,6 +128,11 @@ defmodule AlgoraWeb.SignInLive do
               <.button :if={!@secret} href={@authorize_url} class="w-full py-5">
                 <Logos.github class="size-5 mr-2 -ml-1 shrink-0" /> Continue with GitHub
               </.button>
+              <p :if={!@secret} class="mt-3 text-xs/5 text-muted-foreground">
+                GitHub calls this authorization "act on your behalf." Algora uses it to identify
+                your GitHub account and perform actions you request, like claiming bounties.
+                Repository access is granted separately when you install the GitHub App.
+              </p>
             </div>
 
             <.simple_form

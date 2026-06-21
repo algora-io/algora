@@ -241,7 +241,25 @@ defmodule AlgoraWeb.UserAuth do
   def signed_in_path_from_context(org_handle), do: ~p"/#{org_handle}/dashboard"
 
   def signed_in_path(%User{} = user) do
-    signed_in_path_from_context(Accounts.last_context(user))
+    case Accounts.last_context(user) do
+      "personal" ->
+        signed_in_path_from_context("personal")
+
+      "preview/" <> _ = preview_context ->
+        signed_in_path_from_context(preview_context)
+
+      context ->
+        case Accounts.get_user_by_handle(context) do
+          %User{type: :organization, handle: handle} ->
+            signed_in_path_from_context(handle)
+
+          %User{type: :individual} ->
+            signed_in_path_from_context("personal")
+
+          nil ->
+            signed_in_path_from_context(Accounts.default_context())
+        end
+    end
   end
 
   def signed_in_path(conn) do

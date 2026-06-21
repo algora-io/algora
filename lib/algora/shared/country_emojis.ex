@@ -264,4 +264,11 @@ defmodule Algora.Misc.CountryEmojis do
   def get(country_code, default \\ "🌎") do
     Map.get(@country_emojis, country_code, default)
   end
+
+  def from_flag(emoji) do
+    @country_emojis |> Enum.find(fn {_, v} -> v == emoji end) |> case do
+      {code, _} -> {:ok, code}
+      nil -> :error
+    end
+  end
 end

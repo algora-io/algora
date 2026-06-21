@@ -19,7 +19,7 @@ config :algora, AlgoraWeb.Endpoint,
   secret_key_base: "M+VvXlmVxm5bl+xdXcImlpFP7Kob6M/sYK4SoaPgF0Spteix9NWw7WimjBQolY6V",
   server: false
 
-config :algora, Oban, queues: false, plugins: false
+config :algora, Oban, testing: :manual
 
 # In test we don't send emails.
 config :algora, Algora.Mailer, adapter: Swoosh.Adapters.Test
@@ -65,6 +65,8 @@ config :algora, :local_store,
   salt: System.get_env("LOCAL_STORE_SALT", "algora-local-store")
 
 config :algora, :discord, webhook_url: System.get_env("DISCORD_WEBHOOK_URL")
+
+config :algora, :start_cloud_workers, false
 
 config :algora,
   plausible_embed_url: System.get_env("PLAUSIBLE_EMBED_URL"),

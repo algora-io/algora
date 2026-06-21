@@ -173,7 +173,7 @@ defmodule AlgoraWeb.Org.HomeLive do
                             class="flex shrink-0 items-center gap-1 whitespace-nowrap text-sm text-muted-foreground"
                           >
                             <.icon name="tabler-chevron-right" class="h-4 w-4" />
-                            <.link href={Bounty.url(bounty)} class="hover:underline">
+                            <.link href={Bounty.url(bounty)} target="_blank" rel="noopener noreferrer" class="hover:underline">
                               {Bounty.path(bounty)}
                             </.link>
                           </div>

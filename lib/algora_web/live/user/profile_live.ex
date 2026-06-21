@@ -234,28 +234,22 @@ defmodule AlgoraWeb.User.ProfileLive do
               <% end %>
             <% else %>
               <h2 class="text-lg font-semibold">Top Contributions</h2>
-              <%= for {owner, contributions} <- aggregate_contributions(@contributions) do %>
+              <%= for {repo, contributions} <- aggregate_contributions(@contributions) do %>
                 <.link
-                  href={"https://github.com/#{owner.provider_login}/#{List.first(contributions).repository.name}/pulls?q=author%3A#{@user.provider_login}+is%3Amerged+"}
+                  href={"https://github.com/#{repo.user.provider_login}/#{repo.name}/pulls?q=author%3A#{@user.provider_login}+is%3Amerged+"}
                   target="_blank"
                   rel="noopener"
                   class="flex items-center gap-3 rounded-xl pr-2 bg-card/50 border border-border/50 hover:border-border transition-all group"
                 >
                   <img
-                    src={owner.avatar_url}
+                    src={repo.user.avatar_url}
                     class="h-12 w-12 rounded-xl rounded-r-none  transition-all"
-                    alt={owner.name}
+                    alt={repo.user.name}
                   />
                   <div class="w-full flex flex-col text-xs font-medium gap-0.5">
                     <span class="flex items-start justify-between gap-5">
-                      <span class="font-display">
-                        {if owner.type == :organization do
-                          owner.name
-                        else
-                          List.first(contributions).repository.name
-                        end}
-                      </span>
-                      <%= if tech = List.first(List.first(contributions).repository.tech_stack) do %>
+                      <span class="font-display">{repo.name}</span>
+                      <%= if tech = List.first(repo.tech_stack) do %>
                         <.tech_badge
                           variant="ghost"
                           class="saturate-0 text-[11px] group-hover:saturate-100 transition-all"
@@ -267,7 +261,7 @@ defmodule AlgoraWeb.User.ProfileLive do
                       <span class="flex items-center text-amber-300 text-xs">
                         <.icon name="tabler-star-filled" class="h-4 w-4 mr-1" />
                         {Algora.Util.format_number_compact(
-                          max(owner.stargazers_count, total_stars(contributions))
+                          max(repo.user.stargazers_count, total_stars(contributions))
                         )}
                       </span>
                       <span class="flex items-center text-purple-400 text-xs">
@@ -327,11 +321,11 @@ defmodule AlgoraWeb.User.ProfileLive do
   end
 
   defp aggregate_contributions(contributions) do
-    groups = Enum.group_by(contributions, fn c -> c.repository.user end)
+    groups = Enum.group_by(contributions, fn c -> c.repository.id end)
 
     contributions
-    |> Enum.map(fn c -> {c.repository.user, groups[c.repository.user]} end)
-    |> Enum.uniq_by(fn {owner, _} -> owner.id end)
+    |> Enum.map(fn c -> {c.repository, groups[c.repository.id]} end)
+    |> Enum.uniq_by(fn {repo, _} -> repo.id end)
   end
 
   defp total_stars(contributions) do

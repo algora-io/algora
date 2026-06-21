@@ -18,7 +18,7 @@ defmodule AlgoraWeb.User.SettingsLive do
           <.card_title>Account</.card_title>
         </.card_header>
         <.card_content>
-          <.simple_form for={@form} phx-change="validate" phx-submit="save">
+          <.simple_form for={@form} phx-change="validate" phx-submit="save" phx-debounce="blur">
             <div class="flex flex-col gap-6">
               <div class="flex flex-col gap-2">
                 <.input field={@form[:handle]} label="Handle" />
@@ -45,7 +45,7 @@ defmodule AlgoraWeb.User.SettingsLive do
           <.card_title>Public Profile</.card_title>
         </.card_header>
         <.card_content>
-          <.simple_form for={@form} phx-change="validate" phx-submit="save">
+          <.simple_form for={@form} phx-change="validate" phx-submit="save" phx-debounce="blur">
             <div class="flex flex-col gap-6">
               <.input field={@form[:display_name]} label="Name" />
               <.input field={@form[:bio]} type="textarea" label="Bio" />
@@ -83,7 +83,16 @@ defmodule AlgoraWeb.User.SettingsLive do
       |> User.settings_changeset(params)
       |> Map.put(:action, :validate)
 
-    {:noreply, assign_form(socket, changeset)}
+    socket = assign_form(socket, changeset)
+
+    if changeset.valid? do
+      case Accounts.update_settings(socket.assigns.current_user, params) do
+        {:ok, user} -> {:noreply, assign(socket, current_user: user)}
+        {:error, save_changeset} -> {:noreply, assign_form(socket, save_changeset)}
+      end
+    else
+      {:noreply, socket}
+    end
   end
 
   def handle_event("save", %{"user" => params}, socket) do

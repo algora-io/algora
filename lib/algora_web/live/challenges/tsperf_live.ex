@@ -207,7 +207,7 @@ defmodule AlgoraWeb.Challenges.TsperfLive do
               </section>
               <section class="my-24 md:my-36">
                 <h2 class="flex justify-center text-4xl font-black leading-none tracking-tighter mix-blend-exclusion md:text-7xl">
-                  Submissions
+                  🎉 Winner 🎉
                 </h2>
                 <div class="mx-auto flex flex-col items-start justify-center gap-4 px-4 pt-6 sm:flex-row md:pt-12">
                   <a
@@ -235,64 +235,13 @@ defmodule AlgoraWeb.Challenges.TsperfLive do
                     />
                   </a>
                 </div>
-                <div class="px-4 pt-8">
-                  <button
-                    type="button"
-                    aria-haspopup="dialog"
-                    aria-expanded="false"
-                    aria-controls="radix-:Reaf6:"
-                    data-state="closed"
-                    class="group relative mx-auto flex aspect-[1200/600] w-full max-w-xl flex-1 flex-col overflow-hidden rounded-xl border-2 border-solid border-white p-4 text-left transition-all md:p-6"
-                    style="box-shadow:0px 3.26536px 2.21381px 0px rgba(30, 27, 75, 0.08), 0px 7.84712px 5.32008px 0px rgba(30, 27, 75, 0.11), 0px 14.77543px 10.01724px 0px rgba(30, 27, 75, 0.14), 0px 26.35684px 17.86905px 0px rgba(30, 27, 75, 0.16), 0px 49.29758px 33.42209px 0px rgba(30, 27, 75, 0.19), 0px 118px 80px 0px rgba(30, 27, 75, 0.27)"
-                  >
-                    <div class="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,_#cbcee1_0%,_#65688b_28%,_#050217_63.02%,_#050217_100%)] opacity-100 transition-opacity group-hover:opacity-75">
-                    </div>
-                    <div
-                      class="absolute inset-0 bg-cover bg-center opacity-100 mix-blend-overlay"
-                      style="background-image:url(/images/challenges/solve.png)"
-                    >
-                    </div>
-                    <div
-                      class="absolute inset-0 opacity-50 mix-blend-overlay"
-                      style="background:url(/images/grid.png)"
-                    >
-                    </div>
-                    <div class="relative flex h-full flex-col">
-                      <h3 class="!mt-0 mb-12 text-3xl font-black leading-none tracking-tighter md:text-6xl">
-                        Submit a solution
-                      </h3>
-                      <div class="mt-auto flex items-center">
-                        <div class="mr-1 font-bold uppercase tracking-wider transition-all group-hover:mr-3">
-                          Get started
-                        </div>
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="24"
-                          height="24"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          class="h-5 w-5 text-indigo-100"
-                          aria-hidden="true"
-                        >
-                          <path d="M5 12l14 0"></path>
-                          <path d="M13 18l6 -6"></path>
-                          <path d="M13 6l6 6"></path>
-                        </svg>
-                      </div>
-                    </div>
-                  </button>
-                </div>
               </section>
               <section class="mx-auto my-24 max-w-7xl md:my-36">
                 <h2 class="flex justify-center text-4xl font-black leading-none tracking-tighter mix-blend-exclusion md:text-7xl">
                   Livestreams
                 </h2>
                 <div class="mx-auto grid gap-6 px-6 sm:grid-cols-2 lg:px-8">
-                  <a class="block pt-6 md:pt-12" href="https://tv.algora.io/typeholes/9472">
+                  <a class="block pt-6 md:pt-12" href="https://www.youtube.com/watch?v=4EqW3ofz2bo">
                     <div class="relative z-30 mx-auto max-w-7xl">
                       <div class="relative mx-auto">
                         <div class="group/card h-full border border-white/10 bg-white/[2%] bg-gradient-to-br from-white/[2%] via-white/[2%] to-white/[2%] md:gap-8 group relative flex-1 overflow-hidden rounded-xl bg-cover shadow-[0px_3.26536px_2.21381px_0px_rgba(69,_10,_10,_0.08),_0px_7.84712px_5.32008px_0px_rgba(69,_10,_10,_0.11),_0px_14.77543px_10.01724px_0px_rgba(69,_10,_10,_0.14),_0px_26.35684px_17.86905px_0px_rgba(69,_10,_10,_0.16),_0px_49.29758px_33.42209px_0px_rgba(69,_10,_10,_0.19),_0px_118px_80px_0px_rgba(69,_10,_10,_0.27)] ring-2 ring-red-500 hover:no-underline">
@@ -303,7 +252,7 @@ defmodule AlgoraWeb.Challenges.TsperfLive do
                               <div class="h-2 w-2 rounded-full bg-green-400"></div>
                             </div>
                             <div class="flex items-center justify-center">
-                              <div class="text-xs text-gray-500">tv.algora.io</div>
+                              <div class="text-xs text-gray-500">youtube.com</div>
                             </div>
                             <div></div>
                           </div>
@@ -320,7 +269,7 @@ defmodule AlgoraWeb.Challenges.TsperfLive do
                       </div>
                     </div>
                   </a>
-                  <a class="block pt-6 md:pt-12" href="https://tv.algora.io/danielroe/9476">
+                  <a class="block pt-6 md:pt-12" href="https://www.youtube.com/watch?v=wmFKc5X12Jg">
                     <div class="relative z-30 mx-auto max-w-7xl">
                       <div class="relative mx-auto">
                         <div class="group/card h-full border border-white/10 bg-white/[2%] bg-gradient-to-br from-white/[2%] via-white/[2%] to-white/[2%] md:gap-8 group relative flex-1 overflow-hidden rounded-xl bg-cover shadow-[0px_3.26536px_2.21381px_0px_rgba(69,_10,_10,_0.08),_0px_7.84712px_5.32008px_0px_rgba(69,_10,_10,_0.11),_0px_14.77543px_10.01724px_0px_rgba(69,_10,_10,_0.14),_0px_26.35684px_17.86905px_0px_rgba(69,_10,_10,_0.16),_0px_49.29758px_33.42209px_0px_rgba(69,_10,_10,_0.19),_0px_118px_80px_0px_rgba(69,_10,_10,_0.27)] ring-2 ring-red-500 hover:no-underline">
@@ -331,7 +280,7 @@ defmodule AlgoraWeb.Challenges.TsperfLive do
                               <div class="h-2 w-2 rounded-full bg-green-400"></div>
                             </div>
                             <div class="flex items-center justify-center">
-                              <div class="text-xs text-gray-500">tv.algora.io</div>
+                              <div class="text-xs text-gray-500">youtube.com</div>
                             </div>
                             <div></div>
                           </div>

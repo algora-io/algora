@@ -12,8 +12,8 @@
 #   - Ex: hexpm/elixir:1.18.1-erlang-27.2-debian-bookworm-20241223-slim
 #
 ARG ELIXIR_VERSION=1.18.1
-ARG OTP_VERSION=27.2
-ARG DEBIAN_VERSION=bookworm-20241223-slim
+ARG OTP_VERSION=27.3.4.6
+ARG DEBIAN_VERSION=bookworm-20260610-slim
 ARG NODE_VERSION=23-bookworm-slim
 
 ARG BUILDER_IMAGE="hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-debian-${DEBIAN_VERSION}"

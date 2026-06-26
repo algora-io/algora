@@ -1183,17 +1183,21 @@ defmodule Algora.Workspace do
       # Update all users that were queried from Cloud API to mark them as synced
       users_map = Enum.group_by(users, & &1.provider_login)
 
-      Enum.each(users_without_contributions, fn provider_login ->
-        case users_map[provider_login] do
-          [user] ->
-            user
-            |> Ecto.Changeset.change(%{repo_contributions_synced: true})
-            |> Repo.update()
+      user_ids_to_update =
+        Enum.reduce(users_without_contributions, [], fn provider_login, acc ->
+          case users_map[provider_login] do
+            [user] ->
+              [user.id | acc]
 
-          _ ->
-            Logger.warning("User not found for marking as synced: #{provider_login}")
-        end
-      end)
+            _ ->
+              Logger.warning("User not found for marking as synced: #{provider_login}")
+              acc
+          end
+        end)
+
+      if not Enum.empty?(user_ids_to_update) do
+        Repo.update_all(from(u in User, where: u.id in ^user_ids_to_update), set: [repo_contributions_synced: true])
+      end
     end
 
     :ok

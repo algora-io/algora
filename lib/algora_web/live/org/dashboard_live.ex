@@ -1378,7 +1378,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
             </.button>
             <%!-- <.dropdown_menu>
               <.dropdown_menu_trigger>
-                <.button variant="ghost" size="icon">
+                <.button variant="ghost" size="icon" aria-label="Open menu">
                   <.icon name="tabler-dots" class="h-4 w-4" />
                 </.button>
               </.dropdown_menu_trigger>
@@ -1572,7 +1572,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                 <h2 class="text-lg font-semibold">Algora Founders</h2>
               </div>
             </div>
-            <.button variant="ghost" size="icon" phx-click="close_chat">
+            <.button variant="ghost" size="icon" phx-click="close_chat" aria-label="Close chat">
               <.icon name="tabler-x" class="h-4 w-4" />
             </.button>
           </div>
@@ -1644,12 +1644,13 @@ defmodule AlgoraWeb.Org.DashboardLive do
                     size="icon-sm"
                     phx-hook="EmojiPicker"
                     id="emoji-trigger"
+                    aria-label="Add emoji"
                   >
                     <.icon name="tabler-mood-smile" class="h-4 w-4" />
                   </.button>
                 </div>
               </div>
-              <.button type="submit" size="icon">
+              <.button type="submit" size="icon" aria-label="Send message">
                 <.icon name="tabler-send" class="h-4 w-4" />
               </.button>
             </form>

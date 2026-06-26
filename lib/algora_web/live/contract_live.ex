@@ -738,12 +738,13 @@ defmodule AlgoraWeb.ContractLive do
                   size="icon-sm"
                   phx-hook="EmojiPicker"
                   id="emoji-trigger"
+                  aria-label="Add emoji"
                 >
                   <.icon name="tabler-mood-smile" class="h-4 w-4" />
                 </.button>
               </div>
             </div>
-            <.button type="submit" size="icon">
+            <.button type="submit" size="icon" aria-label="Send message">
               <.icon name="tabler-send" class="h-4 w-4" />
             </.button>
           </form>

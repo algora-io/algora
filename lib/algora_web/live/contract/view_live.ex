@@ -181,7 +181,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
 
                                 <.dropdown_menu>
                                   <.dropdown_menu_trigger>
-                                    <.button variant="ghost" size="icon">
+                                    <.button variant="ghost" size="icon" aria-label="Open menu">
                                       <.icon name="tabler-dots-vertical" class="h-4 w-4" />
                                     </.button>
                                   </.dropdown_menu_trigger>
@@ -428,12 +428,13 @@ defmodule AlgoraWeb.Contract.ViewLive do
                   size="icon-sm"
                   phx-hook="EmojiPicker"
                   id="emoji-trigger"
+                  aria-label="Add emoji"
                 >
                   <.icon name="tabler-mood-smile" class="h-4 w-4" />
                 </.button>
               </div>
             </div>
-            <.button type="submit" size="icon">
+            <.button type="submit" size="icon" aria-label="Send message">
               <.icon name="tabler-send" class="h-4 w-4" />
             </.button>
           </form>

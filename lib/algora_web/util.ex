@@ -45,6 +45,15 @@ defmodule AlgoraWeb.Util do
     |> JS.add_class(opts[:to], to: "[#{attr}='#{eq}']")
   end
 
+  def get_ip(%Plug.Conn{} = conn) do
+    import Plug.Conn
+
+    case get_req_header(conn, "x-forwarded-for") do
+      [value | _] -> value |> String.split(",") |> List.first() |> String.trim()
+      [] -> conn.remote_ip |> :inet.ntoa() |> to_string()
+    end
+  end
+
   def get_ip(socket) do
     socket
     |> Phoenix.LiveView.get_connect_info(:x_headers)

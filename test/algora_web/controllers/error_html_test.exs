@@ -8,6 +8,10 @@ defmodule AlgoraWeb.ErrorHTMLTest do
     assert render_to_string(AlgoraWeb.ErrorHTML, "404", "html", []) =~ "could not be found"
   end
 
+  test "renders 429.html" do
+    assert render_to_string(AlgoraWeb.ErrorHTML, "429", "html", []) =~ "Too Many Requests"
+  end
+
   test "renders 500.html" do
     assert render_to_string(AlgoraWeb.ErrorHTML, "500", "html", []) =~ "Internal Server Error"
   end

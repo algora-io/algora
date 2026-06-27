@@ -6,7 +6,10 @@ defmodule AlgoraWeb.ErrorJSONTest do
   end
 
   test "renders 500" do
-    assert AlgoraWeb.ErrorJSON.render("500.json", %{}) ==
-             %{errors: %{detail: "Internal Server Error"}}
+    assert AlgoraWeb.ErrorJSON.render("500.json", %{}) == %{errors: %{detail: "Internal Server Error"}}
+  end
+
+  test "renders 429" do
+    assert AlgoraWeb.ErrorJSON.render("429.json", %{}) == %{errors: %{detail: "Too Many Requests"}}
   end
 end

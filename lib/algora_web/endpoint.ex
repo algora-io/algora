@@ -6,6 +6,8 @@ defmodule AlgoraWeb.Endpoint do
   # Set :encryption_salt if you would also like to encrypt it.
   alias AlgoraWeb.Plugs.CanonicalHostPlug
 
+  require Algora.Cloud
+
   @session_options [
     store: :cookie,
     key: "_algora_key",
@@ -46,6 +48,7 @@ defmodule AlgoraWeb.Endpoint do
 
   plug Plug.RequestId
   plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint]
+  Algora.Cloud.plug_cloud_plugs()
 
   plug Stripe.WebhookPlug,
     at: "/webhooks/stripe",

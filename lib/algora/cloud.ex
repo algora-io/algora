@@ -94,6 +94,10 @@ defmodule Algora.Cloud do
     call(AlgoraCloud, :start, [], [])
   end
 
+  def plugs do
+    call(AlgoraCloud, :plugs, [], [])
+  end
+
   def token! do
     call(AlgoraCloud, :token!, [], nil)
   end
@@ -128,6 +132,16 @@ defmodule Algora.Cloud do
     if Code.ensure_loaded?(module) do
       quote do
         use unquote(quoted_module), unquote(opts)
+      end
+    end
+  end
+
+  defmacro plug_cloud_plugs do
+    plugs = call(AlgoraCloud, :plugs, [], [])
+
+    for plug_module <- plugs do
+      quote do
+        plug unquote(plug_module)
       end
     end
   end

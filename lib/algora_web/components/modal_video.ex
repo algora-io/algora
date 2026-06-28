@@ -33,8 +33,8 @@ defmodule AlgoraWeb.Components.ModalVideo do
     >
       <img src={@poster} alt={@alt} class="object-cover w-full h-full" loading={@loading} />
       <div class="absolute inset-0 flex items-center justify-center">
-        <div class="size-10 sm:size-16 rounded-full bg-black/50 flex items-center justify-center group-hover:bg-black/70 transition-colors">
-          <.icon name="tabler-player-play-filled" class="size-5 sm:size-8 text-white" />
+        <div class="size-10 rounded-full bg-black/50 flex items-center justify-center group-hover:bg-black/70 transition-colors">
+          <.icon name="tabler-player-play-filled" class="size-4 text-white" />
         </div>
       </div>
     </div>

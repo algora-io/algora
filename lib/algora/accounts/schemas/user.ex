@@ -134,6 +134,7 @@ defmodule Algora.Accounts.User do
     field :location_iso_lvl4, :string
     field :grad_year, :integer
 
+    field :emails, {:array, :string}
     field :email_recipients, {:array, :map}, default: []
     field :language_contributions_synced, :boolean, default: false
     field :repo_contributions_synced, :boolean, default: false

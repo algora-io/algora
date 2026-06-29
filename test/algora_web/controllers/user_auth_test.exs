@@ -143,4 +143,11 @@ defmodule AlgoraWeb.UserAuthTest do
       assert result == id
     end
   end
+
+  describe "signed_in_path/1" do
+    test "routes personal context users to the authenticated bounties page" do
+      assert UserAuth.signed_in_path_from_context("personal") == "/bounties"
+      assert UserAuth.signed_in_path_from_context("preview/bad/context") == "/bounties"
+    end
+  end
 end

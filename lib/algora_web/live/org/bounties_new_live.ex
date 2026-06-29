@@ -9,14 +9,17 @@ defmodule AlgoraWeb.Org.BountiesNewLive do
   alias Algora.Bounties
   alias Algora.Bounties.Bounty
   alias Algora.Github
+  alias Algora.Organizations.Member
   alias Algora.Payments
   alias AlgoraWeb.Forms.BountyForm
+  alias AlgoraWeb.OrgAuth
 
   require Logger
 
   @impl true
   def mount(_params, _session, socket) do
     org = socket.assigns.current_org
+    current_user_role = OrgAuth.get_user_role(socket.assigns[:current_user], org)
 
     open_bounties =
       Bounties.list_bounties(
@@ -50,6 +53,7 @@ defmodule AlgoraWeb.Org.BountiesNewLive do
     socket =
       socket
       |> assign(:org, org)
+      |> assign(:current_user_role, current_user_role)
       |> assign(:has_fresh_token?, Accounts.has_fresh_token?(socket.assigns.current_user))
       |> assign(:oauth_url, Github.authorize_url(%{socket_id: socket.id}))
       |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
@@ -128,8 +132,8 @@ defmodule AlgoraWeb.Org.BountiesNewLive do
           />
         </div>
 
-        <.section>
-          <!-- {create_bounty(assigns)} -->
+        <.section :if={Member.can_create_bounty?(@current_user_role)}>
+          {create_bounty(assigns)}
         </.section>
       </div>
 
@@ -286,44 +290,56 @@ defmodule AlgoraWeb.Org.BountiesNewLive do
 
   @impl true
   def handle_event("create_bounty" = event, %{"bounty_form" => params} = unsigned_params, socket) do
-    if socket.assigns.has_fresh_token? do
-      changeset = %BountyForm{} |> BountyForm.changeset(params) |> Map.put(:action, :validate)
+    cond do
+      Member.can_create_bounty?(socket.assigns.current_user_role) ->
+        if socket.assigns.has_fresh_token? do
+          changeset = %BountyForm{} |> BountyForm.changeset(params) |> Map.put(:action, :validate)
 
-      amount = get_field(changeset, :amount)
-      ticket_ref = get_field(changeset, :ticket_ref)
+          amount = get_field(changeset, :amount)
+          ticket_ref = get_field(changeset, :ticket_ref)
 
-      with %{valid?: true} <- changeset,
-           {:ok, _bounty} <-
-             Bounties.create_bounty(
-               %{
-                 creator: socket.assigns.current_user,
-                 owner: socket.assigns.current_context,
-                 amount: amount,
-                 ticket_ref: %{
-                   owner: ticket_ref.owner,
-                   repo: ticket_ref.repo,
-                   number: ticket_ref.number
-                 }
-               },
-               visibility: get_field(changeset, :visibility),
-               shared_with: get_field(changeset, :shared_with)
-             ) do
-        {:noreply, put_flash(socket, :info, "Bounty created")}
-      else
-        %{valid?: false} ->
-          {:noreply, assign(socket, :bounty_form, to_form(changeset))}
+          with %{valid?: true} <- changeset,
+               {:ok, _bounty} <-
+                 Bounties.create_bounty(
+                   %{
+                     creator: socket.assigns.current_user,
+                     owner: socket.assigns.current_context,
+                     amount: amount,
+                     ticket_ref: %{
+                       owner: ticket_ref.owner,
+                       repo: ticket_ref.repo,
+                       number: ticket_ref.number
+                     }
+                   },
+                   visibility: get_field(changeset, :visibility),
+                   shared_with: get_field(changeset, :shared_with)
+                 ) do
+            {:noreply, put_flash(socket, :info, "Bounty created")}
+          else
+            %{valid?: false} ->
+              {:noreply, assign(socket, :bounty_form, to_form(changeset))}
 
-        {:error, :already_exists} ->
-          {:noreply, put_flash(socket, :warning, "You already have a bounty for this ticket")}
+            {:error, :already_exists} ->
+              {:noreply, put_flash(socket, :warning, "You already have a bounty for this ticket")}
 
-        {:error, _reason} ->
-          {:noreply, put_flash(socket, :error, "Something went wrong")}
-      end
-    else
-      {:noreply,
-       socket
-       |> assign(:pending_action, {event, unsigned_params})
-       |> push_event("open_popup", %{url: socket.assigns.oauth_url})}
+            {:error, _reason} ->
+              {:noreply, put_flash(socket, :error, "Something went wrong")}
+          end
+        else
+          {:noreply,
+           socket
+           |> assign(:pending_action, {event, unsigned_params})
+           |> push_event("open_popup", %{url: socket.assigns.oauth_url})}
+        end
+
+      is_nil(socket.assigns.current_user) ->
+        {:noreply,
+         redirect(socket,
+           to: ~p"/auth/login?#{%{return_to: ~p"/#{socket.assigns.current_org.handle}/bounties/new"}}"
+         )}
+
+      true ->
+        {:noreply, put_flash(socket, :error, "You are not authorized to create bounties")}
     end
   end
 

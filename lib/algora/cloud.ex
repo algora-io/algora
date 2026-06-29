@@ -1,6 +1,10 @@
 defmodule Algora.Cloud do
   @moduledoc false
 
+  alias Algora.Repo
+  alias Algora.Accounts.User
+  alias Algora.Matches.JobMatch
+
   def top_contributions(github_handles) do
     call(AlgoraCloud, :top_contributions, [github_handles], [])
   end
@@ -46,9 +50,18 @@ defmodule Algora.Cloud do
   end
 
   def notify_match(attrs) do
-    # call(AlgoraCloud.Talent.Jobs.SendJobMatchEmail, :send, [attrs])
-    match = Algora.Repo.get_by(Algora.Matches.JobMatch, user_id: attrs.user_id, job_posting_id: attrs.job_posting_id)
-    call(AlgoraCloud.EmailScheduler, :schedule_email, [:job_drip, match.id], {:ok, :skipped})
+    match = Repo.get_by(JobMatch, user_id: attrs.user_id, job_posting_id: attrs.job_posting_id)
+
+    if match && !user_opted_out?(match.user_id) do
+      call(AlgoraCloud.EmailScheduler, :schedule_email, [:job_drip, match.id], {:ok, :skipped})
+    else
+      {:ok, :skipped}
+    end
+  end
+
+  defp user_opted_out?(user_id) do
+    user = Repo.get(User, user_id)
+    user && user.opt_out_algora
   end
 
   def notify_candidate_like(_attrs) do

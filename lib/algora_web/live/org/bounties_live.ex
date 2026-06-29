@@ -221,6 +221,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
                     </td>
                     <td class="[&:has([role=checkbox])]:pr-0 p-4 align-middle">
                       <div class="flex items-center justify-end gap-2">
+                        <%= if @current_user_role in [:admin, :mod] do %>
                         <.button
                           phx-click="edit-bounty-amount"
                           phx-value-id={bounty.id}
@@ -237,6 +238,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
                         >
                           Delete
                         </.button>
+                        <% end %>
                       </div>
                     </td>
                   </tr>

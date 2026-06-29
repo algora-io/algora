@@ -36,7 +36,7 @@ defmodule AlgoraWeb.Org.JobsLive do
       } />
       <div class={
         classes([
-          "mx-auto max-w-6xl px-4 md:px-6 lg:px-8",
+          "mx-auto max-w-7xl px-4 md:px-6 lg:px-8",
           if(!@current_user, do: "py-8", else: "py-4 md:py-6 lg:py-8")
         ])
       }>
@@ -79,7 +79,7 @@ defmodule AlgoraWeb.Org.JobsLive do
             Engineering at {@current_org.name}
           </h2>
           <p class="pt-1 font-medium text-base text-muted-foreground">
-            Open engineering positions at {@current_org.name}
+            {@current_org.bio}
           </p>
           <div class="pt-2 flex gap-2 items-center justify-center">
             <%= for {platform, icon} <- social_icons(),
@@ -124,7 +124,6 @@ defmodule AlgoraWeb.Org.JobsLive do
               </.card_header>
             </.card>
           <% else %>
-            <h2 class="text-sm font-semibold uppercase text-muted-foreground">Open positions</h2>
             <.card class="mt-4 flex flex-col p-6">
               <div class="grid gap-8">
                 <%= for job <- @jobs do %>

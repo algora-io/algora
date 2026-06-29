@@ -16,6 +16,7 @@ erl_crash.dump
 
 # Static artifacts
 node_modules
+lib/algora_cloud/pyscripts
 
 # Env files
 .env
@@ -27,7 +28,9 @@ node_modules
 # Local files
 /tmp
 /.local
+/.lexical
 /priv/cache
+/priv/github
 *.patch
 /.fly
 /xref*

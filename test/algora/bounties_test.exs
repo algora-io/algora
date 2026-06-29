@@ -658,6 +658,46 @@ defmodule Algora.BountiesTest do
       assert Enum.any?(bounties, &(&1.status == :paid))
       refute Enum.any?(bounties, &(&1.status == :cancelled))
     end
+
+    test "tech stack filter excludes visible bounties from other stacks" do
+      viewer = insert!(:user)
+      featured_owner = insert!(:user, featured: true)
+      private_owner = insert!(:user)
+
+      svelte_repo = insert!(:repository, user: featured_owner, tech_stack: ["Svelte"])
+      rust_repo = insert!(:repository, user: private_owner, tech_stack: ["Rust"])
+
+      svelte_ticket = insert!(:ticket, repository: svelte_repo)
+      rust_ticket = insert!(:ticket, repository: rust_repo)
+
+      svelte_bounty =
+        insert!(:bounty,
+          status: :open,
+          visibility: :public,
+          ticket: svelte_ticket,
+          owner: featured_owner
+        )
+
+      rust_bounty =
+        insert!(:bounty,
+          status: :open,
+          visibility: :exclusive,
+          shared_with: [viewer.id],
+          ticket: rust_ticket,
+          owner: private_owner
+        )
+
+      bounties =
+        Bounties.list_bounties(
+          status: :open,
+          current_user: viewer,
+          tech_stack: ["svelte"],
+          limit: :infinity
+        )
+
+      assert Enum.any?(bounties, &(&1.id == svelte_bounty.id))
+      refute Enum.any?(bounties, &(&1.id == rust_bounty.id))
+    end
   end
 
   describe "list_claims/1" do

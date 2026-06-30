@@ -6,6 +6,7 @@
 app = 'algora'
 primary_region = 'iad'
 kill_signal = 'SIGTERM'
+kill_timeout = 120
 
 [build]
 

@@ -70,6 +70,7 @@ defmodule AlgoraWeb.Router do
     live_session :authenticated,
       layout: {AlgoraWeb.Layouts, :user},
       on_mount: [{AlgoraWeb.UserAuth, :ensure_authenticated}, Nav] do
+      live "/home", User.DashboardLive, :index
       live "/user/transactions", User.TransactionsLive, :index
       live "/user/settings", User.SettingsLive, :edit
       live "/user/installations", User.InstallationsLive, :index

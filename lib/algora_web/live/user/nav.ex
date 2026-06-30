@@ -47,6 +47,24 @@ defmodule AlgoraWeb.User.Nav do
   def assign_nav_items(%{assigns: %{current_user: nil}} = socket, _mode), do: socket
 
   def assign_nav_items(socket, :default) do
+   nav = [
+      %{
+        title: nil,
+        items: [
+          %{label: "Dashboard", icon: "tabler-layout-dashboard", href: ~p"/home", tab: :dashboard},
+          %{label: "Bounties", icon: "tabler-diamond", href: ~p"/bounties", tab: :bounties},
+          %{label: "Projects", icon: "tabler-building", href: ~p"/projects", tab: :projects},
+          %{label: "Transactions", icon: "tabler-receipt", href: ~p"/user/transactions", tab: :transactions},
+          %{label: "Settings", icon: "tabler-settings", href: ~p"/user/settings", tab: :settings},
+          %{label: "Installations", icon: "tabler-plug", href: ~p"/user/installations", tab: :installations}
+        ]
+      }
+    ]
+
+    assign(socket, :nav, nav)
+  end
+
+  def assign_nav_items(socket, :viewer) do
     assign(socket, :nav, [])
   end
 end

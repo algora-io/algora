@@ -16,7 +16,7 @@ defmodule AlgoraWeb.Components.Footer do
 
       <div class={
         classes([
-          "relative mx-auto max-w-7xl px-6 lg:px-8 border-t border-white/10 pt-16",
+          "relative mx-auto container px-6 lg:px-8 border-t border-white/10 pt-16",
           @class
         ])
       }>

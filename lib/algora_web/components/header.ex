@@ -67,7 +67,7 @@ defmodule AlgoraWeb.Components.Header do
             <.icon name="tabler-phone" class="size-5 shrink-0" />
             <span class="ml-1 shrink-0 font-medium">1-650-420-2207</span>
           </.link>
-          <.link
+          <%!-- <.link
             :if={Algora.Stargazer.count()}
             class="group w-fit outline-none items-center hidden lg:flex"
             target="_blank"
@@ -80,20 +80,25 @@ defmodule AlgoraWeb.Components.Header do
                   name="github"
                   class="mr-0.5 h-5 shrink-0 justify-start text-foreground/80 group-hover:text-foreground"
                 />
-                <%!-- <span class="hidden xl:block text-foreground/80 group-hover:text-foreground">
-                  Star
-                </span> --%>
                 <span class="font-semibold text-muted-foreground flex items-center gap-1">
                   {Algora.Util.format_number_compact(Algora.Stargazer.count())
                   |> String.replace("k", "K")}
-                  <%!-- <.icon name="tabler-star-filled" class="h-3 w-3 shrink-0" /> --%>
                 </span>
               </div>
             </div>
-          </.link>
-          <.button navigate={~p"/auth/login"} variant="subtle" class="font-semibold">
-            Sign in
+          </.link> --%>
+          <.button
+            href={AlgoraWeb.Constants.get(:calendar_url)}
+            rel="noopener"
+            target="_blank"
+            variant="subtle"
+            class="font-semibold"
+          >
+            Schedule a call
           </.button>
+          <%!-- <.button navigate={~p"/auth/login"} variant="subtle" class="font-semibold">
+            Sign in
+          </.button> --%>
           <%!-- <.button navigate={~p"/auth/signup"} variant="subtle" class="font-semibold">
             Sign up
           </.button> --%>
@@ -173,9 +178,9 @@ defmodule AlgoraWeb.Components.Header do
                     <.icon name="tabler-star-filled" class="h-3 w-3 shrink-0" />
                   </span>
                 </.button>
-                <.button navigate={~p"/auth/login"} class="w-full">
+                <%!-- <.button navigate={~p"/auth/login"} class="w-full">
                   Sign in
-                </.button>
+                </.button> --%>
               </div>
               <div class="py-6 space-y-8">
                 <div>

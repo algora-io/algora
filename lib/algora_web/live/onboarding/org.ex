@@ -195,8 +195,8 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         </div>
       </header>
 
-      <div class="flex-1 p-4 md:py-4 flex xitems-center justify-center overflow-hidden max-w-[88rem] w-full mx-auto">
-        <div class="w-full flex flex-col lg:flex-row gap-6 lg:gap-12 xitems-center px-2">
+      <div class="flex-1 p-4 md:py-4 lg:py-12 flex items-center justify-center overflow-hidden max-w-[88rem] w-full mx-auto">
+        <div class="w-full flex flex-col lg:flex-row gap-6 lg:gap-12 items-center px-2">
           <div class="shrink-0 w-full lg:w-[32%] text-left">
             <.form for={@form} phx-submit="submit" class="flex flex-col gap-4">
               <div>
@@ -345,13 +345,18 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             :if={length(@candidates_data) > 0}
             class="shrink-0 flex flex-col gap-3 w-full lg:w-[68%] lg:pr-12"
           >
-            <div id="candidate-carousel-org" phx-hook="CandidateCarousel" class="relative w-full">
+            <div
+              id="candidate-carousel-org"
+              phx-hook="CandidateCarousel"
+              phx-update="ignore"
+              class="relative w-full"
+            >
               <%= for {candidate_data, index} <- Enum.with_index(@candidates_data) do %>
                 <div
                   data-carousel-item={index}
                   class={"transition-opacity duration-500 #{if index == 0, do: "opacity-100", else: "opacity-0 absolute inset-0"}"}
                 >
-                  <Algora.Cloud.candidate_card {Map.merge(candidate_data, %{anonymize: true, root_class: "h-[40rem] lg:h-[36rem]", fade_to_black?: false, tech_stack: [], hide_badges?: true, hide_scrollbars?: true})} />
+                  <Algora.Cloud.candidate_card {Map.merge(candidate_data, %{anonymize: true, root_class: "h-[33rem] lg:h-[39rem]", fade_to_black?: false, tech_stack: [], hide_badges?: true, hide_scrollbars?: true})} />
                 </div>
               <% end %>
             </div>

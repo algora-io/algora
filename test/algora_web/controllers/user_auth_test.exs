@@ -1,6 +1,8 @@
 defmodule AlgoraWeb.UserAuthTest do
   use AlgoraWeb.ConnCase
 
+  import Algora.Factory
+
   alias AlgoraWeb.UserAuth
 
   describe "verify_login_code/2" do
@@ -141,6 +143,21 @@ defmodule AlgoraWeb.UserAuthTest do
 
       assert {:ok, result} = UserAuth.verify_preview_code(padded_code, id)
       assert result == id
+    end
+  end
+
+  describe "signed_in_path/1" do
+    test "falls back to /home when last_context points to a missing handle" do
+      user = insert!(:user, handle: "zhravan", last_context: "shravan20")
+
+      assert UserAuth.signed_in_path(user) == "/home"
+    end
+
+    test "routes org contexts to the org dashboard" do
+      org = insert!(:organization, handle: "acme")
+      user = insert!(:user, last_context: org.handle)
+
+      assert UserAuth.signed_in_path(user) == "/acme/dashboard"
     end
   end
 end

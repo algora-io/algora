@@ -56,16 +56,26 @@ defmodule Algora.Activities do
   }
 
   @table_from_schema Map.new(@schema_from_table, &{elem(&1, 1), elem(&1, 0)})
+  @schema_from_table_by_name Map.new(@schema_from_table, fn {table, schema} ->
+                               {Atom.to_string(table), schema}
+                             end)
+  @table_from_schema_by_name Map.new(@table_from_schema, fn {schema, table} ->
+                               {Atom.to_string(schema), table}
+                             end)
   @tables Map.keys(@schema_from_table)
   @user_attributes Map.keys(@table_from_user_relation)
 
-  def schema_from_table(name) when is_binary(name), do: name |> String.to_atom() |> schema_from_table()
+  def schema_from_table(name) when is_binary(name) do
+    Map.fetch!(@schema_from_table_by_name, name)
+  end
 
   def schema_from_table(name) when is_atom(name) do
     Map.fetch!(@schema_from_table, name)
   end
 
-  def table_from_schema(name) when is_binary(name), do: name |> String.to_atom() |> table_from_schema()
+  def table_from_schema(name) when is_binary(name) do
+    Map.fetch!(@table_from_schema_by_name, name)
+  end
 
   def table_from_schema(name) when is_atom(name) do
     Map.fetch!(@table_from_schema, name)

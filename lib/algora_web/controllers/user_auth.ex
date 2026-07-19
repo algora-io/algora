@@ -229,12 +229,12 @@ defmodule AlgoraWeb.UserAuth do
 
   defp maybe_store_return_to(conn), do: conn
 
-  def signed_in_path_from_context("personal"), do: ~p"/home"
+  def signed_in_path_from_context("personal"), do: ~p"/bounties"
 
   def signed_in_path_from_context("preview/" <> ctx) do
     case String.split(ctx, "/") do
       [_id, repo_owner, repo_name] -> ~p"/go/#{repo_owner}/#{repo_name}"
-      _ -> ~p"/home"
+      _ -> ~p"/bounties"
     end
   end
 
@@ -343,7 +343,7 @@ defmodule AlgoraWeb.UserAuth do
   def login_path(email, token, return_to),
     do: ~p"/callbacks/email/oauth?email=#{email}&token=#{token}&return_to=#{return_to}"
 
-  def generate_login_path(email, return_to \\ nil), do: login_path(email, generate_login_code(email), return_to)
+  def generate_login_path(email, return_to \ nil), do: login_path(email, generate_login_code(email), return_to)
 
   def generate_totp do
     secret = NimbleTOTP.secret()

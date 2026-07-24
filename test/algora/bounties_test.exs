@@ -658,6 +658,21 @@ defmodule Algora.BountiesTest do
       assert Enum.any?(bounties, &(&1.status == :paid))
       refute Enum.any?(bounties, &(&1.status == :cancelled))
     end
+
+    test "filters bounties at or below the max amount", %{ticket: ticket} do
+      lower_bounty = insert!(:bounty, amount: ~M[100]usd, ticket: ticket, owner: insert!(:user))
+      max_bounty = insert!(:bounty, amount: ~M[250]usd, ticket: ticket, owner: insert!(:user))
+      higher_bounty = insert!(:bounty, amount: ~M[500]usd, ticket: ticket, owner: insert!(:user))
+
+      bounty_ids =
+        [amount_lt: ~M[250]usd, limit: :infinity]
+        |> Bounties.list_bounties()
+        |> Enum.map(& &1.id)
+
+      assert lower_bounty.id in bounty_ids
+      assert max_bounty.id in bounty_ids
+      refute higher_bounty.id in bounty_ids
+    end
   end
 
   describe "list_claims/1" do

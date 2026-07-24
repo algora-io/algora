@@ -37,6 +37,7 @@ defmodule Algora.Bounties do
           | {:tech_stack, [String.t()]}
           | {:before, %{inserted_at: DateTime.t(), id: String.t()}}
           | {:amount_gt, Money.t()}
+          | {:amount_lt, Money.t()}
           | {:current_user, User.t()}
 
   def broadcast do
@@ -1278,6 +1279,18 @@ defmodule Algora.Bounties do
                 b.amount,
                 ^to_string(min_amount.currency),
                 ^min_amount.amount
+              )
+        )
+
+      {:amount_lt, max_amount}, query ->
+        from([b] in query,
+          where:
+            b.visibility == :exclusive or
+              fragment(
+                "?::money_with_currency <= (?, ?)::money_with_currency",
+                b.amount,
+                ^to_string(max_amount.currency),
+                ^max_amount.amount
               )
         )
 

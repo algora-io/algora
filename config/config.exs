@@ -27,6 +27,7 @@ config :algora, AlgoraWeb.Endpoint,
     formats: [html: AlgoraWeb.ErrorHTML, json: AlgoraWeb.ErrorJSON],
     layout: false
   ],
+  drainer: [shutdown: 30_000, check_interval: 1_000],
   pubsub_server: Algora.PubSub,
   live_view: [signing_salt: "lTPawhId"]
 

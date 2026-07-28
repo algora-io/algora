@@ -5,6 +5,14 @@ defmodule AlgoraWeb.UserController do
   alias Algora.Repo
 
   def index(conn, %{"handle" => handle}) do
+    redirect_to_handle(conn, handle)
+  end
+
+  def profile(conn, %{"handle" => handle}) do
+    redirect_to_handle(conn, handle)
+  end
+
+  defp redirect_to_handle(conn, handle) do
     user = Repo.get_by(User, handle: handle)
 
     case user do

@@ -172,6 +172,7 @@ input:-webkit-autofill:active {
 
 @layer base {
   :root {
+    color-scheme: light;
     --background: 255 0% 95%;
     --foreground: 255 0% 0%;
     --card: 255 0% 90%;
@@ -231,6 +232,7 @@ input:-webkit-autofill:active {
     --radius: 0.5rem;
   }
   .dark {
+    color-scheme: dark;
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
     --card: 240 10% 3.9%;

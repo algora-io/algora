@@ -8,6 +8,7 @@ const fs = require("fs");
 const colors = require("tailwindcss/colors");
 
 module.exports = {
+  darkMode: "class",
   content: [
     "./js/**/*.js",
     "./js/**/*.ts",

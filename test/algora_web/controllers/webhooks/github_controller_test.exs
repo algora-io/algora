@@ -163,6 +163,34 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       assert Money.equal?(Repo.one(Bounty).amount, ~M[200]usd)
     end
 
+    test "does not enqueue another bounty response when editing unchanged bounty comment text", ctx do
+      comment_id = :rand.uniform(1000)
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :repo_admin,
+          body: "/bounty $100",
+          params: %{"comment" => %{"id" => comment_id}}
+        }
+      ])
+
+      assert Money.equal?(Repo.one(Bounty).amount, ~M[100]usd)
+      assert [_job] = all_enqueued(worker: NotifyBounty)
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.edited",
+          user_type: :repo_admin,
+          body: "/bounty $100\n\nAdding extra details without changing the bounty.",
+          params: %{"comment" => %{"id" => comment_id}}
+        }
+      ])
+
+      assert Money.equal?(Repo.one(Bounty).amount, ~M[100]usd)
+      assert [_job] = all_enqueued(worker: NotifyBounty)
+    end
+
     test "overrides bounty amount when creating a new bounty comment", ctx do
       comment_id = :rand.uniform(1000)
 

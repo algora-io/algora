@@ -109,6 +109,15 @@ defmodule AlgoraWeb.OrgsLive do
                           <span class="line-clamp-3 pt-2 text-xs text-gray-300 sm:text-sm">
                             {org.bio}
                           </span>
+
+                          <div
+                            :if={display_tech_stack(org.tech_stack) != []}
+                            class="flex flex-wrap items-center justify-center gap-1.5 pt-3"
+                          >
+                            <%= for tech <- display_tech_stack(org.tech_stack) do %>
+                              <.tech_badge tech={tech} size="sm" />
+                            <% end %>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -137,4 +146,12 @@ defmodule AlgoraWeb.OrgsLive do
   end
 
   defp page_size, do: 9
+
+  defp display_tech_stack(tech_stack) do
+    tech_stack
+    |> List.wrap()
+    |> Enum.map(&String.trim/1)
+    |> Enum.reject(&(&1 == ""))
+    |> Enum.take(4)
+  end
 end

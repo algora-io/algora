@@ -658,6 +658,74 @@ defmodule Algora.BountiesTest do
       assert Enum.any?(bounties, &(&1.status == :paid))
       refute Enum.any?(bounties, &(&1.status == :cancelled))
     end
+
+    test "includes active attempt and pull request activity", %{ticket: ticket} do
+      bounty =
+        insert!(:bounty,
+          status: :open,
+          ticket: ticket,
+          owner: insert!(:user),
+          inserted_at: ~U[2024-01-01 12:00:00Z]
+        )
+
+      insert!(:attempt,
+        ticket: ticket,
+        user: insert!(:user),
+        status: :active,
+        inserted_at: ~U[2024-01-02 12:00:00Z]
+      )
+
+      insert!(:attempt,
+        ticket: ticket,
+        user: insert!(:user),
+        status: :inactive,
+        inserted_at: ~U[2024-01-03 12:00:00Z]
+      )
+
+      pull_request = insert!(:ticket, type: :pull_request, number: 101, repository: ticket.repository)
+
+      insert!(:claim,
+        target: ticket,
+        source: pull_request,
+        user: insert!(:user),
+        status: :pending,
+        group_id: "group-101",
+        inserted_at: ~U[2024-01-04 12:00:00Z]
+      )
+
+      insert!(:claim,
+        target: ticket,
+        source: pull_request,
+        user: insert!(:user),
+        status: :pending,
+        group_id: "group-101",
+        inserted_at: ~U[2024-01-05 12:00:00Z]
+      )
+
+      insert!(:claim,
+        target: ticket,
+        source: insert!(:ticket, type: :pull_request, number: 102, repository: ticket.repository),
+        user: insert!(:user),
+        status: :cancelled,
+        group_id: "group-102",
+        inserted_at: ~U[2024-01-06 12:00:00Z]
+      )
+
+      insert!(:claim,
+        target: ticket,
+        user: insert!(:user),
+        type: :review,
+        status: :pending,
+        group_id: "group-review",
+        inserted_at: ~U[2024-01-07 12:00:00Z]
+      )
+
+      [listed_bounty] = Bounties.list_bounties(id: bounty.id)
+
+      assert listed_bounty.activity.active_attempt_count == 1
+      assert listed_bounty.activity.pull_request_count == 1
+      assert NaiveDateTime.truncate(listed_bounty.activity.last_activity_at, :second) == ~N[2024-01-05 12:00:00]
+    end
   end
 
   describe "list_claims/1" do

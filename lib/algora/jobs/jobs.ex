@@ -213,6 +213,13 @@ defmodule Algora.Jobs do
     end
   end
 
+  def withdraw_application(job_id, user) do
+    case JobApplication |> where([a], a.job_id == ^job_id and a.user_id == ^user.id) |> Repo.one() do
+      nil -> {:error, :not_found}
+      application -> Repo.delete(application)
+    end
+  end
+
   def list_user_applications(user) do
     JobApplication
     |> where([a], a.user_id == ^user.id)

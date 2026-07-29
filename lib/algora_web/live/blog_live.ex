@@ -76,6 +76,7 @@ defmodule AlgoraWeb.BlogLive do
                       <.link
                         href={"https://github.com/#{author}"}
                         target="_blank"
+                        rel="noopener"
                         class="text-sm hover:text-muted-foreground/80"
                       >
                         @{author}

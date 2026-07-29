@@ -276,6 +276,7 @@ defmodule AlgoraWeb.Challenges.GolemLive do
                       <span class="text-base font-medium leading-7">
                         1.<a
                           target="_blank"
+                          rel="noopener"
                           class="font-semibold text-white underline"
                           href="https://share.hsforms.com/1R0dEmbBARr2VZeL9D5aExQ444dk"
                         >Sign up for the launch event</a>
@@ -286,6 +287,7 @@ defmodule AlgoraWeb.Challenges.GolemLive do
                       <span class="text-base font-medium leading-7">
                         2.<a
                           target="_blank"
+                          rel="noopener"
                           class="font-semibold text-white underline"
                           href="https://github.com/golemcloud/golem/issues/1004"
                         >Learn about the task and requirements</a>

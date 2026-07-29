@@ -11,6 +11,7 @@ defmodule AlgoraWeb.Org.BountiesNewLive do
   alias Algora.Github
   alias Algora.Payments
   alias AlgoraWeb.Forms.BountyForm
+  alias AlgoraWeb.LocalStore
 
   require Logger
 
@@ -51,7 +52,8 @@ defmodule AlgoraWeb.Org.BountiesNewLive do
       socket
       |> assign(:org, org)
       |> assign(:has_fresh_token?, Accounts.has_fresh_token?(socket.assigns.current_user))
-      |> assign(:oauth_url, Github.authorize_url(%{socket_id: socket.id}))
+      |> assign(:oauth_url, Github.authorize_url(%{return_to: "/#{org.handle}/bounties/new"}))
+      |> assign(:pending_action, nil)
       |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
       |> assign(:page_title, org.name)
       |> assign(:page_description, "#{org.name} OSS bounty board - fund GitHub issues and prioritize development")
@@ -67,7 +69,11 @@ defmodule AlgoraWeb.Org.BountiesNewLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="container mx-auto max-w-7xl space-y-6 p-4 sm:px-6 lg:px-8">
+    <div
+      id="org-bounties-new-page"
+      class="container mx-auto max-w-7xl space-y-6 p-4 sm:px-6 lg:px-8"
+      phx-hook="LocalStateStore"
+    >
       <!-- Org Header -->
       <div class="rounded-xl border bg-card p-6 text-card-foreground">
         <div class="flex flex-col gap-6 md:flex-row">
@@ -266,6 +272,31 @@ defmodule AlgoraWeb.Org.BountiesNewLive do
   end
 
   @impl true
+  def handle_params(_params, uri, socket) do
+    return_to = URI.parse(uri).path
+
+    {:noreply,
+     socket
+     |> assign(:oauth_url, Github.authorize_url(%{return_to: return_to}))
+     |> LocalStore.init(key: __MODULE__)
+     |> LocalStore.subscribe()}
+  end
+
+  @impl true
+  def handle_event("restore_settings", params, socket) do
+    socket = LocalStore.restore(socket, params)
+
+    case socket.assigns.pending_action do
+      nil ->
+        {:noreply, socket}
+
+      {event, params} ->
+        socket = LocalStore.assign_cached(socket, :pending_action, nil)
+        handle_event(event, params, socket)
+    end
+  end
+
+  @impl true
   def handle_info({:authenticated, user}, socket) do
     socket =
       socket
@@ -322,8 +353,8 @@ defmodule AlgoraWeb.Org.BountiesNewLive do
     else
       {:noreply,
        socket
-       |> assign(:pending_action, {event, unsigned_params})
-       |> push_event("open_popup", %{url: socket.assigns.oauth_url})}
+       |> LocalStore.assign_cached(:pending_action, {event, unsigned_params})
+       |> redirect(external: socket.assigns.oauth_url)}
     end
   end
 

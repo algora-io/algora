@@ -19,6 +19,7 @@ defmodule AlgoraWeb.CrowdfundLive do
   alias AlgoraWeb.Data.PlatformStats
   alias AlgoraWeb.Forms.BountyForm
   alias AlgoraWeb.Forms.TipForm
+  alias AlgoraWeb.LocalStore
 
   require Logger
 
@@ -58,7 +59,7 @@ defmodule AlgoraWeb.CrowdfundLive do
      |> assign(:page_title, "Crowdfund")
      |> assign(:page_image, "#{AlgoraWeb.Endpoint.url()}/og/crowdfund")
      |> assign(:screenshot?, not is_nil(params["screenshot"]))
-     |> assign(:oauth_url, Github.authorize_url(%{socket_id: socket.id}))
+     |> assign(:oauth_url, Github.authorize_url(%{return_to: "/crowdfund"}))
      |> assign(:featured_devs, Accounts.list_featured_developers())
      |> assign(:stats, stats)
      |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
@@ -106,7 +107,7 @@ defmodule AlgoraWeb.CrowdfundLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div>
+    <div id="crowdfund-page" phx-hook="LocalStateStore">
       <%= if @screenshot? do %>
         <div class="-mt-24" />
       <% else %>
@@ -407,6 +408,28 @@ defmodule AlgoraWeb.CrowdfundLive do
   end
 
   @impl true
+  def handle_params(_params, _uri, socket) do
+    {:noreply,
+     socket
+     |> LocalStore.init(key: __MODULE__)
+     |> LocalStore.subscribe()}
+  end
+
+  @impl true
+  def handle_event("restore_settings", params, socket) do
+    socket = LocalStore.restore(socket, params)
+
+    case socket.assigns.pending_action do
+      nil ->
+        {:noreply, socket}
+
+      {event, params} ->
+        socket = LocalStore.assign_cached(socket, :pending_action, nil)
+        handle_event(event, params, socket)
+    end
+  end
+
+  @impl true
   def handle_event("create_bounty" = event, %{"bounty_form" => params} = unsigned_params, socket) do
     changeset =
       %BountyForm{}
@@ -436,8 +459,8 @@ defmodule AlgoraWeb.CrowdfundLive do
       else
         {:noreply,
          socket
-         |> assign(:pending_action, {event, unsigned_params})
-         |> push_event("open_popup", %{url: socket.assigns.oauth_url})}
+         |> LocalStore.assign_cached(:pending_action, {event, unsigned_params})
+         |> redirect(external: socket.assigns.oauth_url)}
       end
     else
       {:noreply, assign(socket, :bounty_form, to_form(changeset))}
@@ -473,8 +496,8 @@ defmodule AlgoraWeb.CrowdfundLive do
       else
         {:noreply,
          socket
-         |> assign(:pending_action, {event, unsigned_params})
-         |> push_event("open_popup", %{url: socket.assigns.oauth_url})}
+         |> LocalStore.assign_cached(:pending_action, {event, unsigned_params})
+         |> redirect(external: socket.assigns.oauth_url)}
       end
     else
       {:noreply, assign(socket, :tip_form, to_form(changeset))}

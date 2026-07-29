@@ -124,6 +124,8 @@ defmodule AlgoraWeb.ClaimLive do
           |> Enum.sort_by(&{&1.pledged, &1.paid, &1.sponsor.name}, :desc)
 
         source_or_target = primary_claim.source || primary_claim.target
+        claim_status_label = claim_status_label(primary_claim, sponsors)
+        show_claim_payment_hint = show_claim_payment_hint?(primary_claim, sponsors)
 
         contexts =
           if socket.assigns.current_user do
@@ -145,6 +147,8 @@ defmodule AlgoraWeb.ClaimLive do
          |> assign(:target, primary_claim.target)
          |> assign(:source, primary_claim.source)
          |> assign(:source_or_target, source_or_target)
+         |> assign(:claim_status_label, claim_status_label)
+         |> assign(:show_claim_payment_hint, show_claim_payment_hint)
          |> assign(:bounties, primary_claim.target.bounties)
          |> assign(:prize_pool, prize_pool)
          |> assign(:total_paid, total_paid)
@@ -209,6 +213,24 @@ defmodule AlgoraWeb.ClaimLive do
         {:noreply, assign(socket, :reward_bounty_form, to_form(changeset))}
     end
   end
+
+  defp claim_status_label(%Claim{status: status}, _sponsors) when status != :approved do
+    status |> to_string() |> String.capitalize()
+  end
+
+  defp claim_status_label(%Claim{status: :approved}, sponsors) do
+    cond do
+      Enum.all?(sponsors, &(&1.status in [:paid, :overpaid])) -> "Rewarded"
+      Enum.any?(sponsors, &(&1.status == :partial)) -> "Partially rewarded"
+      true -> "Awaiting sponsor reward"
+    end
+  end
+
+  defp show_claim_payment_hint?(%Claim{status: :approved}, sponsors) do
+    Enum.any?(sponsors, &(&1.status in [:pending, :partial]))
+  end
+
+  defp show_claim_payment_hint?(_claim, _sponsors), do: false
 
   defp default_context_id(socket) do
     case socket.assigns.available_bounties do
@@ -398,7 +420,10 @@ defmodule AlgoraWeb.ClaimLive do
                 </div>
                 <div class="flex justify-between text-sm">
                   <span class="text-muted-foreground">Status</span>
-                  <span>{@primary_claim.status |> to_string() |> String.capitalize()}</span>
+                  <span>{@claim_status_label}</span>
+                </div>
+                <div :if={@show_claim_payment_hint} class="text-sm text-muted-foreground">
+                  No contributor action is required. This claim is approved and waiting for the sponsor reward to be completed.
                 </div>
                 <div class="flex justify-between text-sm">
                   <span class="text-muted-foreground">Submitted</span>

@@ -220,6 +220,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
                       <% end %>
                     </td>
                     <td class="[&:has([role=checkbox])]:pr-0 p-4 align-middle">
+                      <%= if @current_user_role in [:admin, :mod] do %>
                       <div class="flex items-center justify-end gap-2">
                         <.button
                           phx-click="edit-bounty-amount"
@@ -238,6 +239,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
                           Delete
                         </.button>
                       </div>
+                      <% end %>
                     </td>
                   </tr>
                   <%= if MapSet.member?(@expanded_bounties, bounty.id) do %>

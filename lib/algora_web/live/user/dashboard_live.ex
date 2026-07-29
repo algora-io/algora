@@ -206,6 +206,7 @@ defmodule AlgoraWeb.User.DashboardLive do
           id="availability-form"
           phx-change="validate_availability"
           phx-submit="save_availability"
+          phx-debounce="blur"
           class="grid grid-cols-1 lg:grid-cols-2 gap-4"
         >
           <.input
@@ -405,8 +406,21 @@ defmodule AlgoraWeb.User.DashboardLive do
 
   @impl true
   def handle_event("validate_availability", %{"availability_form" => params}, socket) do
-    changeset = AvailabilityForm.changeset(socket.assigns.availability_form.source, params)
-    {:noreply, assign(socket, availability_form: to_form(changeset))}
+    changeset =
+      socket.assigns.availability_form.source
+      |> AvailabilityForm.changeset(params)
+      |> Map.put(:action, :validate)
+
+    socket = assign(socket, availability_form: to_form(changeset))
+
+    if changeset.valid? do
+      case Accounts.update_settings(socket.assigns.current_user, params) do
+        {:ok, user} -> {:noreply, assign(socket, :current_user, user)}
+        {:error, save_changeset} -> {:noreply, assign(socket, availability_form: to_form(save_changeset))}
+      end
+    else
+      {:noreply, socket}
+    end
   end
 
   @impl true

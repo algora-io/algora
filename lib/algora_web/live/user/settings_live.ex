@@ -4,6 +4,7 @@ defmodule AlgoraWeb.User.SettingsLive do
 
   alias Algora.Accounts
   alias Algora.Accounts.User
+  alias AlgoraWeb.Components.TimezoneSelect
 
   def render(assigns) do
     ~H"""
@@ -51,11 +52,9 @@ defmodule AlgoraWeb.User.SettingsLive do
               <.input field={@form[:bio]} type="textarea" label="Bio" />
               <.input field={@form[:website_url]} label="Website" />
               <.input field={@form[:location]} label="Location" />
-              <.input
+              <TimezoneSelect.timezone_select
                 field={@form[:timezone]}
-                label="Timezone"
-                type="select"
-                options={Algora.Time.list_friendly_timezones()}
+                query={@timezone_query}
               />
               <.button class="ml-auto">Save</.button>
             </div>
@@ -74,16 +73,20 @@ defmodule AlgoraWeb.User.SettingsLive do
     {:ok,
      socket
      |> assign(current_user: current_user)
+     |> assign(:timezone_query, "")
      |> assign_form(changeset)}
   end
 
-  def handle_event("validate", %{"user" => params}, socket) do
+  def handle_event("validate", %{"user" => params} = all_params, socket) do
     changeset =
       socket.assigns.current_user
       |> User.settings_changeset(params)
       |> Map.put(:action, :validate)
 
-    {:noreply, assign_form(socket, changeset)}
+    {:noreply,
+     socket
+     |> assign(:timezone_query, Map.get(all_params, "timezone_query", ""))
+     |> assign_form(changeset)}
   end
 
   def handle_event("save", %{"user" => params}, socket) do

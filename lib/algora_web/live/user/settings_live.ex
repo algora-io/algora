@@ -51,12 +51,23 @@ defmodule AlgoraWeb.User.SettingsLive do
               <.input field={@form[:bio]} type="textarea" label="Bio" />
               <.input field={@form[:website_url]} label="Website" />
               <.input field={@form[:location]} label="Location" />
-              <.input
-                field={@form[:timezone]}
-                label="Timezone"
-                type="select"
-                options={Algora.Time.list_friendly_timezones()}
-              />
+              <div class="flex flex-col gap-2">
+                <.input
+                  label="Search timezone"
+                  name="timezone_search"
+                  type="text"
+                  value={@timezone_search}
+                  phx-change="search_timezone"
+                  phx-debounce="200"
+                  placeholder="Search by city, region, or UTC offset..."
+                />
+                <.input
+                  field={@form[:timezone]}
+                  label="Timezone"
+                  type="select"
+                  options={@filtered_timezones}
+                />
+              </div>
               <.button class="ml-auto">Save</.button>
             </div>
           </.simple_form>
@@ -71,11 +82,40 @@ defmodule AlgoraWeb.User.SettingsLive do
 
     changeset = User.settings_changeset(current_user, %{})
 
+    all_timezones = Algora.Time.list_friendly_timezones()
+    current_timezone = current_user.timezone || "UTC"
+
     {:ok,
      socket
      |> assign(current_user: current_user)
-     |> assign_form(changeset)}
+     |> assign_form(changeset)
+     |> assign(timezone_search: "")
+     |> assign(filtered_timezones: all_timezones)
+     |> assign(current_timezone: current_timezone)
+     |> assign(all_timezones: all_timezones)}
   end
+
+  def handle_event("search_timezone", %{"_target" => "timezone_search", "timezone_search" => query}, socket) do
+    filtered =
+      cond do
+        query == "" -> socket.assigns.all_timezones
+        String.downcase(query) == "utc" ->
+          socket.assigns.all_timezones |> Enum.filter(fn {friendly, _} -> String.contains?(String.downcase(friendly), "utc") end)
+        true ->
+          socket.assigns.all_timezones
+          |> Enum.filter(fn {friendly, _} ->
+            String.contains?(String.downcase(friendly), String.downcase(query)) ||
+            String.contains?(String.downcase(friendly), String.replace(String.downcase(query), " ", "_"))
+          end)
+      end
+
+    {:noreply,
+     socket
+     |> assign(timezone_search: query)
+     |> assign(filtered_timezones: filtered)}
+  end
+
+  def handle_event("search_timezone", _, socket), do: {:noreply, socket}
 
   def handle_event("validate", %{"user" => params}, socket) do
     changeset =

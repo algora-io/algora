@@ -109,6 +109,18 @@ defmodule AlgoraWeb.OrgsLive do
                           <span class="line-clamp-3 pt-2 text-xs text-gray-300 sm:text-sm">
                             {org.bio}
                           </span>
+
+                          <div
+                            :if={org.tech_stack != []}
+                            class="flex flex-wrap items-center justify-center gap-1.5 pt-3"
+                          >
+                            <span
+                              :for={tech <- Enum.take(org.tech_stack, 4)}
+                              class="rounded-full border border-white/10 bg-white/[6%] px-2 py-0.5 text-[0.6875rem] font-medium leading-5 text-gray-200"
+                            >
+                              {tech}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
